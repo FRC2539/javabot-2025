@@ -12,7 +12,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.Constants.TunerConstants;
@@ -22,7 +21,10 @@ public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
-    private final CommandXboxController joystick = new CommandXboxController(0);
+    private final ThrustmasterJoystick leftDriveController =
+            new ThrustmasterJoystick(ControllerConstants.LEFT_DRIVE_CONTROLLER);
+    private final ThrustmasterJoystick rightDriveController =
+            new ThrustmasterJoystick(ControllerConstants.RIGHT_DRIVE_CONTROLLER);
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
@@ -39,15 +41,20 @@ public class RobotContainer {
         configureBindings();
     }
 
+    public ChassisSpeeds getDesiredChassisSpeeds()
+    {
+        return new ChassisSpeeds(-leftDriveController.getYAxis() * GlobalConstants.MAX_TRANSLATIONAL_SPEED, -leftDriveController.getXAxis() * GlobalConstants.MAX_TRANSLATIONAL_SPEED, -rightDriveController.getXAxis() * GlobalConstants.MAX_ROTATIONAL_SPEED);
+    }
+
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                drive.withVelocityX(-leftDriveController.getYAxis() * GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive forward with negative Y (forward)
+                    .withVelocityY(-leftDriveController.getXAxis() * GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive left with negative X (left)
+                    .withRotationalRate(-rightDriveController.getXAxis() * GlobalConstants.MAX_ROTATIONAL_SPEED) // Drive counterclockwise with negative X (left)
             )
         );
 

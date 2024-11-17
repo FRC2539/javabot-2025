@@ -121,6 +121,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         if (Utils.isSimulation()) {
             startSimThread();
         }
+
+        swerveSetpointConfig();
     }
 
     /**
@@ -141,6 +143,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         if (Utils.isSimulation()) {
             startSimThread();
         }
+
+        swerveSetpointConfig();
     }
 
     /**
@@ -166,6 +170,54 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         if (Utils.isSimulation()) {
             startSimThread();
         }
+
+        swerveSetpointConfig();
+    }
+
+    private void swerveSetpointConfig()
+    {
+        RobotConfig config;
+        try{
+          config = RobotConfig.fromGUISettings();
+        } catch (Exception e) {
+          // Handle exception as needed
+          e.printStackTrace();
+        }
+
+        setpointGenerator = new SwerveSetpointGenerator(
+            config, 
+            Units.rotationsToRadians(10.0) //max rotational speed
+        );
+
+        ChassisSpeeds currentSpeeds = getCurrentSpeeds(); 
+        SwerveModuleState[] currentStates = getCurrentModuleStates(); 
+        previousSetpoint = new SwerveSetpoint(currentSpeeds, currentStates, DriveFeedforwards.zeros(config.numModules));
+    }
+
+    //
+    *@param speeds //The desired robot-relative speeds
+    //returns the module states where robot can drive while obeying physics and not slipping
+    public void driveRobotRelative(ChassisSpeeds speeds) {
+        // Note: it is important to not discretize speeds before or after
+        // using the setpoint generator, as it will discretize them for you
+        previousSetpoint = setpointGenerator.generateSetpoint(
+            previousSetpoint, // The previous setpoint
+            speeds, // The desired target speeds
+            0.02 // The loop time of the robot code, in seconds
+        );
+        setModuleStates(previousSetpoint.moduleStates()); // Method that will drive the robot given target module states
+    }
+
+    public void driveRobotRelative() {
+        // Note: it is important to not discretize speeds before or after
+        // using the setpoint generator, as it will discretize them for you
+        speeds = RobotContainer.getDesiredChassisSpeeds();
+        previousSetpoint = setpointGenerator.generateSetpoint(
+            previousSetpoint, // The previous setpoint
+            speeds, // The desired target speeds
+            0.02 // The loop time of the robot code, in seconds
+        );
+        setModuleStates(previousSetpoint.moduleStates()); // Method that will drive the robot given target module states
     }
 
     /**
