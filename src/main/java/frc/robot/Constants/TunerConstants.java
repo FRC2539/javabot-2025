@@ -1,4 +1,4 @@
-package frc.robot.Constants;
+package frc.robot.generated;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -58,21 +58,21 @@ public class TunerConstants {
 
     // Theoretical free speed (m/s) at 12v applied output;
     // This needs to be tuned to your individual robot
-    public static final double kSpeedAt12VoltsMps = 5.21;
+    public static final double kSpeedAt12VoltsMps = 6.21;
 
     // Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
     // This may need to be tuned to your individual robot
-    private static final double kCoupleRatio = 3.5714285714285716;
+    private static final double kCoupleRatio = 3;
 
-    private static final double kDriveGearRatio = 6.122448979591837;
+    private static final double kDriveGearRatio = 5.142857142857142;
     private static final double kSteerGearRatio = 12.8;
     private static final double kWheelRadiusInches = 2;
 
     private static final boolean kInvertLeftSide = false;
     private static final boolean kInvertRightSide = true;
 
-    private static final String kCANbusName = GlobalConstants.DRIVE_CANBUS;
-    private static final int kPigeonId = GlobalConstants.PIGEON;
+    private static final String kCANbusName = GlobalConstants.CANBUS_NAME;
+    private static final int kPigeonId = GlobalConstants.PIGEON_ID;
 
 
     // These are only used for simulation
@@ -109,8 +109,8 @@ public class TunerConstants {
 
 
     // Front Left
-    private static final int kFrontLeftDriveMotorId = GlobalConstants.FRONT_LEFT_DRIVE_MOTOR;
-    private static final int kFrontLeftSteerMotorId = GlobalConstants.FRONT_LEFT_STEER_MOTOR;
+    private static final int kFrontLeftDriveMotorId = GlobalConstants.FRONT_LEFT_DRIVE;
+    private static final int kFrontLeftSteerMotorId = GlobalConstants.FRONT_LEFT_STEER;
     private static final int kFrontLeftEncoderId = GlobalConstants.FRONT_LEFT_ENCODER;
     private static final double kFrontLeftEncoderOffset = 0;
     private static final boolean kFrontLeftSteerInvert = false;
@@ -119,8 +119,8 @@ public class TunerConstants {
     private static final double kFrontLeftYPosInches = 10;
 
     // Front Right
-    private static final int kFrontRightDriveMotorId = GlobalConstants.FRONT_RIGHT_DRIVE_MOTOR;
-    private static final int kFrontRightSteerMotorId = GlobalConstants.FRONT_RIGHT_STEER_MOTOR;
+    private static final int kFrontRightDriveMotorId = GlobalConstants.FRONT_RIGHT_DRIVE;
+    private static final int kFrontRightSteerMotorId = GlobalConstants.FRONT_RIGHT_STEER;
     private static final int kFrontRightEncoderId = GlobalConstants.FRONT_RIGHT_ENCODER;
     private static final double kFrontRightEncoderOffset = 0;
     private static final boolean kFrontRightSteerInvert = false;
@@ -129,8 +129,8 @@ public class TunerConstants {
     private static final double kFrontRightYPosInches = -10;
 
     // Back Left
-    private static final int kBackLeftDriveMotorId = GlobalConstants.BACK_LEFT_DRIVE_MOTOR;
-    private static final int kBackLeftSteerMotorId = GlobalConstants.BACK_LEFT_STEER_MOTOR;
+    private static final int kBackLeftDriveMotorId = GlobalConstants.BACK_LEFT_DRIVE;
+    private static final int kBackLeftSteerMotorId = GlobalConstants.BACK_LEFT_STEER;
     private static final int kBackLeftEncoderId = GlobalConstants.BACK_LEFT_ENCODER;
     private static final double kBackLeftEncoderOffset = 0;
     private static final boolean kBackLeftSteerInvert = false;
@@ -139,8 +139,8 @@ public class TunerConstants {
     private static final double kBackLeftYPosInches = 10;
 
     // Back Right
-    private static final int kBackRightDriveMotorId = GlobalConstants.BACK_RIGHT_DRIVE_MOTOR;
-    private static final int kBackRightSteerMotorId = GlobalConstants.BACK_RIGHT_STEER_MOTOR;
+    private static final int kBackRightDriveMotorId = GlobalConstants.BACK_RIGHT_DRIVE;
+    private static final int kBackRightSteerMotorId = GlobalConstants.BACK_RIGHT_STEER;
     private static final int kBackRightEncoderId = GlobalConstants.BACK_RIGHT_ENCODER;
     private static final double kBackRightEncoderOffset = 0;
     private static final boolean kBackRightSteerInvert = false;
