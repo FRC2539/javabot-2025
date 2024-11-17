@@ -10,11 +10,15 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-
-import frc.robot.Constants.TunerConstants;
+import frc.lib.controller.LogitechController;
+import frc.lib.controller.ThrustmasterJoystick;
+import frc.robot.constants.GlobalConstants;
+import frc.robot.constants.TunerConstants;
+import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class RobotContainer {
@@ -25,6 +29,8 @@ public class RobotContainer {
             new ThrustmasterJoystick(ControllerConstants.LEFT_DRIVE_CONTROLLER);
     private final ThrustmasterJoystick rightDriveController =
             new ThrustmasterJoystick(ControllerConstants.RIGHT_DRIVE_CONTROLLER);
+    private final LogitechController operatorController =
+            new LogitechController(ControllerConstants.OPERATOR_CONTROLLER);
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
@@ -43,7 +49,7 @@ public class RobotContainer {
 
     public ChassisSpeeds getDesiredChassisSpeeds()
     {
-        return new ChassisSpeeds(-leftDriveController.getYAxis() * GlobalConstants.MAX_TRANSLATIONAL_SPEED, -leftDriveController.getXAxis() * GlobalConstants.MAX_TRANSLATIONAL_SPEED, -rightDriveController.getXAxis() * GlobalConstants.MAX_ROTATIONAL_SPEED);
+        return new ChassisSpeeds(-leftDriveController.getYAxis().getAsDouble() * GlobalConstants.MAX_TRANSLATIONAL_SPEED, -leftDriveController.getXAxis().get() * GlobalConstants.MAX_TRANSLATIONAL_SPEED, -rightDriveController.getXAxis().get() * GlobalConstants.MAX_ROTATIONAL_SPEED);
     }
 
     private void configureBindings() {
@@ -52,26 +58,26 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-leftDriveController.getYAxis() * GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive forward with negative Y (forward)
-                    .withVelocityY(-leftDriveController.getXAxis() * GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive left with negative X (left)
-                    .withRotationalRate(-rightDriveController.getXAxis() * GlobalConstants.MAX_ROTATIONAL_SPEED) // Drive counterclockwise with negative X (left)
+                drive.withVelocityX(-leftDriveController.getYAxis().get() * GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive forward with negative Y (forward)
+                    .withVelocityY(-leftDriveController.getXAxis().get() * GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive left with negative X (left)
+                    .withRotationalRate(-rightDriveController.getXAxis().get() * GlobalConstants.MAX_ROTATIONAL_SPEED) // Drive counterclockwise with negative X (left)
             )
         );
 
-        joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        joystick.b().whileTrue(drivetrain.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
+        operatorController.getA().whileTrue(drivetrain.applyRequest(() -> brake));
+        operatorController.getB().whileTrue(drivetrain.applyRequest(() ->
+            point.withModuleDirection(new Rotation2d(-operatorController.getLeftYAxis().get(), -operatorController.getLeftXAxis().get()))
         ));
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
-        joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        operatorController.getBack().and(operatorController.getY()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+        operatorController.getBack().and(operatorController.getX()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+        operatorController.getStart().and(operatorController.getY()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+        operatorController.getStart().and(operatorController.getX()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         // reset the field-centric heading on left bumper press
-        joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        operatorController.getLeftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }

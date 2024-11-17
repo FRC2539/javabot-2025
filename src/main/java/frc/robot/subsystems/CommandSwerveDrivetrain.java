@@ -5,16 +5,28 @@ import static edu.wpi.first.units.Units.*;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.util.DriveFeedforwards;
+import com.pathplanner.lib.util.swerve.SwerveSetpoint;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest;
+import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
@@ -43,6 +55,11 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
     private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
+
+    private final SwerveRequest.ApplyRobotSpeeds m_applyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds()
+    .withDriveRequestType(DriveRequestType.Velocity)
+    .withSteerRequestType(SteerRequestType.MotionMagicExpo)
+    .withDesaturateWheelSpeeds(false);
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
@@ -106,6 +123,10 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     /* The SysId routine to test */
     private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
 
+    /* The Setpoint Generator */
+    private SwerveSetpointGenerator setpointGenerator;
+    private SwerveSetpoint previousSetpoint;
+
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
      * <p>
@@ -121,7 +142,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         if (Utils.isSimulation()) {
             startSimThread();
         }
-
         swerveSetpointConfig();
     }
 
@@ -182,6 +202,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         } catch (Exception e) {
           // Handle exception as needed
           e.printStackTrace();
+          throw new RuntimeException("Failed to load robot config from pathplanner.");
         }
 
         setpointGenerator = new SwerveSetpointGenerator(
@@ -189,15 +210,15 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             Units.rotationsToRadians(10.0) //max rotational speed
         );
 
-        ChassisSpeeds currentSpeeds = getCurrentSpeeds(); 
-        SwerveModuleState[] currentStates = getCurrentModuleStates(); 
+        ChassisSpeeds currentSpeeds = getState().Speeds; 
+        SwerveModuleState[] currentStates = getState().ModuleStates; 
         previousSetpoint = new SwerveSetpoint(currentSpeeds, currentStates, DriveFeedforwards.zeros(config.numModules));
     }
 
     //
-    *@param speeds //The desired robot-relative speeds
+    //The desired robot-relative speeds
     //returns the module states where robot can drive while obeying physics and not slipping
-    public void driveRobotRelative(ChassisSpeeds speeds) {
+    public SwerveRequest driveRobotRelative(ChassisSpeeds speeds) {
         // Note: it is important to not discretize speeds before or after
         // using the setpoint generator, as it will discretize them for you
         previousSetpoint = setpointGenerator.generateSetpoint(
@@ -205,19 +226,15 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             speeds, // The desired target speeds
             0.02 // The loop time of the robot code, in seconds
         );
-        setModuleStates(previousSetpoint.moduleStates()); // Method that will drive the robot given target module states
+        return m_applyRobotSpeeds.withSpeeds(previousSetpoint.robotRelativeSpeeds())
+            .withWheelForceFeedforwardsX(previousSetpoint.feedforwards().robotRelativeForcesXNewtons())
+            .withWheelForceFeedforwardsY(previousSetpoint.feedforwards().robotRelativeForcesYNewtons());
+            // Method that will drive the robot given target module states
     }
 
-    public void driveRobotRelative() {
-        // Note: it is important to not discretize speeds before or after
-        // using the setpoint generator, as it will discretize them for you
-        speeds = RobotContainer.getDesiredChassisSpeeds();
-        previousSetpoint = setpointGenerator.generateSetpoint(
-            previousSetpoint, // The previous setpoint
-            speeds, // The desired target speeds
-            0.02 // The loop time of the robot code, in seconds
-        );
-        setModuleStates(previousSetpoint.moduleStates()); // Method that will drive the robot given target module states
+    public SwerveRequest driveFieldRelative(ChassisSpeeds speeds) {
+        ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getState().Pose.getRotation());
+        return driveRobotRelative(speeds);
     }
 
     /**
