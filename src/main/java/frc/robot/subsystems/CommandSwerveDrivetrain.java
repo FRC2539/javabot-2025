@@ -232,6 +232,21 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             // Method that will drive the robot given target module states
     }
 
+    public SwerveRequest driveRobotRelative(double xVelocity, double yVelocity, double rotationRate) {
+        // Note: it is important to not discretize speeds before or after
+        // using the setpoint generator, as it will discretize them for you
+        new ChassisSpeeds speeds = ChassisSpeeds(xVelocity, yVelocity, rotationRate);
+        previousSetpoint = setpointGenerator.generateSetpoint(
+            previousSetpoint, // The previous setpoint
+            speeds, // The desired target speeds
+            0.02 // The loop time of the robot code, in seconds
+        );
+        return m_applyRobotSpeeds.withSpeeds(previousSetpoint.robotRelativeSpeeds())
+            .withWheelForceFeedforwardsX(previousSetpoint.feedforwards().robotRelativeForcesXNewtons())
+            .withWheelForceFeedforwardsY(previousSetpoint.feedforwards().robotRelativeForcesYNewtons());
+            // Method that will drive the robot given target module states
+    }
+
     public SwerveRequest driveFieldRelative(ChassisSpeeds speeds) {
         ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getState().Pose.getRotation());
         return driveRobotRelative(speeds);
