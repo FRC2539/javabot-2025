@@ -16,9 +16,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
-import frc.robot.constants.GlobalConstants;
-import frc.robot.constants.TunerConstants;
-import frc.robot.constants.GlobalConstants.ControllerConstants;
+import frc.robot.Constants.GlobalConstants;
+import frc.robot.Constants.TunerConstants;
+import frc.robot.Constants.GlobalConstants.ControllerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class RobotContainer {
@@ -58,12 +58,15 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.driveRobotRelative(-leftDriveController.getYAxis().get() * GlobalConstants.MAX_TRANSLATIONAL_SPEED, -leftDriveController.getXAxis().get() * GlobalConstants.MAX_TRANSLATIONAL_SPEED, -rightDriveController.getXAxis().get() * GlobalConstants.MAX_ROTATIONAL_SPEED);
-                // drive.withVelocityX(-leftDriveController.getYAxis().get() * GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive forward with negative Y (forward)
-                //     .withVelocityY(-leftDriveController.getXAxis().get() * GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive left with negative X (left)
-                //     .withRotationalRate(-rightDriveController.getXAxis().get() * GlobalConstants.MAX_ROTATIONAL_SPEED) // Drive counterclockwise with negative X (left)
+                drive.withVelocityX(leftDriveController.getYAxis().get() * GlobalConstants.MAX_TRANSLATIONAL_SPEED)
+                    .withVelocityY(-leftDriveController.getXAxis().get() * GlobalConstants.MAX_TRANSLATIONAL_SPEED)
+                    .withRotationalRate(rightDriveController.getXAxis().get() * GlobalConstants.MAX_ROTATIONAL_SPEED)
             )
         );
+
+        // drive.withVelocityX(-leftDriveController.getYAxis().get() * GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive forward with negative Y (forward)
+                //     .withVelocityY(-leftDriveController.getXAxis().get() * GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive left with negative X (left)
+                //     .withRotationalRate(-rightDriveController.getXAxis().get() * GlobalConstants.MAX_ROTATIONAL_SPEED) // Drive counterclockwise with negative X (left)
 
         operatorController.getA().whileTrue(drivetrain.applyRequest(() -> brake));
         operatorController.getB().whileTrue(drivetrain.applyRequest(() ->

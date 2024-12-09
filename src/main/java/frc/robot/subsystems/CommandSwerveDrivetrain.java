@@ -235,7 +235,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     public SwerveRequest driveRobotRelative(double xVelocity, double yVelocity, double rotationRate) {
         // Note: it is important to not discretize speeds before or after
         // using the setpoint generator, as it will discretize them for you
-        new ChassisSpeeds speeds = ChassisSpeeds(xVelocity, yVelocity, rotationRate);
+        ChassisSpeeds speeds = new ChassisSpeeds(xVelocity, yVelocity, rotationRate);
         previousSetpoint = setpointGenerator.generateSetpoint(
             previousSetpoint, // The previous setpoint
             speeds, // The desired target speeds

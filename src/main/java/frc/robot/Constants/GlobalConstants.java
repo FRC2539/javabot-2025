@@ -1,4 +1,4 @@
-package frc.robot.constants;
+package frc.robot.Constants;
 
 public class GlobalConstants {
     
