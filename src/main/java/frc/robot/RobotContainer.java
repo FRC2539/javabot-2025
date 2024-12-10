@@ -36,10 +36,7 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    /* Setting up bindings for necessary control of the swerve drive platform */
-    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+    // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
@@ -57,10 +54,15 @@ public class RobotContainer {
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX(leftDriveController.getYAxis().get() * GlobalConstants.MAX_TRANSLATIONAL_SPEED)
-                    .withVelocityY(-leftDriveController.getXAxis().get() * GlobalConstants.MAX_TRANSLATIONAL_SPEED)
-                    .withRotationalRate(rightDriveController.getXAxis().get() * GlobalConstants.MAX_ROTATIONAL_SPEED)
+            drivetrain.applyRequest(
+                () -> {
+                    ChassisSpeeds driverDesiredSpeeds = new ChassisSpeeds(
+                        sps(deadband(leftDriveController.getYAxis().get(), .1)) * GlobalConstants.MAX_TRANSLATIONAL_SPEED,
+                        -sps(deadband(leftDriveController.getXAxis().get(),0.1)) * GlobalConstants.MAX_TRANSLATIONAL_SPEED,
+                        sps(deadband(rightDriveController.getXAxis().get(),0.1)) * GlobalConstants.MAX_ROTATIONAL_SPEED
+                    );
+                    return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(driverDesiredSpeeds);
+                }
             )
         );
 
@@ -84,6 +86,18 @@ public class RobotContainer {
         operatorController.getLeftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+    }
+
+    private double deadband(double value, double deadband) {
+        if (value <= deadband && -deadband <= value) {
+            return 0;
+        }
+
+        return value;
+    }
+
+    private double sps(double value) {
+        return value * Math.abs(value);
     }
 
     public Command getAutonomousCommand() {

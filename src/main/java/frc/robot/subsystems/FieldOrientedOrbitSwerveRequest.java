@@ -7,12 +7,16 @@ import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 // import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+
 
 public class FieldOrientedOrbitSwerveRequest implements SwerveRequest {
     private final SlewRateLimiter xLimiter;
@@ -23,18 +27,27 @@ public class FieldOrientedOrbitSwerveRequest implements SwerveRequest {
     .withDesaturateWheelSpeeds(false);
 
     private ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
-    private double[] wheelForceFeedforwardsX = new double[4];
-    private double[] wheelForceFeedforwardsY = new double[4];
 
     private SwerveSetpointGenerator setpointGenerator;
     private SwerveSetpoint previousSetpoint;
 
+    private boolean useDriverOrientation;
+
+    /**
+     * @param xTipLimiter
+     * @param yTipLimiter
+     * @param setpointGenerator
+     * @param initialSetpoint
+     * 
+     * This creates a FieldOrientedOrbitSwerveRequest
+     */
     public FieldOrientedOrbitSwerveRequest(SlewRateLimiter xTipLimiter, SlewRateLimiter yTipLimiter, SwerveSetpointGenerator setpointGenerator, SwerveSetpoint initialSetpoint) {
         this.xLimiter = xTipLimiter;
         this.yLimiter = yTipLimiter;
 
         this.setpointGenerator = setpointGenerator;
-        this.previousSetpoint = initialSetpoint;
+
+        this.withPreviousSetpoint(initialSetpoint);
     }
 
     @Override
@@ -42,14 +55,15 @@ public class FieldOrientedOrbitSwerveRequest implements SwerveRequest {
         double toApplyX = chassisSpeeds.vxMetersPerSecond;
         double toApplyY = chassisSpeeds.vyMetersPerSecond;
 
-        // Translation2d tmp = new Translation2d(toApplyX, toApplyY);
-        // tmp = tmp.rotateBy(parameters.operatorForwardDirection);
-        // toApplyX = tmp.getX();
-        // toApplyY = tmp.getY();
+        if (useDriverOrientation) {
+            Translation2d tmp = new Translation2d(toApplyX, toApplyY);
+            tmp = tmp.rotateBy(parameters.operatorForwardDirection);
+            toApplyX = tmp.getX();
+            toApplyY = tmp.getY();
+        }
 
-        ChassisSpeeds fieldRelativeSpeeds = new ChassisSpeeds(toApplyX, toApplyY, chassisSpeeds.omegaRadiansPerSecond);
-
-        ChassisSpeeds robotRelativeSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, parameters.currentPose.getRotation());
+        ChassisSpeeds robotRelativeSpeeds = new ChassisSpeeds(toApplyX, toApplyY, chassisSpeeds.omegaRadiansPerSecond);
+        robotRelativeSpeeds.toRobotRelativeSpeeds(parameters.currentPose.getRotation());
 
         // Keep the robot from tipping over
         robotRelativeSpeeds.vxMetersPerSecond = xLimiter.calculate(robotRelativeSpeeds.vxMetersPerSecond);
@@ -58,10 +72,12 @@ public class FieldOrientedOrbitSwerveRequest implements SwerveRequest {
         // Apply all other limits
         previousSetpoint = setpointGenerator.generateSetpoint(previousSetpoint, robotRelativeSpeeds, 0.02);
 
+        DriveFeedforwards feedforwards = previousSetpoint.feedforwards();
+
         return applyRobotSpeeds
             .withSpeeds(previousSetpoint.robotRelativeSpeeds())
-            .withWheelForceFeedforwardsX(wheelForceFeedforwardsX)
-            .withWheelForceFeedforwardsY(wheelForceFeedforwardsY)
+            .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+            .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
             .apply(parameters, modulesToApply);
     }
 
@@ -70,13 +86,16 @@ public class FieldOrientedOrbitSwerveRequest implements SwerveRequest {
         return this;
     }
 
-    public FieldOrientedOrbitSwerveRequest withWheelForceFeedforwardsX(double[] newWheelForceFeedforwardsX) {
-        wheelForceFeedforwardsX = newWheelForceFeedforwardsX;
+    public FieldOrientedOrbitSwerveRequest withPreviousSetpoint(SwerveSetpoint previousSetpoint) {
+        this.previousSetpoint = previousSetpoint;
+        ChassisSpeeds previousRobotRelativeSpeeds = this.previousSetpoint.robotRelativeSpeeds();
+        xLimiter.reset(previousRobotRelativeSpeeds.vxMetersPerSecond);
+        yLimiter.reset(previousRobotRelativeSpeeds.vyMetersPerSecond);
         return this;
     }
 
-    public FieldOrientedOrbitSwerveRequest withWheelForceFeedforwardsY(double[] newWheelForceFeedforwardsY) {
-        wheelForceFeedforwardsY = newWheelForceFeedforwardsY;
+    public FieldOrientedOrbitSwerveRequest withDriverOrientation(boolean useDriverOrientation) {
+        this.useDriverOrientation = useDriverOrientation;
         return this;
     }
 }
