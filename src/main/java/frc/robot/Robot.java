@@ -15,12 +15,13 @@ public class Robot extends TimedRobot {
 
   public Robot() {
     m_robotContainer = new RobotContainer();
+    
   }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run(); 
-    System.out.println(m_robotContainer.drivetrain.getRobotPose());
+    
   }
 
   @Override
@@ -52,6 +53,8 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+    
+    
   }
 
   @Override

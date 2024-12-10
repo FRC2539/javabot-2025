@@ -6,11 +6,9 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
-import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
-import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -21,7 +19,6 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
-import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 
 import edu.wpi.first.math.Matrix;
@@ -146,7 +143,11 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             this::getRobotPose,
             this::resetPose,  
             this::getChassisSpeeds, 
-            (speeds, DrivefeedForwards) -> applyRequest(() -> driveRobotRelativeWithFeedForwards(speeds, DrivefeedForwards)),
+            (speeds, feedforwards) -> setControl(
+                    m_applyRobotSpeeds.withSpeeds(speeds)
+                        .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+                        .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
+                ),
             new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
                     new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
                     new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
@@ -275,12 +276,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             .withWheelForceFeedforwardsX(previousSetpoint.feedforwards().robotRelativeForcesXNewtons())
             .withWheelForceFeedforwardsY(previousSetpoint.feedforwards().robotRelativeForcesYNewtons());
             // Method that will drive the robot given target module states
-    }
-
-    public SwerveRequest driveRobotRelativeWithFeedForwards(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
-        return m_applyRobotSpeeds.withSpeeds(speeds)
-            .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
-            .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons());
     }
 
     public SwerveRequest driveRobotRelative(double xVelocity, double yVelocity, double rotationRate) {
