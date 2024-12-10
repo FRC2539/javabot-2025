@@ -150,7 +150,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             this::getRobotPose,
             this::resetPose,  
             this::getChassisSpeeds, 
-            (speeds, DrivefeedForwards) -> {driveRobotRelative(speeds);}, 
+            (speeds, DrivefeedForwards) -> applyRequest(() -> driveRobotRelativeWithFeedForwards(speeds, DrivefeedForwards)),
             new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
                     new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
                     new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
@@ -284,6 +284,12 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             .withWheelForceFeedforwardsX(previousSetpoint.feedforwards().robotRelativeForcesXNewtons())
             .withWheelForceFeedforwardsY(previousSetpoint.feedforwards().robotRelativeForcesYNewtons());
             // Method that will drive the robot given target module states
+    }
+
+    public SwerveRequest driveRobotRelativeWithFeedForwards(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
+        return m_applyRobotSpeeds.withSpeeds(speeds)
+            .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+            .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons());
     }
 
     public SwerveRequest driveRobotRelative(double xVelocity, double yVelocity, double rotationRate) {
