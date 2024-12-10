@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.*;
 
 import java.lang.annotation.Inherited;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
@@ -14,7 +15,10 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
@@ -22,6 +26,7 @@ import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -65,6 +70,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     public final SwerveRequest.ApplyFieldSpeeds m_applyFieldSpeeds = new SwerveRequest.ApplyFieldSpeeds();
 
     public final FieldOrientedOrbitSwerveRequest m_applyFieldSpeedsOrbit;
+    RobotConfig config; // PathPlanner robot configuration
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
@@ -131,6 +137,44 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     /* The Setpoint Generator */
     private SwerveSetpointGenerator setpointGenerator;
     private SwerveSetpoint previousSetpoint;
+
+    public void applyConfigs() {
+        try {
+            config = RobotConfig.fromGUISettings();
+        } catch (Exception e) {
+            // Handle exception as needed
+            e.printStackTrace();
+        }
+
+        AutoBuilder.configure(
+            this::getRobotPose,
+            this::resetPose,  
+            this::getChassisSpeeds, 
+            (speeds, DrivefeedForwards) -> {driveRobotRelative(speeds);}, 
+            new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
+                    new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
+                    new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+            ), 
+            config,
+            () -> {
+                // Boolean supplier that controls when the path will be mirrored for the red alliance
+                Optional<Alliance> alliance = DriverStation.getAlliance();
+                if (alliance.isPresent()) {
+                    return alliance.get() == DriverStation.Alliance.Red;
+                }
+                return false;
+            },
+            this
+        );
+    }
+
+    public Pose2d getRobotPose() {
+        return this.getState().Pose;
+    }
+
+    public ChassisSpeeds getChassisSpeeds() {
+        return this.getState().Speeds;
+    }
 
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
