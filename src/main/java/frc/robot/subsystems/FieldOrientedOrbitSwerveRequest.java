@@ -33,6 +33,14 @@ public class FieldOrientedOrbitSwerveRequest implements SwerveRequest {
 
     private boolean useDriverOrientation;
 
+    public ChassisSpeeds getChassisSpeeds() {
+        return chassisSpeeds;
+    }
+
+    public SwerveSetpoint getPreviousSetpoint() {
+        return previousSetpoint;
+    }
+
     /**
      * @param xTipLimiter
      * @param yTipLimiter

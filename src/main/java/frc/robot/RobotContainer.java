@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -42,11 +43,6 @@ public class RobotContainer {
 
     public RobotContainer() {
         configureBindings();
-    }
-
-    public ChassisSpeeds getDesiredChassisSpeeds()
-    {
-        return new ChassisSpeeds(-leftDriveController.getYAxis().getAsDouble() * GlobalConstants.MAX_TRANSLATIONAL_SPEED, -leftDriveController.getXAxis().get() * GlobalConstants.MAX_TRANSLATIONAL_SPEED, -rightDriveController.getXAxis().get() * GlobalConstants.MAX_ROTATIONAL_SPEED);
     }
 
     private void configureBindings() {
@@ -84,6 +80,7 @@ public class RobotContainer {
 
         // reset the field-centric heading on left bumper press
         operatorController.getLeftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        operatorController.getRightBumper().onTrue(drivetrain.runOnce(() -> drivetrain.resetPose(new Pose2d())));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }

@@ -19,6 +19,7 @@ import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -312,6 +313,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                 m_hasAppliedOperatorPerspective = true;
             });
         }
+
+        DogLog.log("/Drive/desiredChassisSpeeds", m_applyFieldSpeedsOrbit.getChassisSpeeds());
+        DogLog.log("/Drive/setpointChassisSpeeds", m_applyFieldSpeedsOrbit.getPreviousSetpoint().robotRelativeSpeeds());
     }
 
     private void startSimThread() {
