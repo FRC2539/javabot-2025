@@ -7,6 +7,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -21,6 +22,7 @@ import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.FieldOrientedOrbitSwerveRequest;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -43,6 +45,7 @@ public class RobotContainer {
 
     public RobotContainer() {
         configureBindings();
+        drivetrain.applyConfigs();
     }
 
     private void configureBindings() {
@@ -99,6 +102,8 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return Commands.print("No autonomous command configured");
+        
+        return AutoBuilder.buildAuto("Test");
+        
     }
 }
