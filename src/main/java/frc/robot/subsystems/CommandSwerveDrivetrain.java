@@ -3,10 +3,12 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.*;
 
 import java.util.Optional;
+import java.lang.annotation.Inherited;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
@@ -21,8 +23,10 @@ import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -64,6 +68,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     .withDesaturateWheelSpeeds(false);
 
     RobotConfig config; // PathPlanner robot configuration
+    public final SwerveRequest.ApplyFieldSpeeds m_applyFieldSpeeds = new SwerveRequest.ApplyFieldSpeeds();
+
+    public final FieldOrientedOrbitSwerveRequest m_applyFieldSpeedsOrbit;
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
@@ -188,7 +195,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         if (Utils.isSimulation()) {
             startSimThread();
         }
-        swerveSetpointConfig();
+        m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
     }
 
     /**
@@ -210,7 +217,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             startSimThread();
         }
 
-        swerveSetpointConfig();
+        m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
     }
 
     /**
@@ -237,10 +244,10 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             startSimThread();
         }
 
-        swerveSetpointConfig();
+        m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
     }
 
-    private void swerveSetpointConfig()
+    private FieldOrientedOrbitSwerveRequest generateSwerveSetpointConfig()
     {
         RobotConfig config;
         try{
@@ -258,7 +265,12 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
         ChassisSpeeds currentSpeeds = getState().Speeds; 
         SwerveModuleState[] currentStates = getState().ModuleStates; 
-        previousSetpoint = new SwerveSetpoint(currentSpeeds, currentStates, DriveFeedforwards.zeros(config.numModules));
+        SwerveSetpoint previousSetpoint = new SwerveSetpoint(currentSpeeds, currentStates, DriveFeedforwards.zeros(config.numModules));
+
+        var request = new FieldOrientedOrbitSwerveRequest(setpointGenerator, previousSetpoint, getState().Pose.getRotation());
+        request.withDriverOrientation(true);
+        request.withXRateLimits(2,2);
+        return request;
     }
 
     //
@@ -349,6 +361,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                 m_hasAppliedOperatorPerspective = true;
             });
         }
+
+        DogLog.log("/Drive/desiredChassisSpeeds", m_applyFieldSpeedsOrbit.getChassisSpeeds());
+        DogLog.log("/Drive/setpointChassisSpeeds", m_applyFieldSpeedsOrbit.getPreviousSetpoint().robotRelativeSpeeds());
     }
 
     private void startSimThread() {

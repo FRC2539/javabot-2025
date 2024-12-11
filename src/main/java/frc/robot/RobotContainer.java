@@ -10,15 +10,16 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
-import frc.robot.Constants.GlobalConstants;
-import frc.robot.Constants.TunerConstants;
-import frc.robot.Constants.GlobalConstants.ControllerConstants;
+import frc.robot.constants.GlobalConstants;
+import frc.robot.constants.TunerConstants;
+import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class RobotContainer {
@@ -36,10 +37,7 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    /* Setting up bindings for necessary control of the swerve drive platform */
-    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+    // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
@@ -48,20 +46,21 @@ public class RobotContainer {
         drivetrain.applyConfigs();
     }
 
-    public ChassisSpeeds getDesiredChassisSpeeds()
-    {
-        return new ChassisSpeeds(-leftDriveController.getYAxis().getAsDouble() * GlobalConstants.MAX_TRANSLATIONAL_SPEED, -leftDriveController.getXAxis().get() * GlobalConstants.MAX_TRANSLATIONAL_SPEED, -rightDriveController.getXAxis().get() * GlobalConstants.MAX_ROTATIONAL_SPEED);
-    }
-
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX(leftDriveController.getYAxis().get() * GlobalConstants.MAX_TRANSLATIONAL_SPEED)
-                    .withVelocityY(-leftDriveController.getXAxis().get() * GlobalConstants.MAX_TRANSLATIONAL_SPEED)
-                    .withRotationalRate(rightDriveController.getXAxis().get() * GlobalConstants.MAX_ROTATIONAL_SPEED)
+            drivetrain.applyRequest(
+                () -> {
+                    ChassisSpeeds driverDesiredSpeeds = new ChassisSpeeds(
+                        sps(deadband(leftDriveController.getYAxis().get(), .1)) * GlobalConstants.MAX_TRANSLATIONAL_SPEED,
+                        -sps(deadband(leftDriveController.getXAxis().get(),0.1)) * GlobalConstants.MAX_TRANSLATIONAL_SPEED,
+                        -sps(deadband(rightDriveController.getXAxis().get(),0.1)) * GlobalConstants.MAX_ROTATIONAL_SPEED
+                    );
+                    return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(driverDesiredSpeeds);
+                    // return drivetrain.m_applyFieldSpeeds.withSpeeds(new ChassisSpeeds(3,1,0));
+                }
             )
         );
 
@@ -83,8 +82,21 @@ public class RobotContainer {
 
         // reset the field-centric heading on left bumper press
         operatorController.getLeftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        operatorController.getRightBumper().onTrue(drivetrain.runOnce(() -> drivetrain.resetPose(new Pose2d())));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+    }
+
+    private double deadband(double value, double deadband) {
+        if (value <= deadband && -deadband <= value) {
+            return 0;
+        }
+
+        return value;
+    }
+
+    private double sps(double value) {
+        return value * Math.abs(value);
     }
 
     public Command getAutonomousCommand() {
