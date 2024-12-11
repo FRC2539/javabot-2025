@@ -1,8 +1,10 @@
-package frc.robot.Constants;
+package frc.robot.constants;
+
+import static edu.wpi.first.units.Units.*;
 
 public class GlobalConstants {
     
-    public static double MAX_TRANSLATIONAL_SPEED = 10;
+    public static double MAX_TRANSLATIONAL_SPEED = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
     public static double MAX_ROTATIONAL_SPEED = Math.PI;
 
     public static class ControllerConstants {
