@@ -269,7 +269,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
         var request = new FieldOrientedOrbitSwerveRequest(setpointGenerator, previousSetpoint, getState().Pose.getRotation());
         request.withDriverOrientation(true);
-        request.withXRateLimits(2,2);
         return request;
     }
 
