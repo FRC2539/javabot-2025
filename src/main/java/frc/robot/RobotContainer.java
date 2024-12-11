@@ -17,9 +17,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
-import frc.robot.Constants.GlobalConstants;
-import frc.robot.Constants.TunerConstants;
-import frc.robot.Constants.GlobalConstants.ControllerConstants;
+import frc.robot.constants.GlobalConstants;
+import frc.robot.constants.TunerConstants;
+import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class RobotContainer {
@@ -55,9 +55,10 @@ public class RobotContainer {
                     ChassisSpeeds driverDesiredSpeeds = new ChassisSpeeds(
                         sps(deadband(leftDriveController.getYAxis().get(), .1)) * GlobalConstants.MAX_TRANSLATIONAL_SPEED,
                         -sps(deadband(leftDriveController.getXAxis().get(),0.1)) * GlobalConstants.MAX_TRANSLATIONAL_SPEED,
-                        sps(deadband(rightDriveController.getXAxis().get(),0.1)) * GlobalConstants.MAX_ROTATIONAL_SPEED
+                        -sps(deadband(rightDriveController.getXAxis().get(),0.1)) * GlobalConstants.MAX_ROTATIONAL_SPEED
                     );
                     return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(driverDesiredSpeeds);
+                    // return drivetrain.m_applyFieldSpeeds.withSpeeds(new ChassisSpeeds(3,1,0));
                 }
             )
         );

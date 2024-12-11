@@ -62,6 +62,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     .withSteerRequestType(SteerRequestType.MotionMagicExpo)
     .withDesaturateWheelSpeeds(false);
 
+    public final SwerveRequest.ApplyFieldSpeeds m_applyFieldSpeeds = new SwerveRequest.ApplyFieldSpeeds();
+
     public final FieldOrientedOrbitSwerveRequest m_applyFieldSpeedsOrbit;
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
@@ -217,11 +219,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         SwerveModuleState[] currentStates = getState().ModuleStates; 
         SwerveSetpoint previousSetpoint = new SwerveSetpoint(currentSpeeds, currentStates, DriveFeedforwards.zeros(config.numModules));
 
-        SlewRateLimiter xLimiter = new SlewRateLimiter(100);
-        SlewRateLimiter yLimiter = new SlewRateLimiter(100);
-
-        var request = new FieldOrientedOrbitSwerveRequest(xLimiter, yLimiter, setpointGenerator, previousSetpoint);
+        var request = new FieldOrientedOrbitSwerveRequest(setpointGenerator, previousSetpoint, getState().Pose.getRotation());
         request.withDriverOrientation(true);
+        request.withXRateLimits(2,2);
         return request;
     }
 
