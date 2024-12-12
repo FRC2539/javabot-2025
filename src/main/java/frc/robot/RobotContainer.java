@@ -6,15 +6,14 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
-import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.controller.LogitechController;
@@ -39,7 +38,7 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    private SendableChooser<Command> autoChooser = new SendableChooser<Command>();
+    private final LoggedDashboardChooser<Command> autoChooser;
 
     // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
@@ -49,8 +48,8 @@ public class RobotContainer {
         configureBindings();
 
         drivetrain.setUpPathPlanner();
-        autoChooser = AutoBuilder.buildAutoChooser();
-        SmartDashboard.putData("Auto Chooser", autoChooser);
+        autoChooser = new LoggedDashboardChooser<>("Auto Routine", AutoBuilder.buildAutoChooser());
+        
     }
 
     private void configureBindings() {
@@ -61,7 +60,7 @@ public class RobotContainer {
             drivetrain.applyRequest(
                 () -> {
                     ChassisSpeeds driverDesiredSpeeds = new ChassisSpeeds(
-                        sps(deadband(leftDriveController.getYAxis().get(), .1)) * GlobalConstants.MAX_TRANSLATIONAL_SPEED,
+                        sps(deadband(leftDriveController.getYAxis().get(), 0.1)) * GlobalConstants.MAX_TRANSLATIONAL_SPEED,
                         -sps(deadband(leftDriveController.getXAxis().get(),0.1)) * GlobalConstants.MAX_TRANSLATIONAL_SPEED,
                         -sps(deadband(rightDriveController.getXAxis().get(),0.1)) * GlobalConstants.MAX_ROTATIONAL_SPEED
                     );
@@ -108,7 +107,7 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
         
-        return autoChooser.getSelected();
+        return autoChooser.get();
         
     }
 }
