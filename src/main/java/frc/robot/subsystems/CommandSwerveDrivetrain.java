@@ -6,6 +6,8 @@ import java.lang.annotation.Inherited;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest;
@@ -22,8 +24,6 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
-
-import dev.doglog.DogLog;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -343,6 +343,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     @Override
     public void periodic() {
+        
         /*
          * Periodically try to apply the operator perspective.
          * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
@@ -361,8 +362,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             });
         }
 
-        DogLog.log("/Drive/desiredChassisSpeeds", m_applyFieldSpeedsOrbit.getChassisSpeeds());
-        DogLog.log("/Drive/setpointChassisSpeeds", m_applyFieldSpeedsOrbit.getPreviousSetpoint().robotRelativeSpeeds());
+        Logger.recordOutput("Drive/desiredChassisSpeeds", m_applyFieldSpeedsOrbit.getChassisSpeeds());
+        Logger.recordOutput("Drive/setpointChassisSpeeds", m_applyFieldSpeedsOrbit.getPreviousSetpoint().robotRelativeSpeeds());
     }
 
     private void startSimThread() {
