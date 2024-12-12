@@ -13,6 +13,8 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.controller.LogitechController;
@@ -37,13 +39,18 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
+    private SendableChooser<Command> autoChooser = new SendableChooser<Command>();
+
     // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
     public RobotContainer() {
         configureBindings();
-        drivetrain.applyConfigs();
+
+        drivetrain.setUpPathPlanner();
+        autoChooser = AutoBuilder.buildAutoChooser();
+        SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
     private void configureBindings() {
@@ -101,7 +108,7 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
         
-        return AutoBuilder.buildAuto("Test");
+        return autoChooser.getSelected();
         
     }
 }
