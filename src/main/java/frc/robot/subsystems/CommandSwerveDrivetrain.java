@@ -138,7 +138,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     private SwerveSetpointGenerator setpointGenerator;
     private SwerveSetpoint previousSetpoint;
 
-    public void applyConfigs() {
+    public void setUpPathPlanner() {
         try {
             config = RobotConfig.fromGUISettings();
         } catch (Exception e) {
