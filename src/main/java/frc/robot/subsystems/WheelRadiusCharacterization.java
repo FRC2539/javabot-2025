@@ -16,7 +16,7 @@ import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
-public class WheelRadiusCharacterization {
+public class WheelRadiusCharacterization extends Command {
     private static final LoggedNetworkNumber characterizationSpeed =
       new LoggedNetworkNumber("WheelRadiusCharacterization/SpeedRadsPerSec", 0.1);
     private static final Pigeon2 pigeon = new Pigeon2(0,"");
@@ -45,11 +45,13 @@ public class WheelRadiusCharacterization {
 
     private final CommandSwerveDrivetrain drive;
 
-    private double[] startWheelPositions;
+    private double[] startWheelPositions = new double[4];
 
     public WheelRadiusCharacterization(Direction omegaDirection, CommandSwerveDrivetrain drivetrain) {
         this.omegaDirection = omegaDirection;
         this.drive = drivetrain;
+
+        addRequirements(drivetrain);
       }
 
     

@@ -18,6 +18,7 @@ import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.WheelRadiusCharacterization;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -73,6 +74,8 @@ public class RobotContainer {
         operatorController.getB().whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-operatorController.getLeftYAxis().get(), -operatorController.getLeftXAxis().get()))
         ));
+
+        leftDriveController.getTrigger().whileTrue(new WheelRadiusCharacterization(WheelRadiusCharacterization.Direction.CLOCKWISE, drivetrain));
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.

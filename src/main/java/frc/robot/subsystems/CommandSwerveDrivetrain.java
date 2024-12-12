@@ -294,14 +294,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         // Note: it is important to not discretize speeds before or after
         // using the setpoint generator, as it will discretize them for you
         ChassisSpeeds speeds = new ChassisSpeeds(xVelocity, yVelocity, rotationRate);
-        previousSetpoint = setpointGenerator.generateSetpoint(
-            previousSetpoint, // The previous setpoint
-            speeds, // The desired target speeds
-            0.02 // The loop time of the robot code, in seconds
-        );
-        return m_applyRobotSpeeds.withSpeeds(previousSetpoint.robotRelativeSpeeds())
-            .withWheelForceFeedforwardsX(previousSetpoint.feedforwards().robotRelativeForcesXNewtons())
-            .withWheelForceFeedforwardsY(previousSetpoint.feedforwards().robotRelativeForcesYNewtons());
+        return m_applyFieldSpeedsOrbit.withChassisSpeeds(speeds);
             // Method that will drive the robot given target module states
     }
 
