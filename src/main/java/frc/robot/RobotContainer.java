@@ -34,8 +34,6 @@ public class RobotContainer {
     private final LogitechController operatorController =
             new LogitechController(ControllerConstants.OPERATOR_CONTROLLER);
 
-    private final Telemetry logger = new Telemetry(MaxSpeed);
-
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     private final LoggedDashboardChooser<Command> autoChooser;
@@ -89,8 +87,6 @@ public class RobotContainer {
         // reset the field-centric heading on left bumper press
         operatorController.getLeftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         operatorController.getRightBumper().onTrue(drivetrain.runOnce(() -> drivetrain.resetPose(new Pose2d())));
-
-        drivetrain.registerTelemetry(logger::telemeterize);
     }
 
     private double deadband(double value, double deadband) {
