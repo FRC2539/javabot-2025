@@ -126,11 +126,11 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void simulationPeriodic() {
-    driveSim.setSimulationWorldPose(m_robotContainer.drivetrain.getState().Pose);
+    // driveSim.setSimulationWorldPose(m_robotContainer.drivetrain.getState().Pose);
 
-    SimulatedArena.getInstance().simulationPeriodic();
+    // SimulatedArena.getInstance().simulationPeriodic();
 
-    m_robotContainer.drivetrain.resetPose(driveSim.getActualPoseInSimulationWorld());
+    // m_robotContainer.drivetrain.resetPose(driveSim.getActualPoseInSimulationWorld());
 
     List<Pose3d> notesPoses = SimulatedArena.getInstance().getGamePiecesByType("Note");
 

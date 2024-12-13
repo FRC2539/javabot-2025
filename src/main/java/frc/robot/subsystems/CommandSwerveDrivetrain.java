@@ -10,6 +10,7 @@ import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
@@ -153,9 +154,9 @@ public class CommandSwerveDrivetrain implements Subsystem {
 
         AutoBuilder.configure(
             this::getRobotPose,
-            m_swerveIO::resetPose,  
+            this::resetPose,  
             this::getChassisSpeeds, 
-            (speeds, feedforwards) -> m_swerveIO.setControl(
+            (speeds, feedforwards) -> setControl(
                     m_applyRobotSpeeds.withSpeeds(speeds)
                         .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
                         .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
@@ -207,6 +208,14 @@ public class CommandSwerveDrivetrain implements Subsystem {
 
     public SwerveDriveState getState() {
         return m_swerveIO.getState();
+    }
+
+    public Pigeon2 getPigeon2() {
+        return m_swerveIO.getPigeon2();
+    }
+
+    public void updateSimState(double dtSeconds, double supplyVoltage) {
+        m_swerveIO.updateSimState(dtSeconds, supplyVoltage);
     }
 
     /**
@@ -310,11 +319,11 @@ public class CommandSwerveDrivetrain implements Subsystem {
             Units.rotationsToRadians(10.0) //max rotational speed
         );
 
-        ChassisSpeeds currentSpeeds = m_swerveIO.getState().Speeds; 
-        SwerveModuleState[] currentStates = m_swerveIO.getState().ModuleStates; 
+        ChassisSpeeds currentSpeeds = getState().Speeds; 
+        SwerveModuleState[] currentStates = getState().ModuleStates; 
         SwerveSetpoint previousSetpoint = new SwerveSetpoint(currentSpeeds, currentStates, DriveFeedforwards.zeros(config.numModules));
 
-        var request = new FieldOrientedOrbitSwerveRequest(setpointGenerator, previousSetpoint, m_swerveIO.getState().Pose.getRotation());
+        var request = new FieldOrientedOrbitSwerveRequest(setpointGenerator, previousSetpoint, getState().Pose.getRotation());
         request.withDriverOrientation(true);
         return request;
     }
@@ -352,7 +361,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
     }
 
     public SwerveRequest driveFieldRelative(ChassisSpeeds speeds) {
-        ChassisSpeeds.fromFieldRelativeSpeeds(speeds, m_swerveIO.getState().Pose.getRotation());
+        ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getState().Pose.getRotation());
         return driveRobotRelative(speeds);
     }
 
@@ -363,7 +372,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
      * @return Command to run
      */
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
-        return run(() -> m_swerveIO.setControl(requestSupplier.get()));
+        return run(() -> setControl(requestSupplier.get()));
     }
 
     /**
@@ -400,17 +409,18 @@ public class CommandSwerveDrivetrain implements Subsystem {
          */
         if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
             DriverStation.getAlliance().ifPresent(allianceColor -> {
-                m_swerveIO.setOperatorPerspectiveForward(
+                setOperatorPerspectiveForward(
                     allianceColor == Alliance.Red
                         ? kRedAlliancePerspectiveRotation
                         : kBlueAlliancePerspectiveRotation
                 );
                 m_hasAppliedOperatorPerspective = true;
             });
+        }
 
-            SwerveDriveState state = m_swerveIO.getState();
+        SwerveDriveState state = getState();
 
-            Pose2d pose = state.Pose;
+        Pose2d pose = state.Pose;
         Logger.recordOutput("Drive/Pose", pose);
 
         /* Telemeterize the robot's general speeds */
@@ -418,7 +428,6 @@ public class CommandSwerveDrivetrain implements Subsystem {
         Logger.recordOutput("Drive/Odometry Period", 1.0 / state.OdometryPeriod);
 
         /* Telemeterize the module's states */
-        }
 
         Logger.recordOutput("Drive/desiredChassisSpeeds", m_applyFieldSpeedsOrbit.getChassisSpeeds());
         Logger.recordOutput("Drive/setpointChassisSpeeds", m_applyFieldSpeedsOrbit.getPreviousSetpoint().robotRelativeSpeeds());
@@ -434,7 +443,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
             m_lastSimTime = currentTime;
 
             /* use the measured time delta, get battery voltage from WPILib */
-            m_swerveIO.updateSimState(deltaTime, RobotController.getBatteryVoltage());
+            updateSimState(deltaTime, RobotController.getBatteryVoltage());
         });
         m_simNotifier.startPeriodic(kSimLoopPeriod);
     }
