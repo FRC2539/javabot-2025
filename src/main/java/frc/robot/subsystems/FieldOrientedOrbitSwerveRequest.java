@@ -111,12 +111,25 @@ public class FieldOrientedOrbitSwerveRequest implements SwerveRequest {
         // robotRelativeSpeeds.vyMetersPerSecond = yLimiter.calculate(robotRelativeSpeeds.vyMetersPerSecond);
 
         // Apply all other limits
+        SwerveSetpoint reallyoldSetpoint = previousSetpoint;
         previousSetpoint = setpointGenerator.generateSetpoint(previousSetpoint, robotRelativeSpeeds, timestep);
 
         DriveFeedforwards feedforwards = previousSetpoint.feedforwards();
 
-       return applyRobotSpeeds
-            .withSpeeds(previousSetpoint.robotRelativeSpeeds())
+        ChassisSpeeds driveSpeeds = previousSetpoint.robotRelativeSpeeds();
+
+        if (driveSpeeds == null || Double.isNaN(driveSpeeds.vxMetersPerSecond) || Double.isNaN(previousSetpoint.moduleStates()[0].speedMetersPerSecond)) {
+            System.out.println("ahh");
+        }
+
+        setpointGenerator.generateSetpoint(reallyoldSetpoint, robotRelativeSpeeds, timestep);
+
+
+        setpointGenerator.generateSetpoint(reallyoldSetpoint, robotRelativeSpeeds, timestep);
+       
+        setpointGenerator.generateSetpoint(reallyoldSetpoint, robotRelativeSpeeds, timestep);
+        return applyRobotSpeeds
+            .withSpeeds(driveSpeeds)
             .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
             .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
             .apply(parameters, modulesToApply);

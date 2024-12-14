@@ -11,6 +11,7 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SelfControlledSwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.motorsims.SimulatedMotorController;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -30,6 +31,7 @@ import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -38,9 +40,8 @@ public class Robot extends LoggedRobot {
 
   private final RobotContainer m_robotContainer;
 
-  private SelfControlledSwerveDriveSimulation driveSim;
-
   public Robot() {
+
     m_robotContainer = new RobotContainer();
 
     Logger.recordMetadata("ProjectName", "JavaBot-2025"); // Set a metadata value
@@ -57,11 +58,7 @@ public class Robot extends LoggedRobot {
 
       final DriveTrainSimulationConfig config = DriveTrainSimulationConfig.Default();
 
-      driveSim = new SelfControlledSwerveDriveSimulation( new SwerveDriveSimulation(config, new Pose2d(2, 2, new Rotation2d())));
-
       m_robotContainer.drivetrain.resetPose(new Pose2d(2, 2, new Rotation2d()));
-
-      SimulatedArena.getInstance().addDriveTrainSimulation(driveSim.getDriveTrainSimulation());
     }
 
     Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may be added.
@@ -126,11 +123,12 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void simulationPeriodic() {
-    driveSim.setSimulationWorldPose(m_robotContainer.drivetrain.getState().Pose);
+    RoboRioSim.setVInVoltage(12.0);
+    //driveSim.setSimulationWorldPose(m_robotContainer.drivetrain.getState().Pose);
 
     SimulatedArena.getInstance().simulationPeriodic();
 
-    m_robotContainer.drivetrain.resetPose(driveSim.getActualPoseInSimulationWorld());
+   // m_robotContainer.drivetrain.resetPose(driveSim.getActualPoseInSimulationWorld());
 
     List<Pose3d> notesPoses = SimulatedArena.getInstance().getGamePiecesByType("Note");
 
