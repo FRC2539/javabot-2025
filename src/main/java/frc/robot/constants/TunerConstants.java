@@ -83,10 +83,10 @@ public class TunerConstants {
 
 
     // These are only used for simulation
-    private static final double kSteerInertia = 0.00001;
+    private static final double kSteerInertia = 0.005;
     private static final double kDriveInertia = 0.001;
     // Simulated voltage necessary to overcome friction
-    private static final Voltage kSteerFrictionVoltage = Volts.of(0.25);
+    private static final Voltage kSteerFrictionVoltage = Volts.of(3);
     private static final Voltage kDriveFrictionVoltage = Volts.of(0.25);
 
     public static final SwerveDrivetrainConstants DrivetrainConstants = new SwerveDrivetrainConstants()

@@ -14,6 +14,7 @@ import org.dyn4j.geometry.Rotation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.littletonrobotics.junction.Logger;
 
@@ -50,6 +51,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -59,6 +61,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.constants.TunerConstants;
 import frc.robot.util.PhoenixUtil;
 
 /**
@@ -90,7 +93,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     .withDesaturateWheelSpeeds(false);
 
     public final SwerveRequest.ApplyFieldSpeeds m_applyFieldSpeeds = new SwerveRequest.ApplyFieldSpeeds();
-
     public final FieldOrientedOrbitSwerveRequest m_applyFieldSpeedsOrbit;
     RobotConfig config; // PathPlanner robot configuration
 
@@ -402,18 +404,38 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         Logger.recordOutput("Drive/Velocity", state.Speeds);
         Logger.recordOutput("Drive/Pose", state.Pose);
         Logger.recordOutput("Drive/Odometry Period", 1.0 / state.OdometryPeriod);
+
+        if (m_driveSim != null) {
+            Logger.recordOutput("FieldSimulation/RobotPose", m_driveSim.getSimulatedDriveTrainPose());
+        }
     }
 
     private void startSimThread() {
-        DriveTrainSimulationConfig config = DriveTrainSimulationConfig.Default();
-        config.withGyro(() -> new GyroSimulation(0.5, 0.02) {
-            public void updateSimulationSubTick(double actualAngularVelocityRadPerSec) {
-                super.updateSimulationSubTick(actualAngularVelocityRadPerSec);
-                CommandSwerveDrivetrain.this.getPigeon2().getSimState().setRawYaw(getGyroReading().getMeasure());
-                CommandSwerveDrivetrain.this.getPigeon2().getSimState().setAngularVelocityZ(getMeasuredAngularVelocity());
-                CommandSwerveDrivetrain.this.getPigeon2().getSimState().setSupplyVoltage(12.0);
-            }
-        });
+        DriveTrainSimulationConfig config = new DriveTrainSimulationConfig(
+            Pounds.of(150), 
+            Inches.of(29.5), 
+            Inches.of(29.5), 
+            Inches.of(23.5), 
+            Inches.of(23.5), 
+            () -> new SwerveModuleSimulation(
+                DCMotor.getFalcon500(1), 
+                DCMotor.getFalcon500(1), 
+                TunerConstants.BackLeft.DriveMotorGearRatio, 
+                TunerConstants.BackLeft.SteerMotorGearRatio, 
+                Volts.of(TunerConstants.BackLeft.DriveFrictionVoltage), 
+                Volts.of(TunerConstants.BackLeft.SteerFrictionVoltage), 
+                Meters.of(TunerConstants.BackLeft.WheelRadius), 
+                KilogramSquareMeters.of(TunerConstants.BackLeft.SteerInertia), 
+                1.2), 
+            () -> new GyroSimulation(0.5, 0.02) {
+                public void updateSimulationSubTick(double actualAngularVelocityRadPerSec) {
+                    super.updateSimulationSubTick(actualAngularVelocityRadPerSec);
+                    CommandSwerveDrivetrain.this.getPigeon2().getSimState().setRawYaw(getGyroReading().getMeasure());
+                    CommandSwerveDrivetrain.this.getPigeon2().getSimState().setAngularVelocityZ(getMeasuredAngularVelocity());
+                    CommandSwerveDrivetrain.this.getPigeon2().getSimState().setSupplyVoltage(12.0);
+                }
+            });
+
         m_driveSim = new SwerveDriveSimulation(config, new Pose2d(2,2, new Rotation2d()));
 
         m_lastSimTime = Utils.getCurrentTimeSeconds();
@@ -436,7 +458,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                 drive_modules[i].getSteerMotor(),
                 drive_modules[i].getSteerMotor().getInverted(),
                 drive_modules[i].getCANcoder(),
-                configCanCoder.SensorDirection == SensorDirectionValue.CounterClockwise_Positive,
+                configCanCoder.SensorDirection == SensorDirectionValue.Clockwise_Positive,
                 Rotations.of(configCanCoder.MagnetOffset)
                 ));
         }

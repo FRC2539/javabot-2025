@@ -120,6 +120,7 @@ public class FieldOrientedOrbitSwerveRequest implements SwerveRequest {
 
         if (driveSpeeds == null || Double.isNaN(driveSpeeds.vxMetersPerSecond) || Double.isNaN(previousSetpoint.moduleStates()[0].speedMetersPerSecond)) {
             System.out.println("ahh");
+            System.out.println("oooh");
         }
 
         setpointGenerator.generateSetpoint(reallyoldSetpoint, robotRelativeSpeeds, timestep);

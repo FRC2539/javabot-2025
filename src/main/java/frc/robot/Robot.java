@@ -28,6 +28,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -123,7 +124,9 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void simulationPeriodic() {
-    RoboRioSim.setVInVoltage(12.0);
+    // RoboRioSim.setVInVoltage(12.0);
+    // RobotController.getBatteryVoltage();
+    // RobotController.getInputVoltage();
     //driveSim.setSimulationWorldPose(m_robotContainer.drivetrain.getState().Pose);
 
     SimulatedArena.getInstance().simulationPeriodic();

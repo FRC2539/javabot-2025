@@ -64,7 +64,7 @@ public final class PhoenixUtil {
             talonFXSimState.setRotorVelocity(encoderVelocity);
             talonFXSimState.setSupplyVoltage(12.0);
             Logger.recordOutput("CTREMotor/" + id + "/mechanismAngleRad", mechanismAngle.in(Radians));
-            Logger.recordOutput("CTREMotor/" + id + "/mechanismVelDegPerRad", mechanismVelocity.in(RadiansPerSecond));
+            Logger.recordOutput("CTREMotor/" + id + "/mechanismVelRadPerSec", mechanismVelocity.in(RadiansPerSecond));
             Voltage output = talonFXSimState.getMotorVoltageMeasure();
             Logger.recordOutput("CTREMotor/" + id + "/outputVoltage", output.in(Volts));
             return output;
