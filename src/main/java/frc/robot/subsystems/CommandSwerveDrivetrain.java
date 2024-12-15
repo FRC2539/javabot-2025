@@ -100,9 +100,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         new SysIdRoutine.Config(
             null,        // Use default ramp rate (1 V/s)
             Volts.of(4), // Reduce dynamic step voltage to 4 V to prevent brownout
-            null,        // Use default timeout (10 s)
+            Seconds.of(5),        // Use default timeout (10 s)
             // Log state with SignalLogger class
-            state -> SignalLogger.writeString("SysIdTranslation_State", state.toString())
+            state -> Logger.recordOutput("SysIdTranslation_State", state.toString())
         ),
         new SysIdRoutine.Mechanism(
             output -> setControl(m_translationCharacterization.withVolts(output)),
@@ -116,9 +116,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         new SysIdRoutine.Config(
             null,        // Use default ramp rate (1 V/s)
             Volts.of(7), // Use dynamic voltage of 7 V
-            null,        // Use default timeout (10 s)
+            Seconds.of(5),        // Use default timeout (10 s)
             // Log state with SignalLogger class
-            state -> SignalLogger.writeString("SysIdSteer_State", state.toString())
+            state -> Logger.recordOutput("SysIdSteer_State", state.toString())
         ),
         new SysIdRoutine.Mechanism(
             volts -> setControl(m_steerCharacterization.withVolts(volts)),
@@ -138,16 +138,16 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             Volts.of(Math.PI / 6).per(Second),
             /* This is in radians per second, but SysId only supports "volts" */
             Volts.of(Math.PI),
-            null, // Use default timeout (10 s)
+            Seconds.of(5), // Use default timeout (10 s)
             // Log state with SignalLogger class
-            state -> SignalLogger.writeString("SysIdRotation_State", state.toString())
+            state -> Logger.recordOutput("SysIdRotation_State", state.toString())
         ),
         new SysIdRoutine.Mechanism(
             output -> {
                 /* output is actually radians per second, but SysId only supports "volts" */
                 setControl(m_rotationCharacterization.withRotationalRate(output.in(Volts)));
                 /* also log the requested output for SysId */
-                SignalLogger.writeDouble("Rotational_Rate", output.in(Volts));
+                Logger.recordOutput("Rotational_Rate", output.in(Volts));
             },
             null,
             this
@@ -171,7 +171,12 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
         AutoBuilder.configure(
             this::getRobotPose,
-            this::resetPose,  
+            (Pose2d pose) -> {
+                resetPose(pose);
+                if (m_driveSim != null) {
+                    m_driveSim.setSimulationWorldPose(pose);
+                }
+            },  
             this::getChassisSpeeds, 
             (speeds, feedforwards) -> setControl(
                     m_applyRobotSpeeds.withSpeeds(speeds)
@@ -409,8 +414,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     }
 
     private void startSimThread() {
+        RobotConfig pathplannerConfig = SwerveConstantsUtil.getRobotConfig();
         DriveTrainSimulationConfig config = new DriveTrainSimulationConfig(
-            Pounds.of(150), 
+            Kilograms.of(pathplannerConfig.massKG), 
             Inches.of(29.5), 
             Inches.of(29.5), 
             Inches.of(23.5), 
@@ -423,7 +429,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                 Volts.of(TunerConstants.BackLeft.DriveFrictionVoltage), 
                 Volts.of(TunerConstants.BackLeft.SteerFrictionVoltage), 
                 Meters.of(TunerConstants.BackLeft.WheelRadius), 
-                KilogramSquareMeters.of(TunerConstants.BackLeft.SteerInertia), 
+                KilogramSquareMeters.of(TunerConstants.BackLeft.SteerInertia),
                 1.2), 
             () -> new GyroSimulation(0.5, 0.02) {
                 public void updateSimulationSubTick(double actualAngularVelocityRadPerSec) {
@@ -434,7 +440,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                 }
             });
 
-        m_driveSim = new SwerveDriveSimulation(config, new Pose2d(2,2, new Rotation2d()));
+        m_driveSim = new SwerveDriveSimulation(config, new Pose2d(1,2, new Rotation2d()));
 
         m_lastSimTime = Utils.getCurrentTimeSeconds();
 
@@ -463,6 +469,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
         /* Run simulation at a faster rate so PID gains behave more reasonably */
         // m_simNotifier = new Notifier(() -> {
+        //         SimulatedArena.getInstance().simulationPeriodic();
             
         //     final double currentTime = Utils.getCurrentTimeSeconds();
         //     double deltaTime = currentTime - m_lastSimTime;
@@ -472,43 +479,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         //     /* use the measured time delta, get battery voltage from WPILib */
         //     // updateSimState(deltaTime, RobotController.getBatteryVoltage());
         // });
-        // // m_simNotifier.startPeriodic(kSimLoopPeriod);
+        // m_simNotifier.startPeriodic(kSimLoopPeriod);
     }
 
     Rotation2d m_lastAngle = new Rotation2d();
-
-    private void updateSimStateNew(double dtSeconds, double supplyVoltage) {
-        var modulesToApply = getModules();
-        
-        var m_modules = m_driveSim.getModules();
-
-        if (modulesToApply.length != m_modules.length) return;
-
-        SwerveModuleState[] states = new SwerveModuleState[m_modules.length];
-        /* Update our sim devices */
-        for (int i = 0; i < m_modules.length; ++i) {
-            TalonFXSimState driveMotor = modulesToApply[i].getDriveMotor().getSimState();
-            TalonFXSimState steerMotor = modulesToApply[i].getSteerMotor().getSimState();
-            CANcoderSimState cancoder = modulesToApply[i].getCANcoder().getSimState();
-
-
-            // getting information from the differrnt sim?
-            // driveMotor.Orientation = modulesToApply[i].getDriveMotor().getInverted() ? ChassisReference.Clockwise_Positive : ChassisReference.CounterClockwise_Positive;
-            // steerMotor.Orientation = modulesToApply[i].getDriveMotor().getInverted() ? ChassisReference.Clockwise_Positive : ChassisReference.CounterClockwise_Positive;
-
-            // driveMotor.setSupplyVoltage(supplyVoltage);
-            // steerMotor.setSupplyVoltage(supplyVoltage);
-            // cancoder.setSupplyVoltage(supplyVoltage);
-
-            // this is going to be replaced with setting information on the different sim
-
-            states[i] = modulesToApply[i].getCurrentState();
-        }
-
-        // var m_pigeonSim = getPigeon2().getSimState();
-
-        // m_lastAngle = m_lastAngle.plus(Rotation2d.fromRadians(angularVelRadPerSec * dtSeconds));
-        // m_pigeonSim.setRawYaw(m_lastAngle.getDegrees());
-        // m_pigeonSim.setAngularVelocityZ(Units.radiansToDegrees(angularVelRadPerSec));
-    }
 }

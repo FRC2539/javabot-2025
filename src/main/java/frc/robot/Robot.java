@@ -5,34 +5,22 @@
 package frc.robot;
 
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import java.util.List;
 
 import org.ironmaple.simulation.SimulatedArena;
-import org.ironmaple.simulation.drivesims.SelfControlledSwerveDriveSimulation;
-import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
-import org.ironmaple.simulation.motorsims.SimulatedMotorController;
-import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
-import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
-import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -42,6 +30,7 @@ public class Robot extends LoggedRobot {
   private final RobotContainer m_robotContainer;
 
   public Robot() {
+    Notifier m_simNotifier;
 
     m_robotContainer = new RobotContainer();
 
@@ -57,9 +46,15 @@ public class Robot extends LoggedRobot {
       Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs")
       Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
 
-      final DriveTrainSimulationConfig config = DriveTrainSimulationConfig.Default();
+      SimulatedArena.overrideSimulationTimings(Seconds.of(0.02/5), 1);
 
-      m_robotContainer.drivetrain.resetPose(new Pose2d(2, 2, new Rotation2d()));
+      /* Run simulation at a faster rate so PID gains behave more reasonably */
+      m_simNotifier = new Notifier(() -> {
+          SimulatedArena.getInstance().simulationPeriodic();
+        });
+      m_simNotifier.startPeriodic(0.02/5);
+
+      m_robotContainer.drivetrain.resetPose(new Pose2d(1, 2, new Rotation2d()));
     }
 
     Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may be added.
@@ -128,8 +123,6 @@ public class Robot extends LoggedRobot {
     // RobotController.getBatteryVoltage();
     // RobotController.getInputVoltage();
     //driveSim.setSimulationWorldPose(m_robotContainer.drivetrain.getState().Pose);
-
-    SimulatedArena.getInstance().simulationPeriodic();
 
    // m_robotContainer.drivetrain.resetPose(driveSim.getActualPoseInSimulationWorld());
 
