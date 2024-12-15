@@ -42,7 +42,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
-import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
+import frc.robot.util.SwerveSetpointGenerator;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -388,15 +388,14 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
         var state = getState();
 
-        Logger.recordOutput("Drive/desiredChassisSpeeds", m_applyFieldSpeedsOrbit.getChassisSpeeds());
-        Logger.recordOutput("Drive/setpoint", m_applyFieldSpeedsOrbit.getPreviousSetpoint());
+        Logger.recordOutput("Drive/DesiredChassisSpeeds", m_applyFieldSpeedsOrbit.getChassisSpeeds());
+        Logger.recordOutput("Drive/SwerveSetpoint", m_applyFieldSpeedsOrbit.getPreviousSetpoint());
 
 
         if (Double.isNaN(state.ModuleTargets[0].speedMetersPerSecond)) {
             System.out.println("ahh");
         }
-        Logger.recordOutput("Drive/desiredModuleStates", state.ModuleTargets);
-        Logger.recordOutput("Drive/setpointModuleStates", state.ModuleTargets);
+        Logger.recordOutput("Drive/ModuleTargets", state.ModuleTargets);
 
         Logger.recordOutput("Drive/ModuleStates", state.ModuleStates);
         Logger.recordOutput("Drive/ModulePositions", state.ModulePositions);

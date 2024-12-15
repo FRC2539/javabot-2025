@@ -8,7 +8,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
-import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
+import frc.robot.util.SwerveSetpointGenerator;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -117,11 +117,6 @@ public class FieldOrientedOrbitSwerveRequest implements SwerveRequest {
         DriveFeedforwards feedforwards = previousSetpoint.feedforwards();
 
         ChassisSpeeds driveSpeeds = previousSetpoint.robotRelativeSpeeds();
-
-        if (driveSpeeds == null || Double.isNaN(driveSpeeds.vxMetersPerSecond) || Double.isNaN(previousSetpoint.moduleStates()[0].speedMetersPerSecond)) {
-            System.out.println("ahh");
-            System.out.println("oooh");
-        }
 
         setpointGenerator.generateSetpoint(reallyoldSetpoint, robotRelativeSpeeds, timestep);
 

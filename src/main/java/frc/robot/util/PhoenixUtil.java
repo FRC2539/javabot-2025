@@ -14,7 +14,6 @@
 package frc.robot.util;
 
 import static edu.wpi.first.units.Units.*;
-import static edu.wpi.first.units.Units.Seconds;
 
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -65,15 +64,21 @@ public final class PhoenixUtil {
             talonFXSimState.setSupplyVoltage(12.0);
             Logger.recordOutput("CTREMotor/" + id + "/mechanismAngleRad", mechanismAngle.in(Radians));
             Logger.recordOutput("CTREMotor/" + id + "/mechanismVelRadPerSec", mechanismVelocity.in(RadiansPerSecond));
+            Logger.recordOutput("CTREMotor/" + id + "/encoderAngleRad", encoderAngle.in(Radians));
+            Logger.recordOutput("CTREMotor/" + id + "/encoderVelRadPerSec", encoderVelocity.in(RadiansPerSecond));
             Voltage output = talonFXSimState.getMotorVoltageMeasure();
             Logger.recordOutput("CTREMotor/" + id + "/outputVoltage", output.in(Volts));
             return output;
         }
     }
 
-    public static class TalonFXMotorControllerWithRemoteCancoderSim extends TalonFXMotorControllerSim {
+    public static class TalonFXMotorControllerWithRemoteCancoderSim  implements SimulatedMotorController {
         private final CANcoderSimState remoteCancoderSimState;
         private final Angle encoderOffset;
+
+        public final int id;
+
+        private final TalonFXSimState talonFXSimState;
 
         public TalonFXMotorControllerWithRemoteCancoderSim(
                 TalonFX talonFX,
@@ -81,7 +86,13 @@ public final class PhoenixUtil {
                 CANcoder cancoder,
                 boolean encoderInverted,
                 Angle encoderOffset) {
-            super(talonFX, motorInverted);
+            this.id = TalonFXMotorControllerSim.instances++;
+
+            this.talonFXSimState = talonFX.getSimState();
+            talonFXSimState.Orientation =
+            motorInverted ? ChassisReference.Clockwise_Positive : ChassisReference.CounterClockwise_Positive;
+            
+
             this.remoteCancoderSimState = cancoder.getSimState();
             this.remoteCancoderSimState.Orientation =
                     encoderInverted ? ChassisReference.Clockwise_Positive : ChassisReference.CounterClockwise_Positive;
@@ -94,10 +105,19 @@ public final class PhoenixUtil {
                 AngularVelocity mechanismVelocity,
                 Angle encoderAngle,
                 AngularVelocity encoderVelocity) {
-            remoteCancoderSimState.setRawPosition(mechanismAngle.minus(encoderOffset));
-            remoteCancoderSimState.setVelocity(mechanismVelocity);
+                // talonFXSimState.setRawRotorPosition(mechanismAngle.minus(encoderOffset));
+                // talonFXSimState.setRotorVelocity(mechanismVelocity);
+                talonFXSimState.setSupplyVoltage(12.0);
+                Logger.recordOutput("CTREMotor/" + id + "/mechanismAngleRad", mechanismAngle.in(Radians));
+                Logger.recordOutput("CTREMotor/" + id + "/mechanismVelRadPerSec", mechanismVelocity.in(RadiansPerSecond));
+                Logger.recordOutput("CTREMotor/" + id + "/encoderAngleRad", encoderAngle.in(Radians));
+                Logger.recordOutput("CTREMotor/" + id + "/encoderVelRadPerSec", encoderVelocity.in(RadiansPerSecond));
+                remoteCancoderSimState.setRawPosition(mechanismAngle.minus(encoderOffset));
+                remoteCancoderSimState.setVelocity(mechanismVelocity);
+                Voltage output = talonFXSimState.getMotorVoltageMeasure();
+                Logger.recordOutput("CTREMotor/" + id + "/outputVoltage", output.in(Volts));
 
-            return super.updateControlSignal(mechanismAngle, mechanismVelocity, encoderAngle, encoderVelocity);
+                return output;
         }
     }
 
