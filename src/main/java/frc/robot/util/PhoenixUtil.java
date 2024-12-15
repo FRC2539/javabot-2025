@@ -105,8 +105,8 @@ public final class PhoenixUtil {
                 AngularVelocity mechanismVelocity,
                 Angle encoderAngle,
                 AngularVelocity encoderVelocity) {
-                // talonFXSimState.setRawRotorPosition(mechanismAngle.minus(encoderOffset));
-                // talonFXSimState.setRotorVelocity(mechanismVelocity);
+                talonFXSimState.setRawRotorPosition(mechanismAngle.minus(encoderOffset));
+                talonFXSimState.setRotorVelocity(mechanismVelocity);
                 talonFXSimState.setSupplyVoltage(12.0);
                 Logger.recordOutput("CTREMotor/" + id + "/mechanismAngleRad", mechanismAngle.in(Radians));
                 Logger.recordOutput("CTREMotor/" + id + "/mechanismVelRadPerSec", mechanismVelocity.in(RadiansPerSecond));
