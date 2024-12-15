@@ -10,7 +10,6 @@ import java.util.Queue;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.dyn4j.geometry.Rotation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
