@@ -80,8 +80,8 @@ public class RobotContainer {
                         -sps(deadband(leftDriveController.getXAxis().get(),0.1)) * GlobalConstants.MAX_TRANSLATIONAL_SPEED,
                         -sps(deadband(rightDriveController.getXAxis().get(),0.1)) * GlobalConstants.MAX_ROTATIONAL_SPEED
                     );
-                    // return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(driverDesiredSpeeds);
-                    return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(new ChassisSpeeds(xVel.get(), yVel.get(), rotVel.get()));
+                    return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(driverDesiredSpeeds);
+                    // return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(new ChassisSpeeds(xVel.get(), yVel.get(), rotVel.get()));
                     // return drivetrain.m_applyFieldSpeeds.withSpeeds(driverDesiredSpeeds);
                 }
             )
