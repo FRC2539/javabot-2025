@@ -8,7 +8,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
-import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
+import frc.robot.util.SwerveSetpointGenerator;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -35,7 +35,7 @@ public class FieldOrientedOrbitSwerveRequest implements SwerveRequest {
     private double forwardYRateLimit = Double.POSITIVE_INFINITY;
     private double backwardYRateLimit = Double.POSITIVE_INFINITY;
 
-    private double timestep = 0.02;
+    private double timestep = 0.02 / 5;
 
     private boolean maintainStraightStopping = true;
 
@@ -111,12 +111,21 @@ public class FieldOrientedOrbitSwerveRequest implements SwerveRequest {
         // robotRelativeSpeeds.vyMetersPerSecond = yLimiter.calculate(robotRelativeSpeeds.vyMetersPerSecond);
 
         // Apply all other limits
+        SwerveSetpoint reallyoldSetpoint = previousSetpoint;
         previousSetpoint = setpointGenerator.generateSetpoint(previousSetpoint, robotRelativeSpeeds, timestep);
 
         DriveFeedforwards feedforwards = previousSetpoint.feedforwards();
 
-       return applyRobotSpeeds
-            .withSpeeds(previousSetpoint.robotRelativeSpeeds())
+        ChassisSpeeds driveSpeeds = previousSetpoint.robotRelativeSpeeds();
+
+        setpointGenerator.generateSetpoint(reallyoldSetpoint, robotRelativeSpeeds, timestep);
+
+
+        setpointGenerator.generateSetpoint(reallyoldSetpoint, robotRelativeSpeeds, timestep);
+       
+        setpointGenerator.generateSetpoint(reallyoldSetpoint, robotRelativeSpeeds, timestep);
+        return applyRobotSpeeds
+            .withSpeeds(driveSpeeds)
             .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
             .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
             .apply(parameters, modulesToApply);

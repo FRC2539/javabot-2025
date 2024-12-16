@@ -7,7 +7,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
@@ -22,6 +23,7 @@ import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.SwerveConstantsUtil;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -36,7 +38,7 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    public final CommandSwerveDrivetrain drivetrain = SwerveConstantsUtil.getCommandSwerveDrivetrain();
 
     private final LoggedDashboardChooser<Command> autoChooser;
 
@@ -49,8 +51,22 @@ public class RobotContainer {
 
         drivetrain.setUpPathPlanner();
         autoChooser = new LoggedDashboardChooser<>("Auto Routine", AutoBuilder.buildAutoChooser());
-        
+        autoChooser.addOption("SysId Routine", 
+            Commands.sequence(
+                drivetrain.sysIdDynamic(Direction.kForward),
+                Commands.waitSeconds(5),
+                drivetrain.sysIdDynamic(Direction.kReverse),
+                Commands.waitSeconds(5),
+                drivetrain.sysIdQuasistatic(Direction.kForward),
+                Commands.waitSeconds(5),
+                drivetrain.sysIdQuasistatic(Direction.kReverse)
+            )
+        );
     }
+
+    private final LoggedNetworkNumber xVel = new LoggedNetworkNumber("xVel", 0.0);
+    private final LoggedNetworkNumber yVel = new LoggedNetworkNumber("yVel", 0.0);
+    private final LoggedNetworkNumber rotVel = new LoggedNetworkNumber("rotVel", 0.0);
 
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
@@ -65,7 +81,8 @@ public class RobotContainer {
                         -sps(deadband(rightDriveController.getXAxis().get(),0.1)) * GlobalConstants.MAX_ROTATIONAL_SPEED
                     );
                     return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(driverDesiredSpeeds);
-                    // return drivetrain.m_applyFieldSpeeds.withSpeeds(new ChassisSpeeds(3,1,0));
+                    // return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(new ChassisSpeeds(xVel.get(), yVel.get(), rotVel.get()));
+                    // return drivetrain.m_applyFieldSpeeds.withSpeeds(driverDesiredSpeeds);
                 }
             )
         );

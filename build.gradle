@@ -73,6 +73,9 @@ dependencies {
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
 
+    implementation 'org.dyn4j:dyn4j:5.0.2'
+    simulationDebug 'org.dyn4j:dyn4j:5.0.2'
+
     roborioDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.roborio)
     roborioDebug wpi.java.vendor.jniDebug(wpi.platforms.roborio)
 
