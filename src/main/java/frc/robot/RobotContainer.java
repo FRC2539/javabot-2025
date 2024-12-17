@@ -34,14 +34,17 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    private Auto auto = new Auto(drivetrain);
+    public Auto auto = new Auto(drivetrain);
 
     // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
     public RobotContainer() {
-        configureBindings();    
+        configureBindings();
+
+        drivetrain.setUpPathPlanner();
+         // Establish the "Trajectory Field" Field2d into the dashboard
     }
 
     private void configureBindings() {
