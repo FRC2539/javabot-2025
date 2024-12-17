@@ -6,14 +6,26 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.PathPoint;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.controller.LogitechController;
@@ -44,12 +56,49 @@ public class RobotContainer {
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
+    private final Field2d m_trajectoryField = new Field2d(); // *NEW
     public RobotContainer() {
         configureBindings();
 
         drivetrain.setUpPathPlanner();
-        autoChooser = new LoggedDashboardChooser<>("Auto Routine", AutoBuilder.buildAutoChooser());
+        SmartDashboard.putData("Trajectory Field", m_trajectoryField); // Establish the "Trajectory Field" Field2d into the dashboard
+        var tempAutoChooser = AutoBuilder.buildAutoChooser();
+        tempAutoChooser.onChange((Command command) -> {
+            try
+            {
+                var paths = PathPlannerAuto.getPathGroupFromAutoFile(command.getName()); // A list of all paths contained in this auto
+                List<Pose2d> poses = new ArrayList<>(); // This will be a list of all points during the auto
+
+                for (PathPlannerPath path : paths) { // For each path assigned, split into segments
+                    List<PathPoint> points = path.getAllPathPoints(); 
+                    for (PathPoint point : points) { // For each segment, split into points 
+                        Pose2d newPose2d = new Pose2d(point.position, new Rotation2d());
+                        poses.add(newPose2d);
+                    }
+                }
+
+                // Generate a trajectory from the "poses" list. This is our entire path 
+                // "config" is used for unit conversions; Reference Field2d Widget
+                var m_trajectory = TrajectoryGenerator.generateTrajectory(poses, new TrajectoryConfig(Units.feetToMeters(3.0), Units.feetToMeters(3.0)));
+
+                // Log the trajectory
+                m_trajectoryField.getObject("traj").setTrajectory(m_trajectory);
+                // Log the start and end positions
+                m_trajectoryField.getObject("start_and_end").setPoses(poses.get(0), poses.get(poses.size() -1));
+            }
+            catch (Exception e)
+            {
+                // Fallback in case the path is set to none, or the path file referenced does not exist
+                e.printStackTrace();
+                System.out.println("Pathplanner file not found! Skipping..."); 
+                m_trajectoryField.getObject("traj").setPoses();
+                m_trajectoryField.getObject("start_and_end").setPoses();
+            }
+
+        });
+        SmartDashboard.putData(tempAutoChooser);
         
+        autoChooser = new LoggedDashboardChooser<>("Auto Routine", tempAutoChooser);
     }
 
     private void configureBindings() {
