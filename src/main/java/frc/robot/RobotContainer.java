@@ -6,10 +6,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-
-
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -38,18 +34,14 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    private final LoggedDashboardChooser<Command> autoChooser;
+    private Auto auto = new Auto(drivetrain);
 
     // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
     public RobotContainer() {
-        configureBindings();
-
-        drivetrain.setUpPathPlanner();
-        autoChooser = new LoggedDashboardChooser<>("Auto Routine", AutoBuilder.buildAutoChooser());
-        
+        configureBindings();    
     }
 
     private void configureBindings() {
@@ -106,8 +98,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        
-        return autoChooser.get();
-        
+        return auto.getAuto();
     }
+
 }
