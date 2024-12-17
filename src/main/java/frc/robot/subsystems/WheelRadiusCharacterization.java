@@ -1,7 +1,9 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.RobotState;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.constants.TunerConstants;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -12,19 +14,23 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+
+import static edu.wpi.first.units.Units.Radians;
+
 import java.util.function.DoubleSupplier;
 
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class WheelRadiusCharacterization extends Command {
     private static final LoggedNetworkNumber characterizationSpeed =
-      new LoggedNetworkNumber("WheelRadiusCharacterization/SpeedRadsPerSec", 0.1);
+      new LoggedNetworkNumber("WheelRadiusCharacterization/SpeedRadsPerSec", 1);
     private static final Pigeon2 pigeon = new Pigeon2(0,"");
-    private double driveBaseRadius = 10;
-    private static DoubleSupplier gyroYawRadSupplier = ()->((pigeon.getYaw().getValueAsDouble() * Math.PI) / 180);
+    private double driveBaseRadius = Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY);
+    private static DoubleSupplier gyroYawRadSupplier = ()->(pigeon.getYaw().refresh().getValue().in(Radians));
 
     private double lastGyroYawRads = 0.0;
-    private double accumGyroYawRads = 0.0;
+    private double initialGyroYawRads = 0.0;
 
     public double currentEffectiveWheelRadius = 0.0;
 
@@ -45,7 +51,11 @@ public class WheelRadiusCharacterization extends Command {
 
     private final CommandSwerveDrivetrain drive;
 
+    private final Timer startTimer  = new Timer();
+
     private double[] startWheelPositions = new double[4];
+
+    private boolean hasntStarted = true;
 
     public WheelRadiusCharacterization(Direction omegaDirection, CommandSwerveDrivetrain drivetrain) {
         this.omegaDirection = omegaDirection;
@@ -57,13 +67,8 @@ public class WheelRadiusCharacterization extends Command {
     
     public void initialize() {
         // Reset
-        lastGyroYawRads = gyroYawRadSupplier.getAsDouble();
-        accumGyroYawRads = 0.0;
-
-        for(int x = 0; x<4 ; x++)
-        {
-            startWheelPositions[x] = drive.getState().ModulePositions[0].distanceMeters;
-        }
+        hasntStarted = true;
+        startTimer.restart();
 
 
 
@@ -73,26 +78,41 @@ public class WheelRadiusCharacterization extends Command {
 
     public void execute()
     {
-        accumGyroYawRads += MathUtil.angleModulus(gyroYawRadSupplier.getAsDouble() - lastGyroYawRads);
-        lastGyroYawRads = gyroYawRadSupplier.getAsDouble();
-
         drive.driveRobotRelative(0, 0, omegaLimiter.calculate(omegaDirection.value * characterizationSpeed.get()));
 
         // Get yaw and wheel positions
-        accumGyroYawRads += MathUtil.angleModulus(gyroYawRadSupplier.getAsDouble() - lastGyroYawRads);
+
+        if (startTimer.hasElapsed(2) && hasntStarted) {
+            initialGyroYawRads = gyroYawRadSupplier.getAsDouble();
+
+            for(int x = 0; x<4 ; x++)
+            {
+                startWheelPositions[x] = drive.getState().ModulePositions[x].distanceMeters / TunerConstants.BackLeft.WheelRadius;
+            }
+
+            hasntStarted = false;
+        }
+
+        if (hasntStarted) return;
+
         lastGyroYawRads = gyroYawRadSupplier.getAsDouble();
+
         double averageWheelPosition = 0.0;
         double[] wheelPositions = new double[4];
         for(int x = 0; x<4 ; x++)
         {
-            wheelPositions[x] = drive.getState().ModulePositions[0].distanceMeters;
+            wheelPositions[x] = drive.getState().ModulePositions[x].distanceMeters / TunerConstants.BackLeft.WheelRadius;
         }
         for (int i = 0; i < 4; i++) {
             averageWheelPosition += Math.abs(wheelPositions[i] - startWheelPositions[i]);
         }
         averageWheelPosition /= 4.0;
 
-        currentEffectiveWheelRadius = (accumGyroYawRads * driveBaseRadius) / averageWheelPosition;
+        currentEffectiveWheelRadius = ((lastGyroYawRads - initialGyroYawRads) * driveBaseRadius) / averageWheelPosition;
+
+        Logger.recordOutput("/Drive/WheelRadiusCalculated", currentEffectiveWheelRadius * 100.0);
+        Logger.recordOutput("/Drive/WheelRadiusGyro", (lastGyroYawRads - initialGyroYawRads) * driveBaseRadius);
+        Logger.recordOutput("/Drive/WheelPosition", averageWheelPosition);
     }
 
    
