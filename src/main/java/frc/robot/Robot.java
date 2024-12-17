@@ -33,7 +33,7 @@ public class Robot extends LoggedRobot {
       Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
       PowerDistribution distribution = new PowerDistribution(1, ModuleType.kRev); // Enables power distribution logging
     } else {
-      setUseTiming(false); // Run as fast as possible
+      setUseTiming(true); // Run as fast as possible
     }
 
     Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may be added.

@@ -22,6 +22,7 @@ import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.TestBase;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -37,6 +38,8 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+
+    public final TestBase newTestBase = new TestBase();
 
     private final LoggedDashboardChooser<Command> autoChooser;
 
@@ -79,16 +82,24 @@ public class RobotContainer {
             point.withModuleDirection(new Rotation2d(-operatorController.getLeftYAxis().get(), -operatorController.getLeftXAxis().get()))
         ));
 
+        operatorController.getX().whileTrue(newTestBase.runReallyReallyReallyReallyReallyReallyReallyFast());
+        newTestBase.setDefaultCommand(newTestBase.zeroBeerForThePolish());
+        
+
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
         operatorController.getBack().and(operatorController.getY()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
         operatorController.getBack().and(operatorController.getX()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
         operatorController.getStart().and(operatorController.getY()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         operatorController.getStart().and(operatorController.getX()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        operatorController.getDPadUp().whileTrue(newTestBase.upTheSpeed());
+        operatorController.getDPadDown().whileTrue(newTestBase.downTheSpeed());
 
         // reset the field-centric heading on left bumper press
         operatorController.getLeftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         operatorController.getRightBumper().onTrue(drivetrain.runOnce(() -> drivetrain.resetPose(new Pose2d())));
+        
+        
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
