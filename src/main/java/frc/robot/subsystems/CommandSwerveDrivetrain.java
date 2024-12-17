@@ -40,6 +40,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.RobotContainer;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -307,6 +308,12 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     public SwerveRequest driveFieldRelative(ChassisSpeeds speeds) {
         ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getState().Pose.getRotation());
         return driveRobotRelative(speeds);
+    }
+
+    public SwerveRequest driveWithFeedforwards(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
+        return m_applyRobotSpeeds.withSpeeds(speeds)
+            .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+            .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons());
     }
 
     /**
