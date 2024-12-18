@@ -6,10 +6,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-
-
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,6 +19,7 @@ import frc.robot.constants.TunerConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.TestBase;
+import frc.robot.subsystems.WheelRadiusCharacterization;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -41,7 +38,7 @@ public class RobotContainer {
 
     public final TestBase newTestBase = new TestBase();
 
-    private final LoggedDashboardChooser<Command> autoChooser;
+    public Auto auto = new Auto(drivetrain);
 
     // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
@@ -51,8 +48,7 @@ public class RobotContainer {
         configureBindings();
 
         drivetrain.setUpPathPlanner();
-        autoChooser = new LoggedDashboardChooser<>("Auto Routine", AutoBuilder.buildAutoChooser());
-        
+         // Establish the "Trajectory Field" Field2d into the dashboard
     }
 
     private void configureBindings() {
@@ -85,6 +81,7 @@ public class RobotContainer {
         operatorController.getX().whileTrue(newTestBase.runReallyReallyReallyReallyReallyReallyReallyFast());
         newTestBase.setDefaultCommand(newTestBase.zeroBeerForThePolish());
         
+        leftDriveController.getTrigger().whileTrue(new WheelRadiusCharacterization(WheelRadiusCharacterization.Direction.CLOCKWISE, drivetrain));
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
@@ -117,8 +114,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        
-        return autoChooser.get();
-        
+        return auto.getAuto();
     }
+
 }

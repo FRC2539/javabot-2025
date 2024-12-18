@@ -40,6 +40,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.RobotContainer;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -293,20 +294,19 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         // Note: it is important to not discretize speeds before or after
         // using the setpoint generator, as it will discretize them for you
         ChassisSpeeds speeds = new ChassisSpeeds(xVelocity, yVelocity, rotationRate);
-        previousSetpoint = setpointGenerator.generateSetpoint(
-            previousSetpoint, // The previous setpoint
-            speeds, // The desired target speeds
-            0.02 // The loop time of the robot code, in seconds
-        );
-        return m_applyRobotSpeeds.withSpeeds(previousSetpoint.robotRelativeSpeeds())
-            .withWheelForceFeedforwardsX(previousSetpoint.feedforwards().robotRelativeForcesXNewtons())
-            .withWheelForceFeedforwardsY(previousSetpoint.feedforwards().robotRelativeForcesYNewtons());
+        return m_applyFieldSpeedsOrbit.withChassisSpeeds(speeds);
             // Method that will drive the robot given target module states
     }
 
     public SwerveRequest driveFieldRelative(ChassisSpeeds speeds) {
         ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getState().Pose.getRotation());
         return driveRobotRelative(speeds);
+    }
+
+    public SwerveRequest driveWithFeedforwards(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
+        return m_applyRobotSpeeds.withSpeeds(speeds)
+            .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+            .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons());
     }
 
     /**
