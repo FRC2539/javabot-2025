@@ -49,7 +49,7 @@ public class Auto {
         Alliance currentAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
         Command currentCommand = autoChooser.get();
 
-        if (previousAuto != currentCommand || (DriverStation.isDisabled() && previousAlliance != currentAlliance)) {
+        if (previousAuto != currentCommand || (!DriverStation.isEnabled() && previousAlliance != currentAlliance)) {
             previousAlliance = currentAlliance;
 
             previousAuto = currentCommand;
