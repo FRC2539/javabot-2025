@@ -147,30 +147,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             e.printStackTrace();
         }
 
-        AutoBuilder.configure(
-            this::getRobotPose,
-            this::resetPose,  
-            this::getChassisSpeeds, 
-            (speeds, feedforwards) -> setControl(
-                    m_applyRobotSpeeds.withSpeeds(speeds)
-                        .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
-                        .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
-                ),
-            new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                    new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-                    new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
-            ), 
-            config,
-            () -> {
-                // Boolean supplier that controls when the path will be mirrored for the red alliance
-                Optional<Alliance> alliance = DriverStation.getAlliance();
-                if (alliance.isPresent()) {
-                    return alliance.get() == DriverStation.Alliance.Red;
-                }
-                return false;
-            },
-            this
-        );
     }
 
     public Pose2d getRobotPose() {
