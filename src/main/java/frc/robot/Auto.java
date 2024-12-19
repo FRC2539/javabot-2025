@@ -13,6 +13,8 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.PathPoint;
+import com.pathplanner.lib.util.FlippingUtil;
+import com.pathplanner.lib.util.PathPlannerLogging;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -56,9 +58,15 @@ public class Auto {
                 List<Pose2d> poses = new ArrayList<>(); // This will be a list of all points during the auto
 
                 for (PathPlannerPath path : paths) { // For each path assigned, split into segments
-                    List<PathPoint> points = path.getAllPathPoints(); 
+                    List<PathPoint> points;
+                    Optional<Alliance> alliance = DriverStation.getAlliance();
+                    if (alliance.isPresent() && alliance.get() == Alliance.Red) {
+                        points = path.flipPath().getAllPathPoints();
+                    } else {
+                        points = path.getAllPathPoints();
+                    }
                     for (PathPoint point : points) { // For each segment, split into points 
-                        Pose2d newPose2d = new Pose2d(point.position, new Rotation2d());
+                        Pose2d newPose2d = new Pose2d(point.position, new Rotation2d());                    
                         poses.add(newPose2d);
                     }
                 }
@@ -70,7 +78,13 @@ public class Auto {
                 // Log the trajectory
                 m_trajectoryField.getObject("traj").setTrajectory(m_trajectory);
                 // Log the start and end positions
-                m_trajectoryField.getObject("start_and_end").setPoses(poses.get(0), poses.get(poses.size() -1));
+
+                Pose2d startingPose = paths.get(0).getStartingHolonomicPose().get();
+                Pose2d endingPose = poses.get(poses.size()-1);
+                endingPose = new Pose2d(endingPose.getX(), endingPose.getY(), paths.get(paths.size()-1).getGoalEndState().rotation());
+
+                m_trajectoryField.getObject("start_and_end").setPoses(startingPose, endingPose);
+              
             }
             catch (Exception e)
             {
@@ -118,6 +132,12 @@ public class Auto {
             },
             drivetrain
         );
+
+        // Logging callback for target robot pose
+        PathPlannerLogging.setLogTargetPoseCallback((pose) -> {
+            // Do whatever you want with the pose here
+            m_trajectoryField.getObject("Robot").setPose(pose);
+        });
     }
 }
 
