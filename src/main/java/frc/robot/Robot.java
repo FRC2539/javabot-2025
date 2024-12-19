@@ -26,9 +26,9 @@ public class Robot extends LoggedRobot {
     Logger.recordMetadata("ProjectName", "JavaBot-2025"); // Set a metadata value
 
     if (isReal()) {
-      Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs")
-      Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
-      PowerDistribution distribution = new PowerDistribution(1, ModuleType.kRev); // Enables power distribution logging
+      // Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs")
+      // Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
+      // PowerDistribution distribution = new PowerDistribution(1, ModuleType.kRev); // Enables power distribution logging
     } else {
       setUseTiming(true); // Run as fast as possible
       Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
