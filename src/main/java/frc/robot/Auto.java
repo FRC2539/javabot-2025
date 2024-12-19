@@ -13,6 +13,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.PathPoint;
+import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 import com.pathplanner.lib.util.FlippingUtil;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
@@ -32,6 +33,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 public class Auto {
     private final LoggedDashboardChooser<Command> autoChooser;
     private Command previousAuto = Commands.none();
+    private Alliance previousAlliance = Alliance.Blue;
     private RobotConfig config; // PathPlanner robot configuration
 
     // *NEW
@@ -44,55 +46,66 @@ public class Auto {
     }
 
     public void logAutoInformation() {
-        if (previousAuto == autoChooser.get()) {
-            return;
-        }
+        Alliance currentAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
+        Command currentCommand = autoChooser.get();
 
-        previousAuto = autoChooser.get();
+        if (previousAuto != currentCommand || (DriverStation.isDisabled() && previousAlliance != currentAlliance)) {
+            previousAlliance = currentAlliance;
 
-        Command command = previousAuto;
-        {
-            try
+            previousAuto = currentCommand;
+
+            Command command = previousAuto;
+            Optional<Alliance> alliance = DriverStation.getAlliance();
             {
-                var paths = PathPlannerAuto.getPathGroupFromAutoFile(command.getName()); // A list of all paths contained in this auto
-                List<Pose2d> poses = new ArrayList<>(); // This will be a list of all points during the auto
-
-                for (PathPlannerPath path : paths) { // For each path assigned, split into segments
-                    List<PathPoint> points;
-                    Optional<Alliance> alliance = DriverStation.getAlliance();
+                try
+                {
+                    var paths = PathPlannerAuto.getPathGroupFromAutoFile(command.getName());
+                    
                     if (alliance.isPresent() && alliance.get() == Alliance.Red) {
-                        points = path.flipPath().getAllPathPoints();
-                    } else {
-                        points = path.getAllPathPoints();
+                        for (int i = 0; i < paths.size(); i++) {
+                            paths.set(i, paths.get(i).flipPath());
+                        }
                     }
-                    for (PathPoint point : points) { // For each segment, split into points 
-                        Pose2d newPose2d = new Pose2d(point.position, new Rotation2d());                    
-                        poses.add(newPose2d);
+
+                    var trajectories = new PathPlannerTrajectory[paths.size()];
+
+                    for (int i = 0; i < trajectories.length; i++) {
+                        trajectories[i] = paths.get(i).getIdealTrajectory(config).get();
                     }
+
+                    // A list of all paths contained in this auto
+                    List<Pose2d> poses = new ArrayList<>(); // This will be a list of all points during the auto
+
+                    for (var path : trajectories) { // For each path assigned, split into segments
+                        for (var point : path.getStates()) { // For each segment, split into points 
+                            poses.add(point.pose);
+                        }
+                    }
+
+                    // Generate a trajectory from the "poses" list. This is our entire path 
+                    // "config" is used for unit conversions; Reference Field2d Widget
+                    var m_trajectory = TrajectoryGenerator.generateTrajectory(poses, new TrajectoryConfig(Units.feetToMeters(3.0), Units.feetToMeters(3.0)));
+
+                    // Log the trajectory
+                    m_trajectoryField.getObject("traj").setTrajectory(m_trajectory);
+                    // Log the start and end positions
+
+                    Pose2d startingPose = trajectories[0].getInitialPose();
+                    Pose2d endingPose = trajectories[trajectories.length-1].getEndState().pose;
+
+                    m_trajectoryField.getObject("start_and_end").setPoses(startingPose, endingPose);
+
+                    System.out.println("Pathplanner auto successfully shared."); 
+                
                 }
-
-                // Generate a trajectory from the "poses" list. This is our entire path 
-                // "config" is used for unit conversions; Reference Field2d Widget
-                var m_trajectory = TrajectoryGenerator.generateTrajectory(poses, new TrajectoryConfig(Units.feetToMeters(3.0), Units.feetToMeters(3.0)));
-
-                // Log the trajectory
-                m_trajectoryField.getObject("traj").setTrajectory(m_trajectory);
-                // Log the start and end positions
-
-                Pose2d startingPose = paths.get(0).getStartingHolonomicPose().get();
-                Pose2d endingPose = poses.get(poses.size()-1);
-                endingPose = new Pose2d(endingPose.getX(), endingPose.getY(), paths.get(paths.size()-1).getGoalEndState().rotation());
-
-                m_trajectoryField.getObject("start_and_end").setPoses(startingPose, endingPose);
-              
-            }
-            catch (Exception e)
-            {
-                // Fallback in case the path is set to none, or the path file referenced does not exist
-                e.printStackTrace();
-                System.out.println("Pathplanner file not found! Skipping..."); 
-                m_trajectoryField.getObject("traj").setPoses();
-                m_trajectoryField.getObject("start_and_end").setPoses();
+                catch (Exception e)
+                {
+                    // Fallback in case the path is set to none, or the path file referenced does not exist
+                    e.printStackTrace();
+                    System.out.println("Pathplanner file not found! Skipping..."); 
+                    m_trajectoryField.getObject("traj").setPoses();
+                    m_trajectoryField.getObject("start_and_end").setPoses();
+                }
             }
         }
     }
