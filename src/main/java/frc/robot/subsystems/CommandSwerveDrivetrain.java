@@ -41,6 +41,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.RobotContainer;
+import frc.robot.constants.GlobalConstants;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -140,12 +141,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     private SwerveSetpoint previousSetpoint;
 
     public void setUpPathPlanner() {
-        try {
-            config = RobotConfig.fromGUISettings();
-        } catch (Exception e) {
-            // Handle exception as needed
-            e.printStackTrace();
-        }
+        
 
     }
 
@@ -226,14 +222,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     private FieldOrientedOrbitSwerveRequest generateSwerveSetpointConfig()
     {
-        RobotConfig config;
-        try{
-          config = RobotConfig.fromGUISettings();
-        } catch (Exception e) {
-          // Handle exception as needed
-          e.printStackTrace();
-          throw new RuntimeException("Failed to load robot config from pathplanner.");
-        }
+        RobotConfig config = GlobalConstants.getRobotConfigPathplanner();
 
         setpointGenerator = new SwerveSetpointGenerator(
             config, 
@@ -340,6 +329,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
         Logger.recordOutput("Drive/desiredChassisSpeeds", m_applyFieldSpeedsOrbit.getChassisSpeeds());
         Logger.recordOutput("Drive/setpointChassisSpeeds", m_applyFieldSpeedsOrbit.getPreviousSetpoint().robotRelativeSpeeds());
+        
+        Logger.recordOutput("Drive/desiredWheelSpeeds", getState().Speeds);
     }
 
     private void startSimThread() {

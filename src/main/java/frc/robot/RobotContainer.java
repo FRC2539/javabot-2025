@@ -56,12 +56,12 @@ public class RobotContainer {
             drivetrain.applyRequest(
                 () -> {
                     ChassisSpeeds driverDesiredSpeeds = new ChassisSpeeds(
-                        sps(deadband(leftDriveController.getYAxis().get(), 0.1)) * GlobalConstants.MAX_TRANSLATIONAL_SPEED,
-                        sps(deadband(leftDriveController.getXAxis().get(),0.1)) * GlobalConstants.MAX_TRANSLATIONAL_SPEED,
-                        -sps(deadband(rightDriveController.getXAxis().get(),0.1)) * GlobalConstants.MAX_ROTATIONAL_SPEED
+                        GlobalConstants.MAX_TRANSLATIONAL_SPEED.in(MetersPerSecond) * sps(deadband(leftDriveController.getYAxis().get(), 0.1)),
+                        sps(deadband(leftDriveController.getXAxis().get(),0.1)) * GlobalConstants.MAX_TRANSLATIONAL_SPEED.in(MetersPerSecond),
+                        -sps(deadband(rightDriveController.getXAxis().get(),0.1)) * GlobalConstants.MAX_ROTATIONAL_SPEED.in(RadiansPerSecond)
                     );
-                    // return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(driverDesiredSpeeds);
-                    return drivetrain.m_applyFieldSpeeds.withSpeeds(driverDesiredSpeeds);
+                    return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(driverDesiredSpeeds);
+                    // return drivetrain.m_applyFieldSpeeds.withSpeeds(driverDesiredSpeeds);
                 }
             )
         );
