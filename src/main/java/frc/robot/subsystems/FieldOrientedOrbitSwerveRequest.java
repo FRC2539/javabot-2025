@@ -35,7 +35,7 @@ public class FieldOrientedOrbitSwerveRequest implements SwerveRequest {
     private double forwardYRateLimit = Double.POSITIVE_INFINITY;
     private double backwardYRateLimit = Double.POSITIVE_INFINITY;
 
-    private double timestep = 0.02;
+    private double timestep = 0.004;
 
     private boolean maintainStraightStopping = true;
 

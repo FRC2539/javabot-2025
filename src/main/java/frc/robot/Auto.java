@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.constants.GlobalConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class Auto {
@@ -92,11 +93,7 @@ public class Auto {
     }
 
     public void setUpPathPlanner(CommandSwerveDrivetrain drivetrain) {
-        try {
-            config = RobotConfig.fromGUISettings();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        config = GlobalConstants.getRobotConfigPathplanner();
 
         AutoBuilder.configure(
             drivetrain::getRobotPose,
