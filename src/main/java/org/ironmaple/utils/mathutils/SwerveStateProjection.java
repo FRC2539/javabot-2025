@@ -16,7 +16,8 @@ public class SwerveStateProjection {
         // Get the angle of the swerve module's current direction
         Rotation2d swerveModuleAngle = swerveSpeed.angle;
 
-        // Calculate the cosine of the angle difference between swerve module direction and the desired
+        // Calculate the cosine of the angle difference between swerve module direction and the
+        // desired
         // direction
         double cosTheta = Math.cos(swerveModuleAngle.minus(currentSwerveFacing).getRadians());
 

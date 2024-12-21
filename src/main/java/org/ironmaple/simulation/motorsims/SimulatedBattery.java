@@ -7,7 +7,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -28,38 +27,38 @@ public class SimulatedBattery {
     }
 
     public static void flush() {
-        final double totalCurrentAmps = electricalAppliances.stream()
-                .mapToDouble(currentSupplier -> currentSupplier.get().in(Amps))
-                .sum()
-                / 2.0;
-        
+        final double totalCurrentAmps =
+                electricalAppliances.stream()
+                                .mapToDouble(currentSupplier -> currentSupplier.get().in(Amps))
+                                .sum()
+                        / 2.0;
+
         SmartDashboard.putNumber("BatterySim/TotalCurrentAmps", totalCurrentAmps);
         batteryVoltageVolts = BatterySim.calculateDefaultBatteryLoadedVoltage(totalCurrentAmps);
-        
+
         if (Double.isNaN(batteryVoltageVolts) || batteryVoltageVolts < 0) {
             batteryVoltageVolts = 12.0;
             DriverStation.reportError(
-                "[MapleSim] Internal Library Error: Calculated battery voltage is invalid" +
-                    "(reverting to max robotcontroller voltage)",
-                false
-            );
+                    "[MapleSim] Internal Library Error: Calculated battery voltage is invalid"
+                            + "(reverting to max robotcontroller voltage)",
+                    false);
         }
-        
+
         RoboRioSim.setVInVoltage(batteryVoltageVolts);
     }
 
     public static Voltage getBatteryVoltage() {
         return Volts.of(batteryVoltageVolts);
     }
-    
+
     /**
      * Clamps the voltage to be a voltage between - battery voltage and + battery voltage.
+     *
      * @param voltage
      * @return
      */
     public static Voltage clamp(Voltage voltage) {
         return Volts.of(
-            MathUtil.clamp(voltage.in(Volts), -batteryVoltageVolts, batteryVoltageVolts)
-        );
+                MathUtil.clamp(voltage.in(Volts), -batteryVoltageVolts, batteryVoltageVolts));
     }
 }

@@ -1,8 +1,6 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.pathplanner.lib.config.RobotConfig;
-
 import frc.robot.constants.TunerConstants;
 
 public class SwerveConstantsUtil {
@@ -25,5 +23,4 @@ public class SwerveConstantsUtil {
         }
         return config;
     }
-
 }

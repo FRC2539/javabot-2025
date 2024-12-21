@@ -20,17 +20,20 @@ public class FieldMirroringUtils {
     public static Rotation2d toCurrentAllianceRotation(Rotation2d rotationAtBlueSide) {
         final Rotation2d yAxis = Rotation2d.fromDegrees(90),
                 differenceFromYAxisAtBlueSide = rotationAtBlueSide.minus(yAxis),
-                differenceFromYAxisNew = differenceFromYAxisAtBlueSide.times(isSidePresentedAsRed() ? -1 : 1);
+                differenceFromYAxisNew =
+                        differenceFromYAxisAtBlueSide.times(isSidePresentedAsRed() ? -1 : 1);
         return yAxis.rotateBy(differenceFromYAxisNew);
     }
 
     public static Translation2d toCurrentAllianceTranslation(Translation2d translationAtBlueSide) {
         if (isSidePresentedAsRed())
-            return new Translation2d(FIELD_WIDTH - translationAtBlueSide.getX(), translationAtBlueSide.getY());
+            return new Translation2d(
+                    FIELD_WIDTH - translationAtBlueSide.getX(), translationAtBlueSide.getY());
         return translationAtBlueSide;
     }
 
-    public static Translation3d toCurrentAllianceTranslation(Translation3d translation3dAtBlueSide) {
+    public static Translation3d toCurrentAllianceTranslation(
+            Translation3d translation3dAtBlueSide) {
         final Translation2d translation3dAtCurrentAlliance =
                 toCurrentAllianceTranslation(translation3dAtBlueSide.toTranslation2d());
         if (isSidePresentedAsRed())

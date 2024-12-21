@@ -19,13 +19,14 @@ import org.ironmaple.utils.mathutils.GeometryConvertor;
  *
  * <h1>Simulates a Game Piece on the Field.</h1>
  *
- * <p>This class simulates a game piece on the field, which has a collision space and interacts with other objects.
+ * <p>This class simulates a game piece on the field, which has a collision space and interacts with
+ * other objects.
  *
  * <p>Game pieces can be "grabbed" by an {@link IntakeSimulation}.
  *
- * <p>For the simulation to actually run, every instance must be added to a
- * {@link org.ironmaple.simulation.SimulatedArena} through
- * {@link SimulatedArena#addGamePiece(GamePieceOnFieldSimulation)}.
+ * <p>For the simulation to actually run, every instance must be added to a {@link
+ * org.ironmaple.simulation.SimulatedArena} through {@link
+ * SimulatedArena#addGamePiece(GamePieceOnFieldSimulation)}.
  */
 public class GamePieceOnFieldSimulation extends Body {
     public static final double LINEAR_DAMPING = 3.5,
@@ -39,11 +40,14 @@ public class GamePieceOnFieldSimulation extends Body {
      *
      * <h2>Supplier of the Current Z-Pose (Height) of the Game Piece.</h2>
      *
-     * <p>Normally, the height is fixed at half the thickness of the game piece to simulate it being "on the ground."
+     * <p>Normally, the height is fixed at half the thickness of the game piece to simulate it being
+     * "on the ground."
      *
-     * <p>If the game piece is flying at a low height, the height is calculated using the law of free-fall.
+     * <p>If the game piece is flying at a low height, the height is calculated using the law of
+     * free-fall.
      */
     private final DoubleSupplier zPositionSupplier;
+
     /**
      *
      *
@@ -65,7 +69,11 @@ public class GamePieceOnFieldSimulation extends Body {
      * @param initialPosition the initial position of the game piece on the field
      */
     public GamePieceOnFieldSimulation(
-            String type, Convex shape, double gamePieceHeight, double mass, Translation2d initialPosition) {
+            String type,
+            Convex shape,
+            double gamePieceHeight,
+            double mass,
+            Translation2d initialPosition) {
         this(type, shape, () -> gamePieceHeight / 2, mass, initialPosition, new Translation2d());
     }
 
@@ -138,7 +146,8 @@ public class GamePieceOnFieldSimulation extends Body {
      *
      * <h2>Obtains a 3d pose of the game piece.</h2>
      *
-     * <p>The 3d position is calculated from both the {@link #getPoseOnField()} and {@link #zPositionSupplier}
+     * <p>The 3d position is calculated from both the {@link #getPoseOnField()} and {@link
+     * #zPositionSupplier}
      *
      * @return the 3d position of the game piece
      */

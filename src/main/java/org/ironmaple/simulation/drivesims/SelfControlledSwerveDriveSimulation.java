@@ -25,10 +25,11 @@ import org.ironmaple.utils.mathutils.SwerveStateProjection;
  *
  * <h1>An easier way to simulate swerve drive.</h1>
  *
- * <p>Check <a href='https://shenzhen-robotics-alliance.github.io/maple-sim/swerve-sim-easy/'>Online Documentation</a>
+ * <p>Check <a href='https://shenzhen-robotics-alliance.github.io/maple-sim/swerve-sim-easy/'>Online
+ * Documentation</a>
  *
- * <p>This class owns and controls a {@link SwerveDriveSimulation}, running closed loops/open loops on the simulated
- * motors.
+ * <p>This class owns and controls a {@link SwerveDriveSimulation}, running closed loops/open loops
+ * on the simulated motors.
  *
  * <p>It works identically to how the real swerve simulation code.
  *
@@ -46,11 +47,11 @@ public class SelfControlledSwerveDriveSimulation {
      *
      * <h2>Default Constructor.</h2>
      *
-     * <p>Constructs a simplified swerve simulation with default standard deviations for odometry & vision pose
-     * estimates.
+     * <p>Constructs a simplified swerve simulation with default standard deviations for odometry &
+     * vision pose estimates.
      *
-     * <p>Odometry is simulated as high-frequency odometry, assuming a robot period of 0.02 seconds and an odometry
-     * frequency of 250 Hz.
+     * <p>Odometry is simulated as high-frequency odometry, assuming a robot period of 0.02 seconds
+     * and an odometry frequency of 250 Hz.
      *
      * @param swerveDriveSimulation the {@link SwerveDriveSimulation} to control.
      */
@@ -63,8 +64,8 @@ public class SelfControlledSwerveDriveSimulation {
      *
      * <h2>Constructs an instance with given odometry standard deviations.</h2>
      *
-     * <p>Constructs a simplified swerve simulation with specified standard deviations for odometry & vision pose
-     * estimates.
+     * <p>Constructs a simplified swerve simulation with specified standard deviations for odometry
+     * & vision pose estimates.
      *
      * @param swerveDriveSimulation the {@link SwerveDriveSimulation} to control.
      * @param stateStdDevs the standard deviations for odometry encoders.
@@ -75,19 +76,21 @@ public class SelfControlledSwerveDriveSimulation {
             Matrix<N3, N1> stateStdDevs,
             Matrix<N3, N1> visionMeasurementStdDevs) {
         this.swerveDriveSimulation = swerveDriveSimulation;
-        this.moduleSimulations = Arrays.stream(swerveDriveSimulation.getModules())
-                .map(SelfControlledModuleSimulation::new)
-                .toArray(SelfControlledModuleSimulation[]::new);
+        this.moduleSimulations =
+                Arrays.stream(swerveDriveSimulation.getModules())
+                        .map(SelfControlledModuleSimulation::new)
+                        .toArray(SelfControlledModuleSimulation[]::new);
 
         this.kinematics = swerveDriveSimulation.kinematics;
 
-        this.poseEstimator = new SwerveDrivePoseEstimator(
-                kinematics,
-                getRawGyroAngle(),
-                getLatestModulePositions(),
-                getActualPoseInSimulationWorld(),
-                stateStdDevs,
-                visionMeasurementStdDevs);
+        this.poseEstimator =
+                new SwerveDrivePoseEstimator(
+                        kinematics,
+                        getRawGyroAngle(),
+                        getLatestModulePositions(),
+                        getActualPoseInSimulationWorld(),
+                        stateStdDevs,
+                        visionMeasurementStdDevs);
 
         this.setPointsOptimized = new SwerveModuleState[moduleSimulations.length];
         Arrays.fill(setPointsOptimized, new SwerveModuleState());
@@ -98,7 +101,8 @@ public class SelfControlledSwerveDriveSimulation {
      *
      * <h2>Periodic Method for Simplified Swerve Sim.</h2>
      *
-     * <p>Call this method in the {@link edu.wpi.first.wpilibj2.command.Subsystem#periodic()} of your swerve subsystem.
+     * <p>Call this method in the {@link edu.wpi.first.wpilibj2.command.Subsystem#periodic()} of
+     * your swerve subsystem.
      *
      * <p>Updates the odometry by fetching cached inputs.
      */
@@ -135,8 +139,8 @@ public class SelfControlledSwerveDriveSimulation {
      *
      * <p>This simulates high-frequency odometry.
      *
-     * <p>The module positions, or the value of {@link #getLatestModulePositions()} are cached in every simulation
-     * sub-tick.
+     * <p>The module positions, or the value of {@link #getLatestModulePositions()} are cached in
+     * every simulation sub-tick.
      *
      * <p>The array is ordered in a [timeStampIndex][moduleIndex] format.
      *
@@ -146,16 +150,22 @@ public class SelfControlledSwerveDriveSimulation {
      */
     public SwerveModulePosition[][] getCachedModulePositions() {
         final SwerveModulePosition[][] cachedModulePositions =
-                new SwerveModulePosition[SimulatedArena.getSimulationSubTicksIn1Period()][moduleSimulations.length];
+                new SwerveModulePosition[SimulatedArena.getSimulationSubTicksIn1Period()]
+                        [moduleSimulations.length];
 
         for (int moduleIndex = 0; moduleIndex < moduleSimulations.length; moduleIndex++) {
-            final Angle[] wheelPosition = moduleSimulations[moduleIndex].instance.getCachedDriveWheelFinalPositions();
+            final Angle[] wheelPosition =
+                    moduleSimulations[moduleIndex].instance.getCachedDriveWheelFinalPositions();
             final Rotation2d[] swerveModuleFacings =
                     moduleSimulations[moduleIndex].instance.getCachedSteerAbsolutePositions();
-            for (int timeStamp = 0; timeStamp < SimulatedArena.getSimulationSubTicksIn1Period(); timeStamp++)
-                cachedModulePositions[timeStamp][moduleIndex] = new SwerveModulePosition(
-                        wheelPosition[timeStamp].in(Radians) * moduleSimulations[0].instance.WHEEL_RADIUS.in(Meters),
-                        swerveModuleFacings[timeStamp]);
+            for (int timeStamp = 0;
+                    timeStamp < SimulatedArena.getSimulationSubTicksIn1Period();
+                    timeStamp++)
+                cachedModulePositions[timeStamp][moduleIndex] =
+                        new SwerveModulePosition(
+                                wheelPosition[timeStamp].in(Radians)
+                                        * moduleSimulations[0].instance.WHEEL_RADIUS.in(Meters),
+                                swerveModuleFacings[timeStamp]);
         }
 
         return cachedModulePositions;
@@ -166,13 +176,15 @@ public class SelfControlledSwerveDriveSimulation {
      *
      * <h2>Obtains the raw angle of the gyro.</h2>
      *
-     * <p>Note that the simulated gyro also drifts/skids like real gyros, especially if the robot collides.
+     * <p>Note that the simulated gyro also drifts/skids like real gyros, especially if the robot
+     * collides.
      *
-     * <p>To obtain the facing of the robot retrieved from the odometry, use {@link #getOdometryEstimatedPose()}; to
-     * obtain the actual facing of the robot, use {@link #getActualPoseInSimulationWorld()}.
+     * <p>To obtain the facing of the robot retrieved from the odometry, use {@link
+     * #getOdometryEstimatedPose()}; to obtain the actual facing of the robot, use {@link
+     * #getActualPoseInSimulationWorld()}.
      *
-     * @deprecated This rotation is <strong>NOT</strong> the actual facing of the robot; it is uncalibrated and is only
-     *     used for features like rotation lock.
+     * @deprecated This rotation is <strong>NOT</strong> the actual facing of the robot; it is
+     *     uncalibrated and is only used for features like rotation lock.
      * @return the raw (uncalibrated) angle of the simulated gyro.
      */
     @Deprecated
@@ -191,11 +203,11 @@ public class SelfControlledSwerveDriveSimulation {
      *
      * <p>This represents the estimated position of the robot.
      *
-     * <p>Note that this estimation includes realistic simulations of measurement errors due to skidding and odometry
-     * drift.
+     * <p>Note that this estimation includes realistic simulations of measurement errors due to
+     * skidding and odometry drift.
      *
-     * <p>To obtain the ACTUAL pose of the robot, with no measurement errors, use
-     * {@link #getActualPoseInSimulationWorld()}.
+     * <p>To obtain the ACTUAL pose of the robot, with no measurement errors, use {@link
+     * #getActualPoseInSimulationWorld()}.
      */
     public Pose2d getOdometryEstimatedPose() {
         return poseEstimator.getEstimatedPosition();
@@ -206,8 +218,8 @@ public class SelfControlledSwerveDriveSimulation {
      *
      * <h2>Resets the odometry to a specified position.</h2>
      *
-     * <p>This method wraps around {@link SwerveDrivePoseEstimator#resetPosition(Rotation2d, SwerveModulePosition[],
-     * Pose2d)}.
+     * <p>This method wraps around {@link SwerveDrivePoseEstimator#resetPosition(Rotation2d,
+     * SwerveModulePosition[], Pose2d)}.
      *
      * <p>It resets the position of the pose estimator to the given pose.
      *
@@ -222,10 +234,11 @@ public class SelfControlledSwerveDriveSimulation {
      *
      * <h2>Adds a vision estimation to the pose estimator.</h2>
      *
-     * <p>This method wraps around {@link SwerveDrivePoseEstimator#addVisionMeasurement(Pose2d, double)}.
+     * <p>This method wraps around {@link SwerveDrivePoseEstimator#addVisionMeasurement(Pose2d,
+     * double)}.
      *
-     * <p>Adds a vision measurement to the Kalman Filter, correcting the odometry pose estimate while accounting for
-     * measurement noise.
+     * <p>Adds a vision measurement to the Kalman Filter, correcting the odometry pose estimate
+     * while accounting for measurement noise.
      *
      * @param robotPoseMeters The pose of the robot as measured by the vision camera.
      * @param timeStampSeconds The timestamp of the vision measurement, in seconds.
@@ -239,19 +252,22 @@ public class SelfControlledSwerveDriveSimulation {
      *
      * <h2>Adds a vision estimation to the pose estimator.</h2>
      *
-     * <p>This method wraps around {@link SwerveDrivePoseEstimator#addVisionMeasurement(Pose2d, double, Matrix)}.
+     * <p>This method wraps around {@link SwerveDrivePoseEstimator#addVisionMeasurement(Pose2d,
+     * double, Matrix)}.
      *
-     * <p>Adds a vision measurement to the Kalman Filter, correcting the odometry pose estimate while accounting for
-     * measurement noise.
+     * <p>Adds a vision measurement to the Kalman Filter, correcting the odometry pose estimate
+     * while accounting for measurement noise.
      *
      * @param robotPoseMeters The pose of the robot as measured by the vision camera.
      * @param timeStampSeconds The timestamp of the vision measurement, in seconds.
-     * @param measurementStdDevs Standard deviations of the vision pose measurement (x position in meters, y position in
-     *     meters, and heading in radians). Increase these values to reduce the trust in the vision pose measurement.
+     * @param measurementStdDevs Standard deviations of the vision pose measurement (x position in
+     *     meters, y position in meters, and heading in radians). Increase these values to reduce
+     *     the trust in the vision pose measurement.
      */
     public void addVisionEstimation(
             Pose2d robotPoseMeters, double timeStampSeconds, Matrix<N3, N1> measurementStdDevs) {
-        this.poseEstimator.addVisionMeasurement(robotPoseMeters, timeStampSeconds, measurementStdDevs);
+        this.poseEstimator.addVisionMeasurement(
+                robotPoseMeters, timeStampSeconds, measurementStdDevs);
     }
 
     /**
@@ -262,11 +278,12 @@ public class SelfControlledSwerveDriveSimulation {
      * <p>Runs the specified chassis speeds, either robot-centric or field-centric.
      *
      * @param chassisSpeeds The speeds to run, in either robot-centric or field-centric coordinates.
-     * @param centerOfRotationMeters The center of rotation. For example, if you set the center of rotation at one
-     *     corner of the robot and provide a chassis speed that has only a dtheta component, the robot will rotate
-     *     around that corner.
+     * @param centerOfRotationMeters The center of rotation. For example, if you set the center of
+     *     rotation at one corner of the robot and provide a chassis speed that has only a dtheta
+     *     component, the robot will rotate around that corner.
      * @param fieldCentricDrive Whether to execute field-centric drive with the provided speed.
-     * @param discretizeSpeeds Whether to apply {@link ChassisSpeeds#discretize(double)} to the provided speed.
+     * @param discretizeSpeeds Whether to apply {@link ChassisSpeeds#discretize(double)} to the
+     *     provided speed.
      */
     public void runChassisSpeeds(
             ChassisSpeeds chassisSpeeds,
@@ -274,11 +291,17 @@ public class SelfControlledSwerveDriveSimulation {
             boolean fieldCentricDrive,
             boolean discretizeSpeeds) {
         if (fieldCentricDrive)
-            chassisSpeeds.toRobotRelativeSpeeds(getOdometryEstimatedPose().getRotation());
+            chassisSpeeds =
+                    ChassisSpeeds.fromFieldRelativeSpeeds(
+                            chassisSpeeds, getOdometryEstimatedPose().getRotation());
         if (discretizeSpeeds)
-            chassisSpeeds.discretize(
-                    SimulatedArena.getSimulationDt().in(Seconds) * SimulatedArena.getSimulationSubTicksIn1Period());
-        final SwerveModuleState[] setPoints = kinematics.toSwerveModuleStates(chassisSpeeds, centerOfRotationMeters);
+            chassisSpeeds =
+                    ChassisSpeeds.discretize(
+                            chassisSpeeds,
+                            SimulatedArena.getSimulationDt().in(Seconds)
+                                    * SimulatedArena.getSimulationSubTicksIn1Period());
+        final SwerveModuleState[] setPoints =
+                kinematics.toSwerveModuleStates(chassisSpeeds, centerOfRotationMeters);
         runSwerveStates(setPoints);
     }
 
@@ -316,10 +339,12 @@ public class SelfControlledSwerveDriveSimulation {
      *
      * <h2>Obtain the optimized SETPOINTS of the swerve.</h2>
      *
-     * <p>The setpoints are calculated using {@link SwerveDriveKinematics#toSwerveModuleStates(ChassisSpeeds)} in the
-     * most recent call to {@link #runChassisSpeeds(ChassisSpeeds, Translation2d, boolean, boolean)}.
+     * <p>The setpoints are calculated using {@link
+     * SwerveDriveKinematics#toSwerveModuleStates(ChassisSpeeds)} in the most recent call to {@link
+     * #runChassisSpeeds(ChassisSpeeds, Translation2d, boolean, boolean)}.
      *
-     * <p>The setpoints are optimized using {@link SwerveModuleState#optimize(SwerveModuleState, Rotation2d)}.
+     * <p>The setpoints are optimized using {@link SwerveModuleState#optimize(SwerveModuleState,
+     * Rotation2d)}.
      *
      * <p>The order of the swerve modules is: front-left, front-right, back-left, back-right.
      *
@@ -336,12 +361,15 @@ public class SelfControlledSwerveDriveSimulation {
      *
      * <p>The speeds are measured from the simulated swerve modules.
      *
-     * @param useGyroForAngularVelocity Whether to use the gyro for a more accurate angular velocity measurement.
+     * @param useGyroForAngularVelocity Whether to use the gyro for a more accurate angular velocity
+     *     measurement.
      * @return The measured chassis speeds, <strong>field-relative</strong>.
      */
     public ChassisSpeeds getMeasuredSpeedsFieldRelative(boolean useGyroForAngularVelocity) {
         ChassisSpeeds speeds = getMeasuredSpeedsRobotRelative(useGyroForAngularVelocity);
-        speeds.toFieldRelativeSpeeds(getOdometryEstimatedPose().getRotation());
+        speeds =
+                ChassisSpeeds.fromRobotRelativeSpeeds(
+                        speeds, getOdometryEstimatedPose().getRotation());
         return speeds;
     }
 
@@ -352,7 +380,8 @@ public class SelfControlledSwerveDriveSimulation {
      *
      * <p>The speeds are measured from the simulated swerve modules.
      *
-     * @param useGyroForAngularVelocity Whether to use the gyro for a more accurate angular velocity measurement.
+     * @param useGyroForAngularVelocity Whether to use the gyro for a more accurate angular velocity
+     *     measurement.
      * @return The measured chassis speeds, <strong>robot-relative</strong>.
      */
     public ChassisSpeeds getMeasuredSpeedsRobotRelative(boolean useGyroForAngularVelocity) {
@@ -371,7 +400,8 @@ public class SelfControlledSwerveDriveSimulation {
     /**
      *
      *
-     * <h2>Obtain the {@link SwerveDriveSimulation} object controlled by this simplified swerve simulation.</h2>
+     * <h2>Obtain the {@link SwerveDriveSimulation} object controlled by this simplified swerve
+     * simulation.</h2>
      *
      * @return The swerve drive simulation.
      */
@@ -386,8 +416,8 @@ public class SelfControlledSwerveDriveSimulation {
      *
      * <p>Obtains the ACTUAL robot pose with zero measurement error.
      *
-     * <p>To obtain the pose calculated by odometry (where the robot thinks it is), use
-     * {@link #getOdometryEstimatedPose()}.
+     * <p>To obtain the pose calculated by odometry (where the robot thinks it is), use {@link
+     * #getOdometryEstimatedPose()}.
      */
     public Pose2d getActualPoseInSimulationWorld() {
         return swerveDriveSimulation.getSimulatedDriveTrainPose();
@@ -398,7 +428,8 @@ public class SelfControlledSwerveDriveSimulation {
      *
      * <h2>Get the ACTUAL field-relative chassis speeds of the robot.</h2>
      *
-     * <p>Wraps around {@link SwerveDriveSimulation#getDriveTrainSimulatedChassisSpeedsFieldRelative()}.
+     * <p>Wraps around {@link
+     * SwerveDriveSimulation#getDriveTrainSimulatedChassisSpeedsFieldRelative()}.
      *
      * @return the actual chassis speeds in the simulation world, <strong>field-relative</strong>
      */
@@ -411,7 +442,8 @@ public class SelfControlledSwerveDriveSimulation {
      *
      * <h2>Get the ACTUAL robot-relative chassis speeds of the robot.</h2>
      *
-     * <p>Wraps around {@link SwerveDriveSimulation#getDriveTrainSimulatedChassisSpeedsRobotRelative()}.
+     * <p>Wraps around {@link
+     * SwerveDriveSimulation#getDriveTrainSimulatedChassisSpeedsRobotRelative()}.
      *
      * @return the actual chassis speeds in the simulation world, <strong>robot-relative</strong>
      */
@@ -424,8 +456,8 @@ public class SelfControlledSwerveDriveSimulation {
      *
      * <h2>Teleport the robot to a specified location on the simulated field.</h2>
      *
-     * <p>This method moves the drivetrain instantly to the specified location on the field, bypassing any obstacles in
-     * its path.
+     * <p>This method moves the drivetrain instantly to the specified location on the field,
+     * bypassing any obstacles in its path.
      *
      * <p>Wraps around {@link SwerveDriveSimulation#setSimulationWorldPose(Pose2d)}.
      *
@@ -438,11 +470,15 @@ public class SelfControlledSwerveDriveSimulation {
     public SelfControlledSwerveDriveSimulation withSteerPID(PIDController steerController) {
         for (SelfControlledModuleSimulation moduleSimulation : moduleSimulations)
             moduleSimulation.withSteerPID(
-                    new PIDController(steerController.getP(), steerController.getI(), steerController.getD()));
+                    new PIDController(
+                            steerController.getP(),
+                            steerController.getI(),
+                            steerController.getD()));
         return this;
     }
 
-    public SelfControlledSwerveDriveSimulation withCurrentLimits(Current driveCurrentLimit, Current steerCurrentLimit) {
+    public SelfControlledSwerveDriveSimulation withCurrentLimits(
+            Current driveCurrentLimit, Current steerCurrentLimit) {
         for (SelfControlledModuleSimulation moduleSimulation : moduleSimulations)
             moduleSimulation.withCurrentLimits(driveCurrentLimit, steerCurrentLimit);
 
@@ -471,7 +507,8 @@ public class SelfControlledSwerveDriveSimulation {
             return this;
         }
 
-        public SelfControlledModuleSimulation withCurrentLimits(Current driveCurrentLimit, Current steerCurrentLimit) {
+        public SelfControlledModuleSimulation withCurrentLimits(
+                Current driveCurrentLimit, Current steerCurrentLimit) {
             this.driveMotor.withCurrentLimit(driveCurrentLimit);
             this.steerMotor.withCurrentLimit(steerCurrentLimit);
             steerController.enableContinuousInput(-Math.PI, Math.PI);
@@ -483,7 +520,8 @@ public class SelfControlledSwerveDriveSimulation {
          *
          * <h2>Runs the control loops for swerve states on a simulated module.</h2>
          *
-         * <p>Optimizes the set-point using {@link SwerveModuleState#optimize(SwerveModuleState, Rotation2d)}.
+         * <p>Optimizes the set-point using {@link SwerveModuleState#optimize(SwerveModuleState,
+         * Rotation2d)}.
          *
          * <p>Executes a closed-loop control on the swerve module.
          *
@@ -498,14 +536,21 @@ public class SelfControlledSwerveDriveSimulation {
 
         public void runModuleState(SwerveModuleState setPoint) {
             final double
-                    cosProjectedSpeedMPS = SwerveStateProjection.project(setPoint, instance.getSteerAbsoluteFacing()),
-                    driveWheelVelocitySetPointRadPerSec = cosProjectedSpeedMPS / instance.WHEEL_RADIUS.in(Meters);
+                    cosProjectedSpeedMPS =
+                            SwerveStateProjection.project(
+                                    setPoint, instance.getSteerAbsoluteFacing()),
+                    driveWheelVelocitySetPointRadPerSec =
+                            cosProjectedSpeedMPS / instance.WHEEL_RADIUS.in(Meters);
 
-            driveMotor.requestVoltage(instance.driveMotorConfigs.calculateVoltage(
-                    Amps.of(0), RadiansPerSecond.of(driveWheelVelocitySetPointRadPerSec)));
+            driveMotor.requestVoltage(
+                    instance.driveMotorConfigs.calculateVoltage(
+                            Amps.of(0), RadiansPerSecond.of(driveWheelVelocitySetPointRadPerSec)));
 
-            steerMotor.requestVoltage(Volts.of(steerController.calculate(
-                    instance.getSteerAbsoluteFacing().getRadians(), setPoint.angle.getRadians())));
+            steerMotor.requestVoltage(
+                    Volts.of(
+                            steerController.calculate(
+                                    instance.getSteerAbsoluteFacing().getRadians(),
+                                    setPoint.angle.getRadians())));
         }
 
         public SwerveModuleState getMeasuredState() {
@@ -514,43 +559,58 @@ public class SelfControlledSwerveDriveSimulation {
 
         public SwerveModulePosition getModulePosition() {
             return new SwerveModulePosition(
-                    instance.getDriveWheelFinalPosition().in(Radians) * instance.WHEEL_RADIUS.in(Meters),
+                    instance.getDriveWheelFinalPosition().in(Radians)
+                            * instance.WHEEL_RADIUS.in(Meters),
                     instance.getSteerAbsoluteFacing());
         }
     }
 
-    /** @see SwerveDriveSimulation#maxLinearVelocity() */
+    /**
+     * @see SwerveDriveSimulation#maxLinearVelocity()
+     */
     public LinearVelocity maxLinearVelocity() {
         return swerveDriveSimulation.maxLinearVelocity();
     }
 
-    /** @see SwerveDriveSimulation#maxLinearAcceleration() */
+    /**
+     * @see SwerveDriveSimulation#maxLinearAcceleration()
+     */
     public LinearAcceleration maxLinearAcceleration() {
         return swerveDriveSimulation.maxLinearAcceleration();
     }
 
-    /** @see DriveTrainSimulationConfig#trackWidthY() */
+    /**
+     * @see DriveTrainSimulationConfig#trackWidthY()
+     */
     public Distance trackWidthY() {
         return swerveDriveSimulation.config.trackWidthY();
     }
 
-    /** @see DriveTrainSimulationConfig#trackLengthX() */
+    /**
+     * @see DriveTrainSimulationConfig#trackLengthX()
+     */
     public Distance trackLengthX() {
         return swerveDriveSimulation.config.trackLengthX();
     }
 
-    /** @see SwerveDriveSimulation#driveBaseRadius() */
+    /**
+     * @see SwerveDriveSimulation#driveBaseRadius()
+     */
     public Distance driveBaseRadius() {
         return swerveDriveSimulation.config.driveBaseRadius();
     }
 
-    /** @see SwerveDriveSimulation#maxAngularVelocity() */
+    /**
+     * @see SwerveDriveSimulation#maxAngularVelocity()
+     */
     public AngularVelocity maxAngularVelocity() {
         return RadiansPerSecond.of(
                 maxLinearVelocity().in(MetersPerSecond) / driveBaseRadius().in(Meters));
     }
 
-    /** @see SwerveDriveSimulation#maxAngularAcceleration() */
+    /**
+     * @see SwerveDriveSimulation#maxAngularAcceleration()
+     */
     public AngularAcceleration maxAngularAcceleration() {
         return swerveDriveSimulation.maxAngularAcceleration();
     }

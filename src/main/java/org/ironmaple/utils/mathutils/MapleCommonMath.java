@@ -35,12 +35,14 @@ public class MapleCommonMath {
         return Math.copySign(Math.min(Math.abs(value), Math.abs(maxMagnitude)), value);
     }
 
-    public static double linearInterpretationWithBounding(double x1, double y1, double x2, double y2, double x) {
+    public static double linearInterpretationWithBounding(
+            double x1, double y1, double x2, double y2, double x) {
         final double minX = Math.min(x1, x2), maxX = Math.max(x1, x2);
         return linearInterpretation(x1, y1, x2, y2, Math.min(maxX, Math.max(minX, x)));
     }
 
-    public static double linearInterpretation(double x1, double y1, double x2, double y2, double x) {
+    public static double linearInterpretation(
+            double x1, double y1, double x2, double y2, double x) {
         return y1 + (x - x1) * (y2 - y1) / (x2 - x1);
     }
 
@@ -49,13 +51,16 @@ public class MapleCommonMath {
      *
      * <h2>Obtains the angle of a translation, ignores zero translation.</h2>
      *
-     * <p>This prevents the driver-station from throwing a bunch of "x and y components of Rotation2d are zero" warning.
+     * <p>This prevents the driver-station from throwing a bunch of "x and y components of
+     * Rotation2d are zero" warning.
      *
      * @param translation2d the translation
      * @return the angle of the translation, or zero if the translation is zero
      */
     public static Rotation2d getAngle(Translation2d translation2d) {
         final double tooSmall = 1e-6;
-        return translation2d.getNorm() < tooSmall ? Rotation2d.fromDegrees(0) : translation2d.getAngle();
+        return translation2d.getNorm() < tooSmall
+                ? Rotation2d.fromDegrees(0)
+                : translation2d.getAngle();
     }
 }

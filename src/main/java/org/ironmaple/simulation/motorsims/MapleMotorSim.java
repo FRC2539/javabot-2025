@@ -10,8 +10,8 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
  *
  * <h1>{@link edu.wpi.first.wpilibj.simulation.DCMotorSim} with a bit of extra spice.</h1>
  *
- * <p>This class extends the functionality of the original {@link edu.wpi.first.wpilibj.simulation.DCMotorSim} and
- * models the following aspects in addition:
+ * <p>This class extends the functionality of the original {@link
+ * edu.wpi.first.wpilibj.simulation.DCMotorSim} and models the following aspects in addition:
  *
  * <ul>
  *   <li>Motor Controller Closed Loops.
@@ -37,7 +37,8 @@ public class MapleMotorSim {
     public MapleMotorSim(SimMotorConfigs configs) {
         this.configs = configs;
         this.state = new SimMotorState(Radians.zero(), RadiansPerSecond.zero());
-        this.controller = (mechanismAngle, mechanismVelocity, encoderAngle, encoderVelocity) -> Volts.of(0);
+        this.controller =
+                (mechanismAngle, mechanismVelocity, encoderAngle, encoderVelocity) -> Volts.of(0);
         this.appliedVoltage = Volts.zero();
         this.statorCurrent = Amps.zero();
 
@@ -52,14 +53,17 @@ public class MapleMotorSim {
      * <p>This is equivalent to{@link edu.wpi.first.wpilibj.simulation.DCMotorSim#update(double)}.
      */
     public void update(Time dt) {
-        this.appliedVoltage = controller.updateControlSignal(
-                state.mechanismAngularPosition,
-                state.mechanismAngularVelocity,
-                state.mechanismAngularPosition.times(configs.gearing),
-                state.mechanismAngularVelocity.times(configs.gearing));
+        this.appliedVoltage =
+                controller.updateControlSignal(
+                        state.mechanismAngularPosition,
+                        state.mechanismAngularVelocity,
+                        state.mechanismAngularPosition.times(configs.gearing),
+                        state.mechanismAngularVelocity.times(configs.gearing));
         this.appliedVoltage = SimulatedBattery.clamp(appliedVoltage);
-        this.statorCurrent = configs.calculateCurrent(state.mechanismAngularVelocity, appliedVoltage);
-        this.state.step(configs.calculateTorque(statorCurrent), configs.friction, configs.loadMOI, dt);
+        this.statorCurrent =
+                configs.calculateCurrent(state.mechanismAngularVelocity, appliedVoltage);
+        this.state.step(
+                configs.calculateTorque(statorCurrent), configs.friction, configs.loadMOI, dt);
 
         if (state.mechanismAngularPosition.lte(configs.reverseHardwareLimit))
             state = new SimMotorState(configs.reverseHardwareLimit, RadiansPerSecond.zero());
@@ -73,7 +77,8 @@ public class MapleMotorSim {
     }
 
     public SimulatedMotorController.GenericMotorController useSimpleDCMotorController() {
-        return useMotorController(new SimulatedMotorController.GenericMotorController(configs.motor));
+        return useMotorController(
+                new SimulatedMotorController.GenericMotorController(configs.motor));
     }
 
     /**
@@ -81,7 +86,8 @@ public class MapleMotorSim {
      *
      * <h2>Obtains the <strong>final</strong> position of the mechanism.</h2>
      *
-     * <p>This is equivalent to {@link edu.wpi.first.wpilibj.simulation.DCMotorSim#getAngularPosition()}.
+     * <p>This is equivalent to {@link
+     * edu.wpi.first.wpilibj.simulation.DCMotorSim#getAngularPosition()}.
      *
      * @return the angular position of the motor, continuous
      */
@@ -105,7 +111,8 @@ public class MapleMotorSim {
      *
      * <h2>Obtains the <strong>final</strong> velocity of the mechanism.</h2>
      *
-     * <p>This is equivalent to {@link edu.wpi.first.wpilibj.simulation.DCMotorSim#getAngularVelocity()}.
+     * <p>This is equivalent to {@link
+     * edu.wpi.first.wpilibj.simulation.DCMotorSim#getAngularVelocity()}.
      *
      * @return the final angular velocity of the rotter
      */
@@ -129,10 +136,11 @@ public class MapleMotorSim {
      *
      * <h2>Obtains the applied voltage by the motor controller.</h2>
      *
-     * <p>The applied voltage is calculated by the motor controller in the previous call to {@link #update(Time)}
+     * <p>The applied voltage is calculated by the motor controller in the previous call to {@link
+     * #update(Time)}
      *
-     * <p>The motor controller specified by {@link #useMotorController(SimulatedMotorController)} is used to calculate
-     * the applied voltage.
+     * <p>The motor controller specified by {@link #useMotorController(SimulatedMotorController)} is
+     * used to calculate the applied voltage.
      *
      * <p>The applied voltage is also restricted for current limit and battery voltage.
      *

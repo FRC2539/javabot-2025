@@ -9,8 +9,8 @@ import edu.wpi.first.units.measure.*;
  *
  * <h2>Represents the state of a simulated motor at a given point in time.</h2>
  *
- * <p>This record holds the final angular position and velocity of the motor. It is used to track the motor's state
- * during each simulation step.
+ * <p>This record holds the final angular position and velocity of the motor. It is used to track
+ * the motor's state during each simulation step.
  */
 public class SimMotorState {
     public Angle mechanismAngularPosition;
@@ -22,7 +22,8 @@ public class SimMotorState {
      * <h2>Constructs a new sim motor state with initial angle and velocity</h2>
      *
      * @param mechanismAngularPosition the final angular position of the motor, in radians
-     * @param mechanismAngularVelocity the final angular velocity of the motor, in radians per second
+     * @param mechanismAngularVelocity the final angular velocity of the motor, in radians per
+     *     second
      */
     public SimMotorState(Angle mechanismAngularPosition, AngularVelocity mechanismAngularVelocity) {
         this.mechanismAngularPosition = mechanismAngularPosition;
@@ -34,8 +35,8 @@ public class SimMotorState {
      *
      * <h2>Simulates a step in the motor's motion based on the applied forces.</h2>
      *
-     * <p>This method calculates the new angular position and velocity of the motor after applying electric and
-     * frictional torques over a time step.
+     * <p>This method calculates the new angular position and velocity of the motor after applying
+     * electric and frictional torques over a time step.
      *
      * <p>The method follows these steps:
      *
@@ -52,10 +53,17 @@ public class SimMotorState {
      * @param loadMOI the moment of inertia of the load, in kilogram square meters
      * @param dt the time step for the simulation, in seconds
      */
-    public void step(Torque finalElectricTorque, Torque finalFrictionTorque, MomentOfInertia loadMOI, Time dt) {
-        // Step 0: Convert all units to SI units (radians, radians per second, Newton-meters, seconds, kg*m²)
+    public void step(
+            Torque finalElectricTorque,
+            Torque finalFrictionTorque,
+            MomentOfInertia loadMOI,
+            Time dt) {
+        // Step 0: Convert all units to SI units (radians, radians per second, Newton-meters,
+        // seconds,
+        // kg*m²)
         double currentAngularPositionRadians = mechanismAngularPosition.in(Radians);
-        double currentAngularVelocityRadiansPerSecond = mechanismAngularVelocity.in(RadiansPerSecond);
+        double currentAngularVelocityRadiansPerSecond =
+                mechanismAngularVelocity.in(RadiansPerSecond);
         final double electricTorqueNewtonsMeters = finalElectricTorque.in(NewtonMeters);
         final double frictionTorqueNewtonsMeters = finalFrictionTorque.in(NewtonMeters);
         final double loadMOIKgMetersSquared = loadMOI.in(KilogramSquareMeters);
@@ -63,7 +71,8 @@ public class SimMotorState {
 
         // Step 1: Apply electric torque to the angular velocity.
         // The torque causes a change in the angular velocity, according to the moment of inertia.
-        currentAngularVelocityRadiansPerSecond += electricTorqueNewtonsMeters / loadMOIKgMetersSquared * dtSeconds;
+        currentAngularVelocityRadiansPerSecond +=
+                electricTorqueNewtonsMeters / loadMOIKgMetersSquared * dtSeconds;
 
         // Step 2: Calculate the change in angular velocity due to friction.
         // Friction opposes the motion and reduces the angular velocity over time.
@@ -72,8 +81,11 @@ public class SimMotorState {
                         / loadMOIKgMetersSquared
                         * dtSeconds;
 
-        // Step 3: Check if the angular velocity changes direction due to friction, or if it reaches zero.
-        // If friction causes the motor to reverse direction, or if the velocity reaches zero, set the angular velocity
+        // Step 3: Check if the angular velocity changes direction due to friction, or if it reaches
+        // zero.
+        // If friction causes the motor to reverse direction, or if the velocity reaches zero, set
+        // the
+        // angular velocity
         // to zero.
         if ((currentAngularVelocityRadiansPerSecond + deltaAngularVelocityDueToFrictionRadPerSec)
                         * currentAngularVelocityRadiansPerSecond
@@ -85,7 +97,9 @@ public class SimMotorState {
             currentAngularVelocityRadiansPerSecond += deltaAngularVelocityDueToFrictionRadPerSec;
 
         // Step 4: Integrate angular velocity to find the new position.
-        // The new angular position is the current position plus the change in position over the time step.
+        // The new angular position is the current position plus the change in position over the
+        // time
+        // step.
         currentAngularPositionRadians += currentAngularVelocityRadiansPerSecond * dtSeconds;
 
         // Return a new instance with the updated angular position and velocity

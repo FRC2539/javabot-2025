@@ -16,8 +16,9 @@ import org.ironmaple.utils.mathutils.MapleCommonMath;
 /**
  * Simulation for a IMU module used as gyro.
  *
- * <p>The Simulation is basically an indefinite integral of the angular velocity during each simulation sub ticks. Above
- * that, it also musicales the measurement inaccuracy of the gyro, drifting in no-motion and drifting due to impacts.
+ * <p>The Simulation is basically an indefinite integral of the angular velocity during each
+ * simulation sub ticks. Above that, it also musicales the measurement inaccuracy of the gyro,
+ * drifting in no-motion and drifting due to impacts.
  */
 public class GyroSimulation {
     private static final double
@@ -25,7 +26,8 @@ public class GyroSimulation {
             ANGULAR_ACCELERATION_THRESHOLD_START_DRIFTING = 500,
             /* The amount of drift, in radians, that the gyro experiences as a result of each multiple of the angular acceleration threshold. */
             DRIFT_DUE_TO_IMPACT_COEFFICIENT = Math.toRadians(1);
-    private final double AVERAGE_DRIFTING_IN_30_SECS_MOTIONLESS_DEG, VELOCITY_MEASUREMENT_STANDARD_DEVIATION_PERCENT;
+    private final double AVERAGE_DRIFTING_IN_30_SECS_MOTIONLESS_DEG,
+            VELOCITY_MEASUREMENT_STANDARD_DEVIATION_PERCENT;
 
     private Rotation2d gyroReading;
     private double measuredAngularVelocityRadPerSec, previousAngularVelocityRadPerSec;
@@ -36,21 +38,25 @@ public class GyroSimulation {
      *
      * <h2>Creates a Gyro Simulation.</h2>
      *
-     * @param AVERAGE_DRIFTING_IN_30_SECS_MOTIONLESS_DEG the average amount of drift, in degrees, the gyro experiences
-     *     if it remains motionless for 30 seconds on a vibrating platform. This value can often be found in the user
-     *     manual.
-     * @param VELOCITY_MEASUREMENT_STANDARD_DEVIATION_PERCENT the standard deviation of the velocity measurement,
-     *     typically around 0.05
+     * @param AVERAGE_DRIFTING_IN_30_SECS_MOTIONLESS_DEG the average amount of drift, in degrees,
+     *     the gyro experiences if it remains motionless for 30 seconds on a vibrating platform.
+     *     This value can often be found in the user manual.
+     * @param VELOCITY_MEASUREMENT_STANDARD_DEVIATION_PERCENT the standard deviation of the velocity
+     *     measurement, typically around 0.05
      */
     public GyroSimulation(
-            double AVERAGE_DRIFTING_IN_30_SECS_MOTIONLESS_DEG, double VELOCITY_MEASUREMENT_STANDARD_DEVIATION_PERCENT) {
-        this.AVERAGE_DRIFTING_IN_30_SECS_MOTIONLESS_DEG = AVERAGE_DRIFTING_IN_30_SECS_MOTIONLESS_DEG;
-        this.VELOCITY_MEASUREMENT_STANDARD_DEVIATION_PERCENT = VELOCITY_MEASUREMENT_STANDARD_DEVIATION_PERCENT;
+            double AVERAGE_DRIFTING_IN_30_SECS_MOTIONLESS_DEG,
+            double VELOCITY_MEASUREMENT_STANDARD_DEVIATION_PERCENT) {
+        this.AVERAGE_DRIFTING_IN_30_SECS_MOTIONLESS_DEG =
+                AVERAGE_DRIFTING_IN_30_SECS_MOTIONLESS_DEG;
+        this.VELOCITY_MEASUREMENT_STANDARD_DEVIATION_PERCENT =
+                VELOCITY_MEASUREMENT_STANDARD_DEVIATION_PERCENT;
 
         gyroReading = new Rotation2d();
         this.previousAngularVelocityRadPerSec = this.measuredAngularVelocityRadPerSec = 0;
         this.cachedRotations = new ConcurrentLinkedQueue<>();
-        for (int i = 0; i < SimulatedArena.getSimulationSubTicksIn1Period(); i++) cachedRotations.offer(gyroReading);
+        for (int i = 0; i < SimulatedArena.getSimulationSubTicksIn1Period(); i++)
+            cachedRotations.offer(gyroReading);
     }
 
     /**
@@ -61,8 +67,8 @@ public class GyroSimulation {
      * <p>This method sets the current rotation of the gyro, similar to <code>Pigeon2().setYaw()
      * </code>.
      *
-     * <p>After setting the rotation, the gyro will continue to estimate the rotation by integrating the angular
-     * velocity, adding it to the specified rotation.
+     * <p>After setting the rotation, the gyro will continue to estimate the rotation by integrating
+     * the angular velocity, adding it to the specified rotation.
      *
      * @param currentRotation the current rotation of the robot, represented as a {@link Rotation2d}
      */
@@ -75,8 +81,8 @@ public class GyroSimulation {
      *
      * <h2>Obtains the Estimated Rotation of the Gyro.</h2>
      *
-     * <p>This method returns the estimated rotation of the gyro, which includes measurement errors due to drifting and
-     * other factors.
+     * <p>This method returns the estimated rotation of the gyro, which includes measurement errors
+     * due to drifting and other factors.
      *
      * @return the current reading of the gyro, represented as a {@link Rotation2d}
      */
@@ -115,17 +121,19 @@ public class GyroSimulation {
      *
      * <h2>Updates the Gyro Simulation for Each Sub-Tick.</h2>
      *
-     * <p>This method updates the gyro simulation and should be called during every sub-tick of the simulation.
+     * <p>This method updates the gyro simulation and should be called during every sub-tick of the
+     * simulation.
      *
-     * <p>If you are using this class outside of {@link org.ironmaple.simulation.SimulatedArena}: make sure to call it 5
-     * times in each robot period (if using default timings), or refer to
+     * <p>If you are using this class outside of {@link org.ironmaple.simulation.SimulatedArena}:
+     * make sure to call it 5 times in each robot period (if using default timings), or refer to
      * {@link org.ironmaple.simulation.SimulatedArena#overrideSimulationTimings(Time, int)}.
      *
-     * @param actualAngularVelocityRadPerSec the actual angular velocity in radians per second, usually obtained from
-     *     {@link AbstractDriveTrainSimulation#getAngularVelocity()}
+     * @param actualAngularVelocityRadPerSec the actual angular velocity in radians per second,
+     *     usually obtained from {@link AbstractDriveTrainSimulation#getAngularVelocity()}
      */
     public void updateSimulationSubTick(double actualAngularVelocityRadPerSec) {
-        final Rotation2d driftingDueToImpact = getDriftingDueToImpact(actualAngularVelocityRadPerSec);
+        final Rotation2d driftingDueToImpact =
+                getDriftingDueToImpact(actualAngularVelocityRadPerSec);
         gyroReading = gyroReading.plus(driftingDueToImpact);
 
         final Rotation2d dTheta = getGyroDTheta(actualAngularVelocityRadPerSec);
@@ -143,11 +151,11 @@ public class GyroSimulation {
      *
      * <h2>Simulates IMU Drifting Due to Robot Impacts.</h2>
      *
-     * <p>This method generates a random amount of drifting for the IMU if the instantaneous angular acceleration
-     * exceeds a threshold, simulating the effects of impacts on the robot.
+     * <p>This method generates a random amount of drifting for the IMU if the instantaneous angular
+     * acceleration exceeds a threshold, simulating the effects of impacts on the robot.
      *
-     * @param actualAngularVelocityRadPerSec the actual angular velocity in radians per second, used to determine if an
-     *     impact is detected
+     * @param actualAngularVelocityRadPerSec the actual angular velocity in radians per second, used
+     *     to determine if an impact is detected
      * @return the amount of drifting the IMU will experience if an impact is detected, or <code>
      *     Rotation2d.fromRadians(0)</code> if no impact is detected
      */
@@ -157,12 +165,15 @@ public class GyroSimulation {
                         (actualAngularVelocityRadPerSec - previousAngularVelocityRadPerSec)
                                 / SimulatedArena.getSimulationDt().in(Seconds),
                 driftingDueToImpactDegAbsVal =
-                        Math.abs(angularAccelerationRadPerSecSq) > ANGULAR_ACCELERATION_THRESHOLD_START_DRIFTING
+                        Math.abs(angularAccelerationRadPerSecSq)
+                                        > ANGULAR_ACCELERATION_THRESHOLD_START_DRIFTING
                                 ? Math.abs(angularAccelerationRadPerSecSq)
                                         / ANGULAR_ACCELERATION_THRESHOLD_START_DRIFTING
                                         * DRIFT_DUE_TO_IMPACT_COEFFICIENT
                                 : 0,
-                driftingDueToImpactDeg = Math.copySign(driftingDueToImpactDegAbsVal, -angularAccelerationRadPerSecSq);
+                driftingDueToImpactDeg =
+                        Math.copySign(
+                                driftingDueToImpactDegAbsVal, -angularAccelerationRadPerSecSq);
 
         previousAngularVelocityRadPerSec = actualAngularVelocityRadPerSec;
 
@@ -174,21 +185,23 @@ public class GyroSimulation {
      *
      * <h2>Gets the Measured ΔTheta of the Gyro.</h2>
      *
-     * <p>This method simulates the change in the robot's angle (ΔTheta) since the last sub-tick, as measured by the
-     * gyro.
+     * <p>This method simulates the change in the robot's angle (ΔTheta) since the last sub-tick, as
+     * measured by the gyro.
      *
      * <p>The measurement includes random errors based on the configuration of the gyro.
      *
-     * @param actualAngularVelocityRadPerSec the actual angular velocity in radians per second, used to calculate the
-     *     ΔTheta
+     * @param actualAngularVelocityRadPerSec the actual angular velocity in radians per second, used
+     *     to calculate the ΔTheta
      * @return the measured ΔTheta, including any measurement errors
      */
     private Rotation2d getGyroDTheta(double actualAngularVelocityRadPerSec) {
-        this.measuredAngularVelocityRadPerSec = MapleCommonMath.generateRandomNormal(
-                actualAngularVelocityRadPerSec,
-                VELOCITY_MEASUREMENT_STANDARD_DEVIATION_PERCENT * Math.abs(actualAngularVelocityRadPerSec));
-        return Rotation2d.fromRadians(measuredAngularVelocityRadPerSec
-                * SimulatedArena.getSimulationDt().in(Seconds));
+        this.measuredAngularVelocityRadPerSec =
+                MapleCommonMath.generateRandomNormal(
+                        actualAngularVelocityRadPerSec,
+                        VELOCITY_MEASUREMENT_STANDARD_DEVIATION_PERCENT
+                                * Math.abs(actualAngularVelocityRadPerSec));
+        return Rotation2d.fromRadians(
+                measuredAngularVelocityRadPerSec * SimulatedArena.getSimulationDt().in(Seconds));
     }
 
     /**
@@ -196,8 +209,8 @@ public class GyroSimulation {
      *
      * <h2>Generates the No-Motion Gyro Drifting.</h2>
      *
-     * <p>This method simulates the minor drifting of the gyro that occurs regardless of whether the robot is moving or
-     * not.
+     * <p>This method simulates the minor drifting of the gyro that occurs regardless of whether the
+     * robot is moving or not.
      *
      * @return the amount of drifting generated while the robot is not moving
      */
@@ -207,7 +220,8 @@ public class GyroSimulation {
                         this.AVERAGE_DRIFTING_IN_30_SECS_MOTIONLESS_DEG
                                 / 30
                                 * SimulatedArena.getSimulationDt().in(Seconds),
-                driftingInThisPeriod = MapleCommonMath.generateRandomNormal(0, AVERAGE_DRIFTING_1_PERIOD);
+                driftingInThisPeriod =
+                        MapleCommonMath.generateRandomNormal(0, AVERAGE_DRIFTING_1_PERIOD);
 
         return Rotation2d.fromDegrees(driftingInThisPeriod);
     }
@@ -215,8 +229,8 @@ public class GyroSimulation {
     /**
      *
      *
-     * <h2>Creates the Simulation for a <a href="https://store.ctr-electronics.com/pigeon-2/">CTRE Pigeon 2 IMU</a>.
-     * </h2>
+     * <h2>Creates the Simulation for a <a href="https://store.ctr-electronics.com/pigeon-2/">CTRE
+     * Pigeon 2 IMU</a>. </h2>
      *
      * @return a gyro simulation factory configured for the Pigeon 2 IMU
      */
@@ -231,7 +245,8 @@ public class GyroSimulation {
     /**
      *
      *
-     * <h2>Creates the Simulation for a <a href="https://pdocs.kauailabs.com/navx-mxp/">navX2-MXP IMU</a>.</h2>
+     * <h2>Creates the Simulation for a <a href="https://pdocs.kauailabs.com/navx-mxp/">navX2-MXP
+     * IMU</a>.</h2>
      *
      * @return a gyro simulation factory configured for the navX2-MXP IMU
      */

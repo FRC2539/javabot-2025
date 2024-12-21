@@ -32,7 +32,8 @@ public interface SimulatedMotorController {
             return this;
         }
 
-        public GenericMotorController withSoftwareLimits(Angle forwardSoftwareLimit, Angle reverseSoftwareLimit) {
+        public GenericMotorController withSoftwareLimits(
+                Angle forwardSoftwareLimit, Angle reverseSoftwareLimit) {
             this.forwardSoftwareLimit = forwardSoftwareLimit;
             this.reverseSoftwareLimit = reverseSoftwareLimit;
             return this;
@@ -47,8 +48,8 @@ public interface SimulatedMotorController {
          *
          * <h2>(Utility Function) Constrains the Output Voltage of a Motor.</h2>
          *
-         * <p>Constrains the output voltage of a motor such that the <strong>stator</strong> current does not exceed the
-         * current limit
+         * <p>Constrains the output voltage of a motor such that the <strong>stator</strong> current
+         * does not exceed the current limit
          *
          * <p>Prevents motor from exceeding software limits
          *
@@ -72,10 +73,14 @@ public interface SimulatedMotorController {
             // https://file.tavsys.net/control/controls-engineering-in-frc.pdf (sec 12.1.3)
             double limitedVoltage = requestedOutputVoltageVolts;
             final boolean currentTooHigh =
-                    Math.abs(currentAtRequestedVoltageAmps) > (kCurrentThreshold * currentLimitAmps);
+                    Math.abs(currentAtRequestedVoltageAmps)
+                            > (kCurrentThreshold * currentLimitAmps);
             if (currentTooHigh) {
-                final double limitedCurrent = Math.copySign(currentLimitAmps, currentAtRequestedVoltageAmps);
-                limitedVoltage = model.getVoltage(model.getTorque(limitedCurrent), motorCurrentVelocityRadPerSec);
+                final double limitedCurrent =
+                        Math.copySign(currentLimitAmps, currentAtRequestedVoltageAmps);
+                limitedVoltage =
+                        model.getVoltage(
+                                model.getTorque(limitedCurrent), motorCurrentVelocityRadPerSec);
             }
 
             // ensure the current limit doesn't cause an increase to output voltage

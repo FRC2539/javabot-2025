@@ -50,7 +50,9 @@ public final class PhoenixUtil {
 
             this.talonFXSimState = talonFX.getSimState();
             talonFXSimState.Orientation =
-                    motorInverted ? ChassisReference.Clockwise_Positive : ChassisReference.CounterClockwise_Positive;
+                    motorInverted
+                            ? ChassisReference.Clockwise_Positive
+                            : ChassisReference.CounterClockwise_Positive;
         }
 
         @Override
@@ -62,17 +64,23 @@ public final class PhoenixUtil {
             talonFXSimState.setRawRotorPosition(encoderAngle);
             talonFXSimState.setRotorVelocity(encoderVelocity);
             talonFXSimState.setSupplyVoltage(12.0);
-            Logger.recordOutput("CTREMotor/" + id + "/mechanismAngleRad", mechanismAngle.in(Radians));
-            Logger.recordOutput("CTREMotor/" + id + "/mechanismVelRadPerSec", mechanismVelocity.in(RadiansPerSecond));
+            Logger.recordOutput(
+                    "CTREMotor/" + id + "/mechanismAngleRad", mechanismAngle.in(Radians));
+            Logger.recordOutput(
+                    "CTREMotor/" + id + "/mechanismVelRadPerSec",
+                    mechanismVelocity.in(RadiansPerSecond));
             Logger.recordOutput("CTREMotor/" + id + "/encoderAngleRad", encoderAngle.in(Radians));
-            Logger.recordOutput("CTREMotor/" + id + "/encoderVelRadPerSec", encoderVelocity.in(RadiansPerSecond));
+            Logger.recordOutput(
+                    "CTREMotor/" + id + "/encoderVelRadPerSec",
+                    encoderVelocity.in(RadiansPerSecond));
             Voltage output = talonFXSimState.getMotorVoltageMeasure();
             Logger.recordOutput("CTREMotor/" + id + "/outputVoltage", output.in(Volts));
             return output;
         }
     }
 
-    public static class TalonFXMotorControllerWithRemoteCancoderSim  implements SimulatedMotorController {
+    public static class TalonFXMotorControllerWithRemoteCancoderSim
+            implements SimulatedMotorController {
         private final CANcoderSimState remoteCancoderSimState;
         private final Angle encoderOffset;
 
@@ -90,12 +98,15 @@ public final class PhoenixUtil {
 
             this.talonFXSimState = talonFX.getSimState();
             talonFXSimState.Orientation =
-            motorInverted ? ChassisReference.Clockwise_Positive : ChassisReference.CounterClockwise_Positive;
-            
+                    motorInverted
+                            ? ChassisReference.Clockwise_Positive
+                            : ChassisReference.CounterClockwise_Positive;
 
             this.remoteCancoderSimState = cancoder.getSimState();
             this.remoteCancoderSimState.Orientation =
-                    encoderInverted ? ChassisReference.Clockwise_Positive : ChassisReference.CounterClockwise_Positive;
+                    encoderInverted
+                            ? ChassisReference.Clockwise_Positive
+                            : ChassisReference.CounterClockwise_Positive;
             this.encoderOffset = encoderOffset;
         }
 
@@ -105,28 +116,35 @@ public final class PhoenixUtil {
                 AngularVelocity mechanismVelocity,
                 Angle encoderAngle,
                 AngularVelocity encoderVelocity) {
-                talonFXSimState.setRawRotorPosition(mechanismAngle.minus(encoderOffset));
-                talonFXSimState.setRotorVelocity(mechanismVelocity);
-                talonFXSimState.setSupplyVoltage(12.0);
-                Logger.recordOutput("CTREMotor/" + id + "/mechanismAngleRad", mechanismAngle.in(Radians));
-                Logger.recordOutput("CTREMotor/" + id + "/mechanismVelRadPerSec", mechanismVelocity.in(RadiansPerSecond));
-                Logger.recordOutput("CTREMotor/" + id + "/encoderAngleRad", encoderAngle.in(Radians));
-                Logger.recordOutput("CTREMotor/" + id + "/encoderVelRadPerSec", encoderVelocity.in(RadiansPerSecond));
-                remoteCancoderSimState.setRawPosition(mechanismAngle.minus(encoderOffset));
-                remoteCancoderSimState.setVelocity(mechanismVelocity);
-                Voltage output = talonFXSimState.getMotorVoltageMeasure();
-                Logger.recordOutput("CTREMotor/" + id + "/outputVoltage", output.in(Volts));
+            talonFXSimState.setRawRotorPosition(mechanismAngle.minus(encoderOffset));
+            talonFXSimState.setRotorVelocity(mechanismVelocity);
+            talonFXSimState.setSupplyVoltage(12.0);
+            Logger.recordOutput(
+                    "CTREMotor/" + id + "/mechanismAngleRad", mechanismAngle.in(Radians));
+            Logger.recordOutput(
+                    "CTREMotor/" + id + "/mechanismVelRadPerSec",
+                    mechanismVelocity.in(RadiansPerSecond));
+            Logger.recordOutput("CTREMotor/" + id + "/encoderAngleRad", encoderAngle.in(Radians));
+            Logger.recordOutput(
+                    "CTREMotor/" + id + "/encoderVelRadPerSec",
+                    encoderVelocity.in(RadiansPerSecond));
+            remoteCancoderSimState.setRawPosition(mechanismAngle.minus(encoderOffset));
+            remoteCancoderSimState.setVelocity(mechanismVelocity);
+            Voltage output = talonFXSimState.getMotorVoltageMeasure();
+            Logger.recordOutput("CTREMotor/" + id + "/outputVoltage", output.in(Volts));
 
-                return output;
+            return output;
         }
     }
 
     public static double[] getSimulationOdometryTimeStamps() {
-        final double[] odometryTimeStamps = new double[SimulatedArena.getSimulationSubTicksIn1Period()];
+        final double[] odometryTimeStamps =
+                new double[SimulatedArena.getSimulationSubTicksIn1Period()];
         for (int i = 0; i < odometryTimeStamps.length; i++) {
-            odometryTimeStamps[i] = Timer.getFPGATimestamp()
-                    - 0.02
-                    + i * SimulatedArena.getSimulationDt().in(Seconds);
+            odometryTimeStamps[i] =
+                    Timer.getFPGATimestamp()
+                            - 0.02
+                            + i * SimulatedArena.getSimulationDt().in(Seconds);
         }
 
         return odometryTimeStamps;

@@ -31,48 +31,65 @@ public class Arena2024Crescendo extends SimulatedArena {
             super.addBorderLine(new Translation2d(0, 8.12), new Translation2d(FIELD_WIDTH, 8.12));
 
             // righter wall
-            super.addBorderLine(new Translation2d(FIELD_WIDTH, 1), new Translation2d(FIELD_WIDTH, 4.51));
-            super.addBorderLine(new Translation2d(FIELD_WIDTH, 4.51), new Translation2d(FIELD_WIDTH - 0.9, 5));
-            super.addBorderLine(new Translation2d(FIELD_WIDTH - 0.9, 5), new Translation2d(FIELD_WIDTH - 0.9, 6.05));
-            super.addBorderLine(new Translation2d(FIELD_WIDTH - 0.9, 6.05), new Translation2d(FIELD_WIDTH, 6.5));
-            super.addBorderLine(new Translation2d(FIELD_WIDTH, 6.5), new Translation2d(FIELD_WIDTH, 8.2));
+            super.addBorderLine(
+                    new Translation2d(FIELD_WIDTH, 1), new Translation2d(FIELD_WIDTH, 4.51));
+            super.addBorderLine(
+                    new Translation2d(FIELD_WIDTH, 4.51), new Translation2d(FIELD_WIDTH - 0.9, 5));
+            super.addBorderLine(
+                    new Translation2d(FIELD_WIDTH - 0.9, 5),
+                    new Translation2d(FIELD_WIDTH - 0.9, 6.05));
+            super.addBorderLine(
+                    new Translation2d(FIELD_WIDTH - 0.9, 6.05),
+                    new Translation2d(FIELD_WIDTH, 6.5));
+            super.addBorderLine(
+                    new Translation2d(FIELD_WIDTH, 6.5), new Translation2d(FIELD_WIDTH, 8.2));
 
             // lower wall
-            super.addBorderLine(new Translation2d(1.92, 0), new Translation2d(FIELD_WIDTH - 1.92, 0));
+            super.addBorderLine(
+                    new Translation2d(1.92, 0), new Translation2d(FIELD_WIDTH - 1.92, 0));
 
             // red source wall
             super.addBorderLine(new Translation2d(1.92, 0), new Translation2d(0, 1));
 
             // blue source wall
-            super.addBorderLine(new Translation2d(FIELD_WIDTH - 1.92, 0), new Translation2d(FIELD_WIDTH, 1));
+            super.addBorderLine(
+                    new Translation2d(FIELD_WIDTH - 1.92, 0), new Translation2d(FIELD_WIDTH, 1));
 
             // blue state
             super.addRectangularObstacle(0.35, 0.35, new Pose2d(3.4, 4.1, new Rotation2d()));
-            super.addRectangularObstacle(0.35, 0.35, new Pose2d(5.62, 4.1 - 1.28, Rotation2d.fromDegrees(30)));
-            super.addRectangularObstacle(0.35, 0.35, new Pose2d(5.62, 4.1 + 1.28, Rotation2d.fromDegrees(60)));
+            super.addRectangularObstacle(
+                    0.35, 0.35, new Pose2d(5.62, 4.1 - 1.28, Rotation2d.fromDegrees(30)));
+            super.addRectangularObstacle(
+                    0.35, 0.35, new Pose2d(5.62, 4.1 + 1.28, Rotation2d.fromDegrees(60)));
 
             // red stage
-            super.addRectangularObstacle(0.35, 0.35, new Pose2d(FIELD_WIDTH - 3.4, 4.1, new Rotation2d()));
             super.addRectangularObstacle(
-                    0.35, 0.35, new Pose2d(FIELD_WIDTH - 5.62, 4.1 - 1.28, Rotation2d.fromDegrees(60)));
+                    0.35, 0.35, new Pose2d(FIELD_WIDTH - 3.4, 4.1, new Rotation2d()));
             super.addRectangularObstacle(
-                    0.35, 0.35, new Pose2d(FIELD_WIDTH - 5.62, 4.1 + 1.28, Rotation2d.fromDegrees(30)));
+                    0.35,
+                    0.35,
+                    new Pose2d(FIELD_WIDTH - 5.62, 4.1 - 1.28, Rotation2d.fromDegrees(60)));
+            super.addRectangularObstacle(
+                    0.35,
+                    0.35,
+                    new Pose2d(FIELD_WIDTH - 5.62, 4.1 + 1.28, Rotation2d.fromDegrees(30)));
         }
     }
 
-    private static final Translation2d[] NOTE_INITIAL_POSITIONS = new Translation2d[] {
-        new Translation2d(2.9, 4.1),
-        new Translation2d(2.9, 5.55),
-        new Translation2d(2.9, 7),
-        new Translation2d(8.27, 0.75),
-        new Translation2d(8.27, 2.43),
-        new Translation2d(8.27, 4.1),
-        new Translation2d(8.27, 5.78),
-        new Translation2d(8.27, 7.46),
-        new Translation2d(13.64, 4.1),
-        new Translation2d(13.64, 5.55),
-        new Translation2d(13.64, 7),
-    };
+    private static final Translation2d[] NOTE_INITIAL_POSITIONS =
+            new Translation2d[] {
+                new Translation2d(2.9, 4.1),
+                new Translation2d(2.9, 5.55),
+                new Translation2d(2.9, 7),
+                new Translation2d(8.27, 0.75),
+                new Translation2d(8.27, 2.43),
+                new Translation2d(8.27, 4.1),
+                new Translation2d(8.27, 5.78),
+                new Translation2d(8.27, 7.46),
+                new Translation2d(13.64, 4.1),
+                new Translation2d(13.64, 5.55),
+                new Translation2d(13.64, 7),
+            };
 
     public Arena2024Crescendo() {
         super(new CrescendoFieldObstaclesMap());
@@ -97,7 +114,8 @@ public class Arena2024Crescendo extends SimulatedArena {
         /* if there is any game-piece 0.5 meters within the human player station, we don't throw a new note */
         for (GamePieceOnFieldSimulation gamePiece : super.gamePieces)
             if (gamePiece instanceof CrescendoNoteOnField
-                    && gamePiece.getPoseOnField().getTranslation().getDistance(sourcePosition) < 1) return;
+                    && gamePiece.getPoseOnField().getTranslation().getDistance(sourcePosition) < 1)
+                return;
 
         /* otherwise, place a note */
         addGamePiece(new CrescendoNoteOnField(sourcePosition));

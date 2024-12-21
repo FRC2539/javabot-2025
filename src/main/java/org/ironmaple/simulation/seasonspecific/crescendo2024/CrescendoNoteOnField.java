@@ -12,6 +12,11 @@ public class CrescendoNoteOnField extends GamePieceOnFieldSimulation {
             NOTE_WEIGHT_KG = 0.2;
 
     public CrescendoNoteOnField(Translation2d initialPosition) {
-        super("Note", Geometry.createCircle(NOTE_DIAMETER / 2), NOTE_HEIGHT, NOTE_WEIGHT_KG, initialPosition);
+        super(
+                "Note",
+                Geometry.createCircle(NOTE_DIAMETER / 2),
+                NOTE_HEIGHT,
+                NOTE_WEIGHT_KG,
+                initialPosition);
     }
 }

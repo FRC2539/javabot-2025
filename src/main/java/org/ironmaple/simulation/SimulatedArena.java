@@ -29,7 +29,8 @@ import org.ironmaple.utils.mathutils.GeometryConvertor;
  *
  * <h1>Abstract Simulation World</h1>
  *
- * <p>Check <a href='https://shenzhen-robotics-alliance.github.io/maple-sim/using-the-simulated-arena/'>Online
+ * <p>Check <a
+ * href='https://shenzhen-robotics-alliance.github.io/maple-sim/using-the-simulated-arena/'>Online
  * Documentation</a>
  *
  * <h2>The heart of the simulator.</h2>
@@ -40,17 +41,21 @@ import org.ironmaple.utils.mathutils.GeometryConvertor;
  *
  * <p>Simulates all interactions within the arena field.
  *
- * <h2>The following objects can be added to the simulation world and will interact with each other: </h2>
+ * <h2>The following objects can be added to the simulation world and will interact with each other:
+ * </h2>
  *
  * <ul>
- *   <li>{@link AbstractDriveTrainSimulation}: Represents abstract drivetrain simulations with collision detection.
- *   <li>{@link GamePieceOnFieldSimulation}: Represents abstract game pieces with collision detection.
+ *   <li>{@link AbstractDriveTrainSimulation}: Represents abstract drivetrain simulations with
+ *       collision detection.
+ *   <li>{@link GamePieceOnFieldSimulation}: Represents abstract game pieces with collision
+ *       detection.
  *   <li>{@link IntakeSimulation}: Represents an intake simulation that responds to contact with
  *       {@link GamePieceOnFieldSimulation}.
  * </ul>
  */
 public abstract class SimulatedArena {
     private static SimulatedArena instance = null;
+
     /**
      *
      *
@@ -62,7 +67,8 @@ public abstract class SimulatedArena {
      * @throws IllegalStateException if the method is call when running on a real robot
      */
     public static SimulatedArena getInstance() {
-        if (RobotBase.isReal()) throw new IllegalStateException("MapleSim should not be running on a real robot!");
+        if (RobotBase.isReal())
+            throw new IllegalStateException("MapleSim should not be running on a real robot!");
 
         if (instance == null) instance = new Arena2024Crescendo();
 
@@ -92,8 +98,10 @@ public abstract class SimulatedArena {
     public static int getSimulationSubTicksIn1Period() {
         return SIMULATION_SUB_TICKS_IN_1_PERIOD;
     }
+
     /** The period length of each sub-tick, in seconds. */
-    private static Time SIMULATION_DT = Seconds.of(TimedRobot.kDefaultPeriod / SIMULATION_SUB_TICKS_IN_1_PERIOD);
+    private static Time SIMULATION_DT =
+            Seconds.of(TimedRobot.kDefaultPeriod / SIMULATION_SUB_TICKS_IN_1_PERIOD);
 
     public static Time getSimulationDt() {
         return SIMULATION_DT;
@@ -104,25 +112,29 @@ public abstract class SimulatedArena {
      *
      * <h2>Overrides the Timing Configurations of the Simulations.</h2>
      *
-     * <h4>If Using <a href='https://github.com/Mechanical-Advantage/AdvantageKit'>Advantage-Kit</a>: DO NOT CHANGE THE
-     * DEFAULT TIMINGS</h4>
+     * <h4>If Using <a
+     * href='https://github.com/Mechanical-Advantage/AdvantageKit'>Advantage-Kit</a>: DO NOT CHANGE
+     * THE DEFAULT TIMINGS</h4>
      *
      * <p>Changes apply to every instance of {@link SimulatedArena}.
      *
-     * <p>The new configuration will take effect the next time {@link SimulatedArena#simulationPeriodic()} is called on
-     * an instance.
+     * <p>The new configuration will take effect the next time {@link
+     * SimulatedArena#simulationPeriodic()} is called on an instance.
      *
-     * <p>It is recommended to call this method before the first call to {@link SimulatedArena#simulationPeriodic()} of
-     * any instance.
+     * <p>It is recommended to call this method before the first call to {@link
+     * SimulatedArena#simulationPeriodic()} of any instance.
      *
-     * <p>It is also recommended to keep the simulation frequency above 200 Hz for accurate simulation results.
+     * <p>It is also recommended to keep the simulation frequency above 200 Hz for accurate
+     * simulation results.
      *
-     * @param robotPeriod the time between two calls of {@link #simulationPeriodic()}, usually obtained from
-     *     {@link TimedRobot#getPeriod()}
-     * @param simulationSubTicksPerPeriod the number of Iterations, or {@link #simulationSubTick(int)} that the
-     *     simulation runs per each call to {@link #simulationPeriodic()}
+     * @param robotPeriod the time between two calls of {@link #simulationPeriodic()}, usually
+     *     obtained from {@link TimedRobot#getPeriod()}
+     * @param simulationSubTicksPerPeriod the number of Iterations, or {@link
+     *     #simulationSubTick(int)} that the simulation runs per each call to {@link
+     *     #simulationPeriodic()}
      */
-    public static synchronized void overrideSimulationTimings(Time robotPeriod, int simulationSubTicksPerPeriod) {
+    public static synchronized void overrideSimulationTimings(
+            Time robotPeriod, int simulationSubTicksPerPeriod) {
         SIMULATION_SUB_TICKS_IN_1_PERIOD = simulationSubTicksPerPeriod;
         SIMULATION_DT = robotPeriod.div(SIMULATION_SUB_TICKS_IN_1_PERIOD);
     }
@@ -139,11 +151,14 @@ public abstract class SimulatedArena {
      *
      * <h2>Constructs a new simulation arena with the specified field map of obstacles.</h2>
      *
-     * <p>This constructor initializes a physics world with zero gravity and adds the provided obstacles to the world.
+     * <p>This constructor initializes a physics world with zero gravity and adds the provided
+     * obstacles to the world.
      *
-     * <p>It also sets up the collections for drivetrain simulations, game pieces, projectiles, and intake simulations.
+     * <p>It also sets up the collections for drivetrain simulations, game pieces, projectiles, and
+     * intake simulations.
      *
-     * @param obstaclesMap the season-specific field map containing the layout of obstacles for the simulation
+     * @param obstaclesMap the season-specific field map containing the layout of obstacles for the
+     *     simulation
      */
     protected SimulatedArena(FieldMap obstaclesMap) {
         this.physicsWorld = new World<>();
@@ -161,8 +176,9 @@ public abstract class SimulatedArena {
      *
      * <h2>Represents a custom simulation to be updated during each simulation sub-tick.</h2>
      *
-     * <p>This allows you to register custom actions that will be executed at a high frequency during each simulation
-     * sub-tick. This is useful for tasks that need to be updated multiple times per simulation cycle.
+     * <p>This allows you to register custom actions that will be executed at a high frequency
+     * during each simulation sub-tick. This is useful for tasks that need to be updated multiple
+     * times per simulation cycle.
      *
      * <p>Examples of how this method is used:
      *
@@ -196,14 +212,15 @@ public abstract class SimulatedArena {
      *
      * <h2>Registers an {@link IntakeSimulation}.</h2>
      *
-     * <p><strong>NOTE:</strong> This method is automatically called in the constructor of {@link IntakeSimulation}, so
-     * you don't need to call it manually.
+     * <p><strong>NOTE:</strong> This method is automatically called in the constructor of {@link
+     * IntakeSimulation}, so you don't need to call it manually.
      *
-     * <p>The intake simulation should be bound to an {@link AbstractDriveTrainSimulation} and becomes part of its
-     * collision space.
+     * <p>The intake simulation should be bound to an {@link AbstractDriveTrainSimulation} and
+     * becomes part of its collision space.
      *
-     * <p>This method immediately starts the {@link org.ironmaple.simulation.IntakeSimulation.GamePieceContactListener},
-     * which listens for contact between the intake and any game piece.
+     * <p>This method immediately starts the {@link
+     * org.ironmaple.simulation.IntakeSimulation.GamePieceContactListener}, which listens for
+     * contact between the intake and any game piece.
      *
      * @param intakeSimulation the intake simulation to be registered
      */
@@ -219,13 +236,14 @@ public abstract class SimulatedArena {
      *
      * <p>The collision space of the drive train is immediately added to the simulation world.
      *
-     * <p>Starting from the next call to {@link #simulationPeriodic()}, the
-     * {@link AbstractDriveTrainSimulation#simulationSubTick()} method will be called during each sub-tick of the
-     * simulator.
+     * <p>Starting from the next call to {@link #simulationPeriodic()}, the {@link
+     * AbstractDriveTrainSimulation#simulationSubTick()} method will be called during each sub-tick
+     * of the simulator.
      *
      * @param driveTrainSimulation the drivetrain simulation to be registered
      */
-    public synchronized void addDriveTrainSimulation(AbstractDriveTrainSimulation driveTrainSimulation) {
+    public synchronized void addDriveTrainSimulation(
+            AbstractDriveTrainSimulation driveTrainSimulation) {
         this.physicsWorld.addBody(driveTrainSimulation);
         this.driveTrainSimulations.add(driveTrainSimulation);
     }
@@ -237,8 +255,8 @@ public abstract class SimulatedArena {
      *
      * <p>The collision space of the game piece is immediately added to the simulation world.
      *
-     * <p>{@link IntakeSimulation}s will be able to interact with this game piece during the next call to
-     * {@link SimulatedArena#simulationPeriodic()}.
+     * <p>{@link IntakeSimulation}s will be able to interact with this game piece during the next
+     * call to {@link SimulatedArena#simulationPeriodic()}.
      *
      * @param gamePiece the game piece to be registered in the simulation
      */
@@ -252,7 +270,8 @@ public abstract class SimulatedArena {
      *
      * <h2>Registers a {@link GamePieceProjectile} to the Simulation and Launches It.</h2>
      *
-     * <p>Calls to {@link GamePieceProjectile#launch()}, which will launch the game piece immediately.
+     * <p>Calls to {@link GamePieceProjectile#launch()}, which will launch the game piece
+     * immediately.
      *
      * @param gamePieceProjectile the projectile to be registered and launched in the simulation
      */
@@ -280,10 +299,12 @@ public abstract class SimulatedArena {
      *
      * <h2>Removes All {@link GamePieceOnFieldSimulation} Objects from the Simulation.</h2>
      *
-     * <p>This method clears all game pieces from the physics world and the simulation's game piece collection.
+     * <p>This method clears all game pieces from the physics world and the simulation's game piece
+     * collection.
      */
     public synchronized void clearGamePieces() {
-        for (GamePieceOnFieldSimulation gamePiece : this.gamePieces) this.physicsWorld.removeBody(gamePiece);
+        for (GamePieceOnFieldSimulation gamePiece : this.gamePieces)
+            this.physicsWorld.removeBody(gamePiece);
         this.gamePieces.clear();
     }
 
@@ -296,11 +317,12 @@ public abstract class SimulatedArena {
      * LoggedRobot.simulationPeriodic()</code> if using <a
      * href='https://github.com/Mechanical-Advantage/AdvantageKit'>Advantage-Kit</a>)
      *
-     * <p>If not configured through {@link SimulatedArena#overrideSimulationTimings(Time, int)} , the simulator will
-     * iterate through 5 Sub-ticks by default.
+     * <p>If not configured through {@link SimulatedArena#overrideSimulationTimings(Time, int)} ,
+     * the simulator will iterate through 5 Sub-ticks by default.
      *
      * <p>The amount of CPU Time that the Dyn4j engine uses in displayed in <code>
-     * SmartDashboard/MapleArenaSimulation/Dyn4jEngineCPUTimeMS</code>, usually performance is not a concern
+     * SmartDashboard/MapleArenaSimulation/Dyn4jEngineCPUTimeMS</code>, usually performance is not a
+     * concern
      */
     public synchronized void simulationPeriodic() {
         /* obtain lock to the simulated arena class to block any calls to overrideTimings() */
@@ -311,7 +333,9 @@ public abstract class SimulatedArena {
             // move through a few sub-periods in each update
             for (int i = 0; i < SIMULATION_SUB_TICKS_IN_1_PERIOD; i++) simulationSubTick(i);
 
-            SmartDashboard.putNumber("MapleArenaSimulation/Dyn4jEngineCPUTimeMS", (System.nanoTime() - t0) / 1000000.0);
+            SmartDashboard.putNumber(
+                    "MapleArenaSimulation/Dyn4jEngineCPUTimeMS",
+                    (System.nanoTime() - t0) / 1000000.0);
         }
     }
 
@@ -327,8 +351,8 @@ public abstract class SimulatedArena {
      *   <li>Updating all {@link GamePieceProjectile} objects in the simulation.
      *   <li>Stepping the physics world with the specified sub-tick duration.
      *   <li>Removing any game pieces as detected by the {@link IntakeSimulation} objects.
-     *   <li>Executing any additional sub-tick actions registered via
-     *       {@link SimulatedArena#addCustomSimulation(Simulatable)} .
+     *   <li>Executing any additional sub-tick actions registered via {@link
+     *       SimulatedArena#addCustomSimulation(Simulatable)} .
      * </ul>
      */
     private void simulationSubTick(int subTickNum) {
@@ -343,7 +367,8 @@ public abstract class SimulatedArena {
             while (!intakeSimulation.getGamePiecesToRemove().isEmpty())
                 removeGamePiece(intakeSimulation.getGamePiecesToRemove().poll());
 
-        for (Simulatable customSimulation : customSimulations) customSimulation.simulationSubTick(subTickNum);
+        for (Simulatable customSimulation : customSimulations)
+            customSimulation.simulationSubTick(subTickNum);
     }
 
     /**
@@ -353,20 +378,23 @@ public abstract class SimulatedArena {
      *
      * <p>This method is used to visualize the positions of game pieces
      *
-     * <p>Also, if you have a game-piece detection vision system <strong>(wow!)</strong>, this is the how you can
-     * simulate it.
+     * <p>Also, if you have a game-piece detection vision system <strong>(wow!)</strong>, this is
+     * the how you can simulate it.
      *
-     * <p>Both {@link GamePieceOnFieldSimulation} and {@link GamePieceProjectile} of the specified type will be
-     * included.
+     * <p>Both {@link GamePieceOnFieldSimulation} and {@link GamePieceProjectile} of the specified
+     * type will be included.
      *
      * <ul>
      *   <li>The type is determined in the constructor of {@link GamePieceOnFieldSimulation}.
-     *   <li>For example, {@link org.ironmaple.simulation.seasonspecific.crescendo2024.CrescendoNoteOnField} has the
+     *   <li>For example, {@link
+     *       org.ironmaple.simulation.seasonspecific.crescendo2024.CrescendoNoteOnField} has the
      *       type "Note".
      * </ul>
      *
-     * @param type the type of game piece, as determined by the constructor of {@link GamePieceOnFieldSimulation}
-     * @return a {@link List} of {@link Pose3d} objects representing the 3D positions of the game pieces
+     * @param type the type of game piece, as determined by the constructor of {@link
+     *     GamePieceOnFieldSimulation}
+     * @return a {@link List} of {@link Pose3d} objects representing the 3D positions of the game
+     *     pieces
      */
     public synchronized List<Pose3d> getGamePiecesByType(String type) {
         final List<Pose3d> gamePiecesPoses = new ArrayList<>();
@@ -374,7 +402,8 @@ public abstract class SimulatedArena {
             if (Objects.equals(gamePiece.type, type)) gamePiecesPoses.add(gamePiece.getPose3d());
 
         for (GamePieceProjectile gamePiece : gamePieceProjectile)
-            if (Objects.equals(gamePiece.gamePieceType, type)) gamePiecesPoses.add(gamePiece.getPose3d());
+            if (Objects.equals(gamePiece.gamePieceType, type))
+                gamePiecesPoses.add(gamePiece.getPose3d());
 
         return gamePiecesPoses;
     }
@@ -384,8 +413,8 @@ public abstract class SimulatedArena {
      *
      * <h2>Resets the Field for Autonomous Mode.</h2>
      *
-     * <p>This method clears all current game pieces from the field and places new game pieces in their starting
-     * positions for the autonomous mode.
+     * <p>This method clears all current game pieces from the field and places new game pieces in
+     * their starting positions for the autonomous mode.
      */
     public synchronized void resetFieldForAuto() {
         clearGamePieces();
@@ -397,10 +426,11 @@ public abstract class SimulatedArena {
      *
      * <h2>Places Game Pieces on the Field for Autonomous Mode.</h2>
      *
-     * <p>This method sets up the game pieces on the field, typically in their starting positions for autonomous mode.
+     * <p>This method sets up the game pieces on the field, typically in their starting positions
+     * for autonomous mode.
      *
-     * <p>It should be implemented differently for each season-specific subclass of {@link SimulatedArena} to reflect
-     * the unique game piece placements for that season's game.
+     * <p>It should be implemented differently for each season-specific subclass of {@link
+     * SimulatedArena} to reflect the unique game piece placements for that season's game.
      */
     public abstract void placeGamePiecesOnField();
 
@@ -409,8 +439,8 @@ public abstract class SimulatedArena {
      *
      * <h2>Season-Specific Actions to Execute in {@link SimulatedArena#simulationPeriodic()}.</h2>
      *
-     * <p>This method defines season-specific tasks to be executed during the
-     * {@link SimulatedArena#simulationPeriodic()} method.
+     * <p>This method defines season-specific tasks to be executed during the {@link
+     * SimulatedArena#simulationPeriodic()} method.
      *
      * <p>For example:
      *
@@ -419,8 +449,8 @@ public abstract class SimulatedArena {
      *   <li>Simulating human player activities.
      * </ul>
      *
-     * <p>This method should be implemented in the season-specific subclass of {@link SimulatedArena} to reflect the
-     * unique aspects of that season's game.
+     * <p>This method should be implemented in the season-specific subclass of {@link
+     * SimulatedArena} to reflect the unique aspects of that season's game.
      */
     public abstract void competitionPeriodic();
 
@@ -431,8 +461,8 @@ public abstract class SimulatedArena {
      *
      * <p>Stores the layout of obstacles and game pieces.
      *
-     * <p>For each season-specific subclass of {@link SimulatedArena}, there should be a corresponding subclass of this
-     * class to store the field map for that specific season's game.
+     * <p>For each season-specific subclass of {@link SimulatedArena}, there should be a
+     * corresponding subclass of this class to store the field map for that specific season's game.
      */
     public abstract static class FieldMap {
         private final List<Body> obstacles = new ArrayList<>();
@@ -445,14 +475,16 @@ public abstract class SimulatedArena {
                     new Pose2d());
         }
 
-        protected void addRectangularObstacle(double width, double height, Pose2d absolutePositionOnField) {
+        protected void addRectangularObstacle(
+                double width, double height, Pose2d absolutePositionOnField) {
             addCustomObstacle(Geometry.createRectangle(width, height), absolutePositionOnField);
         }
 
         protected void addCustomObstacle(Convex shape, Pose2d absolutePositionOnField) {
             final Body obstacle = createObstacle(shape);
 
-            obstacle.getTransform().set(GeometryConvertor.toDyn4jTransform(absolutePositionOnField));
+            obstacle.getTransform()
+                    .set(GeometryConvertor.toDyn4jTransform(absolutePositionOnField));
 
             obstacles.add(obstacle);
         }
