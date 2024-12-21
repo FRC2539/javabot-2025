@@ -41,7 +41,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
-import frc.robot.util.SwerveSetpointGenerator;
+import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -62,6 +62,8 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.constants.TunerConstants;
 import frc.robot.util.PhoenixUtil;
+import frc.robot.RobotContainer;
+import frc.robot.constants.GlobalConstants;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -162,42 +164,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     private SwerveSetpoint previousSetpoint;
 
     public void setUpPathPlanner() {
-        try {
-            config = RobotConfig.fromGUISettings();
-        } catch (Exception e) {
-            // Handle exception as needed
-            e.printStackTrace();
-        }
+        
 
-        AutoBuilder.configure(
-            this::getRobotPose,
-            (Pose2d pose) -> {
-                resetPose(pose);
-                if (m_driveSim != null) {
-                    m_driveSim.setSimulationWorldPose(pose);
-                }
-            },  
-            this::getChassisSpeeds, 
-            (speeds, feedforwards) -> setControl(
-                    m_applyRobotSpeeds.withSpeeds(speeds)
-                        .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
-                        .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
-                ),
-            new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                    new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-                    new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
-            ), 
-            config,
-            () -> {
-                // Boolean supplier that controls when the path will be mirrored for the red alliance
-                Optional<Alliance> alliance = DriverStation.getAlliance();
-                if (alliance.isPresent()) {
-                    return alliance.get() == DriverStation.Alliance.Red;
-                }
-                return false;
-            },
-            this
-        );
     }
 
     public Pose2d getRobotPose() {
@@ -277,14 +245,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     private FieldOrientedOrbitSwerveRequest generateSwerveSetpointConfig()
     {
-        RobotConfig config;
-        try{
-          config = RobotConfig.fromGUISettings();
-        } catch (Exception e) {
-          // Handle exception as needed
-          e.printStackTrace();
-          throw new RuntimeException("Failed to load robot config from pathplanner.");
-        }
+        RobotConfig config = GlobalConstants.getRobotConfigPathplanner();
 
         setpointGenerator = new SwerveSetpointGenerator(
             config, 
@@ -321,20 +282,19 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         // Note: it is important to not discretize speeds before or after
         // using the setpoint generator, as it will discretize them for you
         ChassisSpeeds speeds = new ChassisSpeeds(xVelocity, yVelocity, rotationRate);
-        previousSetpoint = setpointGenerator.generateSetpoint(
-            previousSetpoint, // The previous setpoint
-            speeds, // The desired target speeds
-            0.02 // The loop time of the robot code, in seconds
-        );
-        return m_applyRobotSpeeds.withSpeeds(previousSetpoint.robotRelativeSpeeds())
-            .withWheelForceFeedforwardsX(previousSetpoint.feedforwards().robotRelativeForcesXNewtons())
-            .withWheelForceFeedforwardsY(previousSetpoint.feedforwards().robotRelativeForcesYNewtons());
+        return m_applyFieldSpeedsOrbit.withChassisSpeeds(speeds);
             // Method that will drive the robot given target module states
     }
 
     public SwerveRequest driveFieldRelative(ChassisSpeeds speeds) {
         ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getState().Pose.getRotation());
         return driveRobotRelative(speeds);
+    }
+
+    public SwerveRequest driveWithFeedforwards(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
+        return m_applyRobotSpeeds.withSpeeds(speeds)
+            .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+            .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons());
     }
 
     /**

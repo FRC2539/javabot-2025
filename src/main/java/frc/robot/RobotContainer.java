@@ -24,6 +24,7 @@ import frc.robot.constants.TunerConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.SwerveConstantsUtil;
+import frc.robot.subsystems.WheelRadiusCharacterization;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -40,7 +41,7 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = SwerveConstantsUtil.getCommandSwerveDrivetrain();
 
-    private final LoggedDashboardChooser<Command> autoChooser;
+    public Auto auto = new Auto(drivetrain);
 
     // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
@@ -50,18 +51,7 @@ public class RobotContainer {
         configureBindings();
 
         drivetrain.setUpPathPlanner();
-        autoChooser = new LoggedDashboardChooser<>("Auto Routine", AutoBuilder.buildAutoChooser());
-        autoChooser.addOption("SysId Routine", 
-            Commands.sequence(
-                drivetrain.sysIdDynamic(Direction.kForward),
-                Commands.waitSeconds(5),
-                drivetrain.sysIdDynamic(Direction.kReverse),
-                Commands.waitSeconds(5),
-                drivetrain.sysIdQuasistatic(Direction.kForward),
-                Commands.waitSeconds(5),
-                drivetrain.sysIdQuasistatic(Direction.kReverse)
-            )
-        );
+         // Establish the "Trajectory Field" Field2d into the dashboard
     }
 
     private final LoggedNetworkNumber xVel = new LoggedNetworkNumber("xVel", 0.0);
@@ -76,12 +66,11 @@ public class RobotContainer {
             drivetrain.applyRequest(
                 () -> {
                     ChassisSpeeds driverDesiredSpeeds = new ChassisSpeeds(
-                        sps(deadband(leftDriveController.getYAxis().get(), 0.1)) * GlobalConstants.MAX_TRANSLATIONAL_SPEED,
-                        -sps(deadband(leftDriveController.getXAxis().get(),0.1)) * GlobalConstants.MAX_TRANSLATIONAL_SPEED,
-                        -sps(deadband(rightDriveController.getXAxis().get(),0.1)) * GlobalConstants.MAX_ROTATIONAL_SPEED
+                        GlobalConstants.MAX_TRANSLATIONAL_SPEED.in(MetersPerSecond) * sps(deadband(leftDriveController.getYAxis().get(), 0.1)),
+                        sps(deadband(leftDriveController.getXAxis().get(),0.1)) * GlobalConstants.MAX_TRANSLATIONAL_SPEED.in(MetersPerSecond),
+                        -sps(deadband(rightDriveController.getXAxis().get(),0.1)) * GlobalConstants.MAX_ROTATIONAL_SPEED.in(RadiansPerSecond)
                     );
                     return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(driverDesiredSpeeds);
-                    // return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(new ChassisSpeeds(xVel.get(), yVel.get(), rotVel.get()));
                     // return drivetrain.m_applyFieldSpeeds.withSpeeds(driverDesiredSpeeds);
                 }
             )
@@ -95,6 +84,8 @@ public class RobotContainer {
         operatorController.getB().whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-operatorController.getLeftYAxis().get(), -operatorController.getLeftXAxis().get()))
         ));
+
+        leftDriveController.getTrigger().whileTrue(new WheelRadiusCharacterization(WheelRadiusCharacterization.Direction.CLOCKWISE, drivetrain));
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
@@ -123,8 +114,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        
-        return autoChooser.get();
-        
+        return auto.getAuto();
     }
+
 }
