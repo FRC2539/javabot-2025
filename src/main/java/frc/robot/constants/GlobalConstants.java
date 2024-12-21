@@ -3,10 +3,8 @@ package frc.robot.constants;
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
-import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -36,27 +34,40 @@ public class GlobalConstants {
 
     private static RobotConfig robotConfigPathplanner;
 
+    // public static RobotConfig getRobotConfigPathplanner() {
+    //     if (robotConfigPathplanner == null) {
+    //         try{
+    //           Translation2d[] moduleOffsets = new Translation2d[4];
+    //           SwerveModuleConstants[] constants = new SwerveModuleConstants[]{
+    //             TunerConstants.FrontLeft, TunerConstants.FrontRight, TunerConstants.BackLeft, TunerConstants.BackRight
+    //           };
+    //           for (int i = 0; i < constants.length; i++) {
+    //               moduleOffsets[i] = new Translation2d(constants[i].LocationX, constants[i].LocationY);
+    //           }
+
+    //           robotConfigPathplanner = new RobotConfig(ROBOT_MASS, ROBOT_MOI, 
+    //             new ModuleConfig(
+    //                 Meters.of(EXAMPLE_MODULE.WheelRadius), 
+    //                 MAX_TRANSLATIONAL_SPEED, 
+    //                 COEFFICIENT_OF_FRICTION, 
+    //                 DRIVE_MOTOR, 
+    //                 EXAMPLE_MODULE.DriveMotorInitialConfigs.CurrentLimits.getStatorCurrentLimitMeasure(),
+    //                 1
+    //             ),
+    //             moduleOffsets);
+    //         } catch (Exception e) {
+    //           // Handle exception as needed
+    //           e.printStackTrace();
+    //           throw new RuntimeException("Failed to load robot config from pathplanner.");
+    //         }
+    //     }
+    //     return robotConfigPathplanner;
+    // }
+
     public static RobotConfig getRobotConfigPathplanner() {
         if (robotConfigPathplanner == null) {
             try{
-              Translation2d[] moduleOffsets = new Translation2d[4];
-              SwerveModuleConstants[] constants = new SwerveModuleConstants[]{
-                TunerConstants.FrontLeft, TunerConstants.FrontRight, TunerConstants.BackLeft, TunerConstants.BackRight
-              };
-              for (int i = 0; i < constants.length; i++) {
-                  moduleOffsets[i] = new Translation2d(constants[i].LocationX, constants[i].LocationY);
-              }
-
-              robotConfigPathplanner = new RobotConfig(ROBOT_MASS, ROBOT_MOI, 
-                new ModuleConfig(
-                    Meters.of(EXAMPLE_MODULE.WheelRadius), 
-                    MAX_TRANSLATIONAL_SPEED, 
-                    COEFFICIENT_OF_FRICTION, 
-                    DRIVE_MOTOR, 
-                    EXAMPLE_MODULE.DriveMotorInitialConfigs.CurrentLimits.getStatorCurrentLimitMeasure(),
-                    1
-                ),
-                moduleOffsets);
+              robotConfigPathplanner = RobotConfig.fromGUISettings();
             } catch (Exception e) {
               // Handle exception as needed
               e.printStackTrace();
