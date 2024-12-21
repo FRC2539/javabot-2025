@@ -80,7 +80,7 @@ public class FieldOrientedOrbitSwerveRequest implements SwerveRequest {
         double yAcceleration = toApplyY - slewedFieldChassisSpeeds.vyMetersPerSecond;
         
         ChassisSpeeds accelerations = new ChassisSpeeds(xAcceleration, yAcceleration, 0);
-        accelerations.toRobotRelativeSpeeds(parameters.currentPose.getRotation());
+        accelerations = ChassisSpeeds.fromFieldRelativeSpeeds(accelerations,parameters.currentPose.getRotation());
 
         if (accelerations.vxMetersPerSecond > forwardXRateLimit*timestep) {
             if (maintainStraightStopping) accelerations.vyMetersPerSecond = accelerations.vyMetersPerSecond * forwardXRateLimit*timestep / accelerations.vxMetersPerSecond;
@@ -98,13 +98,13 @@ public class FieldOrientedOrbitSwerveRequest implements SwerveRequest {
             accelerations.vyMetersPerSecond = -backwardYRateLimit*timestep;
         }
 
-        accelerations.toFieldRelativeSpeeds(parameters.currentPose.getRotation());
+        accelerations = ChassisSpeeds.fromFieldRelativeSpeeds(accelerations,parameters.currentPose.getRotation());
 
         slewedFieldChassisSpeeds = slewedFieldChassisSpeeds.plus(accelerations);
 
         ChassisSpeeds robotRelativeSpeeds = new ChassisSpeeds(slewedFieldChassisSpeeds.vxMetersPerSecond, slewedFieldChassisSpeeds.vyMetersPerSecond, chassisSpeeds.omegaRadiansPerSecond);
 
-        robotRelativeSpeeds.toRobotRelativeSpeeds(parameters.currentPose.getRotation());
+        robotRelativeSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(robotRelativeSpeeds,parameters.currentPose.getRotation());
 
         // Keep the robot from tipping over
         // robotRelativeSpeeds.vxMetersPerSecond = xLimiter.calculate(robotRelativeSpeeds.vxMetersPerSecond);
