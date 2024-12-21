@@ -368,7 +368,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     }
 
     private void startSimThread() {
-        RobotConfig pathplannerConfig = SwerveConstantsUtil.getRobotConfig();
+        RobotConfig pathplannerConfig = GlobalConstants.getRobotConfigPathplanner();
         DriveTrainSimulationConfig config =
                 new DriveTrainSimulationConfig(
                         Kilograms.of(pathplannerConfig.massKG),

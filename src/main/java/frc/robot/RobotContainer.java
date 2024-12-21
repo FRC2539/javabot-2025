@@ -18,7 +18,6 @@ import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.SwerveConstantsUtil;
 import frc.robot.subsystems.WheelRadiusCharacterization;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -39,7 +38,7 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     public final CommandSwerveDrivetrain drivetrain =
-            SwerveConstantsUtil.getCommandSwerveDrivetrain();
+            TunerConstants.createDrivetrain();
 
     public Auto auto = new Auto(drivetrain);
 
