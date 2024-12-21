@@ -347,17 +347,19 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                 "Drive/setpointChassisSpeeds",
                 m_applyFieldSpeedsOrbit.getPreviousSetpoint().robotRelativeSpeeds());
 
-        ChassisSpeeds speedsPreview = m_applyFieldSpeedsOrbit.getPreviousSetpoint().robotRelativeSpeeds();
+        ChassisSpeeds speedsPreview =
+                m_applyFieldSpeedsOrbit.getPreviousSetpoint().robotRelativeSpeeds();
 
-        double currentSpeed = Math.hypot(speedsPreview.vxMetersPerSecond, speedsPreview.vyMetersPerSecond);
+        double currentSpeed =
+                Math.hypot(speedsPreview.vxMetersPerSecond, speedsPreview.vyMetersPerSecond);
         double acceleration = (currentSpeed - lastSpeed) / 0.02;
         lastSpeed = currentSpeed;
 
         Logger.recordOutput("Drive/Velocity", currentSpeed);
         Logger.recordOutput("Drive/Acceleration", acceleration);
 
-        Logger.recordOutput("Drive/NotZero", m_applyFieldSpeedsOrbit.getChassisSpeeds().vxMetersPerSecond != 0);
-
+        Logger.recordOutput(
+                "Drive/NotZero", m_applyFieldSpeedsOrbit.getChassisSpeeds().vxMetersPerSecond != 0);
 
         Logger.recordOutput("Drive/ModuleTargets", getState().ModuleTargets);
         Logger.recordOutput("Drive/ModulePositions", getState().ModulePositions);
