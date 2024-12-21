@@ -23,6 +23,8 @@ public class GlobalConstants {
     public static final Mass ROBOT_MASS = Pounds.of(150);
     public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(6.883);
 
+    public static final double COEFFICIENT_OF_FRICTION = 1.0;
+
     public static final DCMotor DRIVE_MOTOR = DCMotor.getKrakenX60Foc(1).withReduction(EXAMPLE_MODULE.DriveMotorGearRatio);
     public static final DCMotor STEER_MOTOR = DCMotor.getKrakenX60Foc(1).withReduction(EXAMPLE_MODULE.SteerMotorGearRatio);
 
@@ -48,8 +50,10 @@ public class GlobalConstants {
               robotConfigPathplanner = new RobotConfig(ROBOT_MASS, ROBOT_MOI, 
                 new ModuleConfig(
                     Meters.of(EXAMPLE_MODULE.WheelRadius), 
-                    MAX_TRANSLATIONAL_SPEED, 1, 
-                    DRIVE_MOTOR, EXAMPLE_MODULE.DriveMotorInitialConfigs.CurrentLimits.getStatorCurrentLimitMeasure(),
+                    MAX_TRANSLATIONAL_SPEED, 
+                    COEFFICIENT_OF_FRICTION, 
+                    DRIVE_MOTOR, 
+                    EXAMPLE_MODULE.DriveMotorInitialConfigs.CurrentLimits.getStatorCurrentLimitMeasure(),
                     1
                 ),
                 moduleOffsets);
