@@ -14,190 +14,188 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 public class FieldOrientedOrbitSwerveRequest implements SwerveRequest {
-  private final SwerveRequest.ApplyRobotSpeeds applyRobotSpeeds =
-      new SwerveRequest.ApplyRobotSpeeds()
-          .withDriveRequestType(DriveRequestType.Velocity)
-          .withSteerRequestType(SteerRequestType.MotionMagicExpo)
-          .withDesaturateWheelSpeeds(false);
+    private final SwerveRequest.ApplyRobotSpeeds applyRobotSpeeds =
+            new SwerveRequest.ApplyRobotSpeeds()
+                    .withDriveRequestType(DriveRequestType.Velocity)
+                    .withSteerRequestType(SteerRequestType.MotionMagicExpo)
+                    .withDesaturateWheelSpeeds(false);
 
-  private ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
+    private ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
 
-  private SwerveSetpointGenerator setpointGenerator;
-  private SwerveSetpoint previousSetpoint;
-  private ChassisSpeeds slewedFieldChassisSpeeds = new ChassisSpeeds();
+    private SwerveSetpointGenerator setpointGenerator;
+    private SwerveSetpoint previousSetpoint;
+    private ChassisSpeeds slewedFieldChassisSpeeds = new ChassisSpeeds();
 
-  private boolean useDriverOrientation = true;
+    private boolean useDriverOrientation = true;
 
-  private double forwardXRateLimit = Double.POSITIVE_INFINITY;
-  private double backwardXRateLimit = Double.POSITIVE_INFINITY;
+    private double forwardXRateLimit = Double.POSITIVE_INFINITY;
+    private double backwardXRateLimit = Double.POSITIVE_INFINITY;
 
-  private double forwardYRateLimit = Double.POSITIVE_INFINITY;
-  private double backwardYRateLimit = Double.POSITIVE_INFINITY;
+    private double forwardYRateLimit = Double.POSITIVE_INFINITY;
+    private double backwardYRateLimit = Double.POSITIVE_INFINITY;
 
-  private double timestep = 0.004;
+    private double timestep = 0.004;
 
-  private boolean maintainStraightStopping = true;
+    private boolean maintainStraightStopping = true;
 
-  public ChassisSpeeds getChassisSpeeds() {
-    return chassisSpeeds;
-  }
-
-  public ChassisSpeeds getSlewedFieldChassisSpeeds() {
-    return slewedFieldChassisSpeeds;
-  }
-
-  public SwerveSetpoint getPreviousSetpoint() {
-    return previousSetpoint;
-  }
-
-  /**
-   * @param xTipLimiter
-   * @param yTipLimiter
-   * @param setpointGenerator
-   * @param initialSetpoint
-   *     <p>This creates a FieldOrientedOrbitSwerveRequest.
-   *     <p>The anti-tipping logic currently does not actually work due to rotation and is taken out
-   *     right now.
-   */
-  public FieldOrientedOrbitSwerveRequest(
-      SwerveSetpointGenerator setpointGenerator,
-      SwerveSetpoint initialSetpoint,
-      Rotation2d robotOrientation) {
-
-    this.setpointGenerator = setpointGenerator;
-
-    this.withPreviousSetpoint(initialSetpoint, robotOrientation);
-  }
-
-  @Override
-  public StatusCode apply(SwerveControlParameters parameters, SwerveModule... modulesToApply) {
-    double toApplyX = chassisSpeeds.vxMetersPerSecond;
-    double toApplyY = chassisSpeeds.vyMetersPerSecond;
-
-    if (useDriverOrientation) {
-      Translation2d tmp = new Translation2d(toApplyX, toApplyY);
-      tmp = tmp.rotateBy(parameters.operatorForwardDirection);
-      toApplyX = tmp.getX();
-      toApplyY = tmp.getY();
+    public ChassisSpeeds getChassisSpeeds() {
+        return chassisSpeeds;
     }
 
-    double xAcceleration = toApplyX - slewedFieldChassisSpeeds.vxMetersPerSecond;
-    double yAcceleration = toApplyY - slewedFieldChassisSpeeds.vyMetersPerSecond;
-
-    ChassisSpeeds accelerations = new ChassisSpeeds(xAcceleration, yAcceleration, 0);
-    accelerations =
-        ChassisSpeeds.fromFieldRelativeSpeeds(accelerations, parameters.currentPose.getRotation());
-
-    if (accelerations.vxMetersPerSecond > forwardXRateLimit * timestep) {
-      if (maintainStraightStopping)
-        accelerations.vyMetersPerSecond =
-            accelerations.vyMetersPerSecond
-                * forwardXRateLimit
-                * timestep
-                / accelerations.vxMetersPerSecond;
-      accelerations.vxMetersPerSecond = forwardXRateLimit * timestep;
-    } else if (accelerations.vxMetersPerSecond < -backwardXRateLimit * timestep) {
-      if (maintainStraightStopping)
-        accelerations.vyMetersPerSecond =
-            accelerations.vyMetersPerSecond
-                * -backwardXRateLimit
-                * timestep
-                / accelerations.vxMetersPerSecond;
-      accelerations.vxMetersPerSecond = -backwardXRateLimit * timestep;
+    public ChassisSpeeds getSlewedFieldChassisSpeeds() {
+        return slewedFieldChassisSpeeds;
     }
 
-    if (accelerations.vyMetersPerSecond > forwardYRateLimit * timestep) {
-      if (maintainStraightStopping)
-        accelerations.vyMetersPerSecond =
-            accelerations.vxMetersPerSecond
-                * forwardYRateLimit
-                * timestep
-                / accelerations.vyMetersPerSecond;
-      accelerations.vyMetersPerSecond = forwardYRateLimit * timestep;
-    } else if (accelerations.vyMetersPerSecond < -backwardYRateLimit * timestep) {
-      if (maintainStraightStopping)
-        accelerations.vxMetersPerSecond =
-            accelerations.vxMetersPerSecond
-                * -backwardYRateLimit
-                * timestep
-                / accelerations.vyMetersPerSecond;
-      accelerations.vyMetersPerSecond = -backwardYRateLimit * timestep;
+    public SwerveSetpoint getPreviousSetpoint() {
+        return previousSetpoint;
     }
 
-    accelerations =
-        ChassisSpeeds.fromFieldRelativeSpeeds(accelerations, parameters.currentPose.getRotation());
+    /**
+     * @param xTipLimiter
+     * @param yTipLimiter
+     * @param setpointGenerator
+     * @param initialSetpoint
+     *     <p>This creates a FieldOrientedOrbitSwerveRequest.
+     *     <p>The anti-tipping logic currently does not actually work due to rotation and is taken
+     *     out right now.
+     */
+    public FieldOrientedOrbitSwerveRequest(
+            SwerveSetpointGenerator setpointGenerator,
+            SwerveSetpoint initialSetpoint,
+            Rotation2d robotOrientation) {
 
-    slewedFieldChassisSpeeds = slewedFieldChassisSpeeds.plus(accelerations);
+        this.setpointGenerator = setpointGenerator;
 
-    ChassisSpeeds robotRelativeSpeeds =
-        new ChassisSpeeds(
-            slewedFieldChassisSpeeds.vxMetersPerSecond,
-            slewedFieldChassisSpeeds.vyMetersPerSecond,
-            chassisSpeeds.omegaRadiansPerSecond);
+        this.withPreviousSetpoint(initialSetpoint, robotOrientation);
+    }
 
-    robotRelativeSpeeds =
-        ChassisSpeeds.fromFieldRelativeSpeeds(
-            robotRelativeSpeeds, parameters.currentPose.getRotation());
+    @Override
+    public StatusCode apply(SwerveControlParameters parameters, SwerveModule... modulesToApply) {
+        double toApplyX = chassisSpeeds.vxMetersPerSecond;
+        double toApplyY = chassisSpeeds.vyMetersPerSecond;
 
-    // Keep the robot from tipping over
-    // robotRelativeSpeeds.vxMetersPerSecond =
-    // xLimiter.calculate(robotRelativeSpeeds.vxMetersPerSecond);
-    // robotRelativeSpeeds.vyMetersPerSecond =
-    // yLimiter.calculate(robotRelativeSpeeds.vyMetersPerSecond);
+        if (useDriverOrientation) {
+            Translation2d tmp = new Translation2d(toApplyX, toApplyY);
+            tmp = tmp.rotateBy(parameters.operatorForwardDirection);
+            toApplyX = tmp.getX();
+            toApplyY = tmp.getY();
+        }
 
-    // Apply all other limits
-    previousSetpoint =
-        setpointGenerator.generateSetpoint(previousSetpoint, robotRelativeSpeeds, timestep);
+        double xAcceleration = toApplyX - slewedFieldChassisSpeeds.vxMetersPerSecond;
+        double yAcceleration = toApplyY - slewedFieldChassisSpeeds.vyMetersPerSecond;
 
-    DriveFeedforwards feedforwards = previousSetpoint.feedforwards();
+        ChassisSpeeds accelerations = new ChassisSpeeds(xAcceleration, yAcceleration, 0);
+        accelerations =
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                        accelerations, parameters.currentPose.getRotation());
 
-    return applyRobotSpeeds
-        .withSpeeds(previousSetpoint.robotRelativeSpeeds())
-        // .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
-        // .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
-        .apply(parameters, modulesToApply);
-  }
+        if (accelerations.vxMetersPerSecond > forwardXRateLimit * timestep) {
+            if (maintainStraightStopping)
+                accelerations.vyMetersPerSecond =
+                        accelerations.vyMetersPerSecond
+                                * forwardXRateLimit
+                                * timestep
+                                / accelerations.vxMetersPerSecond;
+            accelerations.vxMetersPerSecond = forwardXRateLimit * timestep;
+        } else if (accelerations.vxMetersPerSecond < -backwardXRateLimit * timestep) {
+            if (maintainStraightStopping)
+                accelerations.vyMetersPerSecond =
+                        accelerations.vyMetersPerSecond
+                                * -backwardXRateLimit
+                                * timestep
+                                / accelerations.vxMetersPerSecond;
+            accelerations.vxMetersPerSecond = -backwardXRateLimit * timestep;
+        }
 
-  public FieldOrientedOrbitSwerveRequest withChassisSpeeds(ChassisSpeeds chassisSpeeds) {
-    this.chassisSpeeds = chassisSpeeds;
-    return this;
-  }
+        if (accelerations.vyMetersPerSecond > forwardYRateLimit * timestep) {
+            if (maintainStraightStopping)
+                accelerations.vyMetersPerSecond =
+                        accelerations.vxMetersPerSecond
+                                * forwardYRateLimit
+                                * timestep
+                                / accelerations.vyMetersPerSecond;
+            accelerations.vyMetersPerSecond = forwardYRateLimit * timestep;
+        } else if (accelerations.vyMetersPerSecond < -backwardYRateLimit * timestep) {
+            if (maintainStraightStopping)
+                accelerations.vxMetersPerSecond =
+                        accelerations.vxMetersPerSecond
+                                * -backwardYRateLimit
+                                * timestep
+                                / accelerations.vyMetersPerSecond;
+            accelerations.vyMetersPerSecond = -backwardYRateLimit * timestep;
+        }
 
-  public FieldOrientedOrbitSwerveRequest withPreviousSetpoint(
-      SwerveSetpoint previousSetpoint, Rotation2d robotOrientation) {
-    this.previousSetpoint = previousSetpoint;
-    this.slewedFieldChassisSpeeds =
-        ChassisSpeeds.fromRobotRelativeSpeeds(chassisSpeeds, robotOrientation);
-    return this;
-  }
+        accelerations =
+                ChassisSpeeds.fromRobotRelativeSpeeds(
+                        accelerations, parameters.currentPose.getRotation());
 
-  public FieldOrientedOrbitSwerveRequest withDriverOrientation(boolean useDriverOrientation) {
-    this.useDriverOrientation = useDriverOrientation;
-    return this;
-  }
+        slewedFieldChassisSpeeds = slewedFieldChassisSpeeds.plus(accelerations);
 
-  public FieldOrientedOrbitSwerveRequest withXRateLimits(
-      double forwardXRateLimit, double backwardXRateLimit) {
-    this.forwardXRateLimit = forwardXRateLimit;
-    this.backwardXRateLimit = backwardXRateLimit;
-    return this;
-  }
+        ChassisSpeeds robotRelativeSpeeds =
+                new ChassisSpeeds(
+                        slewedFieldChassisSpeeds.vxMetersPerSecond,
+                        slewedFieldChassisSpeeds.vyMetersPerSecond,
+                        chassisSpeeds.omegaRadiansPerSecond);
 
-  public FieldOrientedOrbitSwerveRequest withYRateLimits(
-      double forwardYRateLimit, double backwardYRateLimit) {
-    this.forwardYRateLimit = forwardYRateLimit;
-    this.backwardYRateLimit = backwardYRateLimit;
-    return this;
-  }
+        robotRelativeSpeeds =
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                        robotRelativeSpeeds, parameters.currentPose.getRotation());
 
-  public FieldOrientedOrbitSwerveRequest withTimestep(double timestep) {
-    this.timestep = timestep;
-    return this;
-  }
+        // Apply all other limits
+        previousSetpoint =
+                setpointGenerator.generateSetpoint(previousSetpoint, robotRelativeSpeeds, timestep, 12.0);
 
-  public FieldOrientedOrbitSwerveRequest withMaintainStraightStopping(
-      boolean maintainStraightStopping) {
-    this.maintainStraightStopping = maintainStraightStopping;
-    return this;
-  }
+        DriveFeedforwards feedforwards = previousSetpoint.feedforwards();
+
+        ChassisSpeeds driveSpeeds = previousSetpoint.robotRelativeSpeeds();
+
+        return applyRobotSpeeds
+                .withSpeeds(driveSpeeds)
+                .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+                .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
+                .apply(parameters, modulesToApply);
+    }
+
+    public FieldOrientedOrbitSwerveRequest withChassisSpeeds(ChassisSpeeds chassisSpeeds) {
+        this.chassisSpeeds = chassisSpeeds;
+        return this;
+    }
+
+    public FieldOrientedOrbitSwerveRequest withPreviousSetpoint(
+            SwerveSetpoint previousSetpoint, Rotation2d robotOrientation) {
+        this.previousSetpoint = previousSetpoint;
+        this.slewedFieldChassisSpeeds =
+                ChassisSpeeds.fromRobotRelativeSpeeds(chassisSpeeds, robotOrientation);
+        return this;
+    }
+
+    public FieldOrientedOrbitSwerveRequest withDriverOrientation(boolean useDriverOrientation) {
+        this.useDriverOrientation = useDriverOrientation;
+        return this;
+    }
+
+    public FieldOrientedOrbitSwerveRequest withXRateLimits(
+            double forwardXRateLimit, double backwardXRateLimit) {
+        this.forwardXRateLimit = forwardXRateLimit;
+        this.backwardXRateLimit = backwardXRateLimit;
+        return this;
+    }
+
+    public FieldOrientedOrbitSwerveRequest withYRateLimits(
+            double forwardYRateLimit, double backwardYRateLimit) {
+        this.forwardYRateLimit = forwardYRateLimit;
+        this.backwardYRateLimit = backwardYRateLimit;
+        return this;
+    }
+
+    public FieldOrientedOrbitSwerveRequest withTimestep(double timestep) {
+        this.timestep = timestep;
+        return this;
+    }
+
+    public FieldOrientedOrbitSwerveRequest withMaintainStraightStopping(
+            boolean maintainStraightStopping) {
+        this.maintainStraightStopping = maintainStraightStopping;
+        return this;
+    }
 }
