@@ -19,6 +19,7 @@ import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.WheelRadiusCharacterization;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class RobotContainer {
     private double MaxSpeed =
@@ -52,6 +53,10 @@ public class RobotContainer {
         // Establish the "Trajectory Field" Field2d into the dashboard
     }
 
+    private final LoggedNetworkNumber xVel = new LoggedNetworkNumber("xVel", 0.0);
+    private final LoggedNetworkNumber yVel = new LoggedNetworkNumber("yVel", 0.0);
+    private final LoggedNetworkNumber rotVel = new LoggedNetworkNumber("rotVel", 0.0);
+
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
@@ -80,9 +85,9 @@ public class RobotContainer {
                                                                     0.1))
                                                     * GlobalConstants.MAX_ROTATIONAL_SPEED.in(
                                                             RadiansPerSecond));
-                            return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(
-                                    driverDesiredSpeeds);
-                            // return drivetrain.m_applyFieldSpeeds.withSpeeds(driverDesiredSpeeds);
+                            // return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(
+                            //         driverDesiredSpeeds);
+                            return drivetrain.m_applyFieldSpeeds.withSpeeds(driverDesiredSpeeds);
                         }));
 
         // drive.withVelocityX(-leftDriveController.getYAxis().get() *

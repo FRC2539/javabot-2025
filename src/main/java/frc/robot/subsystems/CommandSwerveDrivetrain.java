@@ -2,8 +2,9 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
 
-import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.configs.MagnetSensorConfigs;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -25,12 +26,16 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.constants.GlobalConstants;
+import frc.robot.util.PhoenixUtil;
 import java.util.function.Supplier;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.GyroSimulation;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -38,6 +43,8 @@ import org.littletonrobotics.junction.Logger;
  * be used in command-based projects.
  */
 public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsystem {
+    private SwerveDriveSimulation m_driveSim;
+
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
@@ -65,7 +72,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     public final SwerveRequest.ApplyFieldSpeeds m_applyFieldSpeeds =
             new SwerveRequest.ApplyFieldSpeeds();
-
     public final FieldOrientedOrbitSwerveRequest m_applyFieldSpeedsOrbit;
     RobotConfig config; // PathPlanner robot configuration
 
@@ -75,10 +81,10 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                     new SysIdRoutine.Config(
                             null, // Use default ramp rate (1 V/s)
                             Volts.of(4), // Reduce dynamic step voltage to 4 V to prevent brownout
-                            null, // Use default timeout (10 s)
+                            Seconds.of(5), // Use default timeout (10 s)
                             // Log state with SignalLogger class
                             state ->
-                                    SignalLogger.writeString(
+                                    Logger.recordOutput(
                                             "SysIdTranslation_State", state.toString())),
                     new SysIdRoutine.Mechanism(
                             output -> setControl(m_translationCharacterization.withVolts(output)),
@@ -91,10 +97,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                     new SysIdRoutine.Config(
                             null, // Use default ramp rate (1 V/s)
                             Volts.of(7), // Use dynamic voltage of 7 V
-                            null, // Use default timeout (10 s)
+                            Seconds.of(5), // Use default timeout (10 s)
                             // Log state with SignalLogger class
-                            state ->
-                                    SignalLogger.writeString("SysIdSteer_State", state.toString())),
+                            state -> Logger.recordOutput("SysIdSteer_State", state.toString())),
                     new SysIdRoutine.Mechanism(
                             volts -> setControl(m_steerCharacterization.withVolts(volts)),
                             null,
@@ -112,11 +117,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                             Volts.of(Math.PI / 6).per(Second),
                             /* This is in radians per second, but SysId only supports "volts" */
                             Volts.of(Math.PI),
-                            null, // Use default timeout (10 s)
+                            Seconds.of(5), // Use default timeout (10 s)
                             // Log state with SignalLogger class
-                            state ->
-                                    SignalLogger.writeString(
-                                            "SysIdRotation_State", state.toString())),
+                            state -> Logger.recordOutput("SysIdRotation_State", state.toString())),
                     new SysIdRoutine.Mechanism(
                             output -> {
                                 /* output is actually radians per second, but SysId only supports "volts" */
@@ -124,7 +127,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                                         m_rotationCharacterization.withRotationalRate(
                                                 output.in(Volts)));
                                 /* also log the requested output for SysId */
-                                SignalLogger.writeDouble("Rotational_Rate", output.in(Volts));
+                                Logger.recordOutput("Rotational_Rate", output.in(Volts));
                             },
                             null,
                             this));
@@ -366,22 +369,95 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         Logger.recordOutput("Drive/ModuleStates", getState().ModuleStates);
 
         Logger.recordOutput("Drive/actualChassisSpeeds", getState().Speeds);
+        Logger.recordOutput("Drive/Pose", getState().Pose);
+
+        if (m_driveSim != null) {
+            Logger.recordOutput(
+                    "FieldSimulation/DriveTrainPose", m_driveSim.getSimulatedDriveTrainPose());
+        }
     }
 
     private void startSimThread() {
+        DriveTrainSimulationConfig config = GlobalConstants.getDriveTrainSimulationConfig();
+
+        config.withGyro(
+                () ->
+                        new GyroSimulation(0.5, 0.02) {
+                            public void updateSimulationSubTick(
+                                    double actualAngularVelocityRadPerSec) {
+                                super.updateSimulationSubTick(actualAngularVelocityRadPerSec);
+                                CommandSwerveDrivetrain.this
+                                        .getPigeon2()
+                                        .getSimState()
+                                        .setRawYaw(getGyroReading().getMeasure());
+                                CommandSwerveDrivetrain.this
+                                        .getPigeon2()
+                                        .getSimState()
+                                        .setAngularVelocityZ(getMeasuredAngularVelocity());
+                                CommandSwerveDrivetrain.this
+                                        .getPigeon2()
+                                        .getSimState()
+                                        .setSupplyVoltage(12.0);
+                            }
+                        });
+
+        m_driveSim = new SwerveDriveSimulation(config, new Pose2d(1, 2, new Rotation2d()));
+
         m_lastSimTime = Utils.getCurrentTimeSeconds();
 
-        /* Run simulation at a faster rate so PID gains behave more reasonably */
-        m_simNotifier =
-                new Notifier(
-                        () -> {
-                            final double currentTime = Utils.getCurrentTimeSeconds();
-                            double deltaTime = currentTime - m_lastSimTime;
-                            m_lastSimTime = currentTime;
+        SimulatedArena.getInstance().addDriveTrainSimulation(m_driveSim);
 
-                            /* use the measured time delta, get battery voltage from WPILib */
-                            updateSimState(deltaTime, RobotController.getBatteryVoltage());
-                        });
-        m_simNotifier.startPeriodic(kSimLoopPeriod);
+        var sim_modules = m_driveSim.getModules();
+        var drive_modules = getModules();
+
+        for (int i = 0; i < 4; i++) {
+
+            sim_modules[i].useDriveMotorController(
+                    new PhoenixUtil.TalonFXMotorControllerSim(
+                            drive_modules[i].getDriveMotor(),
+                            drive_modules[i].getDriveMotor().getInverted()));
+
+            MagnetSensorConfigs configCanCoder = new MagnetSensorConfigs();
+
+            drive_modules[i].getCANcoder().getConfigurator().refresh(configCanCoder);
+            ;
+
+            sim_modules[i].useSteerMotorController(
+                    new PhoenixUtil.TalonFXMotorControllerWithRemoteCancoderSim(
+                            drive_modules[i].getSteerMotor(),
+                            drive_modules[i].getSteerMotor().getInverted(),
+                            drive_modules[i].getCANcoder(),
+                            configCanCoder.SensorDirection
+                                    == SensorDirectionValue.Clockwise_Positive,
+                            Rotations.of(configCanCoder.MagnetOffset)));
+        }
+
+        /* Run simulation at a faster rate so PID gains behave more reasonably */
+        // m_simNotifier = new Notifier(() -> {
+        //         SimulatedArena.getInstance().simulationPeriodic();
+
+        //     final double currentTime = Utils.getCurrentTimeSeconds();
+        //     double deltaTime = currentTime - m_lastSimTime;
+        //     m_lastSimTime = currentTime;
+
+        //     //updateSimState(currentTime, RobotController.getBatteryVoltage());
+        //     /* use the measured time delta, get battery voltage from WPILib */
+        //     // updateSimState(deltaTime, RobotController.getBatteryVoltage());
+        // });
+        // m_simNotifier.startPeriodic(kSimLoopPeriod);
+        /* Run simulation at a faster rate so PID gains behave more reasonably */
+        // m_simNotifier =
+        //         new Notifier(
+        //                 () -> {
+        //                     final double currentTime = Utils.getCurrentTimeSeconds();
+        //                     double deltaTime = currentTime - m_lastSimTime;
+        //                     m_lastSimTime = currentTime;
+
+        //                     /* use the measured time delta, get battery voltage from WPILib */
+        //                     updateSimState(deltaTime, RobotController.getBatteryVoltage());
+        //                 });
+        // m_simNotifier.startPeriodic(kSimLoopPeriod);
     }
+
+    Rotation2d m_lastAngle = new Rotation2d();
 }
