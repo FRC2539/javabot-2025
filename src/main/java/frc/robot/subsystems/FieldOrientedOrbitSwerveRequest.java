@@ -143,8 +143,7 @@ public class FieldOrientedOrbitSwerveRequest implements SwerveRequest {
 
         // Apply all other limits
         previousSetpoint =
-                setpointGenerator.generateSetpoint(
-                        previousSetpoint, robotRelativeSpeeds, timestep);
+                setpointGenerator.generateSetpoint(previousSetpoint, robotRelativeSpeeds, timestep);
 
         DriveFeedforwards feedforwards = previousSetpoint.feedforwards();
 

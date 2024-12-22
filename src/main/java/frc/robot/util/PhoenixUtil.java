@@ -27,6 +27,7 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Timer;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.motorsims.SimulatedBattery;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
 import org.littletonrobotics.junction.Logger;
 
@@ -63,7 +64,7 @@ public final class PhoenixUtil {
                 AngularVelocity encoderVelocity) {
             talonFXSimState.setRawRotorPosition(encoderAngle);
             talonFXSimState.setRotorVelocity(encoderVelocity);
-            talonFXSimState.setSupplyVoltage(12.0);
+            talonFXSimState.setSupplyVoltage(SimulatedBattery.getBatteryVoltage());
             Logger.recordOutput(
                     "CTREMotor/" + id + "/mechanismAngleRad", mechanismAngle.in(Radians));
             Logger.recordOutput(
@@ -118,7 +119,7 @@ public final class PhoenixUtil {
                 AngularVelocity encoderVelocity) {
             talonFXSimState.setRawRotorPosition(mechanismAngle.minus(encoderOffset));
             talonFXSimState.setRotorVelocity(mechanismVelocity);
-            talonFXSimState.setSupplyVoltage(12.0);
+            talonFXSimState.setSupplyVoltage(SimulatedBattery.getBatteryVoltage());
             Logger.recordOutput(
                     "CTREMotor/" + id + "/mechanismAngleRad", mechanismAngle.in(Radians));
             Logger.recordOutput(
