@@ -23,10 +23,11 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class RobotContainer {
     private double MaxSpeed =
-            TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+            GlobalConstants.MAX_TRANSLATIONAL_SPEED.in(
+                    MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate =
-            RotationsPerSecond.of(0.75)
-                    .in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+            GlobalConstants.MAX_ROTATIONAL_SPEED.in(
+                    RadiansPerSecond); // kMaxAngularRate desired top rotational speed
 
     private final ThrustmasterJoystick leftDriveController =
             new ThrustmasterJoystick(ControllerConstants.LEFT_DRIVE_CONTROLLER);

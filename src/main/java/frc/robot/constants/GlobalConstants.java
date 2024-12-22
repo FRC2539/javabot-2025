@@ -20,7 +20,7 @@ public class GlobalConstants {
     public static final AngularVelocity MAX_ROTATIONAL_SPEED = RotationsPerSecond.of(1);
 
     public static final Mass ROBOT_MASS = Pounds.of(150);
-    public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(6.883);
+    public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(11.61);
 
     public static final double COEFFICIENT_OF_FRICTION = 1.0;
 
@@ -74,4 +74,17 @@ public class GlobalConstants {
         }
         return robotConfigPathplanner;
     }
+
+    // public static RobotConfig getRobotConfigPathplanner() {
+    //     if (robotConfigPathplanner == null) {
+    //         try{
+    //           robotConfigPathplanner = RobotConfig.fromGUISettings();
+    //         } catch (Exception e) {
+    //           // Handle exception as needed
+    //           e.printStackTrace();
+    //           throw new RuntimeException("Failed to load robot config from pathplanner.");
+    //         }
+    //     }
+    //     return robotConfigPathplanner;
+    // }
 }

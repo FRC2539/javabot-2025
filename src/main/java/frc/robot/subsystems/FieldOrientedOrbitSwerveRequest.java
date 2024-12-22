@@ -42,6 +42,10 @@ public class FieldOrientedOrbitSwerveRequest implements SwerveRequest {
         return chassisSpeeds;
     }
 
+    public ChassisSpeeds getSlewedFieldChassisSpeeds() {
+        return slewedFieldChassisSpeeds;
+    }
+
     public SwerveSetpoint getPreviousSetpoint() {
         return previousSetpoint;
     }
@@ -122,7 +126,7 @@ public class FieldOrientedOrbitSwerveRequest implements SwerveRequest {
         }
 
         accelerations =
-                ChassisSpeeds.fromFieldRelativeSpeeds(
+                ChassisSpeeds.fromRobotRelativeSpeeds(
                         accelerations, parameters.currentPose.getRotation());
 
         slewedFieldChassisSpeeds = slewedFieldChassisSpeeds.plus(accelerations);
@@ -139,7 +143,8 @@ public class FieldOrientedOrbitSwerveRequest implements SwerveRequest {
 
         // Apply all other limits
         previousSetpoint =
-                setpointGenerator.generateSetpoint(previousSetpoint, robotRelativeSpeeds, timestep);
+                setpointGenerator.generateSetpoint(
+                        previousSetpoint, robotRelativeSpeeds, timestep);
 
         DriveFeedforwards feedforwards = previousSetpoint.feedforwards();
 

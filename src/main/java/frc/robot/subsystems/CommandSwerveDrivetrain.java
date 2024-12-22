@@ -2,9 +2,14 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
 
+<<<<<<< HEAD
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+=======
+import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.Utils;
+>>>>>>> main
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -31,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.constants.GlobalConstants;
+<<<<<<< HEAD
 import frc.robot.constants.TunerConstants;
 import frc.robot.util.PhoenixUtil;
 import java.util.function.Supplier;
@@ -39,6 +45,9 @@ import org.ironmaple.simulation.drivesims.GyroSimulation;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+=======
+import java.util.function.Supplier;
+>>>>>>> main
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -72,6 +81,12 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                     .withDriveRequestType(DriveRequestType.Velocity)
                     .withSteerRequestType(SteerRequestType.MotionMagicExpo)
                     .withDesaturateWheelSpeeds(false);
+<<<<<<< HEAD
+=======
+
+    public final SwerveRequest.ApplyFieldSpeeds m_applyFieldSpeeds =
+            new SwerveRequest.ApplyFieldSpeeds();
+>>>>>>> main
 
     public final SwerveRequest.ApplyFieldSpeeds m_applyFieldSpeeds =
             new SwerveRequest.ApplyFieldSpeeds();
@@ -84,10 +99,17 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                     new SysIdRoutine.Config(
                             null, // Use default ramp rate (1 V/s)
                             Volts.of(4), // Reduce dynamic step voltage to 4 V to prevent brownout
+<<<<<<< HEAD
                             Seconds.of(5), // Use default timeout (10 s)
                             // Log state with SignalLogger class
                             state ->
                                     Logger.recordOutput(
+=======
+                            null, // Use default timeout (10 s)
+                            // Log state with SignalLogger class
+                            state ->
+                                    SignalLogger.writeString(
+>>>>>>> main
                                             "SysIdTranslation_State", state.toString())),
                     new SysIdRoutine.Mechanism(
                             output -> setControl(m_translationCharacterization.withVolts(output)),
@@ -100,9 +122,16 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                     new SysIdRoutine.Config(
                             null, // Use default ramp rate (1 V/s)
                             Volts.of(7), // Use dynamic voltage of 7 V
+<<<<<<< HEAD
                             Seconds.of(5), // Use default timeout (10 s)
                             // Log state with SignalLogger class
                             state -> Logger.recordOutput("SysIdSteer_State", state.toString())),
+=======
+                            null, // Use default timeout (10 s)
+                            // Log state with SignalLogger class
+                            state ->
+                                    SignalLogger.writeString("SysIdSteer_State", state.toString())),
+>>>>>>> main
                     new SysIdRoutine.Mechanism(
                             volts -> setControl(m_steerCharacterization.withVolts(volts)),
                             null,
@@ -120,9 +149,17 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                             Volts.of(Math.PI / 6).per(Second),
                             /* This is in radians per second, but SysId only supports "volts" */
                             Volts.of(Math.PI),
+<<<<<<< HEAD
                             Seconds.of(5), // Use default timeout (10 s)
                             // Log state with SignalLogger class
                             state -> Logger.recordOutput("SysIdRotation_State", state.toString())),
+=======
+                            null, // Use default timeout (10 s)
+                            // Log state with SignalLogger class
+                            state ->
+                                    SignalLogger.writeString(
+                                            "SysIdRotation_State", state.toString())),
+>>>>>>> main
                     new SysIdRoutine.Mechanism(
                             output -> {
                                 /* output is actually radians per second, but SysId only supports "volts" */
@@ -130,7 +167,11 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                                         m_rotationCharacterization.withRotationalRate(
                                                 output.in(Volts)));
                                 /* also log the requested output for SysId */
+<<<<<<< HEAD
                                 Logger.recordOutput("Rotational_Rate", output.in(Volts));
+=======
+                                SignalLogger.writeDouble("Rotational_Rate", output.in(Volts));
+>>>>>>> main
                             },
                             null,
                             this));
@@ -321,6 +362,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         return m_sysIdRoutineToApply.dynamic(direction);
     }
 
+    private double lastSpeed = 0;
+
     @Override
     public void periodic() {
 
@@ -343,6 +386,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                             });
         }
 
+<<<<<<< HEAD
         var state = getState();
 
         Logger.recordOutput(
@@ -365,6 +409,35 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             Logger.recordOutput(
                     "FieldSimulation/RobotPose", m_driveSim.getSimulatedDriveTrainPose());
         }
+=======
+        Logger.recordOutput(
+                "Drive/desiredChassisSpeeds", m_applyFieldSpeedsOrbit.getChassisSpeeds());
+        Logger.recordOutput(
+                "Drive/slewedChassisSpeeds", m_applyFieldSpeedsOrbit.getSlewedFieldChassisSpeeds());
+        Logger.recordOutput(
+                "Drive/setpointChassisSpeeds",
+                m_applyFieldSpeedsOrbit.getPreviousSetpoint().robotRelativeSpeeds());
+
+        ChassisSpeeds speedsPreview =
+                m_applyFieldSpeedsOrbit.getPreviousSetpoint().robotRelativeSpeeds();
+
+        double currentSpeed =
+                Math.hypot(speedsPreview.vxMetersPerSecond, speedsPreview.vyMetersPerSecond);
+        double acceleration = (currentSpeed - lastSpeed) / 0.02;
+        lastSpeed = currentSpeed;
+
+        Logger.recordOutput("Drive/Velocity", currentSpeed);
+        Logger.recordOutput("Drive/Acceleration", acceleration);
+
+        Logger.recordOutput(
+                "Drive/NotZero", m_applyFieldSpeedsOrbit.getChassisSpeeds().vxMetersPerSecond != 0);
+
+        Logger.recordOutput("Drive/ModuleTargets", getState().ModuleTargets);
+        Logger.recordOutput("Drive/ModulePositions", getState().ModulePositions);
+        Logger.recordOutput("Drive/ModuleStates", getState().ModuleStates);
+
+        Logger.recordOutput("Drive/actualChassisSpeeds", getState().Speeds);
+>>>>>>> main
     }
 
     private void startSimThread() {
@@ -413,6 +486,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
         m_lastSimTime = Utils.getCurrentTimeSeconds();
 
+<<<<<<< HEAD
         SimulatedArena.getInstance().addDriveTrainSimulation(m_driveSim);
 
         var sim_modules = m_driveSim.getModules();
@@ -453,6 +527,20 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         //     // updateSimState(deltaTime, RobotController.getBatteryVoltage());
         // });
         // m_simNotifier.startPeriodic(kSimLoopPeriod);
+=======
+        /* Run simulation at a faster rate so PID gains behave more reasonably */
+        m_simNotifier =
+                new Notifier(
+                        () -> {
+                            final double currentTime = Utils.getCurrentTimeSeconds();
+                            double deltaTime = currentTime - m_lastSimTime;
+                            m_lastSimTime = currentTime;
+
+                            /* use the measured time delta, get battery voltage from WPILib */
+                            updateSimState(deltaTime, RobotController.getBatteryVoltage());
+                        });
+        m_simNotifier.startPeriodic(kSimLoopPeriod);
+>>>>>>> main
     }
 
     Rotation2d m_lastAngle = new Rotation2d();

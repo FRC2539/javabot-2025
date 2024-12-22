@@ -37,6 +37,9 @@ public class TunerConstants {
     // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
     private static final Slot0Configs driveGains =
             new Slot0Configs().withKP(0.1).withKI(0).withKD(0).withKS(0).withKV(0.124);
+    // private static final Slot0Configs driveGains = new Slot0Configs()
+    //     .withKP(0.1).withKI(0).withKD(0)
+    //     .withKS(0).withKV(0.124);
 
     // The closed-loop output type to use for the steer motors;
     // This affects the PID/FF gains for the steer motors
@@ -62,8 +65,7 @@ public class TunerConstants {
                     .withCurrentLimits(
                             new CurrentLimitsConfigs()
                                     // Swerve azimuth does not require much torque output, so we can
-                                    // set a relatively
-                                    // low
+                                    // set a relatively low
                                     // stator current limit to help avoid brownouts without
                                     // impacting performance.
                                     .withStatorCurrentLimit(Amps.of(60))
@@ -94,8 +96,8 @@ public class TunerConstants {
     private static final int kPigeonId = 29;
 
     // These are only used for simulation
-    private static final double kSteerInertia = 0.005;
-    private static final double kDriveInertia = 0.001;
+    private static final MomentOfInertia kSteerInertia = KilogramSquareMeters.of(0.01);
+    private static final MomentOfInertia kDriveInertia = KilogramSquareMeters.of(0.0439);
     // Simulated voltage necessary to overcome friction
     private static final Voltage kSteerFrictionVoltage = Volts.of(0.0);
     private static final Voltage kDriveFrictionVoltage = Volts.of(0.0);
