@@ -35,8 +35,6 @@ public class RobotContainer {
     private final LogitechController operatorController =
             new LogitechController(ControllerConstants.OPERATOR_CONTROLLER);
 
-    private final Telemetry logger = new Telemetry(MaxSpeed);
-
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     public Auto auto = new Auto(drivetrain);
@@ -138,7 +136,6 @@ public class RobotContainer {
                 .getRightBumper()
                 .onTrue(drivetrain.runOnce(() -> drivetrain.resetPose(new Pose2d())));
 
-        drivetrain.registerTelemetry(logger::telemeterize);
     }
 
     private double deadband(double value, double deadband) {
