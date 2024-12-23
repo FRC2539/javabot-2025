@@ -1,16 +1,31 @@
 package frc.robot.subsystems;
 
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
 
 public class TestBase extends SubsystemBase{
     LoggedNetworkNumber motorOneSpeed = new LoggedNetworkNumber("motorOne", 1);
     LoggedNetworkNumber motorTwoSpeed = new LoggedNetworkNumber("motorTwo", 1);
     LoggedNetworkNumber motorThreeSpeed = new LoggedNetworkNumber("motorThree", 1);
+    LoggedNetworkBoolean sigGod = new LoggedNetworkBoolean("sigGod", false);
+
+    DigitalInput ongodrizzler = new DigitalInput(6);
+
+    private boolean getTheRizzFromTheRizzler(){
+        if (Robot.isSimulation()) {
+            return sigGod.get();
+        }
+        
+        return ongodrizzler.get();
+    }
 
     TalonFX motorOne = new TalonFX(9);
     TalonFX motorTwo = new TalonFX(10);
@@ -33,12 +48,21 @@ public class TestBase extends SubsystemBase{
 
     }
 
+    public Command runWhile(){
+        return runReallyReallyReallyReallyReallyReallyReallyFast().until(() -> {
+            return getTheRizzFromTheRizzler();
+        });
+    }
+
     public Command runReallyReallyReallyReallyReallyReallyReallyFast() {
         return run(() -> {
             setSigmaSpeed(1, motorOneSpeed.get());
             setSigmaSpeed(2,motorTwoSpeed.get());
             setSigmaSpeed(3, motorThreeSpeed.get());
         
+        })
+        .beforeStarting(() -> {
+            Logger.recordOutput("Drive/skib", "downed speed");
         });
     }
 
@@ -47,6 +71,8 @@ public class TestBase extends SubsystemBase{
             setSigmaSpeed(1, 0);
             setSigmaSpeed(2,0);
             setSigmaSpeed(3, 0);
+        }).beforeStarting(() -> {
+            Logger.recordOutput("Drive/skib", "zero beero weero speed");
         });
 
     }
@@ -56,6 +82,8 @@ public class TestBase extends SubsystemBase{
             motorOneSpeed.set(motorOneSpeed.get() + 0.005); 
             motorTwoSpeed.set(motorTwoSpeed.get() + 0.005); 
             motorThreeSpeed.set(motorThreeSpeed.get() + 0.005); 
+        }).beforeStarting(() -> {
+            Logger.recordOutput("Drive/skib", "upped speed");
         });
     }
 
@@ -64,6 +92,8 @@ public class TestBase extends SubsystemBase{
             motorOneSpeed.set(motorOneSpeed.get() - 0.005); 
             motorTwoSpeed.set(motorTwoSpeed.get() - 0.005); 
             motorThreeSpeed.set(motorThreeSpeed.get() - 0.005); 
+        }).beforeStarting(() -> {
+            Logger.recordOutput("Drive/skib", "downed speed");
         });
     }
 
@@ -88,7 +118,7 @@ public class TestBase extends SubsystemBase{
     if(motorThreeSpeed.get() < 0){
         motorThreeSpeed.set(0);
     }
-    
+    Logger.recordOutput("Drive/onGod", motorOneSpeed.get());
    }
 
     
