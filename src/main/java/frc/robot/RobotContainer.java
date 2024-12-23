@@ -135,7 +135,6 @@ public class RobotContainer {
         operatorController
                 .getRightBumper()
                 .onTrue(drivetrain.runOnce(() -> drivetrain.resetPose(new Pose2d())));
-
     }
 
     private double deadband(double value, double deadband) {
