@@ -20,9 +20,9 @@ public class GlobalConstants {
     public static final AngularVelocity MAX_ROTATIONAL_SPEED = RotationsPerSecond.of(1);
 
     public static final Mass ROBOT_MASS = Pounds.of(65.5);
-    public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(11.61*65.5/150);
+    public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(11.61 * 65.5 / 150);
 
-    public static final double COEFFICIENT_OF_FRICTION = 0.7;
+    public static final double COEFFICIENT_OF_FRICTION = 1.1;
 
     public static final DCMotor DRIVE_MOTOR =
             DCMotor.getFalcon500Foc(1).withReduction(EXAMPLE_MODULE.DriveMotorGearRatio);
