@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import java.util.function.BooleanSupplier;
+
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
@@ -15,16 +17,20 @@ public class TestBase extends SubsystemBase{
     LoggedNetworkNumber motorOneSpeed = new LoggedNetworkNumber("motorOne", 1);
     LoggedNetworkNumber motorTwoSpeed = new LoggedNetworkNumber("motorTwo", 1);
     LoggedNetworkNumber motorThreeSpeed = new LoggedNetworkNumber("motorThree", 1);
-    LoggedNetworkBoolean sigGod = new LoggedNetworkBoolean("sigGod", false);
-
     DigitalInput ongodrizzler = new DigitalInput(6);
+    Boolean the = ongodrizzler.get();
+    LoggedNetworkBoolean sigGod = new LoggedNetworkBoolean("sigGod", false);
+    Boolean f = sigGod.get();
 
-    private boolean getTheRizzFromTheRizzler(){
+    
+
+    private BooleanSupplier getTheRizzFromTheRizzler(){
         if (Robot.isSimulation()) {
-            return sigGod.get();
+            BooleanSupplier simAnswer = sigGod::get;
+            return simAnswer;
         }
-        
-        return ongodrizzler.get();
+        BooleanSupplier realAnswer = ongodrizzler::get;
+        return realAnswer;
     }
 
     TalonFX motorOne = new TalonFX(9);
@@ -48,11 +54,10 @@ public class TestBase extends SubsystemBase{
 
     }
 
-    public Command runWhile(){
-        return runReallyReallyReallyReallyReallyReallyReallyFast().until(() -> {
-            return getTheRizzFromTheRizzler();
-        });
-    }
+    // public Command runWhile(){
+        
+    //     return runReallyReallyReallyReallyReallyReallyReallyFast().until(getTheRizzFromTheRizzler());
+    // }
 
     public Command runReallyReallyReallyReallyReallyReallyReallyFast() {
         return run(() -> {
@@ -63,7 +68,8 @@ public class TestBase extends SubsystemBase{
         })
         .beforeStarting(() -> {
             Logger.recordOutput("Drive/skib", "downed speed");
-        });
+        }).until(getTheRizzFromTheRizzler());
+        
     }
 
     public Command zeroBeerForThePolish() {
