@@ -17,68 +17,71 @@ public class TestBase extends SubsystemBase{
     LoggedNetworkNumber motorOneSpeed = new LoggedNetworkNumber("motorOne", 1);
     LoggedNetworkNumber motorTwoSpeed = new LoggedNetworkNumber("motorTwo", 1);
     LoggedNetworkNumber motorThreeSpeed = new LoggedNetworkNumber("motorThree", 1);
-    DigitalInput ongodrizzler = new DigitalInput(6);
-    Boolean the = ongodrizzler.get();
-    LoggedNetworkBoolean sigGod = new LoggedNetworkBoolean("sigGod", false);
-    Boolean f = sigGod.get();
+    DigitalInput sensor = new DigitalInput(6);
+    
+    LoggedNetworkBoolean simSensor = new LoggedNetworkBoolean("simSensor", false);
+    
 
     
 
     private BooleanSupplier getTheRizzFromTheRizzler(){
         if (Robot.isSimulation()) {
-            BooleanSupplier simAnswer = sigGod::get;
+            BooleanSupplier simAnswer = simSensor::get;
             return simAnswer;
         }
-        BooleanSupplier realAnswer = ongodrizzler::get;
+        BooleanSupplier realAnswer = sensor::get;
         return realAnswer;
     }
+
+
+    
 
     TalonFX motorOne = new TalonFX(9);
     TalonFX motorTwo = new TalonFX(10);
     TalonFX motorThree = new TalonFX(11);
 
-    private void setSigmaSpeed(int eyedee, double spid){
-        if(eyedee==1){
-            motorOne.set(spid);
+    private void setSpeedAmount(int id, double speed){
+        if(id==1){
+            motorOne.set(speed);
         }
-        else if(eyedee==2){
-            motorTwo.set(spid);
+        else if(id==2){
+            motorTwo.set(speed);
         }
         else{
-            motorThree.set(spid);
+            motorThree.set(speed);
         }
     }
 
-    public Command skibidiBazooka(){
-        return run(() -> setSigmaSpeed(1,0.999));
+    // public Command skibidiBazooka(){
+    //     return run(() -> setSpeedAmount(1,0.999));
 
-    }
+    // }
 
     // public Command runWhile(){
         
     //     return runReallyReallyReallyReallyReallyReallyReallyFast().until(getTheRizzFromTheRizzler());
     // }
 
-    public Command runReallyReallyReallyReallyReallyReallyReallyFast() {
+    public Command run() {
         return run(() -> {
-            setSigmaSpeed(1, motorOneSpeed.get());
-            setSigmaSpeed(2,motorTwoSpeed.get());
-            setSigmaSpeed(3, motorThreeSpeed.get());
+            setSpeedAmount(1, motorOneSpeed.get());
+            setSpeedAmount(2,motorTwoSpeed.get());
+            setSpeedAmount(3, motorThreeSpeed.get());
         
         })
         .beforeStarting(() -> {
-            Logger.recordOutput("Drive/skib", "downed speed");
+            Logger.recordOutput("Drive/driving", "running");
         }).until(getTheRizzFromTheRizzler());
         
     }
 
-    public Command zeroBeerForThePolish() {
+    public Command noSpeed() {
         return run(() -> {
-            setSigmaSpeed(1, 0);
-            setSigmaSpeed(2,0);
-            setSigmaSpeed(3, 0);
+            setSpeedAmount(1, 0);
+            setSpeedAmount(2,0);
+            setSpeedAmount(3, 0);
         }).beforeStarting(() -> {
-            Logger.recordOutput("Drive/skib", "zero beero weero speed");
+            Logger.recordOutput("Drive/driving", "idle");
         });
 
     }
@@ -89,7 +92,7 @@ public class TestBase extends SubsystemBase{
             motorTwoSpeed.set(motorTwoSpeed.get() + 0.005); 
             motorThreeSpeed.set(motorThreeSpeed.get() + 0.005); 
         }).beforeStarting(() -> {
-            Logger.recordOutput("Drive/skib", "upped speed");
+            Logger.recordOutput("Drive/setspeed", "upped speed");
         });
     }
 
@@ -99,7 +102,7 @@ public class TestBase extends SubsystemBase{
             motorTwoSpeed.set(motorTwoSpeed.get() - 0.005); 
             motorThreeSpeed.set(motorThreeSpeed.get() - 0.005); 
         }).beforeStarting(() -> {
-            Logger.recordOutput("Drive/skib", "downed speed");
+            Logger.recordOutput("Drive/setspeed", "downed speed");
         });
     }
 
@@ -124,7 +127,7 @@ public class TestBase extends SubsystemBase{
     if(motorThreeSpeed.get() < 0){
         motorThreeSpeed.set(0);
     }
-    Logger.recordOutput("Drive/onGod", motorOneSpeed.get());
+    Logger.recordOutput("Drive/motor one speed", motorOneSpeed.get());
    }
 
     

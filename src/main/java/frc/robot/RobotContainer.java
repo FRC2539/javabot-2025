@@ -78,8 +78,8 @@ public class RobotContainer {
         //     point.withModuleDirection(new Rotation2d(-operatorController.getLeftYAxis().get(), -operatorController.getLeftXAxis().get()))
         // ));
 
-        operatorController.getX().whileTrue(newTestBase.runReallyReallyReallyReallyReallyReallyReallyFast());
-        newTestBase.setDefaultCommand(newTestBase.zeroBeerForThePolish());
+        operatorController.getX().whileTrue(newTestBase.run());
+        newTestBase.setDefaultCommand(newTestBase.noSpeed());
         
         leftDriveController.getTrigger().whileTrue(new WheelRadiusCharacterization(WheelRadiusCharacterization.Direction.CLOCKWISE, drivetrain));
 
