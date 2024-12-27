@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
@@ -24,7 +25,7 @@ public class TestBase extends SubsystemBase{
 
     
 
-    private BooleanSupplier getTheRizzFromTheRizzler(){
+    private BooleanSupplier getSensorValue(){
         if (Robot.isSimulation()) {
             BooleanSupplier simAnswer = simSensor::get;
             return simAnswer;
@@ -39,6 +40,9 @@ public class TestBase extends SubsystemBase{
     TalonFX motorOne = new TalonFX(9);
     TalonFX motorTwo = new TalonFX(10);
     TalonFX motorThree = new TalonFX(11);
+    TalonFX motorOneFollower = new TalonFX(19);
+    TalonFX motorTwoFollower = new TalonFX(20);
+    TalonFX motorThreeFollower = new TalonFX(21);
 
     private void setSpeedAmount(int id, double speed){
         if(id==1){
@@ -52,15 +56,7 @@ public class TestBase extends SubsystemBase{
         }
     }
 
-    // public Command skibidiBazooka(){
-    //     return run(() -> setSpeedAmount(1,0.999));
-
-    // }
-
-    // public Command runWhile(){
-        
-    //     return runReallyReallyReallyReallyReallyReallyReallyFast().until(getTheRizzFromTheRizzler());
-    // }
+    
 
     public Command run() {
         return run(() -> {
@@ -71,8 +67,18 @@ public class TestBase extends SubsystemBase{
         })
         .beforeStarting(() -> {
             Logger.recordOutput("Drive/driving", "running");
-        }).until(getTheRizzFromTheRizzler());
+        }).until(getSensorValue());
         
+    }
+
+    public Command followerRun() {
+        return run(() -> {
+            motorOneFollower.set(motorOne.get());
+            motorTwoFollower.set(motorTwo.get());
+            motorThreeFollower.set(motorThree.get());
+        }).beforeStarting(() -> {
+            Logger.recordOutput("Drive/follower", "follower enabled");
+        });
     }
 
     public Command noSpeed() {

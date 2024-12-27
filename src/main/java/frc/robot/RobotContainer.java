@@ -80,7 +80,7 @@ public class RobotContainer {
 
         operatorController.getX().whileTrue(newTestBase.run());
         newTestBase.setDefaultCommand(newTestBase.noSpeed());
-        
+        operatorController.getDPadLeft().whileTrue(newTestBase.followerRun());
         leftDriveController.getTrigger().whileTrue(new WheelRadiusCharacterization(WheelRadiusCharacterization.Direction.CLOCKWISE, drivetrain));
 
         // Run SysId routines when holding back/start and X/Y.
