@@ -13,6 +13,8 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
+import com.ctre.phoenix6.SignalLogger;
+
 public class Robot extends LoggedRobot {
     private Command m_autonomousCommand;
 
@@ -24,6 +26,8 @@ public class Robot extends LoggedRobot {
         Logger.recordMetadata("ProjectName", "JavaBot-2025"); // Set a metadata value
 
         if (isReal()) {
+            SignalLogger.setPath("/home/lvuser/logs");
+            SignalLogger.start();
             Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
             Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
             PowerDistribution distribution =
