@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     
-permissions: write
+permissions: write-all
 
 jobs:
   sync:
