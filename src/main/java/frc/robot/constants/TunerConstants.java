@@ -64,7 +64,7 @@ public class TunerConstants {
                                     // set a relatively low
                                     // stator current limit to help avoid brownouts without
                                     // impacting performance.
-                                    .withStatorCurrentLimit(Amps.of(100))
+                                    .withStatorCurrentLimit(Amps.of(39)) // 60
                                     .withStatorCurrentLimitEnable(true));
     private static final CANcoderConfiguration cancoderInitialConfigs = new CANcoderConfiguration();
     // Configs for the Pigeon 2; leave this null to skip applying Pigeon 2 configs
