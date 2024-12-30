@@ -67,10 +67,15 @@ public class RobotContainer {
                                                                             .getYAxis()
                                                                             .get(),
                                                                     0.1)),
-                                         -sps(deadband(leftDriveController.getXAxis().get(), 0.1))
+                                            -sps(
+                                                            deadband(
+                                                                    leftDriveController
+                                                                            .getXAxis()
+                                                                            .get(),
+                                                                    0.1))
                                                     * GlobalConstants.MAX_TRANSLATIONAL_SPEED.in(
                                                             MetersPerSecond),
-                                        -sps(
+                                            -sps(
                                                             deadband(
                                                                     rightDriveController
                                                                             .getXAxis()
