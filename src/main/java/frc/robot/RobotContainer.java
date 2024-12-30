@@ -61,13 +61,18 @@ public class RobotContainer {
                                     new ChassisSpeeds(
                                             GlobalConstants.MAX_TRANSLATIONAL_SPEED.in(
                                                             MetersPerSecond)
-                                                    * sps(
+                                                    * -sps(
                                                             deadband(
                                                                     leftDriveController
                                                                             .getYAxis()
                                                                             .get(),
                                                                     0.1)),
-                                            sps(deadband(leftDriveController.getXAxis().get(), 0.1))
+                                            -sps(
+                                                            deadband(
+                                                                    leftDriveController
+                                                                            .getXAxis()
+                                                                            .get(),
+                                                                    0.1))
                                                     * GlobalConstants.MAX_TRANSLATIONAL_SPEED.in(
                                                             MetersPerSecond),
                                             -sps(
@@ -114,7 +119,7 @@ public class RobotContainer {
         operatorController
                 .getBack()
                 .and(operatorController.getY())
-                .whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+                .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
         operatorController
                 .getBack()
                 .and(operatorController.getX())
@@ -126,7 +131,7 @@ public class RobotContainer {
         operatorController
                 .getStart()
                 .and(operatorController.getX())
-                .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+                .whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
 
         // reset the field-centric heading on left bumper press
         operatorController
