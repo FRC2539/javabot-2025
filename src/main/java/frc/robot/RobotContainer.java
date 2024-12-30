@@ -35,8 +35,6 @@ public class RobotContainer {
     private final LogitechController operatorController =
             new LogitechController(ControllerConstants.OPERATOR_CONTROLLER);
 
-    private final Telemetry logger = new Telemetry(MaxSpeed);
-
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     public Auto auto = new Auto(drivetrain);
@@ -116,7 +114,7 @@ public class RobotContainer {
         operatorController
                 .getBack()
                 .and(operatorController.getY())
-                .whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+                .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
         operatorController
                 .getBack()
                 .and(operatorController.getX())
@@ -128,7 +126,7 @@ public class RobotContainer {
         operatorController
                 .getStart()
                 .and(operatorController.getX())
-                .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+                .whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
 
         // reset the field-centric heading on left bumper press
         operatorController
@@ -137,8 +135,6 @@ public class RobotContainer {
         operatorController
                 .getRightBumper()
                 .onTrue(drivetrain.runOnce(() -> drivetrain.resetPose(new Pose2d())));
-
-        drivetrain.registerTelemetry(logger::telemeterize);
     }
 
     private double deadband(double value, double deadband) {

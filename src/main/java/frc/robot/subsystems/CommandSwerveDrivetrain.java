@@ -366,6 +366,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         Logger.recordOutput("Drive/ModuleStates", getState().ModuleStates);
 
         Logger.recordOutput("Drive/actualChassisSpeeds", getState().Speeds);
+
+        Logger.recordOutput("Drive/pose", getState().Pose);
     }
 
     private void startSimThread() {
