@@ -136,7 +136,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     private SwerveSetpointGenerator setpointGenerator;
     private SwerveSetpoint previousSetpoint;
 
-    public void setUpPathPlanner() {}
+    public void setUpPathPlanner() {
+        
+    }
 
     public Pose2d getRobotPose() {
         return this.getState().Pose;
