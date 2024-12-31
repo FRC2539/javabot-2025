@@ -148,6 +148,22 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         return this.getState().Speeds;
     }
 
+    double lastTimestamp = 0;
+
+    {
+        registerTelemetry(
+                (SwerveDrivetrain.SwerveDriveState state) -> {
+                    try {
+
+                        Logger.recordOutput(
+                                "Drive/HighFrequencyOdom", state.Timestamp - lastTimestamp);
+                        lastTimestamp = state.Timestamp;
+                    } catch (Exception e) {
+
+                    }
+                });
+    }
+
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
      *
