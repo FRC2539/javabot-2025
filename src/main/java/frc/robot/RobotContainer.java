@@ -18,8 +18,10 @@ import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.TestBase;
 import frc.robot.subsystems.WheelRadiusCharacterization;
+import frc.robot.subsystems.TestBase.MotorIOSim;
+import frc.robot.subsystems.TestBase.MotorIOTalon;
+import frc.robot.subsystems.TestBase.TestBaseSubsystem;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -36,7 +38,7 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    public final TestBase newTestBase = new TestBase();
+    public final TestBaseSubsystem newTestBaseTalon;
 
     public Auto auto = new Auto(drivetrain);
 
@@ -45,7 +47,14 @@ public class RobotContainer {
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
     public RobotContainer() {
+        if (Robot.isReal()) {
+            newTestBaseTalon =  new TestBaseSubsystem(new MotorIOTalon(9), new MotorIOTalon(10), new MotorIOTalon(11));
+        } else {
+            newTestBaseTalon = new TestBaseSubsystem(new MotorIOSim(), new MotorIOSim(), new MotorIOSim());
+        }
         configureBindings();
+
+
 
         drivetrain.setUpPathPlanner();
          // Establish the "Trajectory Field" Field2d into the dashboard
@@ -78,9 +87,9 @@ public class RobotContainer {
         //     point.withModuleDirection(new Rotation2d(-operatorController.getLeftYAxis().get(), -operatorController.getLeftXAxis().get()))
         // ));
 
-        operatorController.getX().whileTrue(newTestBase.run());
-        newTestBase.setDefaultCommand(newTestBase.noSpeed());
-        operatorController.getDPadLeft().whileTrue(newTestBase.followerRun());
+        operatorController.getX().whileTrue(newTestBaseTalon.run());
+        newTestBaseTalon.setDefaultCommand(newTestBaseTalon.noSpeed());
+       
         leftDriveController.getTrigger().whileTrue(new WheelRadiusCharacterization(WheelRadiusCharacterization.Direction.CLOCKWISE, drivetrain));
 
         // Run SysId routines when holding back/start and X/Y.
@@ -89,8 +98,8 @@ public class RobotContainer {
         operatorController.getBack().and(operatorController.getX()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
         operatorController.getStart().and(operatorController.getY()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         operatorController.getStart().and(operatorController.getX()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-        operatorController.getDPadUp().whileTrue(newTestBase.upTheSpeed());
-        operatorController.getDPadDown().whileTrue(newTestBase.downTheSpeed());
+        operatorController.getDPadUp().whileTrue(newTestBaseTalon.upTheSpeed());
+        operatorController.getDPadDown().whileTrue(newTestBaseTalon.downTheSpeed());
 
         // reset the field-centric heading on left bumper press
         operatorController.getLeftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
