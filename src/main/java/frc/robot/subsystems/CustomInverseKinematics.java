@@ -68,6 +68,27 @@ public class CustomInverseKinematics {
     MathSharedStore.reportUsage(MathUsageId.kKinematics_SwerveDrive, 1);
   }
 
+  public SimpleMatrix toModuleVelocities(SwerveModuleState... moduleStates) {
+    var moduleStatesMatrix = new SimpleMatrix(moduleStates.length * 2, 1);
+
+    for (int i = 0; i < m_numModules - 1; i++) {
+      var module = moduleStates[i];
+      moduleStatesMatrix.set(i * 2, 0, module.speedMetersPerSecond * module.angle.getCos());
+      moduleStatesMatrix.set(i * 2 + 1, module.speedMetersPerSecond * module.angle.getSin());
+    }
+
+    return moduleStatesMatrix;
+  }
+
+  public SimpleMatrix toModuleVelocities(ChassisSpeeds chassisSpeeds) {
+    var chassisSpeedsVector = new SimpleMatrix(3, 1);
+    chassisSpeedsVector.set(0, 0, chassisSpeeds.vxMetersPerSecond);
+    chassisSpeedsVector.set(1, 0, chassisSpeeds.vyMetersPerSecond);
+    chassisSpeedsVector.set(2, 0, chassisSpeeds.omegaRadiansPerSecond);
+
+    return m_inverseKinematics.mult(chassisSpeedsVector);
+  }
+
   public ChassisSpeeds toChassisSpeeds(int missingModule, SwerveModuleState... moduleStates) {
     if (moduleStates.length != m_numModules - 1) {
       throw new IllegalArgumentException(
