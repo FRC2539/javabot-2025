@@ -51,7 +51,7 @@ public class TunerConstants {
 
     // The stator current at which the wheels start to slip;
     // This needs to be tuned to your individual robot
-    private static final Current kSlipCurrent = Amps.of(60.0);
+    private static final Current kSlipCurrent = Amps.of(37.0);
 
     // Initial configs for the drive and steer motors and the CANcoder; these cannot be null.
     // Some configs will be overwritten; check the `with*InitialConfigs()` API documentation.
@@ -64,7 +64,7 @@ public class TunerConstants {
                                     // set a relatively low
                                     // stator current limit to help avoid brownouts without
                                     // impacting performance.
-                                    .withStatorCurrentLimit(Amps.of(39)) // 60
+                                    .withStatorCurrentLimit(Amps.of(60)) // 60
                                     .withStatorCurrentLimitEnable(true));
     private static final CANcoderConfiguration cancoderInitialConfigs = new CANcoderConfiguration();
     // Configs for the Pigeon 2; leave this null to skip applying Pigeon 2 configs
