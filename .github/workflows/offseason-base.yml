@@ -10,15 +10,22 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.KRYPTO_BOT_APPID }}
+          private-key: ${{ secrets.KRYPTO_BOT_SECRET }}
+      
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Setup Git User
         run: |
-          git config user.name "GitHub Action"
-          git config user.email "<EMAIL>"
+          git config user.name "krypto-bot-2539[bot]"
+          git config user.email "193295301+krypto-bot-2539[bot]@users.noreply.github.com"
 
       - name: Update Test Branch
         run: |
