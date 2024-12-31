@@ -10,6 +10,12 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.KRYPTO_BOT_APPID }}
+          private-key: ${{ secrets.KRYPTO_BOT_SECRET }}
+      
       - name: Checkout
         uses: actions/checkout@v4
         with:
