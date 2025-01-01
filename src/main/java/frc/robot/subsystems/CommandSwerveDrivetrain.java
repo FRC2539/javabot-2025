@@ -365,6 +365,39 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         Logger.recordOutput("Drive/ModulePositions", getState().ModulePositions);
         Logger.recordOutput("Drive/ModuleStates", getState().ModuleStates);
 
+        double[] driveMotorStatorCurrents = new double[4];
+        double[] driveMotorSupplyCurrents = new double[4];
+        double[] turnMotorStatorCurrents = new double[4];
+        double[] turnMotorSupplyCurrents = new double[4];
+
+        double[] driveMotorVoltage = new double[4];
+        double[] turnMotorVoltage = new double[4];
+
+        for (int i = 0; i < 4; i++) {
+            var module = getModule(i);
+            driveMotorStatorCurrents[i] =
+                    module.getDriveMotor().getStatorCurrent().refresh().getValueAsDouble();
+            driveMotorSupplyCurrents[i] =
+                    module.getDriveMotor().getSupplyCurrent().refresh().getValueAsDouble();
+            turnMotorStatorCurrents[i] =
+                    module.getSteerMotor().getStatorCurrent().refresh().getValueAsDouble();
+            turnMotorSupplyCurrents[i] =
+                    module.getSteerMotor().getSupplyCurrent().refresh().getValueAsDouble();
+            driveMotorVoltage[i] =
+                    module.getDriveMotor().getMotorVoltage().refresh().getValueAsDouble();
+            turnMotorVoltage[i] =
+                    module.getSteerMotor().getMotorVoltage().refresh().getValueAsDouble();
+        }
+
+        Logger.recordOutput("Drive/Modules/DriveStatorCurrents", driveMotorStatorCurrents);
+        Logger.recordOutput("Drive/Modules/DriveSupplyCurrents", driveMotorSupplyCurrents);
+
+        Logger.recordOutput("Drive/Modules/TurnStatorCurrent", turnMotorStatorCurrents);
+        Logger.recordOutput("Drive/Modules/TurnSupplyCurrent", turnMotorSupplyCurrents);
+
+        Logger.recordOutput("Drive/Modules/DriveStatorVoltage", driveMotorVoltage);
+        Logger.recordOutput("Drive/Modules/TurnStatorVoltage", turnMotorVoltage);
+
         Logger.recordOutput("Drive/actualChassisSpeeds", getState().Speeds);
 
         Logger.recordOutput("Drive/pose", getState().Pose);
