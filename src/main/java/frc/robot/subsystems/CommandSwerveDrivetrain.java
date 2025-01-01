@@ -17,7 +17,9 @@ import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -31,13 +33,14 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.constants.GlobalConstants;
 import java.util.function.Supplier;
+import org.ejml.simple.SimpleMatrix;
 import org.littletonrobotics.junction.Logger;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements Subsystem so it can easily
  * be used in command-based projects.
  */
-public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsystem { 
+public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsystem {
     private final CustomInverseKinematics m_kinematics_custom;
 
     private static final double kSimLoopPeriod = 0.005; // 5 ms
@@ -138,9 +141,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     private SwerveSetpointGenerator setpointGenerator;
     private SwerveSetpoint previousSetpoint;
 
-    public void setUpPathPlanner() {
-        
-    }
+    public void setUpPathPlanner() {}
 
     public Pose2d getRobotPose() {
         return this.getState().Pose;
@@ -148,6 +149,115 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     public ChassisSpeeds getChassisSpeeds() {
         return this.getState().Speeds;
+    }
+
+    private SwerveModulePosition[] m_lastSwerveModulePositionsCustomOdom = new SwerveModulePosition[4];
+    private void customOdometryStep(SwerveDrivetrain.SwerveDriveState state) {
+        double start = Utils.getCurrentTimeSeconds();
+        final double slippingThreshold = 1;
+
+        SimpleMatrix wheel_velocities_no_rot =
+                m_kinematics_custom
+                        .toModuleVelocities(state.ModuleStates)
+                        .minus(
+                                m_kinematics_custom.toModuleVelocities(
+                                        new ChassisSpeeds(
+                                                0,
+                                                0,
+                                                getPigeon2()
+                                                        .getAngularVelocityZWorld()
+                                                        .refresh()
+                                                        .getValue()
+                                                        .in(RadiansPerSecond))));
+        Logger.recordOutput(
+                "Drive/RotationlessVectors", wheel_velocities_no_rot.transpose().toArray2()[0]);
+        
+        double xVelocity = 0;
+        double yVelocity = 0;
+        for (int i = 0; i < 4; i++) {
+            xVelocity += wheel_velocities_no_rot.get(i * 2, 0);
+            yVelocity += wheel_velocities_no_rot.get(i * 2 + 1, 0);
+        }
+        xVelocity /= 4;
+        yVelocity /= 4;
+
+        double[] wheelErrors = new double[4];
+
+        double maxWheelError = 0;
+        int maxWheelErrorIndex = 0;
+
+        for (int i = 0; i < 4; i++) {
+            wheelErrors[i] = Math.hypot(wheel_velocities_no_rot.get(i * 2, 0) - xVelocity, wheel_velocities_no_rot.get(i * 2 + 1, 0) - yVelocity);
+            if (wheelErrors[i] > maxWheelError) {
+                maxWheelError = wheelErrors[i];
+                maxWheelErrorIndex = i;
+            }
+        }
+
+        Logger.recordOutput(
+                "Drive/SlippingAmount", wheelErrors);
+
+        boolean slipping;
+
+        if (maxWheelError > slippingThreshold) {
+                slipping = true;
+                Logger.recordOutput("Drive/MaxSlippingWheel", maxWheelErrorIndex);
+        } else {
+                slipping = false;
+                Logger.recordOutput("Drive/MaxSlippingWheel", -1);
+        }
+
+        Logger.recordOutput("Drive/Slipping", slipping);
+
+        boolean multiWheelSlipping = false;
+
+        if (slipping) {
+                xVelocity = 0;
+                yVelocity = 0;
+                for (int i = 0; i < 3; i++) {
+                        int j = i;
+                         if (i >= maxWheelErrorIndex) {
+                                j++;
+                        }
+                    xVelocity += wheel_velocities_no_rot.get(j * 2, 0);
+                    yVelocity += wheel_velocities_no_rot.get(j * 2 + 1, 0);
+                }
+                xVelocity /= 3;
+                yVelocity /= 3;
+
+                maxWheelError = 0;
+
+                for (int i = 0; i < 3; i++) {
+                        wheelErrors[i] = Math.hypot(wheel_velocities_no_rot.get(i * 2, 0) - xVelocity, wheel_velocities_no_rot.get(i * 2 + 1, 0) - yVelocity);
+                        if (wheelErrors[i] > maxWheelError) {
+                            maxWheelError = wheelErrors[i];
+                        }
+                }
+
+                if (maxWheelError > slippingThreshold) {
+                        multiWheelSlipping = true;
+                }
+        }
+
+        Logger.recordOutput("Drive/MultiWheelSlipping", multiWheelSlipping);
+
+        Twist2d poseChange;
+        double translationStds;
+        double rotationStds;
+
+        if (slipping & !multiWheelSlipping) {
+                poseChange = m_kinematics_custom.toTwist2d(maxWheelErrorIndex, state.ModulePositions, m_lastSwerveModulePositionsCustomOdom);
+        } else {
+                poseChange = m_kinematics_custom.toTwist2d(state.ModulePositions, m_lastSwerveModulePositionsCustomOdom);
+        }
+
+        m_lastSwerveModulePositionsCustomOdom = state.ModulePositions;
+
+
+
+
+        double end = Utils.getCurrentTimeSeconds();
+        Logger.recordOutput("Drive/CustomOdometryTime", end - start);
     }
 
     /**
@@ -167,6 +277,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         }
         m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
         m_kinematics_custom = new CustomInverseKinematics(getModuleLocations());
+        registerTelemetry(this::customOdometryStep);
     }
 
     /**
@@ -191,7 +302,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
         m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
         m_kinematics_custom = new CustomInverseKinematics(getModuleLocations());
-
+        registerTelemetry(this::customOdometryStep);
     }
 
     /**
@@ -225,7 +336,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
         m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
         m_kinematics_custom = new CustomInverseKinematics(getModuleLocations());
-
+        registerTelemetry(this::customOdometryStep);
     }
 
     private FieldOrientedOrbitSwerveRequest generateSwerveSetpointConfig() {
@@ -410,9 +521,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         Logger.recordOutput("Drive/actualChassisSpeeds", getState().Speeds);
 
         Logger.recordOutput("Drive/pose", getState().Pose);
-
-        Logger.recordOutput("Drive/ModuleVectors", m_kinematics_custom.toModuleVelocities(getState().ModuleStates).transpose().toArray2()[0]);
-        Logger.recordOutput("Drive/ModuleVectorsSpeeds", m_kinematics_custom.toModuleVelocities(ChassisSpeeds.fromFieldRelativeSpeeds(getState().Speeds, getState().Pose.getRotation())).transpose().toArray2()[0]);
     }
 
     private void startSimThread() {
