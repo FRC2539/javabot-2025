@@ -89,7 +89,7 @@ public class CustomInverseKinematics {
     }
 
     public ChassisSpeeds toChassisSpeeds(int missingModule, SwerveModuleState... moduleStates) {
-        if (moduleStates.length != m_numModules - 1) {
+        if (moduleStates.length != m_numModules) {
             throw new IllegalArgumentException(
                     "Number of modules is not consistent with number of module locations provided in "
                             + "constructor");
@@ -167,7 +167,7 @@ public class CustomInverseKinematics {
     }
 
     public Twist2d toTwist2d(int missingModule, SwerveModulePosition... moduleDeltas) {
-        if (moduleDeltas.length != m_numModules - 1) {
+        if (moduleDeltas.length != m_numModules) {
             throw new IllegalArgumentException(
                     "Number of modules is not consistent with number of module locations provided in "
                             + "constructor");
