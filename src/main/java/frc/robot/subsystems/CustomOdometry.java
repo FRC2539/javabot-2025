@@ -2,24 +2,20 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
-import java.util.function.DoubleSupplier;
-
-import org.ejml.simple.SimpleMatrix;
-import org.littletonrobotics.junction.Logger;
-
-import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.Timer;
+import java.util.function.DoubleSupplier;
+import org.ejml.simple.SimpleMatrix;
 
 public class CustomOdometry {
     public Pose2d m_currentPose = new Pose2d();
-    private SwerveModulePosition[] m_lastSwerveModulePositionsCustomOdom = new SwerveModulePosition[4];
+    private SwerveModulePosition[] m_lastSwerveModulePositionsCustomOdom =
+            new SwerveModulePosition[4];
     private final CustomInverseKinematics m_kinematics_custom;
     private final DoubleSupplier m_gyroAngularVelocitySupplier;
     final double m_slippingThreshold = 1;
@@ -32,13 +28,16 @@ public class CustomOdometry {
 
     public double m_lastOdometryTime = 0;
 
-    public CustomOdometry(CustomInverseKinematics kinematics, DoubleSupplier gyroAngularVelocitySupplier) {
+    public CustomOdometry(
+            CustomInverseKinematics kinematics, DoubleSupplier gyroAngularVelocitySupplier) {
         m_kinematics_custom = kinematics;
         m_gyroAngularVelocitySupplier = gyroAngularVelocitySupplier;
     }
 
     public CustomOdometry(CustomInverseKinematics kinematics, Pigeon2 pigeon2) {
-        this(kinematics, () -> pigeon2.getAngularVelocityZWorld().refresh().getValue().in(RadiansPerSecond));
+        this(
+                kinematics,
+                () -> pigeon2.getAngularVelocityZWorld().refresh().getValue().in(RadiansPerSecond));
     }
 
     public void odometryFunction(SwerveDrivetrain.SwerveDriveState state) {
@@ -54,7 +53,7 @@ public class CustomOdometry {
                                                     0,
                                                     0,
                                                     m_gyroAngularVelocitySupplier.getAsDouble())));
-            
+
             double xVelocity = 0;
             double yVelocity = 0;
             for (int i = 0; i < 4; i++) {
@@ -70,7 +69,10 @@ public class CustomOdometry {
             int maxWheelErrorIndex = 0;
 
             for (int i = 0; i < 4; i++) {
-                wheelErrors[i] = Math.hypot(wheel_velocities_no_rot.get(i * 2, 0) - xVelocity, wheel_velocities_no_rot.get(i * 2 + 1, 0) - yVelocity);
+                wheelErrors[i] =
+                        Math.hypot(
+                                wheel_velocities_no_rot.get(i * 2, 0) - xVelocity,
+                                wheel_velocities_no_rot.get(i * 2 + 1, 0) - yVelocity);
                 if (wheelErrors[i] > maxWheelError) {
                     maxWheelError = wheelErrors[i];
                     maxWheelErrorIndex = i;
@@ -80,11 +82,11 @@ public class CustomOdometry {
             boolean slipping;
 
             if (maxWheelError > m_slippingThreshold) {
-                    slipping = true;
-                    m_maxSlippingWheelIndex = maxWheelErrorIndex;
+                slipping = true;
+                m_maxSlippingWheelIndex = maxWheelErrorIndex;
             } else {
-                    slipping = false;
-                    m_maxSlippingWheelIndex = -1;
+                slipping = false;
+                m_maxSlippingWheelIndex = -1;
             }
 
             m_isSlipping = slipping;
@@ -92,31 +94,34 @@ public class CustomOdometry {
             boolean multiWheelSlipping = false;
 
             if (slipping) {
-                    xVelocity = 0;
-                    yVelocity = 0;
-                    for (int i = 0; i < 3; i++) {
-                            int j = i;
-                            if (i >= maxWheelErrorIndex) {
-                                    j++;
-                            }
-                        xVelocity += wheel_velocities_no_rot.get(j * 2, 0);
-                        yVelocity += wheel_velocities_no_rot.get(j * 2 + 1, 0);
+                xVelocity = 0;
+                yVelocity = 0;
+                for (int i = 0; i < 3; i++) {
+                    int j = i;
+                    if (i >= maxWheelErrorIndex) {
+                        j++;
                     }
-                    xVelocity /= 3;
-                    yVelocity /= 3;
+                    xVelocity += wheel_velocities_no_rot.get(j * 2, 0);
+                    yVelocity += wheel_velocities_no_rot.get(j * 2 + 1, 0);
+                }
+                xVelocity /= 3;
+                yVelocity /= 3;
 
-                    maxWheelError = 0;
+                maxWheelError = 0;
 
-                    for (int i = 0; i < 3; i++) {
-                            wheelErrors[i] = Math.hypot(wheel_velocities_no_rot.get(i * 2, 0) - xVelocity, wheel_velocities_no_rot.get(i * 2 + 1, 0) - yVelocity);
-                            if (wheelErrors[i] > maxWheelError) {
-                                maxWheelError = wheelErrors[i];
-                            }
+                for (int i = 0; i < 3; i++) {
+                    wheelErrors[i] =
+                            Math.hypot(
+                                    wheel_velocities_no_rot.get(i * 2, 0) - xVelocity,
+                                    wheel_velocities_no_rot.get(i * 2 + 1, 0) - yVelocity);
+                    if (wheelErrors[i] > maxWheelError) {
+                        maxWheelError = wheelErrors[i];
                     }
+                }
 
-                    if (maxWheelError > m_slippingThreshold) {
-                            multiWheelSlipping = true;
-                    }
+                if (maxWheelError > m_slippingThreshold) {
+                    multiWheelSlipping = true;
+                }
             }
 
             m_isMultiwheelSlipping = multiWheelSlipping;
@@ -126,20 +131,24 @@ public class CustomOdometry {
             double rotationStds;
 
             if (m_lastSwerveModulePositionsCustomOdom[0] == null) {
-                    m_lastSwerveModulePositionsCustomOdom = state.ModulePositions.clone();
+                m_lastSwerveModulePositionsCustomOdom = state.ModulePositions.clone();
             }
 
             if (slipping & !multiWheelSlipping) {
-                    poseChange = m_kinematics_custom.toTwist2d(maxWheelErrorIndex, m_lastSwerveModulePositionsCustomOdom, state.ModulePositions);
+                poseChange =
+                        m_kinematics_custom.toTwist2d(
+                                maxWheelErrorIndex,
+                                m_lastSwerveModulePositionsCustomOdom,
+                                state.ModulePositions);
             } else {
-                    poseChange = m_kinematics_custom.toTwist2d(m_lastSwerveModulePositionsCustomOdom, state.ModulePositions);
+                poseChange =
+                        m_kinematics_custom.toTwist2d(
+                                m_lastSwerveModulePositionsCustomOdom, state.ModulePositions);
             }
 
             m_currentPose = m_currentPose.exp(poseChange);
 
-
             m_lastSwerveModulePositionsCustomOdom = state.ModulePositions.clone();
-
 
             double end = Timer.getTimestamp();
             m_lastOdometryTime = end - start;
