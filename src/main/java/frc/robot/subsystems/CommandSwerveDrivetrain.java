@@ -37,7 +37,9 @@ import org.littletonrobotics.junction.Logger;
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements Subsystem so it can easily
  * be used in command-based projects.
  */
-public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsystem {
+public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsystem { 
+    private final CustomInverseKinematics m_kinematics_custom;
+
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
@@ -164,6 +166,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             startSimThread();
         }
         m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
+        m_kinematics_custom = new CustomInverseKinematics(getModuleLocations());
     }
 
     /**
@@ -187,6 +190,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         }
 
         m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
+        m_kinematics_custom = new CustomInverseKinematics(getModuleLocations());
+
     }
 
     /**
@@ -219,6 +224,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         }
 
         m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
+        m_kinematics_custom = new CustomInverseKinematics(getModuleLocations());
+
     }
 
     private FieldOrientedOrbitSwerveRequest generateSwerveSetpointConfig() {
@@ -403,6 +410,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         Logger.recordOutput("Drive/actualChassisSpeeds", getState().Speeds);
 
         Logger.recordOutput("Drive/pose", getState().Pose);
+
+        Logger.recordOutput("Drive/ModuleVectors", m_kinematics_custom.toModuleVelocities(getState().ModuleStates).transpose().toArray2()[0]);
+        Logger.recordOutput("Drive/ModuleVectorsSpeeds", m_kinematics_custom.toModuleVelocities(ChassisSpeeds.fromFieldRelativeSpeeds(getState().Speeds, getState().Pose.getRotation())).transpose().toArray2()[0]);
     }
 
     private void startSimThread() {

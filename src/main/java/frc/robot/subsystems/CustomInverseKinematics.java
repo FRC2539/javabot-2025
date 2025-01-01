@@ -71,7 +71,7 @@ public class CustomInverseKinematics {
   public SimpleMatrix toModuleVelocities(SwerveModuleState... moduleStates) {
     var moduleStatesMatrix = new SimpleMatrix(moduleStates.length * 2, 1);
 
-    for (int i = 0; i < m_numModules - 1; i++) {
+    for (int i = 0; i < m_numModules; i++) {
       var module = moduleStates[i];
       moduleStatesMatrix.set(i * 2, 0, module.speedMetersPerSecond * module.angle.getCos());
       moduleStatesMatrix.set(i * 2 + 1, module.speedMetersPerSecond * module.angle.getSin());
