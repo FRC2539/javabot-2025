@@ -19,9 +19,12 @@ public class TestBaseSubsystem extends SubsystemBase{
     LoggedNetworkNumber motorOneSpeed = new LoggedNetworkNumber("motorOne", 1);
     LoggedNetworkNumber motorTwoSpeed = new LoggedNetworkNumber("motorTwo", 1);
     LoggedNetworkNumber motorThreeSpeed = new LoggedNetworkNumber("motorThree", 1);
-    DigitalInput sensor = new DigitalInput(6);
     
-    LoggedNetworkBoolean simSensor = new LoggedNetworkBoolean("simSensor", false);
+    
+    private SensorIO sensor;
+  
+    
+    
     
     MotorIOInputs motorOneInputs = new MotorIOInputs();
     private final MotorIO motorOneIO;
@@ -32,20 +35,12 @@ public class TestBaseSubsystem extends SubsystemBase{
     MotorIOInputs motorThreeInputs = new MotorIOInputs();
     private final MotorIO motorThreeIO;
 
-    public TestBaseSubsystem(MotorIO motorOne, MotorIO motorTwo, MotorIO motorThree) {
+    public TestBaseSubsystem(MotorIO motorOne, MotorIO motorTwo, MotorIO motorThree, SensorIO sensor) {
         this.motorOneIO = motorOne;
         this.motorTwoIO = motorTwo;
         this.motorThreeIO = motorThree;
+        this.sensor = sensor;
 
-    }
-
-    private BooleanSupplier getSensorValue(){
-        if (Robot.isSimulation()) {
-            BooleanSupplier simAnswer = simSensor::get;
-            return simAnswer;
-        }
-        BooleanSupplier realAnswer = sensor::get;
-        return realAnswer;
     }
 
  
@@ -66,8 +61,13 @@ public class TestBaseSubsystem extends SubsystemBase{
         })
         .beforeStarting(() -> {
             Logger.recordOutput("Drive/driving", "running");
-        }).until(getSensorValue());
+        }).until(sensor.getValue());
         
+    }
+
+    public BooleanSupplier getGet(){
+        
+        return sensor.getValue();
     }
     //Mostly works, however when button is released it instead disables the main motors instead of the followers. Basically, it should disable after the left dpad is dropped and x is held, but it actually does the opposite.
 
@@ -126,6 +126,7 @@ public class TestBaseSubsystem extends SubsystemBase{
         motorThreeSpeed.set(0);
     }
     Logger.recordOutput("Drive/motor one speed", motorOneSpeed.get());
+    Logger.recordOutput("Drive/motor found speed", motorOneIO.getMotorSpeed());
    }
 
     

@@ -21,6 +21,8 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.WheelRadiusCharacterization;
 import frc.robot.subsystems.TestBase.MotorIOSim;
 import frc.robot.subsystems.TestBase.MotorIOTalon;
+import frc.robot.subsystems.TestBase.SensorIOReal;
+import frc.robot.subsystems.TestBase.SensorIOSim;
 import frc.robot.subsystems.TestBase.TestBaseSubsystem;
 
 public class RobotContainer {
@@ -48,9 +50,9 @@ public class RobotContainer {
 
     public RobotContainer() {
         if (Robot.isReal()) {
-            newTestBaseTalon =  new TestBaseSubsystem(new MotorIOTalon(9), new MotorIOTalon(10), new MotorIOTalon(11));
+            newTestBaseTalon =  new TestBaseSubsystem(new MotorIOTalon(9), new MotorIOTalon(10), new MotorIOTalon(11), new SensorIOReal());
         } else {
-            newTestBaseTalon = new TestBaseSubsystem(new MotorIOSim(), new MotorIOSim(), new MotorIOSim());
+            newTestBaseTalon = new TestBaseSubsystem(new MotorIOSim("motorOneIO"), new MotorIOSim("MotorTwoIO"), new MotorIOSim("MotorThreeIO"), new SensorIOSim("Sensor"));
         }
         configureBindings();
 
@@ -87,7 +89,7 @@ public class RobotContainer {
         //     point.withModuleDirection(new Rotation2d(-operatorController.getLeftYAxis().get(), -operatorController.getLeftXAxis().get()))
         // ));
 
-        operatorController.getX().whileTrue(newTestBaseTalon.run());
+        operatorController.getX().whileTrue(newTestBaseTalon.run().until(newTestBaseTalon.getGet()));
         newTestBaseTalon.setDefaultCommand(newTestBaseTalon.noSpeed());
        
         leftDriveController.getTrigger().whileTrue(new WheelRadiusCharacterization(WheelRadiusCharacterization.Direction.CLOCKWISE, drivetrain));

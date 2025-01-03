@@ -10,6 +10,8 @@ public interface MotorIO {
     }
 
     public void setMotorSpeed(double speeds);
+
+    public double getMotorSpeed();
 }
 
 

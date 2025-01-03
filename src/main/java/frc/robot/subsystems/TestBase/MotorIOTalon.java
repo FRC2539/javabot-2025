@@ -18,12 +18,12 @@ public class MotorIOTalon implements MotorIO {
         inputs.voltage = motor.getMotorVoltage().refresh().getValueAsDouble();
     }
 
-
-
-    
-
     public void setMotorSpeed(double speeds) {
         motor.set(speeds);
+    }
+
+    public double getMotorSpeed(){
+        return motor.get();
     }
 }
 
