@@ -414,6 +414,16 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         Logger.recordOutput("Drive/pose", getState().Pose);
 
         Logger.recordOutput("Drive/customPose", m_odometry_custom.m_currentPose);
+
+        Logger.recordOutput("Drive/slippingModule", m_odometry_custom.m_maxSlippingWheelIndex);
+
+        Logger.recordOutput("Drive/slippingModuleAmount", m_odometry_custom.m_maxSlippingAmount);
+        Logger.recordOutput("Drive/slippingModuleRatio", m_odometry_custom.m_maxSlippingRatio);
+
+        Logger.recordOutput("Drive/customOdometryTime", m_odometry_custom.m_lastOdometryTime);
+
+        Logger.recordOutput("Drive/isSlipping", m_odometry_custom.m_isSlipping);
+        Logger.recordOutput("Drive/isMultiSlipping", m_odometry_custom.m_isMultiwheelSlipping);
     }
 
     private void startSimThread() {
