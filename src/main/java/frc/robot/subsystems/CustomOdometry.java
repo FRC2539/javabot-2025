@@ -18,7 +18,7 @@ public class CustomOdometry {
             new SwerveModulePosition[4];
     private final CustomInverseKinematics m_kinematics_custom;
     private final DoubleSupplier m_gyroAngularVelocitySupplier;
-    final double m_slippingThreshold = 1;
+    final double m_slippingThreshold = 0.02;
 
     public boolean m_isSlipping = false;
     public boolean m_isMultiwheelSlipping = false;
@@ -27,6 +27,9 @@ public class CustomOdometry {
     public int m_maxSlippingWheelIndex = -1;
 
     public double m_lastOdometryTime = 0;
+
+    public double m_maxSlippingAmount = 0;
+    public double m_maxSlippingRatio = 1;
 
     public CustomOdometry(
             CustomInverseKinematics kinematics, DoubleSupplier gyroAngularVelocitySupplier) {
@@ -83,11 +86,15 @@ public class CustomOdometry {
 
             if (maxWheelError > m_slippingThreshold) {
                 slipping = true;
-                m_maxSlippingWheelIndex = maxWheelErrorIndex;
             } else {
                 slipping = false;
-                m_maxSlippingWheelIndex = -1;
             }
+
+            m_maxSlippingAmount = maxWheelError;
+
+            m_maxSlippingRatio = maxWheelError / Math.hypot(xVelocity, yVelocity);
+
+            m_maxSlippingWheelIndex = maxWheelErrorIndex;
 
             m_isSlipping = slipping;
 
@@ -110,12 +117,16 @@ public class CustomOdometry {
                 maxWheelError = 0;
 
                 for (int i = 0; i < 3; i++) {
-                    wheelErrors[i] =
+                    int j = i;
+                    if (i >= maxWheelErrorIndex) {
+                        j++;
+                    }
+                    wheelErrors[j] =
                             Math.hypot(
-                                    wheel_velocities_no_rot.get(i * 2, 0) - xVelocity,
-                                    wheel_velocities_no_rot.get(i * 2 + 1, 0) - yVelocity);
-                    if (wheelErrors[i] > maxWheelError) {
-                        maxWheelError = wheelErrors[i];
+                                    wheel_velocities_no_rot.get(j * 2, 0) - xVelocity,
+                                    wheel_velocities_no_rot.get(j * 2 + 1, 0) - yVelocity);
+                    if (wheelErrors[j] > maxWheelError) {
+                        maxWheelError = wheelErrors[j];
                     }
                 }
 
