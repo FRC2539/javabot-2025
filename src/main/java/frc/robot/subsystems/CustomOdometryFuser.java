@@ -4,11 +4,17 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.util.CircularBuffer;
+import java.util.Comparator;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.Stack;
+import java.util.concurrent.PriorityBlockingQueue;
 
+/** This is a custom odometry fuser. It is thread safe in theory. (Matthew approved.) */
 public class CustomOdometryFuser {
     private final boolean kUtilizeTurningCorrection = false;
+
+    private final Object readingLock = new Object();
 
     private static record TimedInfo(
             double poseX,
@@ -52,15 +58,28 @@ public class CustomOdometryFuser {
         }
     }
 
+    private VisionUpdate m_lastVisionUpdate;
+
     private final int m_pastVisionUpdatesMaxSize = 10;
     private CircularBuffer<VisionUpdate> m_pastVisionUpdates =
             new CircularBuffer<>(m_pastVisionUpdatesMaxSize);
 
     private Stack<VisionUpdate> m_unaddedVisionUpdates = new Stack<>();
 
+    private Queue<VisionUpdate> m_unaddedVisionUpdatesExternal =
+            new PriorityBlockingQueue<>(
+                    11,
+                    new Comparator<VisionUpdate>() {
+                        public int compare(VisionUpdate a, VisionUpdate b) {
+                            return Double.compare(a.timestamp, b.timestamp);
+                        }
+                    });
+
     public CustomOdometryFuser() {
         m_pastVisionUpdates.addLast(
                 new VisionUpdate(Pose2d.kZero, 0, 0, 0, new VisionUpdateOffset(0, 0, 0, 0, 0)));
+        m_lastVisionUpdate = m_pastVisionUpdates.getLast();
+        m_pastPosesRelative.addLast(new TimedInfo(0, 0, 0, 0, 0, 0));
     }
 
     public void resetPose(Pose2d newPose, double timestamp) {
@@ -68,9 +87,12 @@ public class CustomOdometryFuser {
     }
 
     public Pose2d getPose() {
-        final var tInfo = m_pastPosesRelative.getLast();
-
-        final var vInfo = m_pastVisionUpdates.getLast().visionUpdateOffset;
+        final TimedInfo tInfo;
+        final VisionUpdateOffset vInfo;
+        synchronized (readingLock) {
+            tInfo = m_pastPosesRelative.getLast();
+            vInfo = m_lastVisionUpdate.visionUpdateOffset;
+        }
 
         double currentPoseX =
                 tInfo.poseX * vInfo.poseThetaOffsetCos
@@ -81,18 +103,24 @@ public class CustomOdometryFuser {
                         + tInfo.poseX * vInfo.poseThetaOffsetCos
                         + vInfo.poseYOffset;
         double currentPoseTheta = tInfo.poseTheta + vInfo.poseThetaOffset;
+
         return new Pose2d(currentPoseX, currentPoseY, new Rotation2d(currentPoseTheta));
     }
 
     public Optional<Pose2d> getPoseAtTimestamp(double timestamp) {
-        int timestampIndex = getTimestampIndex(timestamp);
+        final TimedInfo tInfo;
+        final VisionUpdateOffset vInfo;
 
-        if (timestampIndex == -1) {
-            return Optional.empty();
+        synchronized (readingLock) {
+            int timestampIndex = getTimestampIndex(timestamp);
+
+            if (timestampIndex == -1) {
+                return Optional.empty();
+            }
+
+            tInfo = m_pastPosesRelative.get(timestampIndex);
+            vInfo = m_lastVisionUpdate.visionUpdateOffset;
         }
-
-        final var tInfo = m_pastPosesRelative.get(timestampIndex);
-        final var vInfo = m_pastVisionUpdates.getLast().visionUpdateOffset;
 
         double currentPoseX =
                 tInfo.poseX * vInfo.poseThetaOffsetCos
@@ -108,7 +136,8 @@ public class CustomOdometryFuser {
     }
 
     public double getPhysicalPoseVariance() {
-        return m_pastPosesRelative.getLast().xyVariance;
+        return m_pastPosesRelative.getLast().xyVariance
+                + m_lastVisionUpdate.visionUpdateOffset.translationVarianceDetractor;
     }
 
     public double getPhysicalPoseStdDev() {
@@ -116,43 +145,61 @@ public class CustomOdometryFuser {
     }
 
     public double getRotationalPoseVariance() {
-        return m_pastPosesRelative.getLast().thetaVariance;
+        return m_pastPosesRelative.getLast().thetaVariance
+                + m_lastVisionUpdate.visionUpdateOffset.rotationVarianceDetractor;
     }
 
     public double getRotationalPoseStdDev() {
         return Math.sqrt(getRotationalPoseVariance());
     }
 
-    // You can use this to add a new measurement to the odometry fuser using this.
+    // You can use this to add a new measurement to the odometry fuser using this. This also
+    // processes all the vision updates.
     public void addSwerveMeasurementTwist(
             Twist2d twist, double timestamp, double translationVariance, double rotationVariance) {
-        final Pose2d postExp = Pose2d.kZero.exp(twist);
-        double dx = postExp.getX();
-        double dy = postExp.getY();
-        double dtheta = postExp.getRotation().getRadians();
+        synchronized (this) {
+            final Pose2d postExp = Pose2d.kZero.exp(twist);
+            double dx = postExp.getX();
+            double dy = postExp.getY();
+            double dtheta = postExp.getRotation().getRadians();
 
-        final var tInfo = m_pastPosesRelative.getLast();
+            final var tInfo = m_pastPosesRelative.getLast();
 
-        double dt = timestamp - tInfo.timestamp;
+            double dt = timestamp - tInfo.timestamp;
 
-        // This is technically not correctly considered right now.
-        if (kUtilizeTurningCorrection) {
-            double nextTheta = tInfo.thetaVariance + rotationVariance * dt;
-            double lengthMod = Math.exp(-0.5 * nextTheta);
-            dx *= lengthMod;
-            dy *= lengthMod;
-            double lengthVarianceAddition = (1 - Math.exp(-nextTheta)) * (dx * dx + dy * dy);
-            translationVariance += lengthVarianceAddition;
+            // This is technically not correctly considered right now.
+            if (kUtilizeTurningCorrection) {
+                double nextTheta = tInfo.thetaVariance + rotationVariance * dt;
+                double lengthMod = Math.exp(-0.5 * nextTheta);
+                dx *= lengthMod;
+                dy *= lengthMod;
+                double lengthVarianceAddition = (1 - Math.exp(-nextTheta)) * (dx * dx + dy * dy);
+                translationVariance += lengthVarianceAddition;
+            }
+
+            synchronized (readingLock) {
+                m_pastPosesRelative.addLast(
+                        new TimedInfo(
+                                tInfo.poseX + dx,
+                                tInfo.poseY + dy,
+                                tInfo.poseTheta + dtheta,
+                                tInfo.xyVariance + translationVariance * dt,
+                                tInfo.thetaVariance + rotationVariance * dt,
+                                timestamp));
+            }
+
+            while (true) {
+                VisionUpdate lastVisionUpdate = m_unaddedVisionUpdatesExternal.poll();
+                if (lastVisionUpdate == null) {
+                    break;
+                }
+                moveVisionUpdateOffOuterStack(lastVisionUpdate);
+            }
+
+            synchronized (readingLock) {
+                m_lastVisionUpdate = m_pastVisionUpdates.getLast();
+            }
         }
-
-        m_pastPosesRelative.addLast(
-                new TimedInfo(
-                        tInfo.poseX + dx,
-                        tInfo.poseY + dy,
-                        tInfo.poseTheta + dtheta,
-                        tInfo.xyVariance + translationVariance * dt,
-                        tInfo.thetaVariance + rotationVariance * dt,
-                        timestamp));
     }
 
     private int getTimestampIndex(double timestamp) {
@@ -180,17 +227,19 @@ public class CustomOdometryFuser {
 
     // Use this to add a vision pose update. This will update the odometry fuser with the vision
     // pose and the timestamp. At the moment this can only take vision pose estimates in time order.
-    // AKA If you have multiple cameras, they might not both get processed depending on your
-    // staggering. Think some thunks about this.
     public void addVisionUpdate(
             Pose2d visionPose,
             double timestamp,
             double translationVariance,
             double rotationVariance) {
 
-        moveVisionUpdatesToStack(
+        m_unaddedVisionUpdatesExternal.add(
                 new VisionUpdate(
                         visionPose, timestamp, translationVariance, rotationVariance, null));
+    }
+
+    private void moveVisionUpdateOffOuterStack(VisionUpdate visionUpdate) {
+        moveVisionUpdatesToStack(visionUpdate);
 
         while (!m_unaddedVisionUpdates.isEmpty()) {
             moveVisionUpdateOffStack();
