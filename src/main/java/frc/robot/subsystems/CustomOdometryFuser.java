@@ -16,13 +16,33 @@ public class CustomOdometryFuser {
             double timestamp) {}
 
     CircularBuffer<TimedInfo> timedInfoBuffer = new CircularBuffer<>(100);
-    double translationVarianceDetractor = 0.0;
-    double rotationVarianceDetractor = 0.0;
-    double poseXOffset = 0.0;
-    double poseYOffset = 0.0;
-    double poseThetaOffset = 0.0;
-    double poseThetaOffsetCos = 1.0;
-    double poseThetaOffsetSin = 0.0;
+
+    CircularBuffer<VisionUpdateOffset> visionUpdateBuffer = new CircularBuffer<>(10);
+
+    private static record VisionUpdateOffset(
+            double translationVarianceDetractor,
+            double rotationVarianceDetractor,
+            double poseXOffset,
+            double poseYOffset,
+            double poseThetaOffset,
+            double poseThetaOffsetCos,
+            double poseThetaOffsetSin) {
+        VisionUpdateOffset(
+                double translationVarianceDetractor,
+                double rotationVarianceDetractor,
+                double poseXOffset,
+                double poseYOffset,
+                double poseThetaOffset) {
+            this(
+                    translationVarianceDetractor,
+                    rotationVarianceDetractor,
+                    poseXOffset,
+                    poseYOffset,
+                    poseThetaOffset,
+                    Math.cos(poseThetaOffset),
+                    Math.sin(poseThetaOffset));
+        }
+    }
 
     public CustomOdometryFuser() {}
 
@@ -36,27 +56,23 @@ public class CustomOdometryFuser {
                         0.0,
                         0.0,
                         timestamp));
-        translationVarianceDetractor = 0.0;
-        rotationVarianceDetractor = 0.0;
-        poseXOffset = 0.0;
-        poseYOffset = 0.0;
-        poseThetaOffset = 0.0;
-        poseThetaOffsetCos = 1.0;
-        poseThetaOffsetSin = 0.0;
+        visionUpdateBuffer.addLast(new VisionUpdateOffset(0.0, 0.0, 0.0, 0.0, 0.0));
     }
 
     public Pose2d getPose() {
         final var tInfo = timedInfoBuffer.getLast();
 
+        final var vInfo = visionUpdateBuffer.getLast();
+
         double currentPoseX =
-                tInfo.poseX * poseThetaOffsetCos
-                        - tInfo.poseY * poseThetaOffsetSin
-                        + poseXOffset;
+                tInfo.poseX * vInfo.poseThetaOffsetCos
+                        - tInfo.poseY * vInfo.poseThetaOffsetSin
+                        + vInfo.poseXOffset;
         double currentPoseY =
-                tInfo.poseY * poseThetaOffsetSin
-                        + tInfo.poseX * poseThetaOffsetCos
-                        + poseYOffset;
-        double currentPoseTheta = tInfo.poseTheta + poseThetaOffset;
+                tInfo.poseY * vInfo.poseThetaOffsetSin
+                        + tInfo.poseX * vInfo.poseThetaOffsetCos
+                        + vInfo.poseYOffset;
+        double currentPoseTheta = tInfo.poseTheta + vInfo.poseThetaOffset;
         return new Pose2d(currentPoseX, currentPoseY, new Rotation2d(currentPoseTheta));
     }
 
@@ -68,16 +84,17 @@ public class CustomOdometryFuser {
         }
 
         final var tInfo = timedInfoBuffer.get(timestampIndex);
+        final var vInfo = visionUpdateBuffer.getLast();
 
         double currentPoseX =
-                tInfo.poseX * poseThetaOffsetCos
-                        - tInfo.poseY * poseThetaOffsetSin
-                        + poseXOffset;
+                tInfo.poseX * vInfo.poseThetaOffsetCos
+                        - tInfo.poseY * vInfo.poseThetaOffsetSin
+                        + vInfo.poseXOffset;
         double currentPoseY =
-                tInfo.poseX * poseThetaOffsetSin
-                        + tInfo.poseY * poseThetaOffsetCos
-                        + poseYOffset;
-        double currentPoseTheta = tInfo.poseTheta + poseThetaOffset;
+                tInfo.poseX * vInfo.poseThetaOffsetSin
+                        + tInfo.poseY * vInfo.poseThetaOffsetCos
+                        + vInfo.poseYOffset;
+        double currentPoseTheta = tInfo.poseTheta + vInfo.poseThetaOffset;
         return Optional.of(
                 new Pose2d(currentPoseX, currentPoseY, new Rotation2d(currentPoseTheta)));
     }
@@ -112,16 +129,14 @@ public class CustomOdometryFuser {
 
         double dt = timestamp - tInfo.timestamp;
 
-        timedInfoBuffer.addLast(new TimedInfo(tInfo.poseX + dx,
-        tInfo.poseY + dy,
-        tInfo.poseTheta + dtheta,
-
-       
-                tInfo.xyVariance + translationVariance * dt,
-        
-                tInfo.thetaVariance + rotationVariance * dt,
-
-        timestamp));
+        timedInfoBuffer.addLast(
+                new TimedInfo(
+                        tInfo.poseX + dx,
+                        tInfo.poseY + dy,
+                        tInfo.poseTheta + dtheta,
+                        tInfo.xyVariance + translationVariance * dt,
+                        tInfo.thetaVariance + rotationVariance * dt,
+                        timestamp));
     }
 
     private int getTimestampIndex(double timestamp) {
@@ -173,21 +188,20 @@ public class CustomOdometryFuser {
         double visionTheta = visionPose.getRotation().getRadians();
 
         final var tInfo = timedInfoBuffer.get(timestampIndex);
+        final var vInfo = visionUpdateBuffer.getLast();
 
         double currentPoseX =
-                tInfo.poseX * poseThetaOffsetCos
-                        - tInfo.poseY * poseThetaOffsetSin
-                        + poseXOffset;
+                tInfo.poseX * vInfo.poseThetaOffsetCos
+                        - tInfo.poseY * vInfo.poseThetaOffsetSin
+                        + vInfo.poseXOffset;
         double currentPoseY =
-                tInfo.poseY * poseThetaOffsetSin
-                        + tInfo.poseX * poseThetaOffsetCos
-                        + poseYOffset;
-        double currentPoseTheta = tInfo.poseTheta + poseThetaOffset;
+                tInfo.poseY * vInfo.poseThetaOffsetSin
+                        + tInfo.poseX * vInfo.poseThetaOffsetCos
+                        + vInfo.poseYOffset;
+        double currentPoseTheta = tInfo.poseTheta + vInfo.poseThetaOffset;
 
-        double physicalPoseVariance =
-                tInfo.xyVariance + translationVarianceDetractor;
-        double rotationalPoseVariance =
-                tInfo.thetaVariance + rotationVarianceDetractor;
+        double physicalPoseVariance = tInfo.xyVariance + vInfo.translationVarianceDetractor;
+        double rotationalPoseVariance = tInfo.thetaVariance + vInfo.rotationVarianceDetractor;
 
         double newcurrentPoseX =
                 squareMerge(currentPoseX, physicalPoseVariance, visionX, translationVariance);
@@ -200,24 +214,38 @@ public class CustomOdometryFuser {
         double newPhysicalPoseVariance = tMerge(physicalPoseVariance, translationVariance);
         double newRotationalPoseVariance = tMerge(rotationalPoseVariance, rotationVariance);
 
-        translationVarianceDetractor += newPhysicalPoseVariance - physicalPoseVariance;
-        rotationVarianceDetractor += newRotationalPoseVariance - rotationalPoseVariance;
+        double translationVarianceDetractorNew =
+                newPhysicalPoseVariance - physicalPoseVariance + vInfo.translationVarianceDetractor;
+        double rotationVarianceDetractorNew =
+                newRotationalPoseVariance
+                        - rotationalPoseVariance
+                        + vInfo.rotationVarianceDetractor;
 
-        poseThetaOffset += newcurrentPoseTheta - currentPoseTheta;
-        poseThetaOffsetCos = Math.cos(poseThetaOffset);
-        poseThetaOffsetSin = Math.sin(poseThetaOffset);
+        double poseThetaOffsetNew = newcurrentPoseTheta - currentPoseTheta + vInfo.poseThetaOffset;
+        double poseThetaOffsetCosNew = Math.cos(vInfo.poseThetaOffset);
+        double poseThetaOffsetSinNew = Math.sin(vInfo.poseThetaOffset);
 
         double recalculatedPoseX =
-                tInfo.poseX * poseThetaOffsetCos
-                        - tInfo.poseY * poseThetaOffsetSin
-                        + poseXOffset;
+                tInfo.poseX * poseThetaOffsetCosNew
+                        - tInfo.poseY * poseThetaOffsetSinNew
+                        + vInfo.poseXOffset;
         double recalculatedPoseY =
-                tInfo.poseY * poseThetaOffsetSin
-                        + tInfo.poseX * poseThetaOffsetCos
-                        + poseYOffset;
+                tInfo.poseY * poseThetaOffsetSinNew
+                        + tInfo.poseX * poseThetaOffsetCosNew
+                        + vInfo.poseYOffset;
 
-        poseXOffset += newcurrentPoseX - recalculatedPoseX;
-        poseYOffset += newcurrentPoseY - recalculatedPoseY;
+        var poseXOffsetNew = newcurrentPoseX - recalculatedPoseX + vInfo.poseXOffset;
+        var poseYOffsetNew = newcurrentPoseY - recalculatedPoseY + vInfo.poseYOffset;
+
+        visionUpdateBuffer.addLast(
+                new VisionUpdateOffset(
+                        translationVarianceDetractorNew,
+                        rotationVarianceDetractorNew,
+                        poseXOffsetNew,
+                        poseYOffsetNew,
+                        poseThetaOffsetNew,
+                        poseThetaOffsetCosNew,
+                        poseThetaOffsetSinNew));
     }
 
     private double squareMerge(double a, double a_var, double b, double b_var) {
