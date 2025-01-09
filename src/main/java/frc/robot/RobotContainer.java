@@ -139,7 +139,7 @@ public class RobotContainer {
                 .onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         operatorController
                 .getRightBumper()
-                .onTrue(drivetrain.runOnce(() -> drivetrain.resetPose(new Pose2d())));
+                .onTrue(drivetrain.runOnce(() -> drivetrain.resetPose(Pose2d.kZero)));
     }
 
     private double deadband(double value, double deadband) {
