@@ -4,8 +4,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 public class ElevatorIOTalonFX implements ElevatorIO {
     // idk ids yet
-    private TalonFX elevatorLeader = new TalonFX(98, "CANivore");
-    private TalonFX elevatorFollower = new TalonFX(99, "CANivore");
+    private final TalonFX elevatorLeader = new TalonFX(98, "CANivore");
+    private final TalonFX elevatorFollower = new TalonFX(99, "CANivore");
 
 
     public void updateInputs(ElevatorIOInputs inputs) {
