@@ -17,8 +17,11 @@ import frc.lib.controller.ThrustmasterJoystick;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
+import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.WheelRadiusCharacterization;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIOLimelight;
 
 public class RobotContainer {
     private double MaxSpeed =
@@ -39,6 +42,10 @@ public class RobotContainer {
 
     public Auto auto = new Auto(drivetrain);
 
+    public Vision vision =
+            new Vision(
+                    drivetrain::addVisionMeasurement,
+                    new VisionIOLimelight(VisionConstants.camera0Name, drivetrain::getRotation2d));
     // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();

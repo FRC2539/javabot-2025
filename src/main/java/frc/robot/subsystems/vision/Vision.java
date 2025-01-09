@@ -13,7 +13,7 @@
 
 package frc.robot.subsystems.vision;
 
-import static frc.robot.subsystems.vision.VisionConstants.*;
+import static frc.robot.constants.VisionConstants.*;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -63,6 +63,14 @@ public class Vision extends SubsystemBase {
      */
     public Rotation2d getTargetX(int cameraIndex) {
         return inputs[cameraIndex].latestTargetObservation.tx();
+    }
+
+    public Rotation2d getTargetY(int cameraIndex) {
+        return inputs[cameraIndex].latestTargetObservation.ty();
+    }
+
+    public double getTagID(int cameraIndex) {
+        return inputs[cameraIndex].tagIds[0];
     }
 
     @Override

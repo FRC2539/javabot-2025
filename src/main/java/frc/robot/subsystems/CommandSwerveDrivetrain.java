@@ -144,6 +144,10 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         return this.getState().Pose;
     }
 
+    public Rotation2d getRotation2d() {
+        return this.getRobotPose().getRotation();
+    }
+
     public ChassisSpeeds getChassisSpeeds() {
         return this.getState().Speeds;
     }
@@ -302,6 +306,14 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
      */
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
         return run(() -> this.setControl(requestSupplier.get()));
+    }
+
+    public void addVisionMeasurement(
+            Pose2d visionRobotPoseMeters,
+            double timestampSeconds,
+            Matrix<N3, N1> visionMeasurementStdDevs) {
+
+        addVisionMeasurement(visionRobotPoseMeters, timestampSeconds);
     }
 
     /**
