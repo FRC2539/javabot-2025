@@ -17,12 +17,14 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     }
 
     public void setVoltage(double voltage) {
+        elevatorLeader.setVoltage(voltage);
+        elevatorFollower.setVoltage(voltage);
     }
 
 
     @Override
     public void setPosition(double position) {
-        
+        //Figure out how to make it so we can see how far we need to go to get to a certain position.(?)
     }
 
 }
