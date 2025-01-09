@@ -17,7 +17,16 @@ public class CustomOdometryFuser {
 
     CircularBuffer<TimedInfo> timedInfoBuffer = new CircularBuffer<>(100);
 
-    CircularBuffer<VisionUpdateOffset> visionUpdateBuffer = new CircularBuffer<>(10);
+    VisionUpdateOffset currentOffset = new VisionUpdateOffset(0.0, 0.0, 0.0, 0.0, 0.0);
+
+    CircularBuffer<VisionUpdate> standardOffsets = new CircularBuffer<>(10);
+
+    private static record VisionUpdate(
+        Pose2d visionPose,
+        double timestamp,
+        double translationVariance,
+        double rotationVariance,
+        VisionUpdateOffset currentOffset) {}
 
     private static record VisionUpdateOffset(
             double translationVarianceDetractor,
@@ -56,13 +65,13 @@ public class CustomOdometryFuser {
                         0.0,
                         0.0,
                         timestamp));
-        visionUpdateBuffer.addLast(new VisionUpdateOffset(0.0, 0.0, 0.0, 0.0, 0.0));
+        currentOffset = new VisionUpdateOffset(0.0, 0.0, 0.0, 0.0, 0.0);
     }
 
     public Pose2d getPose() {
         final var tInfo = timedInfoBuffer.getLast();
 
-        final var vInfo = visionUpdateBuffer.getLast();
+        final var vInfo = currentOffset;
 
         double currentPoseX =
                 tInfo.poseX * vInfo.poseThetaOffsetCos
@@ -84,7 +93,7 @@ public class CustomOdometryFuser {
         }
 
         final var tInfo = timedInfoBuffer.get(timestampIndex);
-        final var vInfo = visionUpdateBuffer.getLast();
+        final var vInfo = currentOffset;
 
         double currentPoseX =
                 tInfo.poseX * vInfo.poseThetaOffsetCos
@@ -188,7 +197,7 @@ public class CustomOdometryFuser {
         double visionTheta = visionPose.getRotation().getRadians();
 
         final var tInfo = timedInfoBuffer.get(timestampIndex);
-        final var vInfo = visionUpdateBuffer.getLast();
+        final var vInfo = currentOffset;
 
         double currentPoseX =
                 tInfo.poseX * vInfo.poseThetaOffsetCos
@@ -237,7 +246,7 @@ public class CustomOdometryFuser {
         var poseXOffsetNew = newcurrentPoseX - recalculatedPoseX + vInfo.poseXOffset;
         var poseYOffsetNew = newcurrentPoseY - recalculatedPoseY + vInfo.poseYOffset;
 
-        visionUpdateBuffer.addLast(
+       currentOffset = 
                 new VisionUpdateOffset(
                         translationVarianceDetractorNew,
                         rotationVarianceDetractorNew,
@@ -245,7 +254,7 @@ public class CustomOdometryFuser {
                         poseYOffsetNew,
                         poseThetaOffsetNew,
                         poseThetaOffsetCosNew,
-                        poseThetaOffsetSinNew));
+                        poseThetaOffsetSinNew);
     }
 
     private double squareMerge(double a, double a_var, double b, double b_var) {
