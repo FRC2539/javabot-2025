@@ -1,15 +1,11 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-
-import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.Timer;
-import java.util.function.DoubleSupplier;
 import org.ejml.simple.SimpleMatrix;
 
 public class CustomOdometry {
@@ -35,8 +31,7 @@ public class CustomOdometry {
 
     private boolean hasIteratedYet = false;
 
-    public CustomOdometry(
-            CustomInverseKinematics kinematics) {
+    public CustomOdometry(CustomInverseKinematics kinematics) {
         m_kinematics_custom = kinematics;
     }
 
@@ -55,9 +50,7 @@ public class CustomOdometry {
                             .minus(
                                     m_kinematics_custom.toModuleVelocities(
                                             new ChassisSpeeds(
-                                                    0,
-                                                    0,
-                                                    state.Speeds.omegaRadiansPerSecond)));
+                                                    0, 0, state.Speeds.omegaRadiansPerSecond)));
 
             double xVelocity = 0;
             double yVelocity = 0;

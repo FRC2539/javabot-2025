@@ -7,11 +7,15 @@ import edu.wpi.first.util.CircularBuffer;
 import java.util.Optional;
 
 public class CustomOdometryFuser {
-    CircularBuffer<Double> poseBufferX = new CircularBuffer<>(100);
-    CircularBuffer<Double> poseBufferY = new CircularBuffer<>(100);
-    CircularBuffer<Double> poseBufferTheta = new CircularBuffer<>(100);
-    CircularBuffer<Double> poseBufferPhysicalVariance = new CircularBuffer<>(100);
-    CircularBuffer<Double> poseBufferRotationalVariance = new CircularBuffer<>(100);
+    private static record TimedInfo(
+            double poseX,
+            double poseY,
+            double poseTheta,
+            double xyVariance,
+            double thetaVariance,
+            double timestamp) {}
+
+    CircularBuffer<TimedInfo> timedInfoBuffer = new CircularBuffer<>(100);
     double translationVarianceDetractor = 0.0;
     double rotationVarianceDetractor = 0.0;
     double poseXOffset = 0.0;
@@ -20,23 +24,18 @@ public class CustomOdometryFuser {
     double poseThetaOffsetCos = 1.0;
     double poseThetaOffsetSin = 0.0;
 
-    CircularBuffer<Double> timestampBuffer = new CircularBuffer<>(100);
-
     public CustomOdometryFuser() {}
 
     public void resetPose(Pose2d newPose, double timestamp) {
-        poseBufferX.clear();
-        poseBufferX.addLast(newPose.getX());
-        poseBufferY.clear();
-        poseBufferY.addLast(newPose.getY());
-        poseBufferTheta.clear();
-        poseBufferTheta.addLast(newPose.getRotation().getRadians());
-        poseBufferPhysicalVariance.clear();
-        poseBufferPhysicalVariance.addLast(0.0);
-        poseBufferRotationalVariance.clear();
-        poseBufferRotationalVariance.addLast(0.0);
-        timestampBuffer.clear();
-        timestampBuffer.addLast(timestamp);
+        timedInfoBuffer.clear();
+        timedInfoBuffer.addLast(
+                new TimedInfo(
+                        newPose.getX(),
+                        newPose.getY(),
+                        newPose.getRotation().getRadians(),
+                        0.0,
+                        0.0,
+                        timestamp));
         translationVarianceDetractor = 0.0;
         rotationVarianceDetractor = 0.0;
         poseXOffset = 0.0;
@@ -47,15 +46,17 @@ public class CustomOdometryFuser {
     }
 
     public Pose2d getPose() {
+        final var tInfo = timedInfoBuffer.getLast();
+
         double currentPoseX =
-                poseBufferX.getLast() * poseThetaOffsetCos
-                        - poseBufferY.getLast() * poseThetaOffsetSin
+                tInfo.poseX * poseThetaOffsetCos
+                        - tInfo.poseY * poseThetaOffsetSin
                         + poseXOffset;
         double currentPoseY =
-                poseBufferY.getLast() * poseThetaOffsetSin
-                        + poseBufferX.getLast() * poseThetaOffsetCos
+                tInfo.poseY * poseThetaOffsetSin
+                        + tInfo.poseX * poseThetaOffsetCos
                         + poseYOffset;
-        double currentPoseTheta = poseBufferTheta.getLast() + poseThetaOffset;
+        double currentPoseTheta = tInfo.poseTheta + poseThetaOffset;
         return new Pose2d(currentPoseX, currentPoseY, new Rotation2d(currentPoseTheta));
     }
 
@@ -66,21 +67,23 @@ public class CustomOdometryFuser {
             return Optional.empty();
         }
 
+        final var tInfo = timedInfoBuffer.get(timestampIndex);
+
         double currentPoseX =
-                poseBufferX.get(timestampIndex) * poseThetaOffsetCos
-                        - poseBufferY.get(timestampIndex) * poseThetaOffsetSin
+                tInfo.poseX * poseThetaOffsetCos
+                        - tInfo.poseY * poseThetaOffsetSin
                         + poseXOffset;
         double currentPoseY =
-                poseBufferY.get(timestampIndex) * poseThetaOffsetSin
-                        + poseBufferX.get(timestampIndex) * poseThetaOffsetCos
+                tInfo.poseX * poseThetaOffsetSin
+                        + tInfo.poseY * poseThetaOffsetCos
                         + poseYOffset;
-        double currentPoseTheta = poseBufferTheta.get(timestampIndex) + poseThetaOffset;
+        double currentPoseTheta = tInfo.poseTheta + poseThetaOffset;
         return Optional.of(
                 new Pose2d(currentPoseX, currentPoseY, new Rotation2d(currentPoseTheta)));
     }
 
     public double getPhysicalPoseVariance() {
-        return poseBufferPhysicalVariance.getLast();
+        return timedInfoBuffer.getLast().xyVariance;
     }
 
     public double getPhysicalPoseStdDev() {
@@ -88,7 +91,7 @@ public class CustomOdometryFuser {
     }
 
     public double getRotationalPoseVariance() {
-        return poseBufferRotationalVariance.getLast();
+        return timedInfoBuffer.getLast().thetaVariance;
     }
 
     public double getRotationalPoseStdDev() {
@@ -104,25 +107,28 @@ public class CustomOdometryFuser {
         double dx = postExp.getX();
         double dy = postExp.getY();
         double dtheta = postExp.getRotation().getRadians();
-        double dt = timestamp - timestampBuffer.getLast();
 
-        poseBufferX.addLast(poseBufferX.getLast() + dx);
-        poseBufferY.addLast(poseBufferY.getLast() + dy);
-        poseBufferTheta.addLast(poseBufferTheta.getLast() + dtheta);
+        final var tInfo = timedInfoBuffer.getLast();
 
-        poseBufferPhysicalVariance.addLast(
-                poseBufferPhysicalVariance.getLast() + translationVariance * dt);
-        poseBufferRotationalVariance.addLast(
-                poseBufferRotationalVariance.getLast() + rotationVariance * dt);
+        double dt = timestamp - tInfo.timestamp;
 
-        timestampBuffer.addLast(timestamp);
+        timedInfoBuffer.addLast(new TimedInfo(tInfo.poseX + dx,
+        tInfo.poseY + dy,
+        tInfo.poseTheta + dtheta,
+
+       
+                tInfo.xyVariance + translationVariance * dt,
+        
+                tInfo.thetaVariance + rotationVariance * dt,
+
+        timestamp));
     }
 
     private int getTimestampIndex(double timestamp) {
-        return findLargestDoubleLessThan(timestampBuffer, timestamp);
+        return findLargestDoubleLessThan(timedInfoBuffer, timestamp);
     }
 
-    private static int findLargestDoubleLessThan(CircularBuffer<Double> array, double target) {
+    private static int findLargestDoubleLessThan(CircularBuffer<TimedInfo> array, double target) {
         int left = 0;
         int right = array.size() - 1;
         int result = -1; // To indicate no valid result if not found
@@ -130,7 +136,7 @@ public class CustomOdometryFuser {
         while (left <= right) {
             int mid = left + (right - left) / 2;
 
-            if (array.get(mid) < target) {
+            if (array.get(mid).timestamp < target) {
                 result = mid; // Update result since array[mid] is a valid candidate
                 left = mid + 1; // Move to the right to find a larger candidate
             } else {
@@ -166,20 +172,22 @@ public class CustomOdometryFuser {
         double visionY = visionPose.getY();
         double visionTheta = visionPose.getRotation().getRadians();
 
+        final var tInfo = timedInfoBuffer.get(timestampIndex);
+
         double currentPoseX =
-                poseBufferX.get(timestampIndex) * poseThetaOffsetCos
-                        - poseBufferY.get(timestampIndex) * poseThetaOffsetSin
+                tInfo.poseX * poseThetaOffsetCos
+                        - tInfo.poseY * poseThetaOffsetSin
                         + poseXOffset;
         double currentPoseY =
-                poseBufferY.get(timestampIndex) * poseThetaOffsetSin
-                        + poseBufferX.get(timestampIndex) * poseThetaOffsetCos
+                tInfo.poseY * poseThetaOffsetSin
+                        + tInfo.poseX * poseThetaOffsetCos
                         + poseYOffset;
-        double currentPoseTheta = poseBufferTheta.get(timestampIndex) + poseThetaOffset;
+        double currentPoseTheta = tInfo.poseTheta + poseThetaOffset;
 
         double physicalPoseVariance =
-                poseBufferPhysicalVariance.get(timestampIndex) + translationVarianceDetractor;
+                tInfo.xyVariance + translationVarianceDetractor;
         double rotationalPoseVariance =
-                poseBufferRotationalVariance.get(timestampIndex) + rotationVarianceDetractor;
+                tInfo.thetaVariance + rotationVarianceDetractor;
 
         double newcurrentPoseX =
                 squareMerge(currentPoseX, physicalPoseVariance, visionX, translationVariance);
@@ -200,12 +208,12 @@ public class CustomOdometryFuser {
         poseThetaOffsetSin = Math.sin(poseThetaOffset);
 
         double recalculatedPoseX =
-                poseBufferX.get(timestampIndex) * poseThetaOffsetCos
-                        - poseBufferY.get(timestampIndex) * poseThetaOffsetSin
+                tInfo.poseX * poseThetaOffsetCos
+                        - tInfo.poseY * poseThetaOffsetSin
                         + poseXOffset;
         double recalculatedPoseY =
-                poseBufferY.get(timestampIndex) * poseThetaOffsetSin
-                        + poseBufferX.get(timestampIndex) * poseThetaOffsetCos
+                tInfo.poseY * poseThetaOffsetSin
+                        + tInfo.poseX * poseThetaOffsetCos
                         + poseYOffset;
 
         poseXOffset += newcurrentPoseX - recalculatedPoseX;
