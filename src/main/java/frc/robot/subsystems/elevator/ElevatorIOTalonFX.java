@@ -4,14 +4,24 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 public class ElevatorIOTalonFX implements ElevatorIO {
     // idk ids yet
-    private TalonFX leadElevatorMotor = new TalonFX(99);
-    private TalonFX followerElevatorMotor = new TalonFX(98);
+    private TalonFX elevatorLeader = new TalonFX(98, "CANivore");
+    private TalonFX elevatorFollower = new TalonFX(99, "CANivore");
 
-    public ElevatorIOTalonFX() {
+
+    public void updateInputs(ElevatorIOInputs inputs) {
+        inputs.position = elevatorFollower.getPosition().refresh().getValueAsDouble();
+        inputs.position = elevatorLeader.getPosition().refresh().getValueAsDouble();
+        inputs.voltage = elevatorLeader.getPosition().refresh().getValueAsDouble();
+        inputs.voltage = elevatorFollower.getPosition().refresh().getValueAsDouble();
         
     }
 
-    public void updateInputs(ElevatorIOInputs inputs) {
+    public void setVoltage(double voltage) {
+    }
+
+
+    @Override
+    public void setPosition(double position) {
         
     }
 

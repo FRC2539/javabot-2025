@@ -6,10 +6,14 @@ public interface ElevatorIO {
 
     public class ElevatorIOInputs {
         
-        // public double voltage = 0;
+        //public double voltage = 0;
         public double position = 0;
         public double speed = 0;
+        public double voltage;
 
     }
+
+    public void setVoltage(double voltage);
+    public void setPosition(double position);
 
 }
