@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.Stack;
 
 public class CustomOdometryFuser {
+    private final boolean kUtilizeTurningCorrection = false;
+
     private static record TimedInfo(
             double poseX,
             double poseY,
@@ -132,6 +134,16 @@ public class CustomOdometryFuser {
         final var tInfo = m_pastPosesRelative.getLast();
 
         double dt = timestamp - tInfo.timestamp;
+
+        // This is technically not correctly considered right now.
+        if (kUtilizeTurningCorrection) {
+            double nextTheta = tInfo.thetaVariance + rotationVariance * dt;
+            double lengthMod = Math.exp(-0.5 * nextTheta);
+            dx *= lengthMod;
+            dy *= lengthMod;
+            double lengthVarianceAddition = (1 - Math.exp(-nextTheta)) * (dx * dx + dy * dy);
+            translationVariance += lengthVarianceAddition;
+        }
 
         m_pastPosesRelative.addLast(
                 new TimedInfo(
