@@ -17,7 +17,7 @@ public class CustomOdometry {
     private SwerveModulePosition[] m_lastSwerveModulePositionsCustomOdom =
             new SwerveModulePosition[4];
     private final CustomInverseKinematics m_kinematics_custom;
-    private final DoubleSupplier m_gyroAngularVelocitySupplier;
+
     final double m_slippingThreshold = 0.02;
 
     public boolean m_isSlipping = false;
@@ -31,21 +31,23 @@ public class CustomOdometry {
     public double m_maxSlippingAmount = 0;
     public double m_maxSlippingRatio = 1;
 
-    public CustomOdometry(
-            CustomInverseKinematics kinematics, DoubleSupplier gyroAngularVelocitySupplier) {
-        m_kinematics_custom = kinematics;
-        m_gyroAngularVelocitySupplier = gyroAngularVelocitySupplier;
-    }
+    private double lastGryoTheta = 0;
 
-    public CustomOdometry(CustomInverseKinematics kinematics, Pigeon2 pigeon2) {
-        this(
-                kinematics,
-                () -> pigeon2.getAngularVelocityZWorld().refresh().getValue().in(RadiansPerSecond));
+    private boolean hasIteratedYet = false;
+
+    public CustomOdometry(
+            CustomInverseKinematics kinematics) {
+        m_kinematics_custom = kinematics;
     }
 
     public void odometryFunction(SwerveDrivetrain.SwerveDriveState state) {
         try {
             double start = Timer.getTimestamp();
+
+            if (!hasIteratedYet) {
+                m_lastSwerveModulePositionsCustomOdom = state.ModulePositions.clone();
+                lastGryoTheta = state.Pose.getRotation().getRadians();
+            }
 
             SimpleMatrix wheel_velocities_no_rot =
                     m_kinematics_custom
@@ -55,7 +57,7 @@ public class CustomOdometry {
                                             new ChassisSpeeds(
                                                     0,
                                                     0,
-                                                    m_gyroAngularVelocitySupplier.getAsDouble())));
+                                                    state.Speeds.omegaRadiansPerSecond)));
 
             double xVelocity = 0;
             double yVelocity = 0;
@@ -141,10 +143,6 @@ public class CustomOdometry {
             double translationStds;
             double rotationStds;
 
-            if (m_lastSwerveModulePositionsCustomOdom[0] == null) {
-                m_lastSwerveModulePositionsCustomOdom = state.ModulePositions.clone();
-            }
-
             if (slipping & !multiWheelSlipping) {
                 poseChange =
                         m_kinematics_custom.toTwist2d(
@@ -156,6 +154,10 @@ public class CustomOdometry {
                         m_kinematics_custom.toTwist2d(
                                 m_lastSwerveModulePositionsCustomOdom, state.ModulePositions);
             }
+
+            double currentGyroTheta = state.Pose.getRotation().getRadians();
+
+            poseChange.dtheta = currentGyroTheta - lastGryoTheta;
 
             m_currentPose = m_currentPose.exp(poseChange);
 

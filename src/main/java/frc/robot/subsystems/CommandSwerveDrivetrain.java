@@ -181,7 +181,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         }
         m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
         m_odometry_custom =
-                new CustomOdometry(new CustomInverseKinematics(getModuleLocations()), getPigeon2());
+                new CustomOdometry(new CustomInverseKinematics(getModuleLocations()));
         registerTelemetry(m_odometry_custom::odometryFunction);
     }
 
@@ -207,7 +207,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
         m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
         m_odometry_custom =
-                new CustomOdometry(new CustomInverseKinematics(getModuleLocations()), getPigeon2());
+                new CustomOdometry(new CustomInverseKinematics(getModuleLocations()));
         registerTelemetry(m_odometry_custom::odometryFunction);
     }
 
@@ -242,7 +242,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
         m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
         m_odometry_custom =
-                new CustomOdometry(new CustomInverseKinematics(getModuleLocations()), getPigeon2());
+                new CustomOdometry(new CustomInverseKinematics(getModuleLocations()));
         registerTelemetry(m_odometry_custom::odometryFunction);
     }
 
