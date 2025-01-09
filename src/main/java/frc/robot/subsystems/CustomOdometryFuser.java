@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.util.CircularBuffer;
 import java.util.Optional;
+import java.util.Stack;
 
 public class CustomOdometryFuser {
     private static record TimedInfo(
@@ -15,18 +16,14 @@ public class CustomOdometryFuser {
             double thetaVariance,
             double timestamp) {}
 
-    CircularBuffer<TimedInfo> timedInfoBuffer = new CircularBuffer<>(100);
-
-    VisionUpdateOffset currentOffset = new VisionUpdateOffset(0.0, 0.0, 0.0, 0.0, 0.0);
-
-    CircularBuffer<VisionUpdate> standardOffsets = new CircularBuffer<>(10);
+    private CircularBuffer<TimedInfo> m_pastPosesRelative = new CircularBuffer<>(100);
 
     private static record VisionUpdate(
-        Pose2d visionPose,
-        double timestamp,
-        double translationVariance,
-        double rotationVariance,
-        VisionUpdateOffset currentOffset) {}
+            Pose2d visionPose,
+            double timestamp,
+            double translationVariance,
+            double rotationVariance,
+            VisionUpdateOffset visionUpdateOffset) {}
 
     private static record VisionUpdateOffset(
             double translationVarianceDetractor,
@@ -53,25 +50,25 @@ public class CustomOdometryFuser {
         }
     }
 
-    public CustomOdometryFuser() {}
+    private final int m_pastVisionUpdatesMaxSize = 10;
+    private CircularBuffer<VisionUpdate> m_pastVisionUpdates =
+            new CircularBuffer<>(m_pastVisionUpdatesMaxSize);
+
+    private Stack<VisionUpdate> m_unaddedVisionUpdates = new Stack<>();
+
+    public CustomOdometryFuser() {
+        m_pastVisionUpdates.addLast(
+                new VisionUpdate(Pose2d.kZero, 0, 0, 0, new VisionUpdateOffset(0, 0, 0, 0, 0)));
+    }
 
     public void resetPose(Pose2d newPose, double timestamp) {
-        timedInfoBuffer.clear();
-        timedInfoBuffer.addLast(
-                new TimedInfo(
-                        newPose.getX(),
-                        newPose.getY(),
-                        newPose.getRotation().getRadians(),
-                        0.0,
-                        0.0,
-                        timestamp));
-        currentOffset = new VisionUpdateOffset(0.0, 0.0, 0.0, 0.0, 0.0);
+        addVisionUpdate(newPose, timestamp, 0.0, 0.0);
     }
 
     public Pose2d getPose() {
-        final var tInfo = timedInfoBuffer.getLast();
+        final var tInfo = m_pastPosesRelative.getLast();
 
-        final var vInfo = currentOffset;
+        final var vInfo = m_pastVisionUpdates.getLast().visionUpdateOffset;
 
         double currentPoseX =
                 tInfo.poseX * vInfo.poseThetaOffsetCos
@@ -92,8 +89,8 @@ public class CustomOdometryFuser {
             return Optional.empty();
         }
 
-        final var tInfo = timedInfoBuffer.get(timestampIndex);
-        final var vInfo = currentOffset;
+        final var tInfo = m_pastPosesRelative.get(timestampIndex);
+        final var vInfo = m_pastVisionUpdates.getLast().visionUpdateOffset;
 
         double currentPoseX =
                 tInfo.poseX * vInfo.poseThetaOffsetCos
@@ -109,7 +106,7 @@ public class CustomOdometryFuser {
     }
 
     public double getPhysicalPoseVariance() {
-        return timedInfoBuffer.getLast().xyVariance;
+        return m_pastPosesRelative.getLast().xyVariance;
     }
 
     public double getPhysicalPoseStdDev() {
@@ -117,28 +114,26 @@ public class CustomOdometryFuser {
     }
 
     public double getRotationalPoseVariance() {
-        return timedInfoBuffer.getLast().thetaVariance;
+        return m_pastPosesRelative.getLast().thetaVariance;
     }
 
     public double getRotationalPoseStdDev() {
         return Math.sqrt(getRotationalPoseVariance());
     }
 
-    private final Pose2d m_expPoseZero = new Pose2d();
-
     // You can use this to add a new measurement to the odometry fuser using this.
     public void addSwerveMeasurementTwist(
             Twist2d twist, double timestamp, double translationVariance, double rotationVariance) {
-        final Pose2d postExp = m_expPoseZero.exp(twist);
+        final Pose2d postExp = Pose2d.kZero.exp(twist);
         double dx = postExp.getX();
         double dy = postExp.getY();
         double dtheta = postExp.getRotation().getRadians();
 
-        final var tInfo = timedInfoBuffer.getLast();
+        final var tInfo = m_pastPosesRelative.getLast();
 
         double dt = timestamp - tInfo.timestamp;
 
-        timedInfoBuffer.addLast(
+        m_pastPosesRelative.addLast(
                 new TimedInfo(
                         tInfo.poseX + dx,
                         tInfo.poseY + dy,
@@ -149,7 +144,7 @@ public class CustomOdometryFuser {
     }
 
     private int getTimestampIndex(double timestamp) {
-        return findLargestDoubleLessThan(timedInfoBuffer, timestamp);
+        return findLargestDoubleLessThan(m_pastPosesRelative, timestamp);
     }
 
     private static int findLargestDoubleLessThan(CircularBuffer<TimedInfo> array, double target) {
@@ -171,8 +166,6 @@ public class CustomOdometryFuser {
         return result;
     }
 
-    private double m_lastVisionUpdateTimestamp;
-
     // Use this to add a vision pose update. This will update the odometry fuser with the vision
     // pose and the timestamp. At the moment this can only take vision pose estimates in time order.
     // AKA If you have multiple cameras, they might not both get processed depending on your
@@ -182,22 +175,27 @@ public class CustomOdometryFuser {
             double timestamp,
             double translationVariance,
             double rotationVariance) {
-        if (timestamp < m_lastVisionUpdateTimestamp) {
-            return;
+
+        moveVisionUpdatesToStack(
+                new VisionUpdate(
+                        visionPose, timestamp, translationVariance, rotationVariance, null));
+
+        while (!m_unaddedVisionUpdates.isEmpty()) {
+            moveVisionUpdateOffStack();
         }
+    }
 
-        int timestampIndex = getTimestampIndex(timestamp);
+    private void moveVisionUpdateOffStack() {
+        final var visUpd = m_unaddedVisionUpdates.pop();
 
-        if (timestampIndex == -1) {
-            return;
-        }
+        int timestampIndex = getTimestampIndex(visUpd.timestamp);
 
-        double visionX = visionPose.getX();
-        double visionY = visionPose.getY();
-        double visionTheta = visionPose.getRotation().getRadians();
+        double visionX = visUpd.visionPose.getX();
+        double visionY = visUpd.visionPose.getY();
+        double visionTheta = visUpd.visionPose.getRotation().getRadians();
 
-        final var tInfo = timedInfoBuffer.get(timestampIndex);
-        final var vInfo = currentOffset;
+        final var tInfo = m_pastPosesRelative.get(timestampIndex);
+        final var vInfo = m_pastVisionUpdates.getLast().visionUpdateOffset;
 
         double currentPoseX =
                 tInfo.poseX * vInfo.poseThetaOffsetCos
@@ -213,15 +211,20 @@ public class CustomOdometryFuser {
         double rotationalPoseVariance = tInfo.thetaVariance + vInfo.rotationVarianceDetractor;
 
         double newcurrentPoseX =
-                squareMerge(currentPoseX, physicalPoseVariance, visionX, translationVariance);
+                squareMerge(
+                        currentPoseX, physicalPoseVariance, visionX, visUpd.translationVariance);
         double newcurrentPoseY =
-                squareMerge(currentPoseY, physicalPoseVariance, visionY, translationVariance);
+                squareMerge(
+                        currentPoseY, physicalPoseVariance, visionY, visUpd.translationVariance);
         double newcurrentPoseTheta =
                 squareMerge(
-                        currentPoseTheta, rotationalPoseVariance, visionTheta, rotationVariance);
+                        currentPoseTheta,
+                        rotationalPoseVariance,
+                        visionTheta,
+                        visUpd.rotationVariance);
 
-        double newPhysicalPoseVariance = tMerge(physicalPoseVariance, translationVariance);
-        double newRotationalPoseVariance = tMerge(rotationalPoseVariance, rotationVariance);
+        double newPhysicalPoseVariance = tMerge(physicalPoseVariance, visUpd.translationVariance);
+        double newRotationalPoseVariance = tMerge(rotationalPoseVariance, visUpd.rotationVariance);
 
         double translationVarianceDetractorNew =
                 newPhysicalPoseVariance - physicalPoseVariance + vInfo.translationVarianceDetractor;
@@ -246,15 +249,33 @@ public class CustomOdometryFuser {
         var poseXOffsetNew = newcurrentPoseX - recalculatedPoseX + vInfo.poseXOffset;
         var poseYOffsetNew = newcurrentPoseY - recalculatedPoseY + vInfo.poseYOffset;
 
-       currentOffset = 
-                new VisionUpdateOffset(
-                        translationVarianceDetractorNew,
-                        rotationVarianceDetractorNew,
-                        poseXOffsetNew,
-                        poseYOffsetNew,
-                        poseThetaOffsetNew,
-                        poseThetaOffsetCosNew,
-                        poseThetaOffsetSinNew);
+        m_pastVisionUpdates.addLast(
+                new VisionUpdate(
+                        visUpd.visionPose,
+                        visUpd.timestamp,
+                        visUpd.translationVariance,
+                        visUpd.rotationVariance,
+                        new VisionUpdateOffset(
+                                translationVarianceDetractorNew,
+                                rotationVarianceDetractorNew,
+                                poseXOffsetNew,
+                                poseYOffsetNew,
+                                poseThetaOffsetNew,
+                                poseThetaOffsetCosNew,
+                                poseThetaOffsetSinNew)));
+    }
+
+    private void moveVisionUpdatesToStack(VisionUpdate visionUpdate) {
+        if (visionUpdate.timestamp <= m_pastVisionUpdates.getFirst().timestamp
+                || visionUpdate.timestamp <= m_pastPosesRelative.getFirst().timestamp) {
+            return;
+        }
+
+        while (m_pastVisionUpdates.getLast().timestamp > visionUpdate.timestamp) {
+            m_unaddedVisionUpdates.add(m_pastVisionUpdates.removeLast());
+        }
+
+        m_unaddedVisionUpdates.add(visionUpdate);
     }
 
     private double squareMerge(double a, double a_var, double b, double b_var) {
