@@ -138,6 +138,7 @@ $RECYCLE.BIN/
 ### Gradle ###
 .gradle
 /build/
+/stats_tracker/build/
 
 # Ignore Gradle GUI config
 gradle-app.setting
