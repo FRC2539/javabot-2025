@@ -3,6 +3,8 @@ name: Statistics Tracker
 on:
   schedule:
     - cron: '0 5 * * *'
+  workflow_dispatch:
+    
 
 permissions:
   pages: write
