@@ -16,3 +16,5 @@ echo "<svg width=\"300px\" height=\"300px\" xmlns=\"http://www.w3.org/2000/svg\"
     <image href=\"background.png\" width=\"100%\"/>
     <text x=\"50%\" y=\"90px\" font-size=\"65\" text-anchor=\"middle\" fill=\"black\" font-family=\"Source Code Pro\" font-weight=\"bold\">$value</text>
 </svg>" > loc.svg
+pip install imgkit
+python html-to-img.py
