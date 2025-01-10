@@ -22,9 +22,10 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     }
 
 
-    @Override
+    
     public void setPosition(double position) {
-        //Figure out how to make it so we can see how far we need to go to get to a certain position.(?)
+        elevatorLeader.setPosition(position);
+        elevatorFollower.setPosition(position);
     }
 
 }
