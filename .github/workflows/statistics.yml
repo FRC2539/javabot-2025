@@ -1,15 +1,17 @@
 name: Statistics Tracker
 
-on:
-  push
+on: [push, workflow_call]
 
 permissions:
   pages: write
   id-token: write
 
 jobs:
-
   build:
+    concurrency:
+      group: statistics-deploy
+      cancel-in-progress: true
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -19,6 +21,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Install Imgkit
+        run: |
+          pip install imgkit
+      - name: Install wkhtmltopdf
+        run: |
+          sudo apt-get install wkhtmltopdf
       - name: Generate SVG graphic
         id: build
         run: bash ./generate_svg.sh
@@ -28,7 +36,15 @@ jobs:
         with:
           path: stats_tracker/build/
 
+  main-deploy:
+    if: ${{github.ref != 'refs/heads/main'}}
+    uses:
+      FRC2593/javabot-2025/.github/workflows/statistics.yml@main
+
   deploy:
+    concurrency:
+      group: statistics-deploy
+      cancel-in-progress: true
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
