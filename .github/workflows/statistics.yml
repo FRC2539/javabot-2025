@@ -12,7 +12,8 @@ jobs:
     steps:
       - name: Checkout the repository to the runner
         uses: actions/checkout@v4
-        fetch-depth: 0
+        with:
+          fetch-depth: 0
       - name: Generate SVG graphic
         id: build
         run: bash ./generate_svg.sh
