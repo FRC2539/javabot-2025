@@ -1,6 +1,6 @@
 name: Statistics Tracker
 
-on:
+on: |
   push
   workflow_call
 
