@@ -39,7 +39,7 @@ jobs:
   main-deploy:
     if: ${{github.ref != 'refs/heads/main'}}
     uses:
-      FRC2593/javabot-2025/.github/workflows/statistics.yml@main
+      FRC2539/javabot-2025/.github/workflows/statistics.yml@main
 
   deploy:
     concurrency:
