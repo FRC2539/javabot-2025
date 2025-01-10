@@ -17,7 +17,7 @@ echo "<svg width=\"300px\" height=\"300px\" xmlns=\"http://www.w3.org/2000/svg\"
     <text x=\"50%\" y=\"90px\" font-size=\"65\" text-anchor=\"middle\" fill=\"black\" font-family=\"Source Code Pro\" font-weight=\"bold\">$value</text>
 </svg>" > loc.svg
 TEMP_DEB="$(mktemp)" &&
-wget -O "$TEMP_DEB" 'https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_arm64.deb' &&
+wget -O "$TEMP_DEB" 'https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb' &&
 sudo dpkg -i "$TEMP_DEB"
 rm -f "$TEMP_DEB"
 pip install imgkit
