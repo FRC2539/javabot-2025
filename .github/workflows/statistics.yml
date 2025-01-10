@@ -1,6 +1,8 @@
 name: Statistics Tracker
 
-on: [workflow_call]
+on:
+  schedule:
+    - cron: '0 5 * * *'
 
 permissions:
   pages: write

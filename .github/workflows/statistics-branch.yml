@@ -1,9 +1,0 @@
-name: Statistics Tracker Trigger
-
-on:
-    push
-
-jobs:
-    caller:
-        uses:
-            frc2539/javabot-2025/.github/workflows/statistics.yml@main
