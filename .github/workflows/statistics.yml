@@ -1,0 +1,34 @@
+name: Statistics Tracker
+
+on:
+  push
+
+jobs:
+  statistics:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./stats_tracker
+    steps:
+      - name: Checkout the repository to the runner
+        uses: actions/checkout@v4
+        fetch-depth: 0
+      - name: Generate SVG graphic
+        id: build
+        run: bash ./generate_svg.sh
+      - name: Upload static files as artifact
+        id: deployment
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
