@@ -1,8 +1,6 @@
 name: Statistics Tracker
 
-on: |
-  push
-  workflow_call
+on: [push, workflow_call]
 
 permissions:
   pages: write
