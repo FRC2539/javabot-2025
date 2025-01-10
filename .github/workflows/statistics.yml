@@ -4,7 +4,7 @@ on:
   push
 
 jobs:
-  statistics:
+  build:
     runs-on: ubuntu-latest
     defaults:
       run:
