@@ -21,7 +21,7 @@ jobs:
         id: deployment
         uses: actions/upload-pages-artifact@v3
         with:
-          path: build
+          path: stats_tracker/build/
 
   deploy:
     environment:
