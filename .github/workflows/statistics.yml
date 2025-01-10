@@ -10,6 +10,7 @@ permissions:
 jobs:
 
   build:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -33,6 +34,11 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: stats_tracker/build/
+
+  main-deploy:
+    if: ${{github.ref != 'refs/heads/main'}}
+    uses:
+      FRC2593/javabot-2025/.github/workflows/statistics.yml@main
 
   deploy:
     environment:
