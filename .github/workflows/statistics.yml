@@ -3,7 +3,11 @@ name: Statistics Tracker
 on:
   push
 
+permissions:
+  pages: write
+
 jobs:
+
   build:
     runs-on: ubuntu-latest
     defaults:
