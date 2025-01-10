@@ -19,6 +19,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Install Imgkit
+        run: |
+          pip install imgkit
+      - name: Install wkhtmltopdf
+        run: |
+          sudo apt-get install wkhtmltopdf
       - name: Generate SVG graphic
         id: build
         run: bash ./generate_svg.sh
