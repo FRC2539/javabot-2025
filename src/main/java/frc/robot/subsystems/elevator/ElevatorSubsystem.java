@@ -20,6 +20,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     private Mechanism elevator;
 
 
+    //elevatorFollower.setControl(new Follower(98, false));
     
     public ElevatorSubsystem(){
         
@@ -30,7 +31,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public Command setVoltage(double voltage) {
         return run (() -> {
-            this.voltage = voltage;
+            piviotIO.setVoltage(voltage);
         });
     }
 
