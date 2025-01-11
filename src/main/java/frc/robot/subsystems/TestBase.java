@@ -9,7 +9,11 @@ import java.lang.Math;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.pathplanner.lib.events.TriggerEvent;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkBaseConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
@@ -18,11 +22,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class TestBase extends SubsystemBase {
-public LoggedNetworkNumber motor1SpeedNetworkNumber = new LoggedNetworkNumber("motorOneSpeed",0);
-public LoggedNetworkNumber  motor2SpeedNetworkNumber = new LoggedNetworkNumber("motorTwoSpeed", 0);
+public LoggedNetworkNumber motor1SpeedNetworkNumber = new LoggedNetworkNumber("motorOneSpeed",0.1);
+public LoggedNetworkNumber  motor2SpeedNetworkNumber = new LoggedNetworkNumber("motorTwoSpeed", 0.1);
 
-SparkMax motor1 = new SparkMax(1, MotorType.kBrushless);
-SparkMax motor2 = new SparkMax(2, MotorType.kBrushless);
+SparkMax motor1 = new SparkMax(2, MotorType.kBrushless);
+SparkMax motor2 = new SparkMax(3, MotorType.kBrushless);
 //run motors 1/2 forward and backwards at a certain speed.
 private final Timer startTimer  = new Timer();
 private boolean stop1, stop2, stop3;
@@ -36,7 +40,10 @@ Trigger trigger;
 
 public TestBase(){
     // boolean stop1, stop2, stop3 = false;
-    // startTimer.reset();
+    // startTimer.reset();\
+    SparkBaseConfig test = new SparkMaxConfig().smartCurrentLimit(20).secondaryCurrentLimit(25);
+    motor1.configure(test, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    motor2.configure(test, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     
 
 }
@@ -47,7 +54,7 @@ public TestBase(){
     public void setMotor2Speed(double speed){
         motor2.set(speed);
     }
-    
+
 
     public Command move() {
         return run(() -> { 

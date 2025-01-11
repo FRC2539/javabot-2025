@@ -24,16 +24,16 @@ public class Robot extends LoggedRobot {
         Logger.recordMetadata("ProjectName", "JavaBot-2025"); // Set a metadata value
 
         if (isReal()) {
-            Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
-            Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
-            PowerDistribution distribution =
-                    new PowerDistribution(1, ModuleType.kRev); // Enables power distribution logging
+            // Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
+            // Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
+            // PowerDistribution distribution =
+            //         new PowerDistribution(1, ModuleType.kCTRE); // Enables power distribution logging
         } else {
             setUseTiming(true); // Run as fast as possible
-            Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
+           // Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
         }
 
-        Logger.start(); // Start logging! No more data receivers, replay sources, or metadata
+        // Logger.start(); // Start logging! No more data receivers, replay sources, or metadata
         // values may be added.
     }
 

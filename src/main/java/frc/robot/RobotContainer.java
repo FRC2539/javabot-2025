@@ -131,6 +131,10 @@ private final ThrustmasterJoystick leftDriveController =
             else if  (operatorController.getLeftTrigger().getAsBoolean()){
                 TestBase.setMotor1Speed(TestBase.motor1SpeedNetworkNumber.get() * -1 );
             }
+            else{
+                TestBase.setMotor1Speed(0);
+            
+            }
 
             if(operatorController.getRightBumper().getAsBoolean()){
                 TestBase.setMotor2Speed(TestBase.motor2SpeedNetworkNumber.get());
@@ -138,6 +142,11 @@ private final ThrustmasterJoystick leftDriveController =
 
             else if (operatorController.getRightTrigger().getAsBoolean()){
                 TestBase.setMotor2Speed(TestBase.motor2SpeedNetworkNumber.get() * -1);
+            }
+
+            else{
+                TestBase.setMotor2Speed(0);
+
             }
         }));
         
