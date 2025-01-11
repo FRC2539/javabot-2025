@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
@@ -35,9 +36,9 @@ private final ThrustmasterJoystick leftDriveController =
     private final LogitechController operatorController =
             new LogitechController(ControllerConstants.OPERATOR_CONTROLLER);
 
-    public final CommandSwerveDrivetrain driveTrain = TunerConstants.createDrivetrain();
+    // public final CommandSwerveDrivetrain driveTrain = TunerConstants.createDrivetrain();
 
-    public Auto auto = new Auto(driveTrain);
+    // public Auto auto = new Auto(driveTrain);
 
     public TestBase TestBase = new TestBase();
 
@@ -52,7 +53,7 @@ private final ThrustmasterJoystick leftDriveController =
         configureBindings();
 
 
-        driveTrain.setUpPathPlanner();
+        // driveTrain.setUpPathPlanner();
         // Establish the "Trajectory Field" Field2d into the dashboard
     }
 
@@ -118,9 +119,27 @@ private final ThrustmasterJoystick leftDriveController =
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
         //operatorController.getStart().whileTrue(TestBase.move().until(() -> TestBase.simulationGetBoolean()));
-        TestBase.setDefaultCommand(TestBase.stop());
-        operatorController.getRightBumper().whileTrue(TestBase.runSpeedsV2());
-        TestBase.trigger2.whileTrue(TestBase.runSpeedsV2());
+        // TestBase.setDefaultCommand(TestBase.stop());
+        // operatorController.getRightBumper().whileTrue(TestBase.runSpeedsV2());
+        // TestBase.trigger2.whileTrue(TestBase.runSpeedsV2());
+
+        TestBase.setDefaultCommand(TestBase.run(() -> {
+            if(operatorController.getLeftBumper().getAsBoolean()){
+                TestBase.setMotor1Speed(TestBase.motor1SpeedNetworkNumber.get());
+            }
+
+            else if  (operatorController.getLeftTrigger().getAsBoolean()){
+                TestBase.setMotor1Speed(TestBase.motor1SpeedNetworkNumber.get() * -1 );
+            }
+
+            if(operatorController.getRightBumper().getAsBoolean()){
+                TestBase.setMotor2Speed(TestBase.motor2SpeedNetworkNumber.get());
+            }
+
+            else if (operatorController.getRightTrigger().getAsBoolean()){
+                TestBase.setMotor2Speed(TestBase.motor2SpeedNetworkNumber.get() * -1);
+            }
+        }));
         
 
         // reset the field-centric heading on left bumper press
@@ -146,7 +165,7 @@ private final ThrustmasterJoystick leftDriveController =
     }
 
     public Command getAutonomousCommand() {
-        return auto.getAuto();
+        return Commands.none();
     }
 
 

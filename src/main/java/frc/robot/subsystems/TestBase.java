@@ -8,6 +8,8 @@ import org.opencv.features2d.FlannBasedMatcher;
 import java.lang.Math;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.pathplanner.lib.events.TriggerEvent;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
@@ -16,17 +18,19 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class TestBase extends SubsystemBase {
-LoggedNetworkNumber motor1SpeedNetworkNumber = new LoggedNetworkNumber("motorOneSpeed",0);
-LoggedNetworkNumber  motor2SpeedNetworkNumber = new LoggedNetworkNumber("motorTwoSpeed", 0);
-TalonFX motor1 = new TalonFX(20);
-TalonFX motor2 = new TalonFX(21);
+public LoggedNetworkNumber motor1SpeedNetworkNumber = new LoggedNetworkNumber("motorOneSpeed",0);
+public LoggedNetworkNumber  motor2SpeedNetworkNumber = new LoggedNetworkNumber("motorTwoSpeed", 0);
+
+SparkMax motor1 = new SparkMax(1, MotorType.kBrushless);
+SparkMax motor2 = new SparkMax(2, MotorType.kBrushless);
+//run motors 1/2 forward and backwards at a certain speed.
 private final Timer startTimer  = new Timer();
 private boolean stop1, stop2, stop3;
 LoggedNetworkBoolean simulation = new LoggedNetworkBoolean("isSimulation", false);
 
 boolean trueOrFalse;
 public final Trigger trigger2 = new Trigger(() -> simulation.get());
-
+//change cansparkmax motors
 
 Trigger trigger; 
 
@@ -36,6 +40,14 @@ public TestBase(){
     
 
 }
+
+    public void setMotor1Speed(double speed){
+        motor1.set(speed);
+    }
+    public void setMotor2Speed(double speed){
+        motor2.set(speed);
+    }
+    
 
     public Command move() {
         return run(() -> { 
@@ -47,7 +59,39 @@ public TestBase(){
          motor1.set(motor1SpeedNetworkNumber.get());
          motor2.set(motor2SpeedNetworkNumber.get());
     }
+
+    public Command moveForwardMotor1(){
+        return run(() -> { 
+
+            motor1.set(1);
+        });
+    }
+
     
+    public Command moveForwardMotor2(){
+        return run(() -> { 
+
+            motor2.set(1);
+        });
+    }
+
+    public Command moveBackwardMotor1(){
+
+        return run(() -> {
+
+            motor1.set(-1);
+        });
+    }
+    
+    public Command moveBackwardMotor2(){
+
+        return run(() -> {
+
+            motor2.set(-1);
+        });
+    }
+
+
     public Command stop() {
         return run(() -> {
 
