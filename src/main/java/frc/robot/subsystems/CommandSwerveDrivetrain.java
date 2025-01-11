@@ -15,6 +15,7 @@ import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -27,9 +28,12 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.constants.GlobalConstants;
+
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -454,5 +458,12 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                             updateSimState(deltaTime, RobotController.getBatteryVoltage());
                         });
         m_simNotifier.startPeriodic(kSimLoopPeriod);
+    }
+
+    public static Command alignToReef(CommandSwerveDrivetrain drivetrain, DoubleSupplier txSupplier) {
+        PIDController xController = new PIDController(0.04, 0, 0);
+        //xController.setTolerance(2);
+        xController.setSetpoint(0);
+        return drivetrain.applyRequest(() -> drivetrain.driveRobotRelative(0, xController.calculate(txSupplier.getAsDouble()),0)).until(() -> xController.atSetpoint());
     }
 }
