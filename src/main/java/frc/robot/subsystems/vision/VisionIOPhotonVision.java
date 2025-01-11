@@ -13,9 +13,8 @@
 
 package frc.robot.subsystems.vision;
 
+import static frc.robot.constants.VisionConstants.*;
 
-import static frc.robot.constants.VisionConstants.*;
-import static frc.robot.constants.VisionConstants.*;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
