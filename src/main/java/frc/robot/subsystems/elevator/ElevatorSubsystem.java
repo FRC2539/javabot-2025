@@ -18,16 +18,13 @@ public class ElevatorSubsystem extends SubsystemBase {
     private final double upperLimit = 100;
 
     private Mechanism elevator;
-
-
-    //elevatorFollower.setControl(new Follower(98, false));
     
     public ElevatorSubsystem(){
-        
+        this.piviotIO = piviotIO;
         this.elevator = elevator;
-
         
     }
+
 
     public Command setVoltage(double voltage) {
         return run (() -> {
