@@ -7,22 +7,14 @@ public class ElevatorIOSim implements ElevatorIO {
     public void updateInputs(ElevatorIOInputs inputs) {
         inputs.position = position;
         inputs.voltage = voltage;
-        
-        
     }
 
     public void setVoltage(double voltage) {
-       this.voltage = voltage; 
+        this.voltage = voltage;
     }
-    
+
     public void setPosition(double position) {
 
         this.position = position;
     }
-
-    
-
-    
-    
-
 }
