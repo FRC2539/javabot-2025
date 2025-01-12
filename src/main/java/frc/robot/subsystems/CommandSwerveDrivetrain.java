@@ -304,6 +304,15 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         return run(() -> this.setControl(requestSupplier.get()));
     }
 
+    public void addVisionMeasurement(
+            Pose2d visionRobotPoseMeters,
+            double timestampSeconds,
+            Matrix<N3, N1> visionMeasurementStdDevs) {
+
+        super.addVisionMeasurement(
+                visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds));
+    }
+
     /**
      * Runs the SysId Quasistatic test in the given direction for the routine specified by {@link
      * #m_sysIdRoutineToApply}.
