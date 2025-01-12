@@ -54,7 +54,8 @@ public class RobotContainer {
                     new Vision(
                             drivetrain::addVisionMeasurement,
                             new VisionIOLimelight(
-                                    VisionConstants.camera0Name, () -> drivetrain.getRobotPose().getRotation()));
+                                    VisionConstants.camera0Name,
+                                    () -> drivetrain.getRobotPose().getRotation()));
         } else {
             vision =
                     new Vision(
