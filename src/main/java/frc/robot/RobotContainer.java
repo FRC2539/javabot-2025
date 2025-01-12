@@ -17,8 +17,12 @@ import frc.lib.controller.ThrustmasterJoystick;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
+import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.WheelRadiusCharacterization;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 
 public class RobotContainer {
     private double MaxSpeed =
@@ -39,11 +43,29 @@ public class RobotContainer {
 
     public Auto auto = new Auto(drivetrain);
 
+    public Vision vision;
     // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
     public RobotContainer() {
+        if (Robot.isReal()) {
+            vision =
+                    new Vision(
+                            drivetrain::addVisionMeasurement,
+                            new VisionIOLimelight(
+                                    VisionConstants.camera0Name,
+                                    () -> drivetrain.getRobotPose().getRotation()));
+        } else {
+            vision =
+                    new Vision(
+                            drivetrain::addVisionMeasurement,
+                            new VisionIOPhotonVisionSim(
+                                    VisionConstants.camera0Name,
+                                    VisionConstants.robotToCamera0,
+                                    drivetrain::getRobotPose));
+        }
+
         configureBindings();
 
         drivetrain.setUpPathPlanner();
