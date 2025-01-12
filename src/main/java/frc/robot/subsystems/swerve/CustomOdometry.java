@@ -1,6 +1,7 @@
 package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
+import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -9,7 +10,6 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
-
 import org.ejml.simple.SimpleMatrix;
 
 public class CustomOdometry {
@@ -33,6 +33,10 @@ public class CustomOdometry {
 
     public double m_xyVariance = 0;
     public double m_thetaVariance = 0;
+
+    public SwerveDriveState m_state = new SwerveDriveState();
+
+    public ChassisSpeeds m_speeds = new ChassisSpeeds();
 
     private double lastGryoTheta = 0;
 
@@ -62,7 +66,7 @@ public class CustomOdometry {
 
             if (!hasIteratedYet) {
                 m_lastSwerveModulePositionsCustomOdom = state.ModulePositions.clone();
-                lastGryoTheta = state.Pose.getRotation().getRadians();
+                lastGryoTheta = state.RawHeading.getRadians();
                 hasIteratedYet = true;
             }
 
@@ -164,16 +168,19 @@ public class CustomOdometry {
                                 maxWheelErrorIndex,
                                 m_lastSwerveModulePositionsCustomOdom,
                                 state.ModulePositions);
+                m_speeds =
+                        m_kinematics_custom.toChassisSpeeds(maxWheelErrorIndex, state.ModuleStates);
             } else {
                 poseChange =
                         m_kinematics_custom.toTwist2d(
                                 m_lastSwerveModulePositionsCustomOdom, state.ModulePositions);
+                m_speeds = m_kinematics_custom.toChassisSpeeds(state.ModuleStates);
             }
 
             translationStds = Math.hypot(poseChange.dx, poseChange.dy) / state.OdometryPeriod * 0.1;
             rotationStds = 0.1;
 
-            double currentGyroTheta = state.Pose.getRotation().getRadians();
+            double currentGyroTheta = state.RawHeading.getRadians();
 
             poseChange.dtheta = currentGyroTheta - lastGryoTheta;
 
@@ -188,6 +195,21 @@ public class CustomOdometry {
             m_thetaVariance = m_customOdometryFuser.getRotationalPoseStdDev();
 
             m_lastSwerveModulePositionsCustomOdom = state.ModulePositions.clone();
+
+            var tempState = new SwerveDriveState();
+            tempState.FailedDaqs = state.FailedDaqs;
+            tempState.OdometryPeriod = state.OdometryPeriod;
+            tempState.RawHeading = state.RawHeading;
+            tempState.Timestamp = state.Timestamp;
+            tempState.ModulePositions = state.ModulePositions;
+            tempState.ModuleStates = state.ModuleStates;
+            tempState.ModuleTargets = state.ModuleTargets;
+            tempState.SuccessfulDaqs = state.SuccessfulDaqs;
+
+            tempState.Pose = m_currentPose;
+            tempState.Speeds = m_speeds;
+
+            m_state = tempState;
 
             double end = Timer.getTimestamp();
             m_lastOdometryTime = end - start;
