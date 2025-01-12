@@ -15,6 +15,7 @@ import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -27,9 +28,12 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.constants.GlobalConstants;
+
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -38,6 +42,8 @@ import org.littletonrobotics.junction.Logger;
  * be used in command-based projects.
  */
 public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsystem {
+    private final CustomOdometry m_odometry_custom;
+
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
@@ -142,6 +148,10 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         return this.getState().Pose;
     }
 
+    public Rotation2d getRotation2d() {
+        return this.getRobotPose().getRotation();
+    }
+
     public ChassisSpeeds getChassisSpeeds() {
         return this.getState().Speeds;
     }
@@ -162,6 +172,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             startSimThread();
         }
         m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
+        m_odometry_custom =
+                new CustomOdometry(new CustomInverseKinematics(getModuleLocations()), getPigeon2());
+        registerTelemetry(m_odometry_custom::odometryFunction);
     }
 
     /**
@@ -185,6 +198,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         }
 
         m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
+        m_odometry_custom =
+                new CustomOdometry(new CustomInverseKinematics(getModuleLocations()), getPigeon2());
+        registerTelemetry(m_odometry_custom::odometryFunction);
     }
 
     /**
@@ -217,6 +233,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         }
 
         m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
+        m_odometry_custom =
+                new CustomOdometry(new CustomInverseKinematics(getModuleLocations()), getPigeon2());
+        registerTelemetry(m_odometry_custom::odometryFunction);
     }
 
     private FieldOrientedOrbitSwerveRequest generateSwerveSetpointConfig() {
@@ -291,6 +310,15 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
      */
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
         return run(() -> this.setControl(requestSupplier.get()));
+    }
+
+    public void addVisionMeasurement(
+            Pose2d visionRobotPoseMeters,
+            double timestampSeconds,
+            Matrix<N3, N1> visionMeasurementStdDevs) {
+
+        super.addVisionMeasurement(
+                visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds));
     }
 
     /**
@@ -401,6 +429,18 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         Logger.recordOutput("Drive/actualChassisSpeeds", getState().Speeds);
 
         Logger.recordOutput("Drive/pose", getState().Pose);
+
+        Logger.recordOutput("Drive/customPose", m_odometry_custom.m_currentPose);
+
+        Logger.recordOutput("Drive/slippingModule", m_odometry_custom.m_maxSlippingWheelIndex);
+
+        Logger.recordOutput("Drive/slippingModuleAmount", m_odometry_custom.m_maxSlippingAmount);
+        Logger.recordOutput("Drive/slippingModuleRatio", m_odometry_custom.m_maxSlippingRatio);
+
+        Logger.recordOutput("Drive/customOdometryTime", m_odometry_custom.m_lastOdometryTime);
+
+        Logger.recordOutput("Drive/isSlipping", m_odometry_custom.m_isSlipping);
+        Logger.recordOutput("Drive/isMultiSlipping", m_odometry_custom.m_isMultiwheelSlipping);
     }
 
     private void startSimThread() {
@@ -418,5 +458,12 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                             updateSimState(deltaTime, RobotController.getBatteryVoltage());
                         });
         m_simNotifier.startPeriodic(kSimLoopPeriod);
+    }
+
+    public static Command alignToReef(CommandSwerveDrivetrain drivetrain, DoubleSupplier txSupplier) {
+        PIDController xController = new PIDController(0.04, 0, 0);
+        //xController.setTolerance(2);
+        xController.setSetpoint(0);
+        return drivetrain.applyRequest(() -> drivetrain.driveRobotRelative(0, xController.calculate(txSupplier.getAsDouble()),0)).until(() -> xController.atSetpoint());
     }
 }

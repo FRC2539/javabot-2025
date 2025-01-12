@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -24,6 +25,8 @@ public class Robot extends LoggedRobot {
         Logger.recordMetadata("ProjectName", "JavaBot-2025"); // Set a metadata value
 
         if (isReal()) {
+            SignalLogger.setPath("/home/lvuser/logs");
+            SignalLogger.start();
             Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
             Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
             PowerDistribution distribution =

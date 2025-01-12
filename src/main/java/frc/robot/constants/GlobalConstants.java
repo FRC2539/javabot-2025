@@ -19,15 +19,15 @@ public class GlobalConstants {
     public static final LinearVelocity MAX_TRANSLATIONAL_SPEED = TunerConstants.kSpeedAt12Volts;
     public static final AngularVelocity MAX_ROTATIONAL_SPEED = RotationsPerSecond.of(1);
 
-    public static final Mass ROBOT_MASS = Pounds.of(150);
-    public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(11.61);
+    public static final Mass ROBOT_MASS = Pounds.of(90); // 65.5
+    public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(11.61 * 90 / 150);
 
     public static final double COEFFICIENT_OF_FRICTION = 1.0;
 
     public static final DCMotor DRIVE_MOTOR =
-            DCMotor.getKrakenX60Foc(1).withReduction(EXAMPLE_MODULE.DriveMotorGearRatio);
+            DCMotor.getFalcon500Foc(1).withReduction(EXAMPLE_MODULE.DriveMotorGearRatio);
     public static final DCMotor STEER_MOTOR =
-            DCMotor.getKrakenX60Foc(1).withReduction(EXAMPLE_MODULE.SteerMotorGearRatio);
+            DCMotor.getFalcon500Foc(1).withReduction(EXAMPLE_MODULE.SteerMotorGearRatio);
 
     public static class ControllerConstants {
         public static final int LEFT_DRIVE_CONTROLLER = 0;

@@ -17,8 +17,12 @@ import frc.lib.controller.ThrustmasterJoystick;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
+import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.WheelRadiusCharacterization;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 
 public class RobotContainer {
     private double MaxSpeed =
@@ -39,11 +43,28 @@ public class RobotContainer {
 
     public Auto auto = new Auto(drivetrain);
 
+    public Vision vision;
     // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
     public RobotContainer() {
+        if (Robot.isReal()) {
+            vision =
+                    new Vision(
+                            drivetrain::addVisionMeasurement,
+                            new VisionIOLimelight(
+                                    VisionConstants.camera0Name, drivetrain::getRotation2d));
+        } else {
+            vision =
+                    new Vision(
+                            drivetrain::addVisionMeasurement,
+                            new VisionIOPhotonVisionSim(
+                                    VisionConstants.camera0Name,
+                                    VisionConstants.robotToCamera0,
+                                    drivetrain::getRobotPose));
+        }
+
         configureBindings();
 
         drivetrain.setUpPathPlanner();
@@ -61,13 +82,18 @@ public class RobotContainer {
                                     new ChassisSpeeds(
                                             GlobalConstants.MAX_TRANSLATIONAL_SPEED.in(
                                                             MetersPerSecond)
-                                                    * sps(
+                                                    * -sps(
                                                             deadband(
                                                                     leftDriveController
                                                                             .getYAxis()
                                                                             .get(),
                                                                     0.1)),
-                                            sps(deadband(leftDriveController.getXAxis().get(), 0.1))
+                                            -sps(
+                                                            deadband(
+                                                                    leftDriveController
+                                                                            .getXAxis()
+                                                                            .get(),
+                                                                    0.1))
                                                     * GlobalConstants.MAX_TRANSLATIONAL_SPEED.in(
                                                             MetersPerSecond),
                                             -sps(
@@ -78,9 +104,9 @@ public class RobotContainer {
                                                                     0.1))
                                                     * GlobalConstants.MAX_ROTATIONAL_SPEED.in(
                                                             RadiansPerSecond));
-                            return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(
-                                    driverDesiredSpeeds);
-                            // return drivetrain.m_applyFieldSpeeds.withSpeeds(driverDesiredSpeeds);
+                            //     return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(
+                            //             driverDesiredSpeeds);
+                            return drivetrain.m_applyFieldSpeeds.withSpeeds(driverDesiredSpeeds);
                         }));
 
         // drive.withVelocityX(-leftDriveController.getYAxis().get() *
@@ -114,7 +140,7 @@ public class RobotContainer {
         operatorController
                 .getBack()
                 .and(operatorController.getY())
-                .whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+                .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
         operatorController
                 .getBack()
                 .and(operatorController.getX())
@@ -126,7 +152,7 @@ public class RobotContainer {
         operatorController
                 .getStart()
                 .and(operatorController.getX())
-                .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+                .whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
 
         // reset the field-centric heading on left bumper press
         operatorController
@@ -134,7 +160,7 @@ public class RobotContainer {
                 .onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         operatorController
                 .getRightBumper()
-                .onTrue(drivetrain.runOnce(() -> drivetrain.resetPose(new Pose2d())));
+                .onTrue(drivetrain.runOnce(() -> drivetrain.resetPose(Pose2d.kZero)));
     }
 
     private double deadband(double value, double deadband) {
@@ -151,5 +177,14 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
         return auto.getAuto();
+
+        // return drivetrain.applyRequest(() ->
+        //                 drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(new
+        // ChassisSpeeds(GlobalConstants.MAX_TRANSLATIONAL_SPEED.in(MetersPerSecond), 0, 0))
+        //         ).withTimeout(1).andThen(drivetrain.applyRequest(() ->
+        //         drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(new
+        // ChassisSpeeds(-GlobalConstants.MAX_TRANSLATIONAL_SPEED.in(MetersPerSecond), 0,
+        // 0))).withTimeout(3));
+
     }
 }
