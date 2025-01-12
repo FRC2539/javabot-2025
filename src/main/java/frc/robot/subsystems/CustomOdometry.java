@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -30,6 +31,9 @@ public class CustomOdometry {
     public double m_maxSlippingAmount = 0;
     public double m_maxSlippingRatio = 1;
 
+    public double m_xyVariance = 0;
+    public double m_thetaVariance = 0;
+
     private double lastGryoTheta = 0;
 
     private boolean hasIteratedYet = false;
@@ -46,6 +50,7 @@ public class CustomOdometry {
         // visionSTDs.get(1,0) * visionSTDs.get(1,0)) / 2;
         // m_customOdometryFuser.addVisionUpdate(pose, timestamp, translationVariance,
         // visionSTDs.get(2,0));
+        m_customOdometryFuser.addVisionUpdate(new Pose2d(5,5, Rotation2d.kZero), timestamp, 0.0, 0.0);
     }
 
     public void odometryFunction(SwerveDrivetrain.SwerveDriveState state) {
@@ -162,15 +167,21 @@ public class CustomOdometry {
                                 m_lastSwerveModulePositionsCustomOdom, state.ModulePositions);
             }
 
+            translationStds = Math.hypot(poseChange.dx, poseChange.dy) / state.OdometryPeriod * 0.1;
+            rotationStds = 0.1;
+
             double currentGyroTheta = state.Pose.getRotation().getRadians();
 
             poseChange.dtheta = currentGyroTheta - lastGryoTheta;
 
             lastGryoTheta = currentGyroTheta;
 
-            m_customOdometryFuser.addSwerveMeasurementTwist(poseChange, state.Timestamp, 0.0, 0.0);
+            m_customOdometryFuser.addSwerveMeasurementTwist(poseChange, state.Timestamp, translationStds, rotationStds);
 
             m_currentPose = m_customOdometryFuser.getPose();
+
+            m_xyVariance = m_customOdometryFuser.getPhysicalPoseStdDev();
+            m_thetaVariance = m_customOdometryFuser.getRotationalPoseStdDev();
 
             m_lastSwerveModulePositionsCustomOdom = state.ModulePositions.clone();
 

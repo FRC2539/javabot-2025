@@ -451,6 +451,10 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
         Logger.recordOutput("Drive/isSlipping", m_odometry_custom.m_isSlipping);
         Logger.recordOutput("Drive/isMultiSlipping", m_odometry_custom.m_isMultiwheelSlipping);
+
+        Logger.recordOutput("Drive/translationalStandardDeviation", m_odometry_custom.m_xyVariance);
+
+        Logger.recordOutput("Drive/rotationalStandardDeviation", m_odometry_custom.m_thetaVariance);
     }
 
     private void startSimThread() {

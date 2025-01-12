@@ -10,6 +10,8 @@ import java.util.Queue;
 import java.util.Stack;
 import java.util.concurrent.PriorityBlockingQueue;
 
+import com.ctre.phoenix6.Utils;
+
 /** This is a custom odometry fuser. It is thread safe in theory. (Matthew approved.) */
 public class CustomOdometryFuser {
     private final boolean kUtilizeTurningCorrection = false;
@@ -76,10 +78,11 @@ public class CustomOdometryFuser {
                     });
 
     public CustomOdometryFuser() {
+        double time = Utils.getCurrentTimeSeconds();
         m_pastVisionUpdates.addLast(
-                new VisionUpdate(Pose2d.kZero, 0, 0, 0, new VisionUpdateOffset(0, 0, 0, 0, 0)));
+                new VisionUpdate(Pose2d.kZero, time, 0, 0, new VisionUpdateOffset(0, 0, 0, 0, 0)));
         m_lastVisionUpdate = m_pastVisionUpdates.getLast();
-        m_pastPosesRelative.addLast(new TimedInfo(0, 0, 0, 0, 0, 0));
+        m_pastPosesRelative.addLast(new TimedInfo(0, 0, 0, 0, 0, time));
     }
 
     public void resetPose(Pose2d newPose, double timestamp) {
@@ -94,6 +97,10 @@ public class CustomOdometryFuser {
             vInfo = m_lastVisionUpdate.visionUpdateOffset;
         }
 
+        return getPose(tInfo, vInfo);
+    }
+
+    private Pose2d getPose(TimedInfo tInfo, VisionUpdateOffset vInfo) {
         double currentPoseX =
                 tInfo.poseX * vInfo.poseThetaOffsetCos
                         - tInfo.poseY * vInfo.poseThetaOffsetSin
@@ -122,17 +129,7 @@ public class CustomOdometryFuser {
             vInfo = m_lastVisionUpdate.visionUpdateOffset;
         }
 
-        double currentPoseX =
-                tInfo.poseX * vInfo.poseThetaOffsetCos
-                        - tInfo.poseY * vInfo.poseThetaOffsetSin
-                        + vInfo.poseXOffset;
-        double currentPoseY =
-                tInfo.poseX * vInfo.poseThetaOffsetSin
-                        + tInfo.poseY * vInfo.poseThetaOffsetCos
-                        + vInfo.poseYOffset;
-        double currentPoseTheta = tInfo.poseTheta + vInfo.poseThetaOffset;
-        return Optional.of(
-                new Pose2d(currentPoseX, currentPoseY, new Rotation2d(currentPoseTheta)));
+        return Optional.of(getPose(tInfo, vInfo));
     }
 
     public double getPhysicalPoseVariance() {
@@ -307,12 +304,16 @@ public class CustomOdometryFuser {
                         - tInfo.poseY * poseThetaOffsetSinNew
                         + vInfo.poseXOffset;
         final double recalculatedPoseY =
-                tInfo.poseY * poseThetaOffsetSinNew
-                        + tInfo.poseX * poseThetaOffsetCosNew
+                tInfo.poseY * poseThetaOffsetCosNew
+                        + tInfo.poseX * poseThetaOffsetSinNew
                         + vInfo.poseYOffset;
 
         final var poseXOffsetNew = newcurrentPoseX - recalculatedPoseX + vInfo.poseXOffset;
         final var poseYOffsetNew = newcurrentPoseY - recalculatedPoseY + vInfo.poseYOffset;
+
+        // if (Double.isNaN(poseXOffsetNew) || Double.isNaN(poseYOffsetNew)) {
+        //     System.out.println("AHH");
+        // }
 
         m_pastVisionUpdates.addLast(
                 new VisionUpdate(
@@ -343,10 +344,21 @@ public class CustomOdometryFuser {
         m_unaddedVisionUpdates.add(visionUpdate);
     }
 
+    /**
+     * In the case of a conflict where a_var and b_var are 0, returns b.
+     */
     private double squareMerge(double a, double a_var, double b, double b_var) {
         final double a2 = 1 / (a_var);
         final double b2 = 1 / (b_var);
-        final double denom = 1 / (a2 + b2);
+        final double denom = a2 + b2;
+
+        if (b_var == 0) {
+            return b;
+        }
+
+        if (a_var == 0) {
+            return a;
+        }
 
         return (a * a2 + b * b2) / denom;
     }
