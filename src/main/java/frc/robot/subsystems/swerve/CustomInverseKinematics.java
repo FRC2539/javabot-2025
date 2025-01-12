@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.swerve;
 
 import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.MathUsageId;
