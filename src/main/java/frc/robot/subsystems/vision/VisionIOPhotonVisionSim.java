@@ -13,13 +13,11 @@
 
 package frc.robot.subsystems.vision;
 
-import static frc.robot.constants.VisionConstants.aprilTagLayout;
+import static frc.robot.subsystems.vision.VisionConstants.aprilTagLayout;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import java.util.function.Supplier;
-
-import org.littletonrobotics.junction.Logger;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
@@ -52,7 +50,6 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
         var cameraProperties = new SimCameraProperties();
         cameraSim = new PhotonCameraSim(camera, cameraProperties);
         visionSim.addCamera(cameraSim, robotToCamera);
-        cameraSim.enableDrawWireframe(true);
     }
 
     @Override
