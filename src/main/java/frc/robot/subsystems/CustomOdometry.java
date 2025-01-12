@@ -168,7 +168,9 @@ public class CustomOdometry {
 
             lastGryoTheta = currentGyroTheta;
 
-            m_currentPose = m_currentPose.exp(poseChange);
+            m_customOdometryFuser.addSwerveMeasurementTwist(poseChange, state.Timestamp, 0.0, 0.0);
+
+            m_currentPose = m_customOdometryFuser.getPose();
 
             m_lastSwerveModulePositionsCustomOdom = state.ModulePositions.clone();
 
