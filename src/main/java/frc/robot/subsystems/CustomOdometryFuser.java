@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.Utils;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -10,10 +11,10 @@ import java.util.Queue;
 import java.util.Stack;
 import java.util.concurrent.PriorityBlockingQueue;
 
-import com.ctre.phoenix6.Utils;
-
 /** This is a custom odometry fuser. It is thread safe in theory. (Matthew approved.) */
 public class CustomOdometryFuser {
+    // This is probably unnecesary as it is only has a very big impact if your rotational
+    // uncertainty is high.
     private final boolean kUtilizeTurningCorrection = false;
 
     private final Object readingLock = new Object();
@@ -264,8 +265,8 @@ public class CustomOdometryFuser {
                         - tInfo.poseY * vInfo.poseThetaOffsetSin
                         + vInfo.poseXOffset;
         final double currentPoseY =
-                tInfo.poseY * vInfo.poseThetaOffsetSin
-                        + tInfo.poseX * vInfo.poseThetaOffsetCos
+                tInfo.poseY * vInfo.poseThetaOffsetCos
+                        + tInfo.poseX * vInfo.poseThetaOffsetSin
                         + vInfo.poseYOffset;
         final double currentPoseTheta = tInfo.poseTheta + vInfo.poseThetaOffset;
 
@@ -279,14 +280,16 @@ public class CustomOdometryFuser {
                 squareMerge(
                         currentPoseY, physicalPoseVariance, visionY, visUpd.translationVariance);
         final double newcurrentPoseTheta =
-                squareMerge(
+                squareMergeWrapping(
                         currentPoseTheta,
                         rotationalPoseVariance,
                         visionTheta,
                         visUpd.rotationVariance);
 
-        final double newPhysicalPoseVariance = tMerge(physicalPoseVariance, visUpd.translationVariance);
-        final double newRotationalPoseVariance = tMerge(rotationalPoseVariance, visUpd.rotationVariance);
+        final double newPhysicalPoseVariance =
+                tMerge(physicalPoseVariance, visUpd.translationVariance);
+        final double newRotationalPoseVariance =
+                tMerge(rotationalPoseVariance, visUpd.rotationVariance);
 
         final double translationVarianceDetractorNew =
                 newPhysicalPoseVariance - physicalPoseVariance + vInfo.translationVarianceDetractor;
@@ -295,7 +298,8 @@ public class CustomOdometryFuser {
                         - rotationalPoseVariance
                         + vInfo.rotationVarianceDetractor;
 
-        final double poseThetaOffsetNew = newcurrentPoseTheta - currentPoseTheta + vInfo.poseThetaOffset;
+        final double poseThetaOffsetNew =
+                newcurrentPoseTheta - currentPoseTheta + vInfo.poseThetaOffset;
         final double poseThetaOffsetCosNew = Math.cos(poseThetaOffsetNew);
         final double poseThetaOffsetSinNew = Math.sin(poseThetaOffsetNew);
 
@@ -311,9 +315,9 @@ public class CustomOdometryFuser {
         final var poseXOffsetNew = newcurrentPoseX - recalculatedPoseX + vInfo.poseXOffset;
         final var poseYOffsetNew = newcurrentPoseY - recalculatedPoseY + vInfo.poseYOffset;
 
-        // if (Double.isNaN(poseXOffsetNew) || Double.isNaN(poseYOffsetNew)) {
-        //     System.out.println("AHH");
-        // }
+        if (Double.isNaN(poseXOffsetNew) || Double.isNaN(poseYOffsetNew)) {
+            System.out.println("AHH");
+        }
 
         m_pastVisionUpdates.addLast(
                 new VisionUpdate(
@@ -344,9 +348,7 @@ public class CustomOdometryFuser {
         m_unaddedVisionUpdates.add(visionUpdate);
     }
 
-    /**
-     * In the case of a conflict where a_var and b_var are 0, returns b.
-     */
+    /** In the case of a conflict where a_var and b_var are 0, returns b. */
     private double squareMerge(double a, double a_var, double b, double b_var) {
         final double a2 = 1 / (a_var);
         final double b2 = 1 / (b_var);
@@ -361,6 +363,19 @@ public class CustomOdometryFuser {
         }
 
         return (a * a2 + b * b2) / denom;
+    }
+
+    // This returns the result wrapped to follow a closer. (AKA b is wrapped to be within PI of a)
+    private double squareMergeWrapping(double a, double a_var, double b, double b_var) {
+        while (a - b > Math.PI) {
+            b += 2 * Math.PI;
+        }
+
+        while (a - b < -Math.PI) {
+            b -= 2 * Math.PI;
+        }
+
+        return squareMerge(a, a_var, b, b_var);
     }
 
     private double tMerge(double a_var, double b_var) {

@@ -3,7 +3,6 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -46,11 +45,14 @@ public class CustomOdometry {
     }
 
     public void addVisionMeasurement(Pose2d pose, double timestamp, Matrix<N3, N1> visionSTDs) {
-        // double translationVariance = (visionSTDs.get(0,0) * visionSTDs.get(0,0) +
-        // visionSTDs.get(1,0) * visionSTDs.get(1,0)) / 2;
-        // m_customOdometryFuser.addVisionUpdate(pose, timestamp, translationVariance,
-        // visionSTDs.get(2,0));
-        m_customOdometryFuser.addVisionUpdate(new Pose2d(5,5, Rotation2d.kZero), timestamp, 0.0, 0.0);
+        double translationVariance =
+                (visionSTDs.get(0, 0) * visionSTDs.get(0, 0)
+                                + visionSTDs.get(1, 0) * visionSTDs.get(1, 0))
+                        / 2;
+        m_customOdometryFuser.addVisionUpdate(
+                pose, timestamp, translationVariance, visionSTDs.get(2, 0));
+        // m_customOdometryFuser.addVisionUpdate(new Pose2d(5,5, Rotation2d.kZero), timestamp, 0.0,
+        // 0.0);
     }
 
     public void odometryFunction(SwerveDrivetrain.SwerveDriveState state) {
@@ -176,7 +178,8 @@ public class CustomOdometry {
 
             lastGryoTheta = currentGyroTheta;
 
-            m_customOdometryFuser.addSwerveMeasurementTwist(poseChange, state.Timestamp, translationStds, rotationStds);
+            m_customOdometryFuser.addSwerveMeasurementTwist(
+                    poseChange, state.Timestamp, translationStds, rotationStds);
 
             m_currentPose = m_customOdometryFuser.getPose();
 
