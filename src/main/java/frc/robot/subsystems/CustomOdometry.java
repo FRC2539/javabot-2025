@@ -1,10 +1,13 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
 import org.ejml.simple.SimpleMatrix;
 
@@ -31,8 +34,18 @@ public class CustomOdometry {
 
     private boolean hasIteratedYet = false;
 
+    private final CustomOdometryFuser m_customOdometryFuser;
+
     public CustomOdometry(CustomInverseKinematics kinematics) {
         m_kinematics_custom = kinematics;
+        m_customOdometryFuser = new CustomOdometryFuser();
+    }
+
+    public void addVisionMeasurement(Pose2d pose, double timestamp, Matrix<N3, N1> visionSTDs) {
+        // double translationVariance = (visionSTDs.get(0,0) * visionSTDs.get(0,0) +
+        // visionSTDs.get(1,0) * visionSTDs.get(1,0)) / 2;
+        // m_customOdometryFuser.addVisionUpdate(pose, timestamp, translationVariance,
+        // visionSTDs.get(2,0));
     }
 
     public void odometryFunction(SwerveDrivetrain.SwerveDriveState state) {
@@ -42,6 +55,7 @@ public class CustomOdometry {
             if (!hasIteratedYet) {
                 m_lastSwerveModulePositionsCustomOdom = state.ModulePositions.clone();
                 lastGryoTheta = state.Pose.getRotation().getRadians();
+                hasIteratedYet = true;
             }
 
             SimpleMatrix wheel_velocities_no_rot =
@@ -151,6 +165,8 @@ public class CustomOdometry {
             double currentGyroTheta = state.Pose.getRotation().getRadians();
 
             poseChange.dtheta = currentGyroTheta - lastGryoTheta;
+
+            lastGryoTheta = currentGyroTheta;
 
             m_currentPose = m_currentPose.exp(poseChange);
 

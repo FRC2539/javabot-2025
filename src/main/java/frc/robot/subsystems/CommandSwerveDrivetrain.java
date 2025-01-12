@@ -324,6 +324,11 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
         super.addVisionMeasurement(
                 visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds));
+
+        m_odometry_custom.addVisionMeasurement(
+                visionRobotPoseMeters,
+                Utils.fpgaToCurrentTime(timestampSeconds),
+                visionMeasurementStdDevs);
     }
 
     /**
