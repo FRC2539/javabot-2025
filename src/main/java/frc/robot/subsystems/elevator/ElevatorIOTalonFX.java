@@ -1,7 +1,5 @@
 package frc.robot.subsystems.elevator;
 
-import static edu.wpi.first.units.Units.Pound;
-
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
@@ -45,13 +43,10 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     private void encoderUpdate() {
 
         while (!pidController.atSetpoint()) {
-            double currentPosition = elevatorLeader
-                                            .getPosition()
-                                            .getValueAsDouble();
+            double currentPosition = elevatorLeader.getPosition().getValueAsDouble();
             elevatorLeader.set(
                     pidController.calculate(
-                                    currentPosition /*this is the encoder position*/,
-                                    targetHeight)
+                                    currentPosition /*this is the encoder position*/, targetHeight)
                             + elevatorFeedforward.calculate(targetHeight - currentPosition));
         }
     }
