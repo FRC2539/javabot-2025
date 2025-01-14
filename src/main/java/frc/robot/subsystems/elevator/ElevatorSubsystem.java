@@ -8,10 +8,9 @@ import org.littletonrobotics.junction.Logger;
 
 public class ElevatorSubsystem extends SubsystemBase {
 
-    private ElevatorIO piviotIO;
-    private ElevatorIOInputs elevatorVoltage = new ElevatorIOInputs();
+    private ElevatorIOTalonFX piviotIO;
+    private ElevatorIOInputs elevatorInputs = new ElevatorIOInputs();
 
-    private double voltage = 0;
 
     private double position = 0;
 
@@ -20,18 +19,29 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private Mechanism elevator;
 
-    public ElevatorSubsystem() {
-        this.piviotIO = piviotIO;
+    public ElevatorSubsystem(ElevatorIOTalonFX elevatorIO, Mechanism elevator) {
+        this.piviotIO = elevatorIO;
         this.elevator = elevator;
     }
 
     public void periodic() {
 
-        this.piviotIO.updateInputs(elevatorVoltage);
+        piviotIO.updateInputs(elevatorInputs);
 
-        this.piviotIO.setVoltage(voltage);
+        piviotIO.encoderUpdate();
 
-        Logger.recordOutput("Elevator/Voltage", this.elevatorVoltage.voltage);
+        Logger.recordOutput("Elevator/Voltage", elevatorInputs.voltage);
+
+
+        if (elevatorInputs.voltage < 0 && elevatorInputs.position <= lowerLimit) {
+            this.piviotIO.setVoltage(0);
+        }
+
+        if (elevatorInputs.voltage > 0 && elevatorInputs.position >= upperLimit) {
+            this.piviotIO.setVoltage(0);
+        }
+
+
     }
 
     public Command zeroElevatorCommand() {
@@ -42,7 +52,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public Command moveElevatorUp() {
-        return setVoltage(12).until(() -> elevatorVoltage.position >= upperLimit);
+        return setVoltage(12).until(() -> elevatorInputs.position >= upperLimit);
+    }
+
+    public Command moveElevatorDown() {
+        return setVoltage(-12).until(() -> elevatorInputs.position <= lowerLimit);
     }
 
     public Command setVoltage(double voltage) {

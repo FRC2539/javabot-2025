@@ -1,5 +1,7 @@
 package frc.robot.subsystems.elevator;
 
+import edu.wpi.first.math.controller.PIDController;
+
 public class ElevatorIOSim implements ElevatorIO {
     private double position = 0;
     private double voltage = 0;
@@ -17,4 +19,8 @@ public class ElevatorIOSim implements ElevatorIO {
 
         this.position = position;
     }
+
+    public void encoderUpdate(PIDController pidController) { }
+
+    public PIDController getPIDController() { return null; }
 }
