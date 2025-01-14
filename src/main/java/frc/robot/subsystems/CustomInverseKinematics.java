@@ -59,8 +59,10 @@ public class CustomInverseKinematics {
         for (int i = 0; i < m_numModules; i++) {
             m_inverseKinematicsMissing[i] =
                     m_inverseKinematics
-                            .rows(0, i)
-                            .concatColumns(m_inverseKinematics.rows(i + 1, m_numModules));
+                            .rows(0, i * 2)
+                            .concatRows(m_inverseKinematics.rows(i * 2 + 2, m_numModules * 2));
+            var x = m_inverseKinematicsMissing[i].getNumRows();
+            var y = m_inverseKinematicsMissing[i].getNumCols();
             m_forwardKinematicsMissing[i] = m_inverseKinematicsMissing[i].pseudoInverse();
         }
 

@@ -3,14 +3,11 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.SignalLogger;
-import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
-import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
-import com.ctre.phoenix6.swerve.jni.SwerveJNI.DriveState;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.config.RobotConfig;
@@ -25,7 +22,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
@@ -34,9 +30,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.constants.GlobalConstants;
-import frc.robot.constants.TunerConstants;
-
-import java.security.Timestamp;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -177,9 +170,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         m_odometry_custom =
                 new CustomOdometry(new CustomInverseKinematics(getModuleLocations()), getPigeon2());
 
-
-
-
         registerTelemetry(m_odometry_custom::odometryFunction);
     }
 
@@ -312,19 +302,17 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     }
 
     public SwerveRequest antiSlipBrakeLock(SwerveRequest swerveRequest) {
-        if(m_odometry_custom.m_isSlipping && !m_odometry_custom.m_isMultiwheelSlipping){
-                m_customSwerveRequest.setDesiredChassisSpeedsForSlippingModule(m_odometry_custom.m_speedsWithoutSlip);
-                m_customSwerveRequest.setIndexOfSlippingWheel(m_odometry_custom.m_maxSlippingWheelIndex);   
-                m_customSwerveRequest.setSwerveRequest(swerveRequest);
+        if (m_odometry_custom.m_isSlipping && !m_odometry_custom.m_isMultiwheelSlipping) {
+            m_customSwerveRequest.setDesiredChassisSpeedsForSlippingModule(
+                    m_odometry_custom.m_speedsWithoutSlip);
+            m_customSwerveRequest.setIndexOfSlippingWheel(
+                    m_odometry_custom.m_maxSlippingWheelIndex);
+            m_customSwerveRequest.setSwerveRequest(swerveRequest);
 
-                return m_customSwerveRequest;
+            return m_customSwerveRequest;
+        } else {
+            return swerveRequest;
         }
-
-        else
-        {
-                return swerveRequest;
-        }
-        
     }
 
     /**
@@ -335,6 +323,15 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
      */
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
         return run(() -> this.setControl(requestSupplier.get()));
+    }
+
+    public void addVisionMeasurement(
+            Pose2d visionRobotPoseMeters,
+            double timestampSeconds,
+            Matrix<N3, N1> visionMeasurementStdDevs) {
+
+        super.addVisionMeasurement(
+                visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds));
     }
 
     /**
@@ -432,7 +429,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             turnMotorVoltage[i] =
                     module.getSteerMotor().getMotorVoltage().refresh().getValueAsDouble();
         }
-
 
         Logger.recordOutput("Drive/Modules/DriveStatorCurrents", driveMotorStatorCurrents);
         Logger.recordOutput("Drive/Modules/DriveSupplyCurrents", driveMotorSupplyCurrents);
