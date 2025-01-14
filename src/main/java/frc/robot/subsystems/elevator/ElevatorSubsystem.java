@@ -8,7 +8,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class ElevatorSubsystem extends SubsystemBase {
 
-    private ElevatorIOTalonFX piviotIO;
+    private ElevatorIO piviotIO;
     private ElevatorIOInputs elevatorInputs = new ElevatorIOInputs();
 
     private double position = 0;
@@ -18,7 +18,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private Mechanism elevator;
 
-    public ElevatorSubsystem(ElevatorIOTalonFX elevatorIO, Mechanism elevator) {
+    public ElevatorSubsystem(ElevatorIO elevatorIO, Mechanism elevator) {
         this.piviotIO = elevatorIO;
         this.elevator = elevator;
     }
@@ -26,8 +26,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void periodic() {
 
         piviotIO.updateInputs(elevatorInputs);
-
-        piviotIO.encoderUpdate();
 
         Logger.recordOutput("Elevator/Voltage", elevatorInputs.voltage);
 

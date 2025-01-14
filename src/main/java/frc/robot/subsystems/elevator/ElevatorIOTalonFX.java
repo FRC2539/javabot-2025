@@ -1,5 +1,7 @@
 package frc.robot.subsystems.elevator;
 
+import static edu.wpi.first.units.Units.Pound;
+
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
@@ -21,9 +23,11 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         this.pidController = pidController;
         this.elevatorFeedforward = elevatorFeedforward;
         elevatorLeader.setPosition(0);
+        follower();
     }
 
     public void updateInputs(ElevatorIOInputs inputs) {
+        encoderUpdate();
 
         inputs.position = elevatorLeader.getPosition().refresh().getValueAsDouble();
         inputs.voltage = elevatorLeader.getMotorVoltage().refresh().getValueAsDouble();
@@ -35,26 +39,20 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     }
 
     public void setPosition(double position) {
-        elevatorLeader.setPosition(position);
         targetHeight = position;
     }
 
-    public void encoderUpdate() {
+    private void encoderUpdate() {
 
         while (!pidController.atSetpoint()) {
-
+            double currentPosition = elevatorLeader
+                                            .getPosition()
+                                            .getValueAsDouble();
             elevatorLeader.set(
                     pidController.calculate(
-                                    elevatorLeader
-                                            .getPosition()
-                                            .refresh()
-                                            .getValueAsDouble() /*this is the encoder position*/,
+                                    currentPosition /*this is the encoder position*/,
                                     targetHeight)
-                            + elevatorFeedforward.calculate(targetHeight));
+                            + elevatorFeedforward.calculate(targetHeight - currentPosition));
         }
-    }
-
-    public PIDController getPIDController() {
-        return pidController;
     }
 }
