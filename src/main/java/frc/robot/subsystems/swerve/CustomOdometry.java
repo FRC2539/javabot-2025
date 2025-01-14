@@ -177,8 +177,9 @@ public class CustomOdometry {
                 m_speeds = m_kinematics_custom.toChassisSpeeds(state.ModuleStates);
             }
 
-            translationStds = Math.hypot(poseChange.dx, poseChange.dy) / state.OdometryPeriod * 0.1;
-            rotationStds = 0.1;
+            translationStds =
+                    Math.hypot(poseChange.dx, poseChange.dy) / state.OdometryPeriod * 0.03 + 0.01;
+            rotationStds = 0.001;
 
             double currentGyroTheta = state.RawHeading.getRadians();
 
