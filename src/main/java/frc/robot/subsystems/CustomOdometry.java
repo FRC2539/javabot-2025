@@ -31,6 +31,8 @@ public class CustomOdometry {
     public double m_maxSlippingAmount = 0;
     public double m_maxSlippingRatio = 1;
 
+    public ChassisSpeeds m_speedsWithoutSlip;
+
     public CustomOdometry(
             CustomInverseKinematics kinematics, DoubleSupplier gyroAngularVelocitySupplier) {
         m_kinematics_custom = kinematics;
@@ -160,6 +162,11 @@ public class CustomOdometry {
             m_currentPose = m_currentPose.exp(poseChange);
 
             m_lastSwerveModulePositionsCustomOdom = state.ModulePositions.clone();
+
+            var speeds =
+                    m_kinematics_custom.toChassisSpeeds(maxWheelErrorIndex, state.ModuleStates);
+
+            m_speedsWithoutSlip = speeds;
 
             double end = Timer.getTimestamp();
             m_lastOdometryTime = end - start;

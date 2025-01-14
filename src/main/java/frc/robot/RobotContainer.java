@@ -85,7 +85,7 @@ public class RobotContainer {
                                                             RadiansPerSecond));
                             //     return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(
                             //             driverDesiredSpeeds);
-                            return drivetrain.m_applyFieldSpeeds.withSpeeds(driverDesiredSpeeds);
+                            return drivetrain.antiSlipBrakeLock(drivetrain.m_applyFieldSpeeds.withSpeeds(driverDesiredSpeeds));
                         }));
 
         // drive.withVelocityX(-leftDriveController.getYAxis().get() *
