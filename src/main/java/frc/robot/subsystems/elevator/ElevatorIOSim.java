@@ -20,7 +20,9 @@ public class ElevatorIOSim implements ElevatorIO {
         this.position = position;
     }
 
-    public void encoderUpdate(PIDController pidController) { }
+    public void encoderUpdate() {}
 
-    public PIDController getPIDController() { return null; }
+    public PIDController getPIDController() {
+        return null;
+    }
 }

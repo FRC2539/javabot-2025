@@ -11,7 +11,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     private ElevatorIOTalonFX piviotIO;
     private ElevatorIOInputs elevatorInputs = new ElevatorIOInputs();
 
-
     private double position = 0;
 
     private final double lowerLimit = 0;
@@ -32,7 +31,6 @@ public class ElevatorSubsystem extends SubsystemBase {
 
         Logger.recordOutput("Elevator/Voltage", elevatorInputs.voltage);
 
-
         if (elevatorInputs.voltage < 0 && elevatorInputs.position <= lowerLimit) {
             this.piviotIO.setVoltage(0);
         }
@@ -40,8 +38,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         if (elevatorInputs.voltage > 0 && elevatorInputs.position >= upperLimit) {
             this.piviotIO.setVoltage(0);
         }
-
-
     }
 
     public Command zeroElevatorCommand() {

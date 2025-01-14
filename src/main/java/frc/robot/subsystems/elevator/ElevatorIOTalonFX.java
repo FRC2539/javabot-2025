@@ -28,32 +28,33 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         inputs.position = elevatorLeader.getPosition().refresh().getValueAsDouble();
         inputs.voltage = elevatorLeader.getMotorVoltage().refresh().getValueAsDouble();
         inputs.speed = elevatorLeader.getVelocity().refresh().getValueAsDouble();
-
     }
-
-
 
     public void setVoltage(double voltage) {
         elevatorLeader.setVoltage(voltage);
     }
 
-
-
     public void setPosition(double position) {
         elevatorLeader.setPosition(position);
         targetHeight = position;
-
     }
 
     public void encoderUpdate() {
 
-        while(!pidController.atSetpoint()) {
+        while (!pidController.atSetpoint()) {
 
-            elevatorLeader.set(pidController.calculate(elevatorLeader.getPosition().refresh().getValueAsDouble() /*this is the encoder position*/, targetHeight) + elevatorFeedforward.calculate(targetHeight));
+            elevatorLeader.set(
+                    pidController.calculate(
+                                    elevatorLeader
+                                            .getPosition()
+                                            .refresh()
+                                            .getValueAsDouble() /*this is the encoder position*/,
+                                    targetHeight)
+                            + elevatorFeedforward.calculate(targetHeight));
         }
-
     }
 
-    public PIDController getPIDController() { return pidController; }
-
+    public PIDController getPIDController() {
+        return pidController;
+    }
 }

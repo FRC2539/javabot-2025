@@ -13,24 +13,20 @@ public interface ElevatorIO {
         public double speed = 0;
         public double voltage;
 
-
-
         public void setPosition(double position) {
-            this.position = position;}
+            this.position = position;
+        }
 
         public void setSpeed(double speed) {
             this.speed = speed;
         }
 
-        public void setVoltage(double voltage){
-            this.voltage = voltage;}
-
+        public void setVoltage(double voltage) {
+            this.voltage = voltage;
+        }
     }
 
     public void encoderUpdate();
+
     public PIDController getPIDController();
-
 }
-
-
-
