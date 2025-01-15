@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.swerve;
 
 import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.MathUsageId;
@@ -24,7 +24,6 @@ public class CustomInverseKinematics {
     private final int m_numModules;
     private final Translation2d[] m_modules;
     private Rotation2d[] m_moduleHeadings;
-    private Translation2d m_prevCoR = Translation2d.kZero;
 
     /**
      * Constructs a swerve drive kinematics object. This takes in a variable number of module
@@ -61,8 +60,6 @@ public class CustomInverseKinematics {
                     m_inverseKinematics
                             .rows(0, i * 2)
                             .concatRows(m_inverseKinematics.rows(i * 2 + 2, m_numModules * 2));
-            var x = m_inverseKinematicsMissing[i].getNumRows();
-            var y = m_inverseKinematicsMissing[i].getNumCols();
             m_forwardKinematicsMissing[i] = m_inverseKinematicsMissing[i].pseudoInverse();
         }
 

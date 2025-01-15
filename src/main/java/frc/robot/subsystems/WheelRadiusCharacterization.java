@@ -49,8 +49,7 @@ public class WheelRadiusCharacterization extends Command {
             Direction omegaDirection, CommandSwerveDrivetrain drivetrain) {
         this.omegaDirection = omegaDirection;
         this.drive = drivetrain;
-        this.gyroYawRadSupplier =
-                () -> (drivetrain.getPigeon2().getYaw().refresh().getValue().in(Radians));
+        this.gyroYawRadSupplier = () -> drivetrain.getState().RawHeading.getRadians();
 
         addRequirements(drivetrain);
     }
