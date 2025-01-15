@@ -279,40 +279,21 @@ public class CommandSwerveDrivetrain implements Subsystem {
         return request;
     }
 
-    //
-    // The desired robot-relative speeds
-    // returns the module states where robot can drive while obeying physics and not slipping
     public SwerveRequest driveRobotRelative(ChassisSpeeds speeds) {
-        // Note: it is important to not discretize speeds before or after
-        // using the setpoint generator, as it will discretize them for you
-        previousSetpoint =
-                setpointGenerator.generateSetpoint(
-                        previousSetpoint, // The previous setpoint
-                        speeds, // The desired target speeds
-                        0.02 // The loop time of the robot code, in seconds
-                        );
-        return m_applyRobotSpeeds
-                .withSpeeds(previousSetpoint.robotRelativeSpeeds())
-                .withWheelForceFeedforwardsX(
-                        previousSetpoint.feedforwards().robotRelativeForcesXNewtons())
-                .withWheelForceFeedforwardsY(
-                        previousSetpoint.feedforwards().robotRelativeForcesYNewtons());
-        // Method that will drive the robot given target module states
-    }
-
-    public SwerveRequest driveRobotRelative(
-            double xVelocity, double yVelocity, double rotationRate) {
-        // Note: it is important to not discretize speeds before or after
-        // using the setpoint generator, as it will discretize them for you
-        ChassisSpeeds speeds = new ChassisSpeeds(xVelocity, yVelocity, rotationRate);
         return m_applyFieldSpeedsOrbit.withChassisSpeeds(speeds);
         // Method that will drive the robot given target module states
     }
 
     public SwerveRequest driveFieldRelative(ChassisSpeeds speeds) {
-        ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getState().Pose.getRotation());
-        return driveRobotRelative(speeds);
+        ChassisSpeeds newSpeeds =
+                ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getState().Pose.getRotation());
+        return driveRobotRelative(newSpeeds);
     }
+
+    //     public SwerveRequest driveFieldRelativeNoSetpointGenerator(ChassisSpeeds speeds) {
+    //         ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getState().Pose.getRotation());
+    //         return driveRobotRelative()
+    //     }
 
     public SwerveRequest driveWithFeedforwards(
             ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
