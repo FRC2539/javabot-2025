@@ -1,20 +1,23 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.swerve;
 
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
+import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -29,6 +32,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Robot;
 import frc.robot.constants.GlobalConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -37,7 +41,9 @@ import org.littletonrobotics.junction.Logger;
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements Subsystem so it can easily
  * be used in command-based projects.
  */
-public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsystem {
+public class CommandSwerveDrivetrain implements Subsystem {
+    private final SwerveDrivetrain m_drivetrain;
+
     private final CustomOdometry m_odometry_custom;
 
     private static final double kSimLoopPeriod = 0.005; // 5 ms
@@ -66,7 +72,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                     .withDesaturateWheelSpeeds(false);
 
     public final SwerveRequest.ApplyFieldSpeeds m_applyFieldSpeeds =
-            new SwerveRequest.ApplyFieldSpeeds();
+            new SwerveRequest.ApplyFieldSpeeds()
+                    .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective);
 
     public final FieldOrientedOrbitSwerveRequest m_applyFieldSpeedsOrbit;
     RobotConfig config; // PathPlanner robot configuration
@@ -148,6 +155,12 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         return this.getState().Speeds;
     }
 
+    public SwerveDriveState getState() {
+        return m_odometry_custom.m_state;
+    }
+
+    double lastTimestamp = 0;
+
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
      *
@@ -159,14 +172,19 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
      */
     public CommandSwerveDrivetrain(
             SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants... modules) {
-        super(drivetrainConstants, modules);
+        m_drivetrain = new SwerveDrivetrain(drivetrainConstants, modules);
         if (Utils.isSimulation()) {
             startSimThread();
         }
-        m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
+
         m_odometry_custom =
-                new CustomOdometry(new CustomInverseKinematics(getModuleLocations()), getPigeon2());
-        registerTelemetry(m_odometry_custom::odometryFunction);
+                new CustomOdometry(new CustomInverseKinematics(m_drivetrain.getModuleLocations()));
+        m_drivetrain.registerTelemetry(
+                (SwerveDriveState state) -> {
+                    m_odometry_custom.odometryFunction(state);
+                    m_drivetrain.resetPose(m_odometry_custom.m_currentPose);
+                });
+        m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
     }
 
     /**
@@ -184,15 +202,19 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             SwerveDrivetrainConstants drivetrainConstants,
             double OdometryUpdateFrequency,
             SwerveModuleConstants... modules) {
-        super(drivetrainConstants, OdometryUpdateFrequency, modules);
+        m_drivetrain = new SwerveDrivetrain(drivetrainConstants, OdometryUpdateFrequency, modules);
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        m_odometry_custom =
+                new CustomOdometry(new CustomInverseKinematics(m_drivetrain.getModuleLocations()));
+        m_drivetrain.registerTelemetry(
+                (SwerveDriveState state) -> {
+                    m_odometry_custom.odometryFunction(state);
+                    m_drivetrain.resetPose(m_odometry_custom.m_currentPose);
+                });
 
         m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
-        m_odometry_custom =
-                new CustomOdometry(new CustomInverseKinematics(getModuleLocations()), getPigeon2());
-        registerTelemetry(m_odometry_custom::odometryFunction);
     }
 
     /**
@@ -214,20 +236,26 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             Matrix<N3, N1> odometryStandardDeviation,
             Matrix<N3, N1> visionStandardDeviation,
             SwerveModuleConstants... modules) {
-        super(
-                drivetrainConstants,
-                odometryUpdateFrequency,
-                odometryStandardDeviation,
-                visionStandardDeviation,
-                modules);
+        m_drivetrain =
+                new SwerveDrivetrain(
+                        drivetrainConstants,
+                        odometryUpdateFrequency,
+                        odometryStandardDeviation,
+                        visionStandardDeviation,
+                        modules);
         if (Utils.isSimulation()) {
             startSimThread();
         }
 
-        m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
         m_odometry_custom =
-                new CustomOdometry(new CustomInverseKinematics(getModuleLocations()), getPigeon2());
-        registerTelemetry(m_odometry_custom::odometryFunction);
+                new CustomOdometry(new CustomInverseKinematics(m_drivetrain.getModuleLocations()));
+        m_drivetrain.registerTelemetry(
+                (SwerveDriveState state) -> {
+                    m_odometry_custom.odometryFunction(state);
+                    m_drivetrain.resetPose(m_odometry_custom.m_currentPose);
+                });
+
+        m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
     }
 
     private FieldOrientedOrbitSwerveRequest generateSwerveSetpointConfig() {
@@ -309,8 +337,10 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             double timestampSeconds,
             Matrix<N3, N1> visionMeasurementStdDevs) {
 
-        super.addVisionMeasurement(
-                visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds));
+        m_odometry_custom.addVisionMeasurement(
+                visionRobotPoseMeters,
+                Utils.fpgaToCurrentTime(timestampSeconds),
+                visionMeasurementStdDevs);
     }
 
     /**
@@ -351,7 +381,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             DriverStation.getAlliance()
                     .ifPresent(
                             allianceColor -> {
-                                setOperatorPerspectiveForward(
+                                m_drivetrain.setOperatorPerspectiveForward(
                                         allianceColor == Alliance.Red
                                                 ? kRedAlliancePerspectiveRotation
                                                 : kBlueAlliancePerspectiveRotation);
@@ -394,7 +424,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         double[] turnMotorVoltage = new double[4];
 
         for (int i = 0; i < 4; i++) {
-            var module = getModule(i);
+            var module = m_drivetrain.getModule(i);
             driveMotorStatorCurrents[i] =
                     module.getDriveMotor().getStatorCurrent().refresh().getValueAsDouble();
             driveMotorSupplyCurrents[i] =
@@ -422,7 +452,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
         Logger.recordOutput("Drive/pose", getState().Pose);
 
-        Logger.recordOutput("Drive/customPose", m_odometry_custom.m_currentPose);
+        Logger.recordOutput("Drive/outdatedPose", m_drivetrain.getState().Pose);
 
         Logger.recordOutput("Drive/slippingModule", m_odometry_custom.m_maxSlippingWheelIndex);
 
@@ -433,6 +463,10 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
         Logger.recordOutput("Drive/isSlipping", m_odometry_custom.m_isSlipping);
         Logger.recordOutput("Drive/isMultiSlipping", m_odometry_custom.m_isMultiwheelSlipping);
+
+        Logger.recordOutput("Drive/translationalStandardDeviation", m_odometry_custom.m_xyVariance);
+
+        Logger.recordOutput("Drive/rotationalStandardDeviation", m_odometry_custom.m_thetaVariance);
     }
 
     private void startSimThread() {
@@ -447,8 +481,31 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                             m_lastSimTime = currentTime;
 
                             /* use the measured time delta, get battery voltage from WPILib */
-                            updateSimState(deltaTime, RobotController.getBatteryVoltage());
+                            m_drivetrain.updateSimState(
+                                    deltaTime, RobotController.getBatteryVoltage());
                         });
         m_simNotifier.startPeriodic(kSimLoopPeriod);
+    }
+
+    public void resetPose(Pose2d pose) {
+        m_odometry_custom.addVisionMeasurement(
+                pose, Utils.getCurrentTimeSeconds(), VecBuilder.fill(0.0, 0.0, 0.0));
+        if (Robot.isSimulation()) {
+            // m_drivetrain.resetPose(pose);
+        }
+    }
+
+    public void setControl(SwerveRequest request) {
+        m_drivetrain.setControl(request);
+    }
+
+    public void seedFieldCentric() {
+        m_odometry_custom.addVisionMeasurement(
+                new Pose2d(0, 0, m_drivetrain.getOperatorForwardDirection()),
+                Utils.getCurrentTimeSeconds(),
+                VecBuilder.fill(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, 0.0));
+        if (Robot.isSimulation()) {
+            // m_drivetrain.seedFieldCentric();
+        }
     }
 }

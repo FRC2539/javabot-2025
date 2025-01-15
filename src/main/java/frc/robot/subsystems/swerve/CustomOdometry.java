@@ -1,15 +1,15 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.swerve;
 
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-
-import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
+import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
-import java.util.function.DoubleSupplier;
 import org.ejml.simple.SimpleMatrix;
 
 public class CustomOdometry {
@@ -17,7 +17,7 @@ public class CustomOdometry {
     private SwerveModulePosition[] m_lastSwerveModulePositionsCustomOdom =
             new SwerveModulePosition[4];
     private final CustomInverseKinematics m_kinematics_custom;
-    private final DoubleSupplier m_gyroAngularVelocitySupplier;
+
     final double m_slippingThreshold = 0.02;
 
     public boolean m_isSlipping = false;
@@ -31,21 +31,44 @@ public class CustomOdometry {
     public double m_maxSlippingAmount = 0;
     public double m_maxSlippingRatio = 1;
 
-    public CustomOdometry(
-            CustomInverseKinematics kinematics, DoubleSupplier gyroAngularVelocitySupplier) {
+    public double m_xyVariance = 0;
+    public double m_thetaVariance = 0;
+
+    public SwerveDriveState m_state = new SwerveDriveState();
+
+    public ChassisSpeeds m_speeds = new ChassisSpeeds();
+
+    private double lastGryoTheta = 0;
+
+    private boolean hasIteratedYet = false;
+
+    private final CustomOdometryFuser m_customOdometryFuser;
+
+    public CustomOdometry(CustomInverseKinematics kinematics) {
         m_kinematics_custom = kinematics;
-        m_gyroAngularVelocitySupplier = gyroAngularVelocitySupplier;
+        m_customOdometryFuser = new CustomOdometryFuser();
     }
 
-    public CustomOdometry(CustomInverseKinematics kinematics, Pigeon2 pigeon2) {
-        this(
-                kinematics,
-                () -> pigeon2.getAngularVelocityZWorld().refresh().getValue().in(RadiansPerSecond));
+    public void addVisionMeasurement(Pose2d pose, double timestamp, Matrix<N3, N1> visionSTDs) {
+        double translationVariance =
+                (visionSTDs.get(0, 0) * visionSTDs.get(0, 0)
+                                + visionSTDs.get(1, 0) * visionSTDs.get(1, 0))
+                        / 2;
+        m_customOdometryFuser.addVisionUpdate(
+                pose, timestamp, translationVariance, visionSTDs.get(2, 0));
+        // m_customOdometryFuser.addVisionUpdate(new Pose2d(5,5, Rotation2d.kZero), timestamp, 0.0,
+        // 0.0);
     }
 
     public void odometryFunction(SwerveDrivetrain.SwerveDriveState state) {
         try {
             double start = Timer.getTimestamp();
+
+            if (!hasIteratedYet) {
+                m_lastSwerveModulePositionsCustomOdom = state.ModulePositions.clone();
+                lastGryoTheta = state.RawHeading.getRadians();
+                hasIteratedYet = true;
+            }
 
             SimpleMatrix wheel_velocities_no_rot =
                     m_kinematics_custom
@@ -53,9 +76,7 @@ public class CustomOdometry {
                             .minus(
                                     m_kinematics_custom.toModuleVelocities(
                                             new ChassisSpeeds(
-                                                    0,
-                                                    0,
-                                                    m_gyroAngularVelocitySupplier.getAsDouble())));
+                                                    0, 0, state.Speeds.omegaRadiansPerSecond)));
 
             double xVelocity = 0;
             double yVelocity = 0;
@@ -141,25 +162,55 @@ public class CustomOdometry {
             double translationStds;
             double rotationStds;
 
-            if (m_lastSwerveModulePositionsCustomOdom[0] == null) {
-                m_lastSwerveModulePositionsCustomOdom = state.ModulePositions.clone();
-            }
-
             if (slipping & !multiWheelSlipping) {
                 poseChange =
                         m_kinematics_custom.toTwist2d(
                                 maxWheelErrorIndex,
                                 m_lastSwerveModulePositionsCustomOdom,
                                 state.ModulePositions);
+                m_speeds =
+                        m_kinematics_custom.toChassisSpeeds(maxWheelErrorIndex, state.ModuleStates);
             } else {
                 poseChange =
                         m_kinematics_custom.toTwist2d(
                                 m_lastSwerveModulePositionsCustomOdom, state.ModulePositions);
+                m_speeds = m_kinematics_custom.toChassisSpeeds(state.ModuleStates);
             }
 
-            m_currentPose = m_currentPose.exp(poseChange);
+            translationStds =
+                    Math.hypot(poseChange.dx, poseChange.dy) / state.OdometryPeriod * 0.03 + 0.01;
+            rotationStds = 0.001;
+
+            double currentGyroTheta = state.RawHeading.getRadians();
+
+            poseChange.dtheta = currentGyroTheta - lastGryoTheta;
+
+            lastGryoTheta = currentGyroTheta;
+
+            m_customOdometryFuser.addSwerveMeasurementTwist(
+                    poseChange, state.Timestamp, translationStds, rotationStds);
+
+            m_currentPose = m_customOdometryFuser.getPose();
+
+            m_xyVariance = m_customOdometryFuser.getPhysicalPoseStdDev();
+            m_thetaVariance = m_customOdometryFuser.getRotationalPoseStdDev();
 
             m_lastSwerveModulePositionsCustomOdom = state.ModulePositions.clone();
+
+            var tempState = new SwerveDriveState();
+            tempState.FailedDaqs = state.FailedDaqs;
+            tempState.OdometryPeriod = state.OdometryPeriod;
+            tempState.RawHeading = state.RawHeading;
+            tempState.Timestamp = state.Timestamp;
+            tempState.ModulePositions = state.ModulePositions;
+            tempState.ModuleStates = state.ModuleStates;
+            tempState.ModuleTargets = state.ModuleTargets;
+            tempState.SuccessfulDaqs = state.SuccessfulDaqs;
+
+            tempState.Pose = m_currentPose;
+            tempState.Speeds = m_speeds;
+
+            m_state = tempState;
 
             double end = Timer.getTimestamp();
             m_lastOdometryTime = end - start;

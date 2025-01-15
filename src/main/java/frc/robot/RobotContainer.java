@@ -18,8 +18,8 @@ import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.constants.VisionConstants;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.WheelRadiusCharacterization;
+import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
@@ -83,13 +83,18 @@ public class RobotContainer {
                                     new ChassisSpeeds(
                                             GlobalConstants.MAX_TRANSLATIONAL_SPEED.in(
                                                             MetersPerSecond)
-                                                    * sps(
+                                                    * -sps(
                                                             deadband(
                                                                     leftDriveController
                                                                             .getYAxis()
                                                                             .get(),
                                                                     0.1)),
-                                            sps(deadband(leftDriveController.getXAxis().get(), 0.1))
+                                            -sps(
+                                                            deadband(
+                                                                    leftDriveController
+                                                                            .getXAxis()
+                                                                            .get(),
+                                                                    0.1))
                                                     * GlobalConstants.MAX_TRANSLATIONAL_SPEED.in(
                                                             MetersPerSecond),
                                             -sps(
@@ -100,9 +105,9 @@ public class RobotContainer {
                                                                     0.1))
                                                     * GlobalConstants.MAX_ROTATIONAL_SPEED.in(
                                                             RadiansPerSecond));
-                            return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(
-                                    driverDesiredSpeeds);
-                            // return drivetrain.m_applyFieldSpeeds.withSpeeds(driverDesiredSpeeds);
+                            //     return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(
+                            //     driverDesiredSpeeds);
+                            return drivetrain.m_applyFieldSpeeds.withSpeeds(driverDesiredSpeeds);
                         }));
 
         // drive.withVelocityX(-leftDriveController.getYAxis().get() *
