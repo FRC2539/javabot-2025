@@ -9,6 +9,7 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
+import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.config.RobotConfig;
@@ -71,7 +72,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
                     .withDesaturateWheelSpeeds(false);
 
     public final SwerveRequest.ApplyFieldSpeeds m_applyFieldSpeeds =
-            new SwerveRequest.ApplyFieldSpeeds();
+            new SwerveRequest.ApplyFieldSpeeds().withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective);
 
     public final FieldOrientedOrbitSwerveRequest m_applyFieldSpeedsOrbit;
     RobotConfig config; // PathPlanner robot configuration
@@ -498,7 +499,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
     }
 
     public void seedFieldCentric() {
-        m_drivetrain.addVisionMeasurement(
+        m_odometry_custom.addVisionMeasurement(
                 new Pose2d(0, 0, m_drivetrain.getOperatorForwardDirection()),
                 Utils.getCurrentTimeSeconds(),
                 VecBuilder.fill(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, 0.0));
