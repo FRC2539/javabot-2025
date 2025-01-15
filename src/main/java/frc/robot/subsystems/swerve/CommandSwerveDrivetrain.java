@@ -9,9 +9,9 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
-import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
@@ -72,7 +72,8 @@ public class CommandSwerveDrivetrain implements Subsystem {
                     .withDesaturateWheelSpeeds(false);
 
     public final SwerveRequest.ApplyFieldSpeeds m_applyFieldSpeeds =
-            new SwerveRequest.ApplyFieldSpeeds().withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective);
+            new SwerveRequest.ApplyFieldSpeeds()
+                    .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective);
 
     public final FieldOrientedOrbitSwerveRequest m_applyFieldSpeedsOrbit;
     RobotConfig config; // PathPlanner robot configuration
