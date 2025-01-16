@@ -11,16 +11,12 @@ public class ElevatorSubsystem extends SubsystemBase {
     private ElevatorIO piviotIO;
     private ElevatorIOInputs elevatorInputs = new ElevatorIOInputs();
 
-    private double position = 0;
-
     private final double lowerLimit = 0;
     private final double upperLimit = 100;
 
-    private Mechanism elevator;
 
-    public ElevatorSubsystem(ElevatorIO elevatorIO, Mechanism elevator) {
+    public ElevatorSubsystem(ElevatorIO elevatorIO) {
         this.piviotIO = elevatorIO;
-        this.elevator = elevator;
     }
 
     public void periodic() {
@@ -63,7 +59,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     public Command setPosition(double position) {
         return run(
                 () -> {
-                    this.position = position;
+                    piviotIO.setPosition(position);
                 });
     }
 }
