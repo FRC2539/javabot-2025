@@ -2,7 +2,6 @@ package frc.robot.subsystems.elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import frc.robot.subsystems.elevator.ElevatorIO.ElevatorIOInputs;
 import org.littletonrobotics.junction.Logger;
 
@@ -13,7 +12,6 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private final double lowerLimit = 0;
     private final double upperLimit = 100;
-
 
     public ElevatorSubsystem(ElevatorIO elevatorIO) {
         this.piviotIO = elevatorIO;
@@ -35,7 +33,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public Command zeroElevatorCommand() {
-        return runOnce(
+        return run(
                 () -> {
                     piviotIO.setPosition(0);
                 });
