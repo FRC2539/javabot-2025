@@ -23,7 +23,6 @@ import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
-import frc.robot.subsystems.elevator.ElevatorSubsystem;
 
 public class RobotContainer {
     private double MaxSpeed =
@@ -41,8 +40,6 @@ public class RobotContainer {
             new LogitechController(ControllerConstants.OPERATOR_CONTROLLER);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-
-    private ElevatorSubsystem elevatorSubsystem;
 
     public Auto auto = new Auto(drivetrain);
 
