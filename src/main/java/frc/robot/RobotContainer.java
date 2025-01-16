@@ -55,24 +55,23 @@ public class RobotContainer {
 
     public RobotContainer() {
         if (Robot.isReal()) {
-                vision =
+            vision =
                     new Vision(
                             drivetrain::addVisionMeasurement,
                             new VisionIOLimelight(
                                     VisionConstants.camera0Name,
                                     () -> drivetrain.getRobotPose().getRotation()));
-                elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
-        
-        
+            elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
+
         } else {
-                vision =
+            vision =
                     new Vision(
                             drivetrain::addVisionMeasurement,
                             new VisionIOPhotonVisionSim(
                                     VisionConstants.camera0Name,
                                     VisionConstants.robotToCamera0,
                                     drivetrain::getRobotPose));
-                elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSim());
+            elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSim());
         }
 
         configureBindings();
