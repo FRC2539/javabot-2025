@@ -24,6 +24,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.trajectory.constraint.MaxVelocityConstraint;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -277,6 +278,35 @@ public class CommandSwerveDrivetrain implements Subsystem {
                         setpointGenerator, previousSetpoint, getState().Pose.getRotation());
         request.withDriverOrientation(true);
         return request;
+    }
+
+    private double maxAcceleration = 5;
+
+    private double getMaxAllowedVelocity() {
+        maxAcceleration = 5;
+        double maxVelocity = maxAcceleration * 2;
+        return maxVelocity;
+    }
+
+    public ChassisSpeeds limitFieldRelativeSpeeds(ChassisSpeeds inputSpeeds) {
+        getState();
+        double max_speed = Math.hypot(inputSpeeds.vxMetersPerSecond, inputSpeeds.vyMetersPerSecond);
+        double max_allowed_velocity = getMaxAllowedVelocity();
+        
+        if (max_allowed_velocity < max_speed) {
+            inputSpeeds =
+                    new ChassisSpeeds(
+                            inputSpeeds.vxMetersPerSecond * max_allowed_velocity / max_speed,
+                            inputSpeeds.vyMetersPerSecond * max_allowed_velocity / max_speed,
+                            inputSpeeds.omegaRadiansPerSecond);
+        }
+
+        return inputSpeeds;
+    }
+
+    private final AntiTipSlewer antiTipSlewer = new AntiTipSlewer();
+    public ChassisSpeeds limitRobotRelativeAcceleration(ChassisSpeeds speeds) {
+        return antiTipSlewer.limitSpeeds(speeds, getState().Pose.getRotation());
     }
 
     //
