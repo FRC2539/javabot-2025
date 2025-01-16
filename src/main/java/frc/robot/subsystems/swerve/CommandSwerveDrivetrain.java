@@ -148,7 +148,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
     public void setUpPathPlanner() {}
 
     public Pose2d getRobotPose() {
-        return this.getState().Pose;
+        return getState().Pose;
     }
 
     public ChassisSpeeds getChassisSpeeds() {
