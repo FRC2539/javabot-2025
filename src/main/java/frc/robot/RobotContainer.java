@@ -7,16 +7,12 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
-
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.commands.AlignToAngle;
 import frc.commands.AlignToReef;
-import frc.commands.alignToPoseX;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
 import frc.robot.constants.GlobalConstants;
@@ -140,10 +136,10 @@ public class RobotContainer {
         //                                         drivetrain, vision, 10, 0,
         // leftJoystickVelocityX)));
 
-        operatorController.getA().toggleOnTrue(new AlignToReef(drivetrain, leftJoystickVelocityX, leftJoystickVelocityY, 0.5, 9));
-        leftDriveController.getBottomThumb().whileTrue(new AlignToReef(drivetrain, leftJoystickVelocityX, leftJoystickVelocityY, 0.0, 9));
-        leftDriveController.getRightThumb().whileTrue(new AlignToReef(drivetrain, leftJoystickVelocityX, leftJoystickVelocityY, 0.4, 9));
-        leftDriveController.getLeftThumb().whileTrue(new AlignToReef(drivetrain, leftJoystickVelocityX, leftJoystickVelocityY, -0.4, 9));
+        operatorController.getA().toggleOnTrue(alignToReef(9, 0));
+        leftDriveController.getBottomThumb().whileTrue(alignToReef(9, 0));
+        leftDriveController.getRightThumb().whileTrue(alignToReef(9, 0.4));
+        leftDriveController.getLeftThumb().whileTrue(alignToReef(9, -0.4));
         operatorController
                 .getB()
                 .whileTrue(
@@ -206,15 +202,8 @@ public class RobotContainer {
         return auto.getAuto();
     }
 
-    public static Command alignToReef(
-            CommandSwerveDrivetrain drivetrain,
-            Vision vision,
-            DoubleSupplier xVelocity,
-            DoubleSupplier yVelocity) {
-        int cameraId = 0;
-        int tagId = 10;
-
-        return new AlignToAngle(drivetrain, new Rotation2d(), true, xVelocity, yVelocity)
-                .andThen(new alignToPoseX(drivetrain, vision, tagId, cameraId, yVelocity));
+    public Command alignToReef(int tag, double offset) {
+        return new AlignToReef(
+                drivetrain, leftJoystickVelocityX, leftJoystickVelocityY, offset, tag);
     }
 }

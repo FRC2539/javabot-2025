@@ -9,7 +9,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import java.util.function.DoubleSupplier;
 
 public class AlignToReef extends Command {
@@ -24,14 +24,18 @@ public class AlignToReef extends Command {
     private Pose2d targetPose;
     private double offset;
 
-    public AlignToReef(CommandSwerveDrivetrain drivetrain, DoubleSupplier xVelocity, DoubleSupplier yVelocity, double alignmentOffset, int tagId) {
+    public AlignToReef(
+            CommandSwerveDrivetrain drivetrain,
+            DoubleSupplier xVelocity,
+            DoubleSupplier yVelocity,
+            double alignmentOffset,
+            int tagId) {
         this.drivetrain = drivetrain;
         this.xVelocity = xVelocity;
         this.yVelocity = yVelocity;
         this.tagId = tagId;
         this.offset = alignmentOffset;
     }
-    
 
     @Override
     public void initialize() {
@@ -67,21 +71,24 @@ public class AlignToReef extends Command {
 
         Rotation2d tagRotation = targetPose.getRotation();
 
-        ChassisSpeeds driverCommandedVelocities = new ChassisSpeeds(xVelocity.getAsDouble(), yVelocity.getAsDouble(), 0);
+        ChassisSpeeds driverCommandedVelocities =
+                new ChassisSpeeds(xVelocity.getAsDouble(), yVelocity.getAsDouble(), 0);
 
-        ChassisSpeeds fieldCommandedVelocities = ChassisSpeeds.fromRobotRelativeSpeeds(driverCommandedVelocities,drivetrain.getOperatorForwardDirection());
+        ChassisSpeeds fieldCommandedVelocities =
+                ChassisSpeeds.fromRobotRelativeSpeeds(
+                        driverCommandedVelocities, drivetrain.getOperatorForwardDirection());
 
-        ChassisSpeeds tagRelativeCommandedVelocities = ChassisSpeeds.fromFieldRelativeSpeeds(fieldCommandedVelocities, tagRotation);
+        ChassisSpeeds tagRelativeCommandedVelocities =
+                ChassisSpeeds.fromFieldRelativeSpeeds(fieldCommandedVelocities, tagRotation);
 
         tagRelativeCommandedVelocities.vyMetersPerSecond = yVelocityController;
         tagRelativeCommandedVelocities.omegaRadiansPerSecond = thetaVelocity;
 
-        ChassisSpeeds fieldRelativeSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(tagRelativeCommandedVelocities, tagRotation);
+        ChassisSpeeds fieldRelativeSpeeds =
+                ChassisSpeeds.fromRobotRelativeSpeeds(tagRelativeCommandedVelocities, tagRotation);
 
         // System.out.println(offset.getRotation().getRadians());
-        drivetrain.setControl(
-                drivetrain.driveFieldRelative(
-                        fieldRelativeSpeeds));
+        drivetrain.setControl(drivetrain.driveFieldRelative(fieldRelativeSpeeds));
     }
 
     @Override
