@@ -1,17 +1,16 @@
 package frc.robot.subsystems.swerve;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 public class AntiTipSlewer {
     private ChassisSpeeds slewedFieldChassisSpeeds = new ChassisSpeeds();
 
-    private final double forwardXRateLimit = 1;
-    private final double backwardXRateLimit = 1;
+    private double forwardXRateLimit = 1;
+    private double backwardXRateLimit = 1;
 
-    private final double forwardYRateLimit = 1;
-    private final double backwardYRateLimit = 1;
+    private double forwardYRateLimit = 1;
+    private double backwardYRateLimit = 1;
 
 
     public void setFwdXRateLimit(double fwdXRateLimit)
@@ -35,7 +34,7 @@ public class AntiTipSlewer {
     }
 
 
-    private final boolean maintainStraightStopping = false;
+    // private final boolean maintainStraightStopping = false;
 
     private final double timestep = 0.02;
 

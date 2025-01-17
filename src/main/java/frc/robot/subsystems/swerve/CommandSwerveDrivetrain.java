@@ -397,6 +397,10 @@ public class CommandSwerveDrivetrain implements Subsystem {
 
     private double lastSpeed = 0;
 
+    private double getMaxAcceleration(double comHeight, double comX) {
+        throw new RuntimeException();
+    }
+
     @Override
     public void periodic() {
 
@@ -417,6 +421,14 @@ public class CommandSwerveDrivetrain implements Subsystem {
                                                 : kBlueAlliancePerspectiveRotation);
                                 m_hasAppliedOperatorPerspective = true;
                             });
+        }
+        
+        {
+
+                antiTipSlewer.setFwdXRateLimit(1);
+                antiTipSlewer.setRevXRateLimit(1);
+                antiTipSlewer.setFwdYRateLimit(1);
+                antiTipSlewer.setRevYRateLimit(1);
         }
 
         Logger.recordOutput(
