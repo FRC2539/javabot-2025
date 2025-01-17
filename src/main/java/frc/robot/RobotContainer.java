@@ -5,21 +5,16 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.constants.VisionConstants.aprilTagLayout;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.commands.AlignToAngle;
-import frc.commands.AlignToReef;
 import frc.commands.alignToPoseX;
-import frc.commands.alignToTargetX;
+import frc.commands.alignToReef;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
 import frc.robot.constants.GlobalConstants;
@@ -29,11 +24,8 @@ import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.WheelRadiusCharacterization;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
-
-import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 public class RobotContainer {
@@ -143,8 +135,9 @@ public class RobotContainer {
         //                                 leftJoystickVelocityY)
         //                         .andThen(
         //                                 new alignToTargetX(
-        //                                         drivetrain, vision, 10, 0, leftJoystickVelocityX)));
-        operatorController.getA().onTrue(new AlignToReef(drivetrain, vision, 0, leftJoystickVelocityX));
+        //                                         drivetrain, vision, 10, 0,
+        // leftJoystickVelocityX)));
+        operatorController.getA().onTrue(new alignToReef(drivetrain, leftJoystickVelocityX));
         operatorController
                 .getB()
                 .whileTrue(
@@ -207,34 +200,15 @@ public class RobotContainer {
         return auto.getAuto();
     }
 
-//     // - rotation + 180
-//     public static Command alignToReef(
-//             CommandSwerveDrivetrain drivetrain,
-//             Vision vision,
-//             DoubleSupplier xVelocity,
-//             DoubleSupplier yVelocity) {
-//         int cameraId = 0;
-//         int tagId = 10;
-//         Pose3d tagPose = aprilTagLayout.getTagPose(tagId).get();
-        
-//         Optional<PoseObservation> robotPose = vision.getNewestPoseObservation(cameraId);
-//         if (robotPose.isEmpty()) {
-//                 return Commands.none();
-//         }
-//         Transform3d offset = robotPose.minus(tagPose);
+    public static Command alignToReef(
+            CommandSwerveDrivetrain drivetrain,
+            Vision vision,
+            DoubleSupplier xVelocity,
+            DoubleSupplier yVelocity) {
+        int cameraId = 0;
+        int tagId = 10;
 
-//         Rotation2d angleToRotate =
-//                 Rotation2d.fromRadians(-offset.getRotation().getX() + (2 * Math.PI));
-//         Command alignToAngle =
-//                 new AlignToAngle(drivetrain, angleToRotate, false, xVelocity, yVelocity);
-
-//         Command alignXAxis = new alignToPoseX(drivetrain, vision, tagId, cameraId, yVelocity);
-
-//         Command alignToReef = alignToAngle.andThen(alignXAxis);
-
-//         return alignToReef.onlyWhile(
-//                 () -> {
-//                     return vision.getTagIDs(cameraId).length != 0 && vision.getTagIDs(cameraId)[0] == tagId;
-//                 });
-//     }
+        return new AlignToAngle(drivetrain, new Rotation2d(), true, xVelocity, yVelocity)
+                .andThen(new alignToPoseX(drivetrain, vision, tagId, cameraId, yVelocity));
+    }
 }
