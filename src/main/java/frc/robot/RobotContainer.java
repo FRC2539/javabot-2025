@@ -7,14 +7,16 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
+
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.commands.AlignToAngle;
+import frc.commands.AlignToReef;
 import frc.commands.alignToPoseX;
-import frc.commands.alignToReef;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
 import frc.robot.constants.GlobalConstants;
@@ -110,8 +112,8 @@ public class RobotContainer {
                                                     * GlobalConstants.MAX_ROTATIONAL_SPEED.in(
                                                             RadiansPerSecond));
                             //     return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(
-                            //     driverDesiredSpeeds);
-                            return drivetrain.m_applyFieldSpeeds.withSpeeds(driverDesiredSpeeds);
+                            //             driverDesiredSpeeds);
+                            return drivetrain.m_applyDriverSpeeds.withSpeeds(driverDesiredSpeeds);
                         }));
 
         // drive.withVelocityX(-leftDriveController.getYAxis().get() *
@@ -137,7 +139,11 @@ public class RobotContainer {
         //                                 new alignToTargetX(
         //                                         drivetrain, vision, 10, 0,
         // leftJoystickVelocityX)));
-        operatorController.getA().onTrue(new alignToReef(drivetrain, leftJoystickVelocityX));
+
+        operatorController.getA().toggleOnTrue(new AlignToReef(drivetrain, leftJoystickVelocityX, leftJoystickVelocityY, 0.5, 9));
+        leftDriveController.getBottomThumb().whileTrue(new AlignToReef(drivetrain, leftJoystickVelocityX, leftJoystickVelocityY, 0.0, 9));
+        leftDriveController.getRightThumb().whileTrue(new AlignToReef(drivetrain, leftJoystickVelocityX, leftJoystickVelocityY, 0.4, 9));
+        leftDriveController.getLeftThumb().whileTrue(new AlignToReef(drivetrain, leftJoystickVelocityX, leftJoystickVelocityY, -0.4, 9));
         operatorController
                 .getB()
                 .whileTrue(

@@ -9,6 +9,7 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModule.SteerRequestType;
+import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
@@ -70,6 +71,9 @@ public class CommandSwerveDrivetrain implements Subsystem {
                     .withDriveRequestType(DriveRequestType.Velocity)
                     .withSteerRequestType(SteerRequestType.MotionMagicExpo)
                     .withDesaturateWheelSpeeds(false);
+
+    public final SwerveRequest.ApplyFieldSpeeds m_applyDriverSpeeds =
+            new SwerveRequest.ApplyFieldSpeeds().withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective);
 
     public final SwerveRequest.ApplyFieldSpeeds m_applyFieldSpeeds =
             new SwerveRequest.ApplyFieldSpeeds()
@@ -285,11 +289,8 @@ public class CommandSwerveDrivetrain implements Subsystem {
     }
 
     public SwerveRequest driveFieldRelative(ChassisSpeeds speeds) {
-        ChassisSpeeds newSpeeds =
-                ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getState().Pose.getRotation());
-        return driveRobotRelative(newSpeeds);
+        return m_applyFieldSpeeds.withSpeeds(speeds);
     }
-
     //     public SwerveRequest driveFieldRelativeNoSetpointGenerator(ChassisSpeeds speeds) {
     //         ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getState().Pose.getRotation());
     //         return driveRobotRelative()
