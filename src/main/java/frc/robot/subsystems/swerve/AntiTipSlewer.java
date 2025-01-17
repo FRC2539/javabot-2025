@@ -13,6 +13,28 @@ public class AntiTipSlewer {
     private final double forwardYRateLimit = 1;
     private final double backwardYRateLimit = 1;
 
+
+    public void setFwdXRateLimit(double fwdXRateLimit)
+    {
+        forwardXRateLimit = fwdXRateLimit;
+    }
+
+    public void setRevXRateLimit(double revXRateLimit)
+    {
+        backwardXRateLimit = revXRateLimit;
+    }
+
+    public void setFwdYRateLimit(double fwdYRateLimit)
+    {
+        forwardYRateLimit = fwdYRateLimit;
+    }
+
+    public void setRevYRateLimit(double revYRateLimit)
+    {
+        backwardYRateLimit = revYRateLimit;
+    }
+
+
     private final boolean maintainStraightStopping = false;
 
     private final double timestep = 0.02;
@@ -42,38 +64,38 @@ public class AntiTipSlewer {
                         accelerations, rotation);
 
         if (accelerations.vxMetersPerSecond > forwardXRateLimit * timestep) {
-            if (maintainStraightStopping)
-                accelerations.vyMetersPerSecond =
-                        accelerations.vyMetersPerSecond
-                                * forwardXRateLimit
-                                * timestep
-                                / accelerations.vxMetersPerSecond;
+            // if (maintainStraightStopping)
+            //     accelerations.vyMetersPerSecond =
+            //             accelerations.vyMetersPerSecond
+            //                     * forwardXRateLimit
+            //                     * timestep
+            //                     / accelerations.vxMetersPerSecond;
             accelerations.vxMetersPerSecond = forwardXRateLimit * timestep;
         } else if (accelerations.vxMetersPerSecond < -backwardXRateLimit * timestep) {
-            if (maintainStraightStopping)
-                accelerations.vyMetersPerSecond =
-                        accelerations.vyMetersPerSecond
-                                * -backwardXRateLimit
-                                * timestep
-                                / accelerations.vxMetersPerSecond;
+            // if (maintainStraightStopping)
+            //     accelerations.vyMetersPerSecond =
+            //             accelerations.vyMetersPerSecond
+            //                     * -backwardXRateLimit
+            //                     * timestep
+            //                     / accelerations.vxMetersPerSecond;
             accelerations.vxMetersPerSecond = -backwardXRateLimit * timestep;
         }
 
         if (accelerations.vyMetersPerSecond > forwardYRateLimit * timestep) {
-            if (maintainStraightStopping)
-                accelerations.vyMetersPerSecond =
-                        accelerations.vxMetersPerSecond
-                                * forwardYRateLimit
-                                * timestep
-                                / accelerations.vyMetersPerSecond;
+            // if (maintainStraightStopping)
+            //     accelerations.vyMetersPerSecond =
+            //             accelerations.vxMetersPerSecond
+            //                     * forwardYRateLimit
+            //                     * timestep
+            //                     / accelerations.vyMetersPerSecond;
             accelerations.vyMetersPerSecond = forwardYRateLimit * timestep;
         } else if (accelerations.vyMetersPerSecond < -backwardYRateLimit * timestep) {
-            if (maintainStraightStopping)
-                accelerations.vxMetersPerSecond =
-                        accelerations.vxMetersPerSecond
-                                * -backwardYRateLimit
-                                * timestep
-                                / accelerations.vyMetersPerSecond;
+            // if (maintainStraightStopping)
+            //     accelerations.vxMetersPerSecond =
+            //             accelerations.vxMetersPerSecond
+            //                     * -backwardYRateLimit
+            //                     * timestep
+            //                     / accelerations.vyMetersPerSecond;
             accelerations.vyMetersPerSecond = -backwardYRateLimit * timestep;
         }
 
