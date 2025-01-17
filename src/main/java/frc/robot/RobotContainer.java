@@ -20,6 +20,9 @@ import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.WheelRadiusCharacterization;
+import frc.robot.subsystems.elevator.ElevatorIOSim;
+import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
+import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -43,6 +46,8 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
+    private ElevatorSubsystem elevatorSubsystem;
+
     public Auto auto = new Auto(drivetrain);
 
     public Vision vision;
@@ -61,6 +66,8 @@ public class RobotContainer {
                             new VisionIOLimelight(
                                     VisionConstants.camera0Name,
                                     () -> drivetrain.getRobotPose().getRotation()));
+            elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
+
         } else {
             vision =
                     new Vision(
@@ -69,6 +76,7 @@ public class RobotContainer {
                                     VisionConstants.camera0Name,
                                     VisionConstants.robotToCamera0,
                                     drivetrain::getRobotPose));
+            elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSim());
         }
 
         configureBindings();
