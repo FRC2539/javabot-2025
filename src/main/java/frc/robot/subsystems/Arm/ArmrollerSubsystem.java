@@ -11,7 +11,7 @@ public class ArmrollerSubsystem extends SubsystemBase {
 
     private ArmrollerIOInputs armrollerInputs = new ArmrollerIOInputs();
 
-    public ArmrollerSubsystem(ArmrollerIO armrollerIO) {
+    public ArmrollerSubsystem(ArmrollerFalcon armrollerIO, ArmrollerIOSim armrollerIOSim) {
         this.piviotIO = armrollerIO;
     }
 
