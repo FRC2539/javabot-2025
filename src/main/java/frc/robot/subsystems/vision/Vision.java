@@ -25,9 +25,11 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
 public class Vision extends SubsystemBase {
@@ -63,6 +65,19 @@ public class Vision extends SubsystemBase {
      */
     public Rotation2d getTargetX(int cameraIndex) {
         return inputs[cameraIndex].latestTargetObservation.tx();
+    }
+
+    public int[] getTagIDs(int cameraIndex) {
+        return inputs[cameraIndex].tagIds;
+    }
+
+    public Optional<PoseObservation> getNewestPoseObservation(int cameraIndex) {
+        PoseObservation[] observations = inputs[cameraIndex].poseObservations;
+        if (observations.length != 0) {
+            return Optional.of(observations[0]);
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override
