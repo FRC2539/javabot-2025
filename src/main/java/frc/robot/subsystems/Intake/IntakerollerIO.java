@@ -1,9 +1,9 @@
 package frc.robot.subsystems.Intake;
 
 public interface IntakerollerIO {
-    public void updateInputs(IntakerollerIO inputs);
+    public void updateInputs(IntakerollerIOInputs inputs);
 
-    public class IntakerollerInputs {
+    public class IntakerollerIOInputs {
         public double speed = 0;
         public double voltage;
     }

@@ -10,8 +10,8 @@ public class FlipperSubsystem extends SubsystemBase {
     private FlipperIO piviotIO;
     private FlipperIOInputs flipperInputs = new FlipperIOInputs();
 
-    private final double lowerLimit = 0;
-    private final double upperLimit = 100;
+    private final double lowerLimit = 0.0;
+    private final double upperLimit = 100.0;
 
     public FlipperSubsystem(FlipperIO flipperIO) {
         this.piviotIO = flipperIO;
@@ -21,7 +21,7 @@ public class FlipperSubsystem extends SubsystemBase {
 
         piviotIO.updateInputs(flipperInputs);
 
-        Logger.recordOutput("Fipper/Position", flipperInputs.position);
+        Logger.recordOutput("Flipper/Position", flipperInputs.position);
 
         if (flipperInputs.voltage < 0 && flipperInputs.position <= lowerLimit) {
             this.piviotIO.setVoltage(0);
