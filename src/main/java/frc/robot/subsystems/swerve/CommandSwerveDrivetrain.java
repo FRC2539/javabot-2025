@@ -76,8 +76,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
                     .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective);
 
     public final SwerveRequest.ApplyFieldSpeeds m_applyFieldSpeeds =
-            new SwerveRequest.ApplyFieldSpeeds()
-                    .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective);
+            new SwerveRequest.ApplyFieldSpeeds();
 
     public final FieldOrientedOrbitSwerveRequest m_applyFieldSpeedsOrbit;
     RobotConfig config; // PathPlanner robot configuration

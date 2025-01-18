@@ -1,6 +1,4 @@
-package frc.commands;
-
-import static frc.robot.constants.VisionConstants.aprilTagLayout;
+package frc.robot.commands;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -20,21 +18,23 @@ public class AlignToReef extends Command {
 
     private PIDController thetaController = new PIDController(4, 0, 0);
     private PIDController yController = new PIDController(6, 0, 0);
-    private int tagId;
     private Pose2d targetPose;
     private double offset;
+    private Rotation2d rotationOffset;
 
     public AlignToReef(
             CommandSwerveDrivetrain drivetrain,
             DoubleSupplier xVelocity,
             DoubleSupplier yVelocity,
             double alignmentOffset,
-            int tagId) {
+            Pose2d alignmentPose,
+            Rotation2d rotationOffset) {
         this.drivetrain = drivetrain;
         this.xVelocity = xVelocity;
         this.yVelocity = yVelocity;
-        this.tagId = tagId;
         this.offset = alignmentOffset;
+        this.targetPose = alignmentPose;
+        this.rotationOffset = rotationOffset;
     }
 
     @Override
@@ -44,9 +44,7 @@ public class AlignToReef extends Command {
         // tagId
         // Rotation to face the tag
 
-        targetPose = aprilTagLayout.getTagPose(tagId).get().toPose2d();
-
-        thetaController.setSetpoint(Math.PI);
+        thetaController.setSetpoint(rotationOffset.getRadians());
         yController.setSetpoint(offset);
         thetaController.enableContinuousInput(0, 2 * Math.PI);
         thetaController.setTolerance(Units.degreesToRadians(0.5));
