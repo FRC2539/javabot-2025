@@ -30,13 +30,11 @@ public class VisionConstants {
     // Robot to camera transforms
     // (Not used by Limelight, configure in web UI instead)
     public static Transform3d robotToCamera0 =
-            new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0));
-    //     public static Transform3d robotToCamera1 =
-    //             new Transform3d(-0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, Math.PI));
+            new Transform3d(0.331, -0.0381, 0.33, new Rotation3d(0.0, -0.0, 0.0));
 
     // Basic filtering thresholds
     public static double maxAmbiguity = 0.3;
-    public static double maxZError = 1.5;
+    public static double maxZError = 6;
 
     // Standard deviation baselines, for 1 meter distance and 1 tag
     // (Adjusted automatically based on distance and # of tags)

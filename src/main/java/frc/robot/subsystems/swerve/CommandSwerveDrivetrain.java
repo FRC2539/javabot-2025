@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
-import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -35,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
 import frc.robot.constants.GlobalConstants;
+import frc.robot.constants.TunerConstants.TunerSwerveDrivetrain;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -43,7 +43,7 @@ import org.littletonrobotics.junction.Logger;
  * be used in command-based projects.
  */
 public class CommandSwerveDrivetrain implements Subsystem {
-    private final SwerveDrivetrain m_drivetrain;
+    private final TunerSwerveDrivetrain m_drivetrain;
 
     private final CustomOdometry m_odometry_custom;
 
@@ -52,9 +52,9 @@ public class CommandSwerveDrivetrain implements Subsystem {
     private double m_lastSimTime;
 
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
-    private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.fromDegrees(0);
+    private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
     /* Red alliance sees forward as 180 degrees (toward blue alliance wall) */
-    private static final Rotation2d kRedAlliancePerspectiveRotation = Rotation2d.fromDegrees(180);
+    private static final Rotation2d kRedAlliancePerspectiveRotation = Rotation2d.k180deg;
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
 
@@ -71,6 +71,10 @@ public class CommandSwerveDrivetrain implements Subsystem {
                     .withDriveRequestType(DriveRequestType.Velocity)
                     .withSteerRequestType(SteerRequestType.MotionMagicExpo)
                     .withDesaturateWheelSpeeds(false);
+
+    public final SwerveRequest.ApplyFieldSpeeds m_applyDriverSpeeds =
+            new SwerveRequest.ApplyFieldSpeeds()
+                    .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective);
 
     public final SwerveRequest.ApplyFieldSpeeds m_applyFieldSpeeds =
             new SwerveRequest.ApplyFieldSpeeds()
@@ -149,7 +153,11 @@ public class CommandSwerveDrivetrain implements Subsystem {
     public void setUpPathPlanner() {}
 
     public Pose2d getRobotPose() {
-        return this.getState().Pose;
+        return getState().Pose;
+    }
+
+    public Rotation2d getOperatorForwardDirection() {
+        return m_drivetrain.getOperatorForwardDirection();
     }
 
     public ChassisSpeeds getChassisSpeeds() {
@@ -172,8 +180,9 @@ public class CommandSwerveDrivetrain implements Subsystem {
      * @param modules Constants for each specific module
      */
     public CommandSwerveDrivetrain(
-            SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants... modules) {
-        m_drivetrain = new SwerveDrivetrain(drivetrainConstants, modules);
+            SwerveDrivetrainConstants drivetrainConstants,
+            SwerveModuleConstants<?, ?, ?>... modules) {
+        m_drivetrain = new TunerSwerveDrivetrain(drivetrainConstants, modules);
         if (Utils.isSimulation()) {
             startSimThread();
         }
@@ -201,9 +210,10 @@ public class CommandSwerveDrivetrain implements Subsystem {
      */
     public CommandSwerveDrivetrain(
             SwerveDrivetrainConstants drivetrainConstants,
-            double OdometryUpdateFrequency,
-            SwerveModuleConstants... modules) {
-        m_drivetrain = new SwerveDrivetrain(drivetrainConstants, OdometryUpdateFrequency, modules);
+            double odometryUpdateFrequency,
+            SwerveModuleConstants<?, ?, ?>... modules) {
+        m_drivetrain =
+                new TunerSwerveDrivetrain(drivetrainConstants, odometryUpdateFrequency, modules);
         if (Utils.isSimulation()) {
             startSimThread();
         }
@@ -227,8 +237,10 @@ public class CommandSwerveDrivetrain implements Subsystem {
      * @param drivetrainConstants Drivetrain-wide constants for the swerve drive
      * @param odometryUpdateFrequency The frequency to run the odometry loop. If unspecified or set
      *     to 0 Hz, this is 250 Hz on CAN FD, and 100 Hz on CAN 2.0.
-     * @param odometryStandardDeviation The standard deviation for odometry calculation
-     * @param visionStandardDeviation The standard deviation for vision calculation
+     * @param odometryStandardDeviation The standard deviation for odometry calculation in the form
+     *     [x, y, theta]ᵀ, with units in meters and radians
+     * @param visionStandardDeviation The standard deviation for vision calculation in the form [x,
+     *     y, theta]ᵀ, with units in meters and radians
      * @param modules Constants for each specific module
      */
     public CommandSwerveDrivetrain(
@@ -236,9 +248,9 @@ public class CommandSwerveDrivetrain implements Subsystem {
             double odometryUpdateFrequency,
             Matrix<N3, N1> odometryStandardDeviation,
             Matrix<N3, N1> visionStandardDeviation,
-            SwerveModuleConstants... modules) {
+            SwerveModuleConstants<?, ?, ?>... modules) {
         m_drivetrain =
-                new SwerveDrivetrain(
+                new TunerSwerveDrivetrain(
                         drivetrainConstants,
                         odometryUpdateFrequency,
                         odometryStandardDeviation,
@@ -313,36 +325,18 @@ public class CommandSwerveDrivetrain implements Subsystem {
     // The desired robot-relative speeds
     // returns the module states where robot can drive while obeying physics and not slipping
     public SwerveRequest driveRobotRelative(ChassisSpeeds speeds) {
-        // Note: it is important to not discretize speeds before or after
-        // using the setpoint generator, as it will discretize them for you
-        previousSetpoint =
-                setpointGenerator.generateSetpoint(
-                        previousSetpoint, // The previous setpoint
-                        speeds, // The desired target speeds
-                        0.02 // The loop time of the robot code, in seconds
-                        );
-        return m_applyRobotSpeeds
-                .withSpeeds(previousSetpoint.robotRelativeSpeeds())
-                .withWheelForceFeedforwardsX(
-                        previousSetpoint.feedforwards().robotRelativeForcesXNewtons())
-                .withWheelForceFeedforwardsY(
-                        previousSetpoint.feedforwards().robotRelativeForcesYNewtons());
-        // Method that will drive the robot given target module states
-    }
-
-    public SwerveRequest driveRobotRelative(
-            double xVelocity, double yVelocity, double rotationRate) {
-        // Note: it is important to not discretize speeds before or after
-        // using the setpoint generator, as it will discretize them for you
-        ChassisSpeeds speeds = new ChassisSpeeds(xVelocity, yVelocity, rotationRate);
         return m_applyFieldSpeedsOrbit.withChassisSpeeds(speeds);
         // Method that will drive the robot given target module states
     }
 
     public SwerveRequest driveFieldRelative(ChassisSpeeds speeds) {
-        ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getState().Pose.getRotation());
-        return driveRobotRelative(speeds);
+        return m_applyFieldSpeeds.withSpeeds(speeds);
     }
+
+    //     public SwerveRequest driveFieldRelativeNoSetpointGenerator(ChassisSpeeds speeds) {
+    //         ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getState().Pose.getRotation());
+    //         return driveRobotRelative()
+    //     }
 
     public SwerveRequest driveWithFeedforwards(
             ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
@@ -403,7 +397,6 @@ public class CommandSwerveDrivetrain implements Subsystem {
 
     @Override
     public void periodic() {
-
         /*
          * Periodically try to apply the operator perspective.
          * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
