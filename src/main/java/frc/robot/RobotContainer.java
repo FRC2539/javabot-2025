@@ -127,7 +127,10 @@ public class RobotContainer {
         //     .withRotationalRate(-rightDriveController.getXAxis().get() *
         // GlobalConstants.MAX_ROTATIONAL_SPEED) // Drive counterclockwise with negative X (left)
 
-        // operatorController.getA().whileTrue(drivetrain.applyRequest(() -> brake));
+        operatorController.getY().whileTrue(elevatorSubsystem.moveElevatorUp());
+        operatorController.getA().whileTrue(elevatorSubsystem.moveElevatorDown());
+
+        //operatorController.getY().whileTrue(drivetrain.applyRequest(() -> brake));
         // operatorController.getA().onTrue(new alignToTargetX(drivetrain, vision, 10, 0));
 
         // operatorController

@@ -40,11 +40,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public Command moveElevatorUp() {
-        return setVoltage(12).until(() -> elevatorInputs.position >= upperLimit);
+        return setVoltage(12);//.until(() -> elevatorInputs.position >= upperLimit);i
     }
 
     public Command moveElevatorDown() {
-        return setVoltage(-12).until(() -> elevatorInputs.position <= lowerLimit);
+        return setVoltage(-12);//.until(() -> elevatorInputs.position <= lowerLimit);
     }
 
     public Command setVoltage(double voltage) {
