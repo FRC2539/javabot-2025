@@ -1,4 +1,4 @@
-package frc.robot.subsystems.intakea;
+package frc.robot.subsystems.intake;
 
 public class IntakeRollerIOSim implements IntakeRollerIO {
     public double voltage;

@@ -1,9 +1,9 @@
-package frc.robot.subsystems.intakea;
+package frc.robot.subsystems.intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.intakea.FlipperIO.FlipperIOInputs;
-import frc.robot.subsystems.intakea.IntakeRollerIO.IntakeRollerIOInputs;
+import frc.robot.subsystems.intake.FlipperIO.FlipperIOInputs;
+import frc.robot.subsystems.intake.IntakeRollerIO.IntakeRollerIOInputs;
 
 import org.littletonrobotics.junction.Logger;
 
