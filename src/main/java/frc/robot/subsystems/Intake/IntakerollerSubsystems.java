@@ -9,7 +9,8 @@ public class IntakerollerSubsystems extends SubsystemBase {
     private IntakerollerIO piviotIO;
     private IntakerollerIOInputs intakeInputs = new IntakerollerIOInputs();
 
-    public IntakerollerSubsystems(IntakerollerIO intakerollerIO) {
+    public IntakerollerSubsystems(
+            IntakerollerIOSim intakerollerIO, IntakerollerTalonFX intakerollerTalonFX) {
         piviotIO = intakerollerIO;
     }
 

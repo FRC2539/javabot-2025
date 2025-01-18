@@ -2,7 +2,7 @@ package frc.robot.subsystems.Intake;
 
 import frc.robot.subsystems.Intake.IntakerollerIO.IntakerollerIOInputs;
 
-public class IntakerollerIOSim {
+public class IntakerollerIOSim implements IntakerollerIO {
     public double voltage;
     public double speed;
 
