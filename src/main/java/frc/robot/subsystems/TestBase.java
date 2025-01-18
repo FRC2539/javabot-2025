@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -22,10 +23,9 @@ public class TestBase extends SubsystemBase {
             new LoggedNetworkNumber("motorTwoSpeed", 0.1);
 
     public SparkMax motor1 = new SparkMax(2, MotorType.kBrushless);
-    public SparkMax motor2 = new SparkMax(3, MotorType.kBrushless);
-    // run motors 1/2 forward and backwards at a certain speed.
-    private final Timer startTimer = new Timer();
-    private boolean stop1, stop2, stop3;
+    public TalonFX motor2 = new TalonFX(12);    // run motors 1/2 forward and backwards at a certain speed.
+    //private final Timer startTimer = new Timer();
+    //private boolean stop1, stop2, stop3;
     LoggedNetworkBoolean simulation = new LoggedNetworkBoolean("isSimulation", false);
 
     boolean trueOrFalse;
@@ -39,7 +39,7 @@ public class TestBase extends SubsystemBase {
         // startTimer.reset();\
         SparkBaseConfig test = new SparkMaxConfig().smartCurrentLimit(20).secondaryCurrentLimit(20).idleMode(IdleMode.kBrake);
         motor1.configure(test, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-        motor2.configure(test, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+        //motor2.configure(test, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     public void setMotor1Speed(double speed) {

@@ -40,7 +40,6 @@ public class RobotContainer {
     // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-
     public RobotContainer() {
         configureBindings();
 
@@ -129,10 +128,10 @@ public class RobotContainer {
                             Logger.recordOutput(
                                     "Testbase/Motor1Temp", TestBase.motor1.getMotorTemperature());
                             Logger.recordOutput(
-                                    "Testbase/Motor2Temp", TestBase.motor2.getMotorTemperature());
+                                    "Testbase/Motor2Temp", TestBase.motor2.getDeviceTemp().getValueAsDouble());
 
                             Logger.recordOutput(
-                                    "Testbase/Motor2Cur", TestBase.motor2.getOutputCurrent()
+                                    "Testbase/Motor2Cur", TestBase.motor2.getStatorCurrent().getValueAsDouble()
                             );
                             Logger.recordOutput(
                                 "Testbase/Motor1Cur", TestBase.motor1.getOutputCurrent());
@@ -142,11 +141,12 @@ public class RobotContainer {
                             } else if (TestBase.motor1.getMotorTemperature() < 58) {
                                 shutdownOne = false;
                             }
-                            if (TestBase.motor2.getMotorTemperature() > 60) {
-                                shutdownTwo = true;
-                            } else if (TestBase.motor2.getMotorTemperature() < 58) {
-                                shutdownTwo = false;
-                            }
+                            shutdownTwo = false;
+                            // if (TestBase.motor2.getMotorTemperature() > 60) {
+                            //     shutdownTwo = true;
+                            // } else if (TestBase.motor2.getMotorTemperature() < 58) {
+                            //     shutdownTwo = false;
+                            // }
                             if (!shutdownOne) {
                                 if (operatorController.getLeftBumper().getAsBoolean()) {
                                     TestBase.setMotor1Speed(
@@ -175,7 +175,6 @@ public class RobotContainer {
                                 TestBase.setMotor2Speed(0);
                             }
                         }));
-
         // reset the field-centric heading on left bumper press
         // operatorController
         //         .getLeftBumper()
