@@ -228,7 +228,13 @@ public class RobotContainer {
     }
 
     public Command alignToReef(int tag, double offset) {
+        Pose2d alignmentPose = VisionConstants.aprilTagLayout.getTagPose(tag).get().toPose2d();
         return new AlignToReef(
-                drivetrain, leftJoystickVelocityX, leftJoystickVelocityY, offset, tag);
+                drivetrain,
+                leftJoystickVelocityX,
+                leftJoystickVelocityY,
+                offset,
+                alignmentPose,
+                Rotation2d.kPi);
     }
 }
