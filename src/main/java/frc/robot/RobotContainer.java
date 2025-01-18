@@ -26,6 +26,9 @@ import frc.robot.subsystems.WheelRadiusCharacterization;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
+import frc.robot.subsystems.gripper.GripperIOFalcon;
+import frc.robot.subsystems.gripper.GripperIOSim;
+import frc.robot.subsystems.gripper.GripperSubsystem;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -55,6 +58,8 @@ public class RobotContainer {
     public Auto auto = new Auto(drivetrain);
 
     public Vision vision;
+
+    public GripperSubsystem gripperSubsystem;
     // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
@@ -70,6 +75,7 @@ public class RobotContainer {
                             new VisionIOLimelight(
                                     VisionConstants.camera0Name,
                                     () -> drivetrain.getRobotPose().getRotation()));
+            gripperSubsystem = new GripperSubsystem(new GripperIOFalcon());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
 
             intakeSubsystem = new IntakeSubsystem(null, new IntakerollerTalonFX());
@@ -82,6 +88,8 @@ public class RobotContainer {
                                     VisionConstants.camera0Name,
                                     VisionConstants.robotToCamera0,
                                     drivetrain::getRobotPose));
+
+            gripperSubsystem = new GripperSubsystem(new GripperIOSim());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSim());
 
             intakeSubsystem = new IntakeSubsystem(new IntakerollerIOSim(), null);
