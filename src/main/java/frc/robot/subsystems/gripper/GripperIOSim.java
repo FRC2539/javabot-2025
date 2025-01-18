@@ -1,12 +1,10 @@
-package frc.robot.subsystems.Arm;
+package frc.robot.subsystems.gripper;
 
-import frc.robot.subsystems.Arm.ArmrollerIO.ArmrollerIOInputs;
-
-public class ArmrollerIOSim {
+public class GripperIOSim implements GripperIO {
     public double voltage;
     public double speed;
 
-    public void updateInputs(ArmrollerIOInputs inputs) {
+    public void updateInputs(GripperIOInputs inputs) {
         voltage = inputs.voltage;
         speed = inputs.speed;
     }

@@ -1,18 +1,19 @@
-package frc.robot.subsystems.Arm;
+package frc.robot.subsystems.gripper;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.Arm.ArmrollerIO.ArmrollerIOInputs;
+import frc.robot.subsystems.gripper.GripperIO.GripperIOInputs;
 import org.littletonrobotics.junction.Logger;
 
-public class ArmrollerSubsystem extends SubsystemBase {
+public class GripperSubsystem extends SubsystemBase {
 
-    private ArmrollerIO piviotIO;
+    private GripperIO piviotIO;
 
-    private ArmrollerIOInputs armrollerInputs = new ArmrollerIOInputs();
+    private GripperIOInputs armrollerInputs = new GripperIOInputs();
 
-    public ArmrollerSubsystem(ArmrollerFalcon armrollerIO, ArmrollerIOSim armrollerIOSim) {
+    public GripperSubsystem(GripperIO armrollerIO) {
         this.piviotIO = armrollerIO;
+        setDefaultCommand(setVoltage(0));
     }
 
     public void periodic() {
@@ -24,7 +25,7 @@ public class ArmrollerSubsystem extends SubsystemBase {
         return setVoltage(12);
     }
 
-    public Command edjectSpin() {
+    public Command ejectSpin() {
         return setVoltage(-12);
     }
 

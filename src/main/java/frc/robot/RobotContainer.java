@@ -18,10 +18,9 @@ import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.constants.VisionConstants;
-import frc.robot.subsystems.Arm.ArmrollerFalcon;
-import frc.robot.subsystems.Arm.ArmrollerIOSim;
-import frc.robot.subsystems.Arm.ArmrollerSubsystem;
 import frc.robot.subsystems.WheelRadiusCharacterization;
+import frc.robot.subsystems.gripper.GripperIOFalcon;
+import frc.robot.subsystems.gripper.GripperSubsystem;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -48,7 +47,7 @@ public class RobotContainer {
 
     public Vision vision;
 
-    public ArmrollerSubsystem armrollerSubsystem;
+    public GripperSubsystem gripperSubsystem;
     // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
@@ -61,9 +60,6 @@ public class RobotContainer {
                             new VisionIOLimelight(
                                     VisionConstants.camera0Name,
                                     () -> drivetrain.getRobotPose().getRotation()));
-
-            armrollerSubsystem = new ArmrollerSubsystem(new ArmrollerFalcon(), null);
-
         } else {
             vision =
                     new Vision(
@@ -73,7 +69,7 @@ public class RobotContainer {
                                     VisionConstants.robotToCamera0,
                                     drivetrain::getRobotPose));
 
-            armrollerSubsystem = new ArmrollerSubsystem(null, new ArmrollerIOSim());
+            gripperSubsystem = new GripperSubsystem(new GripperIOFalcon());
         }
 
         configureBindings();

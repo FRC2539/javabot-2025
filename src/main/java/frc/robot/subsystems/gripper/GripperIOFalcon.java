@@ -1,15 +1,15 @@
-package frc.robot.subsystems.Arm;
+package frc.robot.subsystems.gripper;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 
-public class ArmrollerFalcon implements ArmrollerIO {
-    private final TalonFX armRoller = new TalonFX(51);
+public class GripperIOFalcon implements GripperIO {
+    private final TalonFX armRoller = new TalonFX(12);
 
-    public ArmrollerFalcon() {
+    public GripperIOFalcon() {
         armRoller.setPosition(0);
     }
 
-    public void updateInputs(ArmrollerIOInputs inputs) {
+    public void updateInputs(GripperIOInputs inputs) {
         inputs.speed = armRoller.getVelocity().refresh().getValueAsDouble();
         inputs.voltage = armRoller.getMotorVoltage().refresh().getValueAsDouble();
     }
@@ -17,6 +17,4 @@ public class ArmrollerFalcon implements ArmrollerIO {
     public void setVoltage(double voltage) {
         armRoller.setVoltage(voltage);
     }
-
-    public void updateInputs(ArmrollerIO inputs) {}
 }
