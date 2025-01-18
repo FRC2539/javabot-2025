@@ -30,7 +30,7 @@ public class Robot extends LoggedRobot {
             Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
             Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
             PowerDistribution distribution =
-                    new PowerDistribution(1, ModuleType.kRev); // Enables power distribution logging
+                    new PowerDistribution(1, ModuleType.kCTRE); // Enables power distribution logging
         } else {
             setUseTiming(true); // Run as fast as possible
             Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
@@ -43,14 +43,15 @@ public class Robot extends LoggedRobot {
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
-        m_robotContainer.auto.logAutoInformation();
     }
 
     @Override
     public void disabledInit() {}
 
     @Override
-    public void disabledPeriodic() {}
+    public void disabledPeriodic() {
+        m_robotContainer.auto.logAutoInformation();
+    }
 
     @Override
     public void disabledExit() {}
