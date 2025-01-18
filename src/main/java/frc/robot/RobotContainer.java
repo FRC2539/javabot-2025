@@ -11,25 +11,17 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
-import frc.robot.constants.GlobalConstants;
-import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.subsystems.TestBase;
 import org.littletonrobotics.junction.Logger;
 
 public class RobotContainer {
-    private double MaxSpeed =
-            GlobalConstants.MAX_TRANSLATIONAL_SPEED.in(
-                    MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate =
-            GlobalConstants.MAX_ROTATIONAL_SPEED.in(
-                    RadiansPerSecond); // kMaxAngularRate desired top rotational speed
 
     private final ThrustmasterJoystick leftDriveController =
-            new ThrustmasterJoystick(ControllerConstants.LEFT_DRIVE_CONTROLLER);
+            new ThrustmasterJoystick(0);
     private final ThrustmasterJoystick rightDriveController =
-            new ThrustmasterJoystick(ControllerConstants.RIGHT_DRIVE_CONTROLLER);
+            new ThrustmasterJoystick(1);
     private final LogitechController operatorController =
-            new LogitechController(ControllerConstants.OPERATOR_CONTROLLER);
+            new LogitechController(2);
 
     // public final CommandSwerveDrivetrain driveTrain = TunerConstants.createDrivetrain();
 
@@ -128,10 +120,10 @@ public class RobotContainer {
                             Logger.recordOutput(
                                     "Testbase/Motor1Temp", TestBase.motor1.getMotorTemperature());
                             Logger.recordOutput(
-                                    "Testbase/Motor2Temp", TestBase.motor2.getDeviceTemp().getValueAsDouble());
+                                    "Testbase/Motor2Temp", TestBase.motor2.getDeviceTemp().refresh().getValueAsDouble());
 
                             Logger.recordOutput(
-                                    "Testbase/Motor2Cur", TestBase.motor2.getStatorCurrent().getValueAsDouble()
+                                    "Testbase/Motor2Cur", TestBase.motor2.getStatorCurrent().refresh().getValueAsDouble()
                             );
                             Logger.recordOutput(
                                 "Testbase/Motor1Cur", TestBase.motor1.getOutputCurrent());

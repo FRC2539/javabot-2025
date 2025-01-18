@@ -3,7 +3,10 @@ package frc.robot.subsystems;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -39,6 +42,9 @@ public class TestBase extends SubsystemBase {
         // startTimer.reset();\
         SparkBaseConfig test = new SparkMaxConfig().smartCurrentLimit(20).secondaryCurrentLimit(20).idleMode(IdleMode.kBrake);
         motor1.configure(test, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+
+        motor2.getConfigurator().apply(new CurrentLimitsConfigs().withStatorCurrentLimit(60));
+        motor2.getConfigurator().apply(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
         //motor2.configure(test, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }
 
