@@ -21,15 +21,11 @@ import frc.robot.constants.TunerConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.WheelRadiusCharacterization;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
-import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
-import frc.robot.subsystems.gripper.GripperIOFalcon;
 import frc.robot.subsystems.gripper.GripperIOSim;
 import frc.robot.subsystems.gripper.GripperSubsystem;
 import frc.robot.subsystems.intake.FlipperIOSim;
-import frc.robot.subsystems.intake.FlipperIOTalon;
 import frc.robot.subsystems.intake.IntakeRollerIOSim;
-import frc.robot.subsystems.intake.IntakeRollerTalonFX;
 import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.Vision;
@@ -77,10 +73,15 @@ public class RobotContainer {
                             new VisionIOLimelight(
                                     VisionConstants.camera0Name,
                                     () -> drivetrain.getRobotPose().getRotation()));
-            gripperSubsystem = new GripperSubsystem(new GripperIOFalcon());
-            elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
+            //     gripperSubsystem = new GripperSubsystem(new GripperIOFalcon());
+            //     elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
 
-            intakeSubsystem = new IntakeSubsystem(new IntakeRollerTalonFX(), new FlipperIOTalon());
+            //     intakeSubsystem = new IntakeSubsystem(new IntakeRollerTalonFX(), new
+            // FlipperIOTalon());
+            gripperSubsystem = new GripperSubsystem(new GripperIOSim());
+            elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSim());
+
+            intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
         } else {
             vision =
                     new Vision(

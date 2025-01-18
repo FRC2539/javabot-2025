@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "QuarterSprint"
+            "pathName": "disgusting path"
           }
         }
       ]
@@ -15,5 +15,5 @@
   },
   "resetOdom": true,
   "folder": null,
-  "choreoAuto": true
+  "choreoAuto": false
 }
