@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.constants.TunerConstants;
@@ -62,7 +63,11 @@ public class WheelRadiusCharacterization extends Command {
 
     public void execute() {
         drive.driveRobotRelative(
-                0, 0, omegaLimiter.calculate(omegaDirection.value * characterizationSpeed.get()));
+                new ChassisSpeeds(
+                        0,
+                        0,
+                        omegaLimiter.calculate(
+                                omegaDirection.value * characterizationSpeed.get())));
 
         // Get yaw and wheel positions
 
