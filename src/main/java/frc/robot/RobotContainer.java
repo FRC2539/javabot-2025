@@ -19,8 +19,8 @@ import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.constants.VisionConstants;
+import frc.robot.subsystems.Intake.IntakeSubsystem;
 import frc.robot.subsystems.Intake.IntakerollerIOSim;
-import frc.robot.subsystems.Intake.IntakerollerSubsystems;
 import frc.robot.subsystems.Intake.IntakerollerTalonFX;
 import frc.robot.subsystems.WheelRadiusCharacterization;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
@@ -50,7 +50,7 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     private ElevatorSubsystem elevatorSubsystem;
-    private IntakerollerSubsystems intakerollerSubsystems;
+    private IntakeSubsystem intakeSubsystem;
 
     public Auto auto = new Auto(drivetrain);
 
@@ -72,7 +72,7 @@ public class RobotContainer {
                                     () -> drivetrain.getRobotPose().getRotation()));
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
 
-            intakerollerSubsystems = new IntakerollerSubsystems(null, new IntakerollerTalonFX());
+            intakeSubsystem = new IntakeSubsystem(null, new IntakerollerTalonFX());
 
         } else {
             vision =
@@ -84,7 +84,7 @@ public class RobotContainer {
                                     drivetrain::getRobotPose));
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSim());
 
-            intakerollerSubsystems = new IntakerollerSubsystems(new IntakerollerIOSim(), null);
+            intakeSubsystem = new IntakeSubsystem(new IntakerollerIOSim(), null);
         }
 
         configureBindings();

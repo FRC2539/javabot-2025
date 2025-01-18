@@ -5,11 +5,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.Intake.IntakerollerIO.IntakerollerIOInputs;
 import org.littletonrobotics.junction.Logger;
 
-public class IntakerollerSubsystems extends SubsystemBase {
+public class IntakeSubsystem extends SubsystemBase {
     private IntakerollerIO piviotIO;
     private IntakerollerIOInputs intakeInputs = new IntakerollerIOInputs();
 
-    public IntakerollerSubsystems(
+    public IntakeSubsystem(
             IntakerollerIOSim intakerollerIO, IntakerollerTalonFX intakerollerTalonFX) {
         piviotIO = intakerollerIO;
     }
