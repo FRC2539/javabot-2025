@@ -1,4 +1,4 @@
-package frc.robot.subsystems.intake;
+package frc.robot.subsystems.intakea;
 
 public interface IntakeRollerIO {
     public void updateInputs(IntakeRollerIOInputs inputs);
