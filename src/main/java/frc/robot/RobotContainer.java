@@ -26,6 +26,11 @@ import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.gripper.GripperIOFalcon;
 import frc.robot.subsystems.gripper.GripperIOSim;
 import frc.robot.subsystems.gripper.GripperSubsystem;
+import frc.robot.subsystems.intake.FlipperIOSim;
+import frc.robot.subsystems.intake.FlipperIOTalon;
+import frc.robot.subsystems.intake.IntakeRollerIOSim;
+import frc.robot.subsystems.intake.IntakeRollerTalonFX;
+import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -50,6 +55,7 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     private ElevatorSubsystem elevatorSubsystem;
+    private IntakeSubsystem intakeSubsystem;
 
     public Auto auto = new Auto(drivetrain);
 
@@ -74,6 +80,7 @@ public class RobotContainer {
             gripperSubsystem = new GripperSubsystem(new GripperIOFalcon());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
 
+            intakeSubsystem = new IntakeSubsystem(new IntakeRollerTalonFX(), new FlipperIOTalon());
         } else {
             vision =
                     new Vision(
@@ -85,6 +92,8 @@ public class RobotContainer {
 
             gripperSubsystem = new GripperSubsystem(new GripperIOSim());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSim());
+
+            intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
         }
 
         configureBindings();
