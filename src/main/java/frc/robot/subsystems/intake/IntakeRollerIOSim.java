@@ -1,10 +1,10 @@
-package frc.robot.subsystems.Intake;
+package frc.robot.subsystems.intake;
 
-public class IntakerollerIOSim implements IntakerollerIO {
+public class IntakeRollerIOSim implements IntakeRollerIO {
     public double voltage;
     public double speed;
 
-    public void updateInputs(IntakerollerIOInputs inputs) {
+    public void updateInputs(IntakeRollerIOInputs inputs) {
         voltage = inputs.voltage;
         speed = inputs.speed;
     }

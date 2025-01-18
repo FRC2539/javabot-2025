@@ -19,9 +19,6 @@ import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.constants.VisionConstants;
-import frc.robot.subsystems.Intake.IntakeSubsystem;
-import frc.robot.subsystems.Intake.IntakerollerIOSim;
-import frc.robot.subsystems.Intake.IntakerollerTalonFX;
 import frc.robot.subsystems.WheelRadiusCharacterization;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
@@ -29,6 +26,11 @@ import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.gripper.GripperIOFalcon;
 import frc.robot.subsystems.gripper.GripperIOSim;
 import frc.robot.subsystems.gripper.GripperSubsystem;
+import frc.robot.subsystems.intake.FlipperIOSim;
+import frc.robot.subsystems.intake.FlipperIOTalon;
+import frc.robot.subsystems.intake.IntakeRollerIOSim;
+import frc.robot.subsystems.intake.IntakeRollerTalonFX;
+import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -78,8 +80,7 @@ public class RobotContainer {
             gripperSubsystem = new GripperSubsystem(new GripperIOFalcon());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
 
-            intakeSubsystem = new IntakeSubsystem(null, new IntakerollerTalonFX());
-
+            intakeSubsystem = new IntakeSubsystem(new IntakeRollerTalonFX(), new FlipperIOTalon());
         } else {
             vision =
                     new Vision(
@@ -92,7 +93,7 @@ public class RobotContainer {
             gripperSubsystem = new GripperSubsystem(new GripperIOSim());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSim());
 
-            intakeSubsystem = new IntakeSubsystem(new IntakerollerIOSim(), null);
+            intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
         }
 
         configureBindings();
