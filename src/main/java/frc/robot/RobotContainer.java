@@ -12,9 +12,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.commands.AlignToReef;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
+import frc.robot.commands.AlignToReef;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
@@ -238,7 +238,13 @@ public class RobotContainer {
     }
 
     public Command alignToReef(int tag, double offset) {
+        Pose2d alignmentPose = VisionConstants.aprilTagLayout.getTagPose(tag).get().toPose2d();
         return new AlignToReef(
-                drivetrain, leftJoystickVelocityX, leftJoystickVelocityY, offset, tag);
+                drivetrain,
+                leftJoystickVelocityX,
+                leftJoystickVelocityY,
+                offset,
+                alignmentPose,
+                Rotation2d.kPi);
     }
 }
