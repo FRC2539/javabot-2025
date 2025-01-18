@@ -8,6 +8,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
@@ -62,8 +63,12 @@ public class GlobalConstants {
                                         MAX_TRANSLATIONAL_SPEED,
                                         COEFFICIENT_OF_FRICTION,
                                         DRIVE_MOTOR,
-                                        EXAMPLE_MODULE.DriveMotorInitialConfigs.CurrentLimits
-                                                .getStatorCurrentLimitMeasure(),
+                                        EXAMPLE_MODULE.DriveMotorGearRatio,
+                                        Current.ofBaseUnits(
+                                                TunerConstants.driveInitialConfigs
+                                                        .CurrentLimits
+                                                        .StatorCurrentLimit,
+                                                Amps),
                                         1),
                                 moduleOffsets);
             } catch (Exception e) {
