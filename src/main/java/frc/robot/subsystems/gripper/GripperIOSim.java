@@ -1,12 +1,14 @@
 package frc.robot.subsystems.gripper;
 
 public class GripperIOSim implements GripperIO {
-    public double voltage;
-    public double speed;
+    private double voltage;
+    private double speed;
 
     public void updateInputs(GripperIOInputs inputs) {
-        voltage = inputs.voltage;
-        speed = inputs.speed;
+        inputs.voltage = voltage;
+        inputs.speed = speed;
+        inputs.temperature = 0;
+        inputs.current = 0;
     }
 
     public void setVoltage(double voltage) {
