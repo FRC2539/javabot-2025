@@ -128,6 +128,11 @@ public class RobotContainer {
                             Logger.recordOutput(
                                 "Testbase/Motor1Cur", TestBase.motor1.getOutputCurrent());
 
+                            // motor 3 info
+                            Logger.recordOutput( "Testbase/Motor3", TestBase.motor3.get());
+                            Logger.recordOutput( "Testbase/Motor3Temp", TestBase.motor3.getDeviceTemp().refresh().getValueAsDouble());
+                            Logger.recordOutput( "Testbase/Motor3Cur", TestBase.motor3.getStatorCurrent().refresh().getValueAsDouble());
+
                             if (TestBase.motor1.getMotorTemperature() > 60) {
                                 shutdownOne = true;
                             } else if (TestBase.motor1.getMotorTemperature() < 58) {
@@ -165,6 +170,20 @@ public class RobotContainer {
                                 }
                             } else {
                                 TestBase.setMotor2Speed(0);
+                            }
+
+                            if (true) {
+                                if (operatorController.getY().getAsBoolean()) {
+                                    TestBase.setMotor3Speed(
+                                            TestBase.motor2SpeedNetworkNumber.get());
+                                } else if (operatorController.getA().getAsBoolean()) {
+                                    TestBase.setMotor3Speed(
+                                            TestBase.motor2SpeedNetworkNumber.get() * -1);
+                                } else {
+                                    TestBase.setMotor3Speed(0);
+                                }
+                            } else {
+                                TestBase.setMotor3Speed(0);
                             }
                         }));
         // reset the field-centric heading on left bumper press
