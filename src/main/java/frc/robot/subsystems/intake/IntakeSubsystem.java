@@ -2,16 +2,14 @@ package frc.robot.subsystems.intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.intake.FlipperIO.FlipperIOInputs;
-import frc.robot.subsystems.intake.IntakeRollerIO.IntakeRollerIOInputs;
 import org.littletonrobotics.junction.Logger;
 
 public class IntakeSubsystem extends SubsystemBase {
     private IntakeRollerIO piviotIO;
-    private IntakeRollerIOInputs intakeInputs = new IntakeRollerIOInputs();
+    private IntakeRollerIOInputsAutoLogged intakeInputs = new IntakeRollerIOInputsAutoLogged();
 
     private FlipperIO flipperIO;
-    private FlipperIOInputs flipperInputs = new FlipperIOInputs();
+    private FlipperIOInputsAutoLogged flipperInputs = new FlipperIOInputsAutoLogged();
 
     private final double lowerLimit = 0.0;
     private final double upperLimit = 100.0;
@@ -22,9 +20,10 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public void periodic() {
         piviotIO.updateInputs(intakeInputs);
+        flipperIO.updateInputs(flipperInputs);
 
-        Logger.recordOutput("IntakeRoller/Voltage", intakeInputs.voltage);
-        Logger.recordOutput("FlipperFlip/Voltage", flipperInputs.voltage);
+        Logger.processInputs("Realoutputs/Flipper", flipperInputs);
+        Logger.processInputs("Realoutputs/IntakeRoller", intakeInputs);
 
         Logger.recordOutput("Flipper/Position", flipperInputs.position);
         if (flipperInputs.voltage < 0 && flipperInputs.position <= lowerLimit) {
