@@ -68,17 +68,21 @@ public class CommandSwerveDrivetrain implements Subsystem {
     private final SwerveRequest.ApplyRobotSpeeds m_applyRobotSpeeds =
             new SwerveRequest.ApplyRobotSpeeds()
                     .withDriveRequestType(DriveRequestType.Velocity)
-                    .withSteerRequestType(SteerRequestType.MotionMagicExpo)
-                    .withDesaturateWheelSpeeds(false);
+                    .withSteerRequestType(SteerRequestType.MotionMagicExpo);
 
-    public final SwerveRequest.ApplyFieldSpeeds m_applyDriverSpeeds =
+    private final SwerveRequest.ApplyFieldSpeeds m_applyDriverSpeeds =
             new SwerveRequest.ApplyFieldSpeeds()
+                    .withDriveRequestType(DriveRequestType.Velocity)
+                    .withSteerRequestType(SteerRequestType.MotionMagicExpo)
                     .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective);
 
-    public final SwerveRequest.ApplyFieldSpeeds m_applyFieldSpeeds =
-            new SwerveRequest.ApplyFieldSpeeds();
+    private final SwerveRequest.ApplyFieldSpeeds m_applyFieldSpeeds =
+            new SwerveRequest.ApplyFieldSpeeds()
+                    .withDriveRequestType(DriveRequestType.Velocity)
+                    .withSteerRequestType(SteerRequestType.MotionMagicExpo)
+                    .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance);
 
-    public final FieldOrientedOrbitSwerveRequest m_applyFieldSpeedsOrbit;
+    private final FieldOrientedOrbitSwerveRequest m_applyFieldSpeedsOrbit;
     RobotConfig config; // PathPlanner robot configuration
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
@@ -291,12 +295,33 @@ public class CommandSwerveDrivetrain implements Subsystem {
     }
 
     public SwerveRequest driveRobotRelative(ChassisSpeeds speeds) {
-        return m_applyFieldSpeedsOrbit.withChassisSpeeds(speeds);
-        // Method that will drive the robot given target module states
+        return m_applyRobotSpeeds.withSpeeds(speeds);
+    }
+
+    public SwerveRequest driveRobotRelative(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
+        return m_applyRobotSpeeds
+                .withSpeeds(speeds)
+                .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+                .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons());
     }
 
     public SwerveRequest driveFieldRelative(ChassisSpeeds speeds) {
         return m_applyFieldSpeeds.withSpeeds(speeds);
+    }
+
+    public SwerveRequest driveFieldRelative(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
+        return m_applyFieldSpeeds
+                .withSpeeds(speeds)
+                .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+                .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons());
+    }
+
+    public SwerveRequest driveDriverRelative(ChassisSpeeds speeds) {
+        return m_applyDriverSpeeds.withSpeeds(speeds);
+    }
+
+    public SwerveRequest driveDriverRelativeOrbit(ChassisSpeeds speeds) {
+        return m_applyFieldSpeedsOrbit.withChassisSpeeds(speeds);
     }
 
     //     public SwerveRequest driveFieldRelativeNoSetpointGenerator(ChassisSpeeds speeds) {
@@ -304,13 +329,13 @@ public class CommandSwerveDrivetrain implements Subsystem {
     //         return driveRobotRelative()
     //     }
 
-    public SwerveRequest driveWithFeedforwards(
-            ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
-        return m_applyRobotSpeeds
-                .withSpeeds(speeds)
-                .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
-                .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons());
-    }
+    //     public SwerveRequest driveWithFeedforwards(
+    //             ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
+    //         return m_applyRobotSpeeds
+    //                 .withSpeeds(speeds)
+    //                 .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+    //                 .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons());
+    //     }
 
     /**
      * Returns a command that applies the specified control request to this swerve drivetrain.
