@@ -17,7 +17,6 @@ public class IntakeSubsystem extends SubsystemBase {
     public IntakeSubsystem(IntakeRollerIO intakerollerIO, FlipperIO sflipperIO) {
         piviotIO = intakerollerIO;
         flipperIO = sflipperIO;
-        flipperIO = sflipperIO;
     }
 
     public void periodic() {
