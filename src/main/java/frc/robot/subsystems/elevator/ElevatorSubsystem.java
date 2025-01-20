@@ -20,7 +20,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
         piviotIO.updateInputs(elevatorInputs);
 
-        Logger.processInputs("Realoutputs/Elevator", elevatorInputs);
+        Logger.processInputs("RealOutputs/Elevator", elevatorInputs);
 
         if (elevatorInputs.voltage < 0 && elevatorInputs.position <= lowerLimit) {
             this.piviotIO.setVoltage(0);

@@ -14,16 +14,18 @@ public class IntakeSubsystem extends SubsystemBase {
     private final double lowerLimit = 0.0;
     private final double upperLimit = 100.0;
 
-    public IntakeSubsystem(IntakeRollerIO intakerollerIO, FlipperIO flipperIO) {
+    public IntakeSubsystem(IntakeRollerIO intakerollerIO, FlipperIO sflipperIO) {
         piviotIO = intakerollerIO;
+        flipperIO = sflipperIO;
+        flipperIO = sflipperIO;
     }
 
     public void periodic() {
         piviotIO.updateInputs(intakeInputs);
         flipperIO.updateInputs(flipperInputs);
 
-        Logger.processInputs("Realoutputs/Flipper", flipperInputs);
-        Logger.processInputs("Realoutputs/IntakeRoller", intakeInputs);
+        Logger.processInputs("RealOutputs/Flipper", flipperInputs);
+        Logger.processInputs("RealOutputs/IntakeRoller", intakeInputs);
 
         Logger.recordOutput("Flipper/Position", flipperInputs.position);
         if (flipperInputs.voltage < 0 && flipperInputs.position <= lowerLimit) {
