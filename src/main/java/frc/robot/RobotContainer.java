@@ -15,11 +15,11 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
 import frc.robot.commands.AlignToReef;
+import frc.robot.commands.WheelRadiusCharacterization;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.constants.VisionConstants;
-import frc.robot.subsystems.WheelRadiusCharacterization;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
@@ -134,7 +134,7 @@ public class RobotContainer {
                                                             RadiansPerSecond));
                             //     return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(
                             //             driverDesiredSpeeds);
-                            return drivetrain.m_applyDriverSpeeds.withSpeeds(driverDesiredSpeeds);
+                            return drivetrain.driveDriverRelative(driverDesiredSpeeds);
                         }));
 
         // drive.withVelocityX(-leftDriveController.getYAxis().get() *
