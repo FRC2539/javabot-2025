@@ -8,6 +8,9 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import java.util.Scanner; 
+
+
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -27,7 +30,7 @@ public class TestBase extends SubsystemBase {
     //private final Timer startTimer = new Timer();
     //private boolean stop1, stop2, stop3;
     LoggedNetworkBoolean simulation = new LoggedNetworkBoolean("isSimulation", false);
-
+    
     boolean trueOrFalse;
     public final Trigger trigger2 = new Trigger(() -> simulation.get());
     // change cansparkmax motors
@@ -35,7 +38,7 @@ public class TestBase extends SubsystemBase {
     Trigger trigger;
 
     public TestBase() {
-        // boolean stop1, stop2, stop3 = false;
+        // boolean stop1, stop2, stop3 = false; 
         // startTimer.reset();\
         SparkBaseConfig test = new SparkMaxConfig().smartCurrentLimit(20).secondaryCurrentLimit(20).idleMode(IdleMode.kBrake);
         motor1.configure(test, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
@@ -60,7 +63,7 @@ public class TestBase extends SubsystemBase {
     public void setSpeed() {
         motor1.set(motor1SpeedNetworkNumber.get());
         motor2.set(motor2SpeedNetworkNumber.get());
-    }
+    }//engeeders hope
 
     public Command moveForwardMotor1() {
         return run(
@@ -99,6 +102,7 @@ public class TestBase extends SubsystemBase {
                     motor2.set(0);
                 });
     }
+
 
     public boolean simulationGetBoolean() {
         return simulation.get();
