@@ -20,6 +20,7 @@ public class ArmSubsystem extends SubsystemBase {
         pivotIO.updateInputs(armPivotInputs);
         wristIO.updateInputs(wristInputs);
 
+        wristIO.encoderUpdate();
         Logger.processInputs("RealOutputs/Arm", armPivotInputs);
         Logger.processInputs("RealOutputs/Wrist", wristInputs);
     }

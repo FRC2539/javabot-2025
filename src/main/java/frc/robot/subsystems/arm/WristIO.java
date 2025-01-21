@@ -19,4 +19,6 @@ public interface WristIO {
     public void setVoltage(double voltage);
 
     public void zeroPosition();
+
+    public void encoderUpdate();
 }

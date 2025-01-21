@@ -1,21 +1,20 @@
 package frc.robot.subsystems.arm;
 
-import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
+import edu.wpi.first.math.controller.PIDController;
 import frc.robot.constants.ArmConstants;
 
 public class WristIONeo550 implements WristIO {
     private SparkMax SparkMax =
             new SparkMax(ArmConstants.WRIST_MOTOR_ID, SparkLowLevel.MotorType.kBrushless);
-    private SparkClosedLoopController pidController;
+    private PIDController pidController;
+    private double reference;
 
-    public WristIONeo550() {
+    public WristIONeo550(double kP, double kI, double kD) {
         SparkMax.getEncoder().setPosition(0);
 
-        pidController = SparkMax.getClosedLoopController();
-        pidController.setReference(100, ControlType.kPosition); // what??
+        pidController = new PIDController(kP, kI, kD);
     }
 
     public void updateInputs(WristIOInputs inputs) {
@@ -31,10 +30,27 @@ public class WristIONeo550 implements WristIO {
     }
 
     public void setPosition(double position) {
-        SparkMax.getEncoder().setPosition(position);
+        reference = position;
+        if (position > SparkMax.getEncoder().getPosition()) {
+            while (position > SparkMax.getEncoder().getPosition()) {
+                SparkMax.set(12);
+            }
+        } else if (position < SparkMax.getEncoder().getPosition()) {
+            while (position < SparkMax.getEncoder().getPosition()) {
+                SparkMax.set(-12);
+            }
+        }
     }
 
     public void zeroPosition() {
         SparkMax.getEncoder().setPosition(0);
+    }
+
+    public void encoderUpdate() {
+
+        while (!pidController.atSetpoint()) {
+
+            SparkMax.set(pidController.calculate(SparkMax.getEncoder().getPosition(), reference));
+        }
     }
 }

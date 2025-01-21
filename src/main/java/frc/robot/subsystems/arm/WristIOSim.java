@@ -17,4 +17,6 @@ public class WristIOSim implements WristIO {
     public void zeroPosition() {
         this.position = 0;
     }
+
+    public void encoderUpdate() {}
 }
