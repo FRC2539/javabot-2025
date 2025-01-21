@@ -1,8 +1,11 @@
 package frc.robot.subsystems.arm;
 
+import org.littletonrobotics.junction.AutoLog;
+
 public interface ArmPivotIO {
     public void updateInputs(ArmPivotIOInputs inputs);
 
+    @AutoLog
     public class ArmPivotIOInputs {
         public double position = 0;
         public double speed = 0;

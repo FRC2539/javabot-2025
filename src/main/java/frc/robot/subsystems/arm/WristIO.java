@@ -1,8 +1,11 @@
 package frc.robot.subsystems.arm;
 
+import org.littletonrobotics.junction.AutoLog;
+
 public interface WristIO {
     public void updateInputs(WristIOInputs inputs);
 
+    @AutoLog
     public class WristIOInputs {
         public double position = 0;
         public boolean atTarget = false;
