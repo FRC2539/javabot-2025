@@ -295,16 +295,21 @@ public class CommandSwerveDrivetrain implements Subsystem {
         return request;
     }
 
-    private double maxAcceleration = 5;
+    private double currentMaxAcceleration = 5;
+    private double futureMaxAcceleration = 5;
 
     private double getMaxAllowedVelocity() {
-        maxAcceleration = 5;
+        double maxAcceleration = Math.min(currentMaxAcceleration, futureMaxAcceleration);
         double maxVelocity = maxAcceleration * 2;
         return maxVelocity;
     }
 
     public ChassisSpeeds limitFieldRelativeSpeeds(ChassisSpeeds inputSpeeds) {
-        getState();
+        return limitFieldRelativeSpeeds(inputSpeeds, false);
+    }
+
+    public ChassisSpeeds limitFieldRelativeSpeeds(ChassisSpeeds inputSpeeds, boolean maintainRotationProportion) {
+        var robotState = getState();
         double max_speed = Math.hypot(inputSpeeds.vxMetersPerSecond, inputSpeeds.vyMetersPerSecond);
         double max_allowed_velocity = getMaxAllowedVelocity();
         
@@ -313,8 +318,10 @@ public class CommandSwerveDrivetrain implements Subsystem {
                     new ChassisSpeeds(
                             inputSpeeds.vxMetersPerSecond * max_allowed_velocity / max_speed,
                             inputSpeeds.vyMetersPerSecond * max_allowed_velocity / max_speed,
-                            inputSpeeds.omegaRadiansPerSecond);
+                            (!maintainRotationProportion) ? inputSpeeds.omegaRadiansPerSecond : (inputSpeeds.omegaRadiansPerSecond * max_allowed_velocity / max_speed));
         }
+
+        antiTipSlewer.limitSpeeds(inputSpeeds, robotState.Pose.getRotation());
 
         return inputSpeeds;
     }
