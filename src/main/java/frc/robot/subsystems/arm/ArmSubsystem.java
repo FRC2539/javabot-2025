@@ -1,9 +1,8 @@
 package frc.robot.subsystems.arm;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
 
 public class ArmSubsystem extends SubsystemBase {
     private ArmPivotIO pivotIO;
@@ -23,19 +22,35 @@ public class ArmSubsystem extends SubsystemBase {
 
         Logger.processInputs("RealOutputs/Arm", armPivotInputs);
         Logger.processInputs("RealOutputs/Wrist", wristInputs);
-        
     }
 
-    public Command setVoltageArm(double voltage){
-        return run(() -> {
-            pivotIO.setVoltage(voltage);
-        });
+    public Command turnWristRight() {
+        return setVoltageWrist(12);
     }
 
-    public Command setVoltageWrist(double voltage){
-        return run(() -> {
-            wristIO.setVoltage(voltage);
-        });
+    public Command turnWristLeft() {
+        return setVoltageWrist(-12);
     }
 
+    public Command armPivotUp() {
+        return setVoltageArm(12);
+    }
+
+    public Command armpivotDown() {
+        return setVoltageArm(-12);
+    }
+
+    public Command setVoltageArm(double voltage) {
+        return run(
+                () -> {
+                    pivotIO.setVoltage(voltage);
+                });
+    }
+
+    public Command setVoltageWrist(double voltage) {
+        return run(
+                () -> {
+                    wristIO.setVoltage(voltage);
+                });
+    }
 }
