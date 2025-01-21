@@ -2,14 +2,13 @@ package frc.robot.subsystems.gripper;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.gripper.GripperIO.GripperIOInputs;
 import org.littletonrobotics.junction.Logger;
 
 public class GripperSubsystem extends SubsystemBase {
 
     private GripperIO piviotIO;
 
-    private GripperIOInputs armrollerInputs = new GripperIOInputs();
+    private GripperIOInputsAutoLogged armrollerInputs = new GripperIOInputsAutoLogged();
 
     public GripperSubsystem(GripperIO armrollerIO) {
         this.piviotIO = armrollerIO;
@@ -17,8 +16,8 @@ public class GripperSubsystem extends SubsystemBase {
     }
 
     public void periodic() {
-
-        Logger.recordOutput("Armroller/Voltage", armrollerInputs.voltage);
+        piviotIO.updateInputs(armrollerInputs);
+        Logger.processInputs("RealOutputs/Gripper", armrollerInputs);
     }
 
     public Command intakeSpin() {
