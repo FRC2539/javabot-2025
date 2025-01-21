@@ -11,25 +11,17 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
-import frc.robot.constants.GlobalConstants;
-import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.subsystems.TestBase;
 import org.littletonrobotics.junction.Logger;
 
 public class RobotContainer {
-    private double MaxSpeed =
-            GlobalConstants.MAX_TRANSLATIONAL_SPEED.in(
-                    MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate =
-            GlobalConstants.MAX_ROTATIONAL_SPEED.in(
-                    RadiansPerSecond); // kMaxAngularRate desired top rotational speed
 
     private final ThrustmasterJoystick leftDriveController =
-            new ThrustmasterJoystick(ControllerConstants.LEFT_DRIVE_CONTROLLER);
+            new ThrustmasterJoystick(0);
     private final ThrustmasterJoystick rightDriveController =
-            new ThrustmasterJoystick(ControllerConstants.RIGHT_DRIVE_CONTROLLER);
+            new ThrustmasterJoystick(1);
     private final LogitechController operatorController =
-            new LogitechController(ControllerConstants.OPERATOR_CONTROLLER);
+            new LogitechController(2);
 
     // public final CommandSwerveDrivetrain driveTrain = TunerConstants.createDrivetrain();
 
@@ -128,13 +120,18 @@ public class RobotContainer {
                             Logger.recordOutput(
                                     "Testbase/Motor1Temp", TestBase.motor1.getMotorTemperature());
                             Logger.recordOutput(
-                                    "Testbase/Motor2Temp", TestBase.motor2.getDeviceTemp().getValueAsDouble());
+                                    "Testbase/Motor2Temp", TestBase.motor2.getDeviceTemp().refresh().getValueAsDouble());
 
                             Logger.recordOutput(
-                                    "Testbase/Motor2Cur", TestBase.motor2.getStatorCurrent().getValueAsDouble()
+                                    "Testbase/Motor2Cur", TestBase.motor2.getStatorCurrent().refresh().getValueAsDouble()
                             );
                             Logger.recordOutput(
                                 "Testbase/Motor1Cur", TestBase.motor1.getOutputCurrent());
+
+                            // motor 3 info
+                            Logger.recordOutput( "Testbase/Motor3", TestBase.motor3.get());
+                            Logger.recordOutput( "Testbase/Motor3Temp", TestBase.motor3.getDeviceTemp().refresh().getValueAsDouble());
+                            Logger.recordOutput( "Testbase/Motor3Cur", TestBase.motor3.getStatorCurrent().refresh().getValueAsDouble());
 
                             if (TestBase.motor1.getMotorTemperature() > 60) {
                                 shutdownOne = true;
@@ -173,6 +170,20 @@ public class RobotContainer {
                                 }
                             } else {
                                 TestBase.setMotor2Speed(0);
+                            }
+
+                            if (true) {
+                                if (operatorController.getY().getAsBoolean()) {
+                                    TestBase.setMotor3Speed(
+                                            TestBase.motor2SpeedNetworkNumber.get());
+                                } else if (operatorController.getA().getAsBoolean()) {
+                                    TestBase.setMotor3Speed(
+                                            TestBase.motor2SpeedNetworkNumber.get() * -1);
+                                } else {
+                                    TestBase.setMotor3Speed(0);
+                                }
+                            } else {
+                                TestBase.setMotor3Speed(0);
                             }
                         }));
         // reset the field-centric heading on left bumper press
