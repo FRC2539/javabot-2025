@@ -14,7 +14,9 @@ public class WristIONeo550 implements WristIO {
     public WristIONeo550() {
         wristMotor.getEncoder().setPosition(0);
 
-        pidController = new PIDController(ArmConstants.WRIST_KP, ArmConstants.WRIST_KI, ArmConstants.WRIST_KD);
+        pidController =
+                new PIDController(
+                        ArmConstants.WRIST_KP, ArmConstants.WRIST_KI, ArmConstants.WRIST_KD);
     }
 
     public void updateInputs(WristIOInputs inputs) {
@@ -51,7 +53,8 @@ public class WristIONeo550 implements WristIO {
 
         while (!pidController.atSetpoint()) {
 
-            wristMotor.set(pidController.calculate(wristMotor.getEncoder().getPosition(), reference));
+            wristMotor.set(
+                    pidController.calculate(wristMotor.getEncoder().getPosition(), reference));
         }
     }
 }

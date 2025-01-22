@@ -20,8 +20,11 @@ import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.WheelRadiusCharacterization;
-import frc.robot.subsystems.arm.ArmPivotIO;
+import frc.robot.subsystems.arm.ArmPivotIOSim;
+import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
 import frc.robot.subsystems.arm.ArmSubsystem;
+import frc.robot.subsystems.arm.WristIONeo550;
+import frc.robot.subsystems.arm.WristIOSim;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
@@ -30,10 +33,6 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import java.util.function.DoubleSupplier;
-import frc.robot.subsystems.arm.WristIONeo550;
-import frc.robot.subsystems.arm.WristIOSim;
-import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
-import frc.robot.subsystems.arm.ArmPivotIOSim;
 
 public class RobotContainer {
     private double MaxSpeed =
@@ -57,7 +56,7 @@ public class RobotContainer {
     public ElevatorSubsystem elevatorSubsystem;
     public ArmSubsystem armSubsystem;
     public Vision vision;
-    
+
     // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
