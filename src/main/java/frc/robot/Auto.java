@@ -124,8 +124,7 @@ public class Auto {
                 drivetrain::resetPose,
                 drivetrain::getChassisSpeeds,
                 (speeds, feedforwards) ->
-                        drivetrain.setControl(
-                                drivetrain.driveWithFeedforwards(speeds, feedforwards)),
+                        drivetrain.setControl(drivetrain.driveRobotRelative(speeds, feedforwards)),
                 new PPHolonomicDriveController( // PPHolonomicController is the built in path
                         // following controller for holonomic drive trains
                         new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants

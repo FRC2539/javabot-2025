@@ -12,14 +12,14 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.commands.AlignToReef;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
+import frc.robot.commands.AlignToReef;
+import frc.robot.commands.WheelRadiusCharacterization;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.constants.VisionConstants;
-import frc.robot.subsystems.WheelRadiusCharacterization;
 import frc.robot.subsystems.arm.ArmPivotIOSim;
 import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
 import frc.robot.subsystems.arm.ArmSubsystem;
@@ -28,6 +28,14 @@ import frc.robot.subsystems.arm.WristIOSim;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
+import frc.robot.subsystems.gripper.GripperIOFalcon;
+import frc.robot.subsystems.gripper.GripperIOSim;
+import frc.robot.subsystems.gripper.GripperSubsystem;
+import frc.robot.subsystems.intake.FlipperIOSim;
+import frc.robot.subsystems.intake.FlipperIOTalon;
+import frc.robot.subsystems.intake.IntakeRollerIOSim;
+import frc.robot.subsystems.intake.IntakeRollerTalonFX;
+import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -51,12 +59,15 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    public Auto auto = new Auto(drivetrain);
+    private ElevatorSubsystem elevatorSubsystem;
+    private IntakeSubsystem intakeSubsystem;
 
+    public Auto auto = new Auto(drivetrain);
     public ElevatorSubsystem elevatorSubsystem;
     public ArmSubsystem armSubsystem;
     public Vision vision;
 
+    public GripperSubsystem gripperSubsystem;
     // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
@@ -72,9 +83,11 @@ public class RobotContainer {
                             new VisionIOLimelight(
                                     VisionConstants.camera0Name,
                                     () -> drivetrain.getRobotPose().getRotation()));
+            gripperSubsystem = new GripperSubsystem(new GripperIOFalcon());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
             armSubsystem = new ArmSubsystem(new ArmPivotIOTalonFX(), new WristIONeo550());
 
+            intakeSubsystem = new IntakeSubsystem(new IntakeRollerTalonFX(), new FlipperIOTalon());
         } else {
             vision =
                     new Vision(
@@ -83,8 +96,11 @@ public class RobotContainer {
                                     VisionConstants.camera0Name,
                                     VisionConstants.robotToCamera0,
                                     drivetrain::getRobotPose));
+
+            gripperSubsystem = new GripperSubsystem(new GripperIOSim());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSim());
             armSubsystem = new ArmSubsystem(new ArmPivotIOSim(), new WristIOSim());
+            intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
         }
 
         configureBindings();
@@ -125,7 +141,7 @@ public class RobotContainer {
                                                             RadiansPerSecond));
                             //     return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(
                             //             driverDesiredSpeeds);
-                            return drivetrain.m_applyDriverSpeeds.withSpeeds(driverDesiredSpeeds);
+                            return drivetrain.driveDriverRelative(driverDesiredSpeeds);
                         }));
 
         // drive.withVelocityX(-leftDriveController.getYAxis().get() *
@@ -219,7 +235,13 @@ public class RobotContainer {
     }
 
     public Command alignToReef(int tag, double offset) {
+        Pose2d alignmentPose = VisionConstants.aprilTagLayout.getTagPose(tag).get().toPose2d();
         return new AlignToReef(
-                drivetrain, leftJoystickVelocityX, leftJoystickVelocityY, offset, tag);
+                drivetrain,
+                leftJoystickVelocityX,
+                leftJoystickVelocityY,
+                offset,
+                alignmentPose,
+                Rotation2d.kPi);
     }
 }
