@@ -40,9 +40,6 @@ public class Vision extends SubsystemBase {
     private final VisionIOInputsAutoLogged[] inputs;
     private final Alert[] disconnectedAlerts;
     
-    //C refers to a constant that is added. A refers to a scalar constant. Edit this if this is wrong. 
-    // Like this -> ((A * calculations) + c) 
-
     private final double STD_DEV_FACTOR_MT2A = 0.0000206;
     private final double STD_DEV_FACTOR_MT2C = 0.000469;
 
@@ -51,6 +48,8 @@ public class Vision extends SubsystemBase {
 
     private final double ANGULAR_STD_DEV_MT1A = 0.0264;
     private final double ANGULAR_STD_DEV_MT1C = 0.5;
+
+    private final double ANGULAR_STD_DEV_MT2 = Double.POSITIVE_INFINITY;
 
     private double linearStdDev;
     private double angularStdDev;
@@ -161,8 +160,8 @@ public class Vision extends SubsystemBase {
                 }
 
                 // Calculate standard deviations
-                   //C refers to a constant that is added. A refers to a scalar constant. Edit this if this is wrong. 
-                 // Like this -> ((A * calculations) + c) 
+                   //C refers to a constant that is added. A refers to a scalar constant.
+                    // Like this -> ((A * calculations) + c) 
 
                 if (observation.type() == PoseObservationType.MEGATAG_2) {
                     linearStdDev =
@@ -170,7 +169,7 @@ public class Vision extends SubsystemBase {
                                             * (Math.pow(observation.averageTagDistance(), 2.0)
                                                     / observation.tagCount())) 
                                     + STD_DEV_FACTOR_MT2C;
-                    angularStdDev = Double.POSITIVE_INFINITY; // this is standard for megatag 2.
+                    angularStdDev = ANGULAR_STD_DEV_MT2; // this is standard for megatag 2.
                 } else {
                     linearStdDev =
                             (STD_DEV_FACTOR_MT1A
