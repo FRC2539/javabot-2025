@@ -20,7 +20,7 @@ public class WristIONeo550 implements WristIO {
     public void updateInputs(WristIOInputs inputs) {
         inputs.position = wristMotor.getEncoder().getPosition();
         inputs.atTarget = false; // ?
-        inputs.voltage = wristMotor.getBusVoltage();
+        inputs.voltage = wristMotor.getBusVoltage() * wristMotor.getAppliedOutput();
         inputs.current = wristMotor.getOutputCurrent();
         inputs.temperature = wristMotor.getMotorTemperature();
     }

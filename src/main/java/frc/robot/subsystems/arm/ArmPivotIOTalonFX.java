@@ -34,6 +34,8 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
         inputs.position = armPivotMotor.getPosition().refresh().getValueAsDouble();
         inputs.voltage = armPivotMotor.getMotorVoltage().refresh().getValueAsDouble();
         inputs.speed = armPivotMotor.getVelocity().refresh().getValueAsDouble();
+        inputs.temperature = armPivotMotor.getDeviceTemp().getValueAsDouble();
+        inputs.current = armPivotMotor.getStatorCurrent().getValueAsDouble();
     }
 
     public void setVoltage(double voltage) {

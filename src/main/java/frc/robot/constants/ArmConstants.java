@@ -25,4 +25,8 @@ public class ArmConstants {
                     .withMotionMagicAcceleration(4) // these are guesses, come back here
                     .withMotionMagicCruiseVelocity(4) // also guess
                     .withMotionMagicJerk(4);
+
+    public static final double WRIST_KP = 0;
+    public static final double WRIST_KD = 0;
+    public static final double WRIST_KI = 0;
 }
