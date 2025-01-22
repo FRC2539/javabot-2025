@@ -169,7 +169,7 @@ public class Vision extends SubsystemBase {
                                             * (Math.pow(observation.averageTagDistance(), 2.0)
                                                     / observation.tagCount())) 
                                     + STD_DEV_FACTOR_MT2C;
-                    angularStdDev = ANGULAR_STD_DEV_MT2; // this is standard for megatag 2.
+                    angularStdDev = ANGULAR_STD_DEV_MT2;
                 } else {
                     linearStdDev =
                             (STD_DEV_FACTOR_MT1A
