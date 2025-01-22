@@ -298,6 +298,8 @@ public class CommandSwerveDrivetrain implements Subsystem {
     private double currentMaxAcceleration = 5;
     private double futureMaxAcceleration = 5;
 
+    
+
     private double getMaxAllowedVelocity() {
         double maxAcceleration = Math.min(currentMaxAcceleration, futureMaxAcceleration);
         double maxVelocity = maxAcceleration * 2;
@@ -311,7 +313,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
     public ChassisSpeeds limitFieldRelativeSpeeds(ChassisSpeeds inputSpeeds, boolean maintainRotationProportion) {
         var robotState = getState();
         double max_speed = Math.hypot(inputSpeeds.vxMetersPerSecond, inputSpeeds.vyMetersPerSecond);
-        double max_allowed_velocity = getMaxAllowedVelocity();
+        double max_allowed_velocity = Math.hypot(antiTipSlewer.getMaxAllowedVelocityDirectional(inputSpeeds.vxMetersPerSecond, true), antiTipSlewer.getMaxAllowedVelocityDirectional(inputSpeeds.vyMetersPerSecond, false));
         
         if (max_allowed_velocity < max_speed) {
             inputSpeeds =

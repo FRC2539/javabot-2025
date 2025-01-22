@@ -2,6 +2,7 @@ package frc.robot.subsystems.swerve;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import frc.robot.constants.GlobalConstants;
 
 public class AntiTipSlewer {
     private ChassisSpeeds slewedFieldChassisSpeeds = new ChassisSpeeds();
@@ -31,6 +32,42 @@ public class AntiTipSlewer {
     public void setRevYRateLimit(double revYRateLimit)
     {
         backwardYRateLimit = revYRateLimit;
+    }
+
+    private double getElevatorCOMHeight()
+    {
+        //placeholder
+        return 1;
+    } 
+    
+    public double getMaxAllowedVelocityDirectional(double speed, boolean isXDirection)
+    {
+        if(isXDirection)
+        {
+                if(speed > 0)
+                {
+                        return 2 * (( 9.81 * (((GlobalConstants.bumperWidth)/2) - GlobalConstants.robotComXOffset)) /(2 * getElevatorCOMHeight())); 
+
+                }
+                else if (speed < 0)
+                {
+                        return 2 * (( 9.81 * (((GlobalConstants.bumperWidth)/2) + GlobalConstants.robotComXOffset)) /(2 * getElevatorCOMHeight())); 
+                }
+        }
+        else if (!isXDirection)
+        {
+                if(speed > 0)
+                {
+                        return 2 * (( 9.81 * (((GlobalConstants.bumperLength)/2) - GlobalConstants.robotComYOffset)) /(2 * getElevatorCOMHeight())); 
+
+                }
+                else if(speed < 0)
+                {
+                        return 2 * (( 9.81 * (((GlobalConstants.bumperLength)/2) + GlobalConstants.robotComYOffset)) /(2 * getElevatorCOMHeight())); 
+                } 
+        }
+
+        return 0;
     }
 
 
