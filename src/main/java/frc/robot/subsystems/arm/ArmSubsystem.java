@@ -14,6 +14,13 @@ public class ArmSubsystem extends SubsystemBase {
     public ArmSubsystem(ArmPivotIO armPivotIO, WristIO wristIO) {
         this.armPivotIO = armPivotIO;
         this.wristIO = wristIO;
+
+        setDefaultCommand(
+                run(
+                        () -> {
+                            armPivotIO.setPosition(0);
+                            wristIO.setPosition(0);
+                        }));
     }
 
     public void periodic() {
