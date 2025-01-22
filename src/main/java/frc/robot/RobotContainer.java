@@ -59,10 +59,8 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    private ElevatorSubsystem elevatorSubsystem;
-    private IntakeSubsystem intakeSubsystem;
-
     public Auto auto = new Auto(drivetrain);
+    public IntakeSubsystem intakeSubsystem;
     public ElevatorSubsystem elevatorSubsystem;
     public ArmSubsystem armSubsystem;
     public Vision vision;
