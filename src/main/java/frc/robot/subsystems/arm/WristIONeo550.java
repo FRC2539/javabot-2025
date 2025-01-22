@@ -6,51 +6,52 @@ import edu.wpi.first.math.controller.PIDController;
 import frc.robot.constants.ArmConstants;
 
 public class WristIONeo550 implements WristIO {
-    private SparkMax SparkMax =
+    private SparkMax wristMotor =
             new SparkMax(ArmConstants.WRIST_MOTOR_ID, SparkLowLevel.MotorType.kBrushless);
     private PIDController pidController;
     private double reference;
 
-    public WristIONeo550(double kP, double kI, double kD) {
-        SparkMax.getEncoder().setPosition(0);
+    public WristIONeo550() {
+        wristMotor.getEncoder().setPosition(0);
 
-        pidController = new PIDController(kP, kI, kD);
+        pidController = new PIDController(ArmConstants.WRIST_KP, ArmConstants.WRIST_KI, ArmConstants.WRIST_KD);
     }
 
     public void updateInputs(WristIOInputs inputs) {
-        inputs.position = SparkMax.getEncoder().getPosition();
+        inputs.position = wristMotor.getEncoder().getPosition();
         inputs.atTarget = false; // ?
-        inputs.voltage = SparkMax.getBusVoltage();
-        inputs.current = SparkMax.getOutputCurrent();
-        inputs.temperature = SparkMax.getMotorTemperature();
+        inputs.voltage = wristMotor.getBusVoltage();
+        inputs.current = wristMotor.getOutputCurrent();
+        inputs.temperature = wristMotor.getMotorTemperature();
     }
 
     public void setVoltage(double voltage) {
-        SparkMax.setVoltage(voltage);
+        wristMotor.setVoltage(voltage);
     }
 
     public void setPosition(double position) {
         reference = position;
-        if (position > SparkMax.getEncoder().getPosition()) {
-            while (position > SparkMax.getEncoder().getPosition()) {
-                SparkMax.set(12);
-            }
-        } else if (position < SparkMax.getEncoder().getPosition()) {
-            while (position < SparkMax.getEncoder().getPosition()) {
-                SparkMax.set(-12);
-            }
-        }
+
+        // if (position > wristMotor.getEncoder().getPosition()) {
+        //     while (position > wristMotor.getEncoder().getPosition()) {
+        //         wristMotor.set(12);
+        //     }
+        // } else if (position < wristMotor.getEncoder().getPosition()) {
+        //     while (position < wristMotor.getEncoder().getPosition()) {
+        //         wristMotor.set(-12);
+        //     }
+        // }
     }
 
     public void zeroPosition() {
-        SparkMax.getEncoder().setPosition(0);
+        wristMotor.getEncoder().setPosition(0);
     }
 
     public void encoderUpdate() {
 
         while (!pidController.atSetpoint()) {
 
-            SparkMax.set(pidController.calculate(SparkMax.getEncoder().getPosition(), reference));
+            wristMotor.set(pidController.calculate(wristMotor.getEncoder().getPosition(), reference));
         }
     }
 }

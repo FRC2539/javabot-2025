@@ -5,19 +5,19 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
 public class ArmSubsystem extends SubsystemBase {
-    private ArmPivotIO pivotIO;
+    private ArmPivotIO armPivotIO;
     private ArmPivotIOInputsAutoLogged armPivotInputs = new ArmPivotIOInputsAutoLogged();
 
     private WristIO wristIO;
     private WristIOInputsAutoLogged wristInputs = new WristIOInputsAutoLogged();
 
-    public ArmSubsystem(ArmPivotIO armPivotIO, WristIO swristIO) {
-        pivotIO = armPivotIO;
-        wristIO = swristIO;
+    public ArmSubsystem(ArmPivotIO armPivotIO, WristIO wristIO) {
+        this.armPivotIO = armPivotIO;
+        this.wristIO = wristIO;
     }
 
     public void periodic() {
-        pivotIO.updateInputs(armPivotInputs);
+        armPivotIO.updateInputs(armPivotInputs);
         wristIO.updateInputs(wristInputs);
 
         wristIO.encoderUpdate();
@@ -44,7 +44,7 @@ public class ArmSubsystem extends SubsystemBase {
     public Command setVoltageArm(double voltage) {
         return run(
                 () -> {
-                    pivotIO.setVoltage(voltage);
+                    armPivotIO.setVoltage(voltage);
                 });
     }
 
