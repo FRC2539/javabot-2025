@@ -300,11 +300,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
 
     
 
-    private double getMaxAllowedVelocity() {
-        double maxAcceleration = Math.min(currentMaxAcceleration, futureMaxAcceleration);
-        double maxVelocity = maxAcceleration * 2;
-        return maxVelocity;
-    }
+    
 
     public ChassisSpeeds limitFieldRelativeSpeeds(ChassisSpeeds inputSpeeds) {
         return limitFieldRelativeSpeeds(inputSpeeds, false);
@@ -313,14 +309,15 @@ public class CommandSwerveDrivetrain implements Subsystem {
     public ChassisSpeeds limitFieldRelativeSpeeds(ChassisSpeeds inputSpeeds, boolean maintainRotationProportion) {
         var robotState = getState();
         double max_speed = Math.hypot(inputSpeeds.vxMetersPerSecond, inputSpeeds.vyMetersPerSecond);
-        double max_allowed_velocity = Math.hypot(antiTipSlewer.getMaxAllowedVelocityDirectional(inputSpeeds.vxMetersPerSecond, true), antiTipSlewer.getMaxAllowedVelocityDirectional(inputSpeeds.vyMetersPerSecond, false));
-        
+        double max_speed_to_allowed_ratio = antiTipSlewer.getMaxAllowedVelocityRatio(inputSpeeds.vxMetersPerSecond, inputSpeeds.vyMetersPerSecond);
+        double max_allowed_velocity = max_speed * max_speed_to_allowed_ratio;
+
         if (max_allowed_velocity < max_speed) {
             inputSpeeds =
                     new ChassisSpeeds(
-                            inputSpeeds.vxMetersPerSecond * max_allowed_velocity / max_speed,
-                            inputSpeeds.vyMetersPerSecond * max_allowed_velocity / max_speed,
-                            (!maintainRotationProportion) ? inputSpeeds.omegaRadiansPerSecond : (inputSpeeds.omegaRadiansPerSecond * max_allowed_velocity / max_speed));
+                            inputSpeeds.vxMetersPerSecond * max_speed_to_allowed_ratio,
+                            inputSpeeds.vyMetersPerSecond * max_speed_to_allowed_ratio,
+                            (!maintainRotationProportion) ? inputSpeeds.omegaRadiansPerSecond : (inputSpeeds.omegaRadiansPerSecond * max_speed_to_allowed_ratio));
         }
 
         antiTipSlewer.limitSpeeds(inputSpeeds, robotState.Pose.getRotation());
