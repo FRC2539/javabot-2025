@@ -2,35 +2,57 @@ package frc.robot.subsystems.ModeManager;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState.Position;
+import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 
-public class SuperstructureStateManager {
+import org.littletonrobotics.junction.Logger;
+
+public class SuperstructureStateManager extends SubsystemBase {
     public class SuperstructureState {
 
+        @FunctionalInterface
+        private interface StateChecker {
+            boolean isAtTarget(Position position, SuperstructureStateManager stateManager);
+        }
+
+        private static final StateChecker FALSE = (p, s) -> false;
+        private static final StateChecker TRUE = (p, s) ->  true;
+        private static final StateChecker DEFAULT = (p,s) -> {
+            return (s.internalPosition == p);
+        };
+
+
+
         public enum Position {
-            None(1, 1, 1, null),
+            Sussy(1,1,1,null),
+            None(1, 1, 1, null, TRUE),
             Home(1, 1, 1, None),
-            L1Prep(1, 1, 1, Home),
+            Preppy(1, 1, 1, None),
+            PreppyNull(1,1,1,Preppy, TRUE),
+            L1Prep(1, 1, 1, PreppyNull),
             L1(1, 1, 1, L1Prep),
-            L2Prep(1, 1, 1, Home),
+            L2Prep(1, 1, 1, PreppyNull),
             L2(1, 1, 1, L2Prep),
-            L3Prep(1, 1, 1, Home),
+            L3Prep(1, 1, 1, PreppyNull),
             L3(1, 1, 1, L3Prep),
-            L4Prep(1, 1, 1, Home),
+            L4Prep(1, 1, 1, PreppyNull),
             L4(1, 1, 1, L4Prep),
-            L1AlgaePrep(1, 1, 1, Home),
+            L1AlgaePrep(1, 1, 1, PreppyNull),
             L1Algae(1, 1, 1, L1AlgaePrep),
-            L2AlgaePrep(1, 1, 1, Home),
+            L2AlgaePrep(1, 1, 1, PreppyNull),
             L2Algae(1, 1, 1, L2AlgaePrep),
-            L3AlgaePrep(1, 1, 1, Home),
+            L3AlgaePrep(1, 1, 1, PreppyNull),
             L3Algae(1, 1, 1, L3AlgaePrep),
-            L4AlgaePrep(1, 1, 1, Home),
+            L4AlgaePrep(1, 1, 1, PreppyNull),
             L4Algae(1, 1, 1, L4AlgaePrep),
-            SourcePrep(1, 1, 1, Home),
+            SourcePrep(1, 1, 1, None),
             Source(1, 1, 1, SourcePrep);
 
             public double elevatorheight;
@@ -38,14 +60,14 @@ public class SuperstructureStateManager {
             public double wristrotation;
             public Position position;
             public Position parent;
-            public BooleanSupplier isAtTarget;
+            public StateChecker isAtTarget;
 
             private Position(
                     double elevatorheight,
                     double armheight,
                     double wristRotation,
                     Position parent,
-                    BooleanSupplier isAtTarget) {
+                    StateChecker isAtTarget) {
                 this.armheight = armheight;
                 this.elevatorheight = elevatorheight;
                 this.position = this;
@@ -59,26 +81,30 @@ public class SuperstructureStateManager {
                     double armheight,
                     double wristRotation,
                     Position parent) {
-                this(
-                        elevatorheight,
-                        armheight,
-                        wristRotation,
-                        parent,
-                        () -> {
-                            // TODO: make this only return true if you're within tolerance.
-                            return true;
-                        });
+                        this(elevatorheight, armheight, wristRotation, parent, DEFAULT);
+                    }
+
+            public boolean isAtTarget(SuperstructureStateManager stateManager) {
+                return isAtTarget.isAtTarget(this, stateManager);
             }
         }
     }
 
-    public SuperstructureState.Position targetPostition = SuperstructureState.Position.None;
-    public SuperstructureState.Position lastPosition = SuperstructureState.Position.None;
+    private SuperstructureState.Position targetPostition = SuperstructureState.Position.None;
+    private SuperstructureState.Position lastPosition = SuperstructureState.Position.None;
 
-    public List<SuperstructureState.Position> outList = new ArrayList<>();
+    private List<SuperstructureState.Position> outList = new ArrayList<>();
     // public List<SuperstructureState.Position> inList = new ArrayList<>();
     private ElevatorSubsystem ElevatorSubsystem;
-    private Object ArmSubsystem;
+    private ArmSubsystem ArmSubsystem;
+
+    public void periodic() {
+        Logger.recordOutput("Superstructure/Target", targetPostition);
+        Logger.recordOutput("Superstructure/Last", lastPosition);
+        Logger.recordOutput("Superstructure/Internal", internalPosition);
+        Logger.recordOutput("Superstructure/InternalPersistant", internalPosition == Position.Sussy ? null : internalPosition);
+        Logger.recordOutput("Superstructure/OutList", outList.toArray(new SuperstructureState.Position[0]));
+    }
 
     private void setFinalTarget(SuperstructureState.Position myPosition) {
         outList.clear();
@@ -129,8 +155,9 @@ public class SuperstructureStateManager {
         return higherPose;
     }
 
+    private SuperstructureState.Position internalPosition = Position.Sussy;
     private Command internalGoToPosition(SuperstructureState.Position myPosition) {
-        return Commands.none();
+        return Commands.idle().beforeStarting(() -> internalPosition = Position.Sussy).withTimeout(1).andThen(() -> internalPosition = myPosition).andThen(Commands.idle());
     }
 
     public Command moveToPosition(SuperstructureState.Position myPosition) {
@@ -156,7 +183,9 @@ public class SuperstructureStateManager {
                             }
                         });
         Command followOutPath = followOutPath();
-        return setFinalTarget.andThen(followInPath).andThen(clearOutPath).andThen(followOutPath);
+        Command outputCommand = setFinalTarget.andThen(followInPath).andThen(clearOutPath).andThen(followOutPath);
+        outputCommand.addRequirements(this);
+        return outputCommand;
     }
 
     private Command followOutPath() {
@@ -169,7 +198,7 @@ public class SuperstructureStateManager {
                             }
                             return internalGoToPosition(nextPose)
                                     .beforeStarting(() -> updateTarget(nextPose))
-                                    .until(nextPose.isAtTarget)
+                                    .until(() -> nextPose.isAtTarget(this))
                                     .andThen(
                                             () -> {
                                                 lastPosition = nextPose;
@@ -184,19 +213,19 @@ public class SuperstructureStateManager {
                         () -> {
                             SuperstructureState.Position nextPose =
                                     getChilderNodeInBranch(lastPosition, targetPostition).parent;
-                            if (outList.size() == 0) {
-                                return internalGoToPosition(nextPose);
+                            if (nextPose == null) {
+                                return internalGoToPosition(Position.None);
                             }
                             return internalGoToPosition(nextPose)
-                                    .beforeStarting(() -> updateTarget(targetPostition))
-                                    .until(nextPose.isAtTarget)
+                                    .beforeStarting(() -> updateTarget(nextPose))
+                                    .until(() -> nextPose.isAtTarget(this))
                                     .andThen(() -> lastPosition = nextPose);
                         },
                         new HashSet<>()))
                 .repeatedly();
     }
 
-    public SuperstructureStateManager(ElevatorSubsystem elevatorheight, Object armSubsystem) {
+    public SuperstructureStateManager(ElevatorSubsystem elevatorheight, ArmSubsystem armSubsystem) {
         ElevatorSubsystem = elevatorheight;
         ArmSubsystem = armSubsystem;
     }
