@@ -62,19 +62,6 @@ public class CommandSwerveDrivetrain implements Subsystem {
         }
     }
 
-    public enum Element {
-        H("Hydrogen"),
-        HE("Helium"),
-        // ...
-        NE("Neon");
-
-        public final String label;
-
-        private Element(String label) {
-            this.label = label;
-        }
-    }
-
     private SwerveState m_swerveState;
 
     private static final double kSimLoopPeriod = 0.005; // 5 ms
