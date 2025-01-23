@@ -308,13 +308,18 @@ public class CommandSwerveDrivetrain implements Subsystem {
 
     public ChassisSpeeds limitFieldRelativeSpeeds(ChassisSpeeds inputSpeeds, boolean maintainRotationProportion) {
         var robotState = getState();
-        double max_speed = Math.hypot(inputSpeeds.vxMetersPerSecond, inputSpeeds.vyMetersPerSecond);
-        double max_speed_to_allowed_ratio = antiTipSlewer.getMaxAllowedVelocityRatio(inputSpeeds.vxMetersPerSecond, inputSpeeds.vyMetersPerSecond);
-        double max_allowed_velocity = max_speed * max_speed_to_allowed_ratio;
+        // double max_speed = Math.hypot(inputSpeeds.vxMetersPerSecond, inputSpeeds.vyMetersPerSecond);
+        // double limited_x_speed = antiTipSlewer.getMaxAllowedVelocityDirectional(inputSpeeds.vxMetersPerSecond, true);
+        // double limited_y_speed = antiTipSlewer.getMaxAllowedVelocityDirectional(inputSpeeds.vyMetersPerSecond, false);
 
-        if (max_allowed_velocity < max_speed) {
-            inputSpeeds =
-                    new ChassisSpeeds(
+        // double x_ratio = limited_x_speed / inputSpeeds.vxMetersPerSecond;
+        // double y_ratio = limited
+
+        double max_speed_to_allowed_ratio = antiTipSlewer.getMaxAllowedVelocityRatio(inputSpeeds.vxMetersPerSecond, inputSpeeds.vyMetersPerSecond);
+        // double max_allowed_velocity = max_speed * max_speed_to_allowed_ratio;
+
+        if (max_speed_to_allowed_ratio < 1) {
+                new ChassisSpeeds(
                             inputSpeeds.vxMetersPerSecond * max_speed_to_allowed_ratio,
                             inputSpeeds.vyMetersPerSecond * max_speed_to_allowed_ratio,
                             (!maintainRotationProportion) ? inputSpeeds.omegaRadiansPerSecond : (inputSpeeds.omegaRadiansPerSecond * max_speed_to_allowed_ratio));

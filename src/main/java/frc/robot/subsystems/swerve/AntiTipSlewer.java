@@ -72,20 +72,21 @@ public class AntiTipSlewer {
 
     public double getMaxAllowedVelocityRatio(double speedX, double speedY) {
 
-        double maxSpeed = Math.hypot(speedX, speedY);
-        if((speedX / getMaxAllowedVelocityDirectional(speedX, true)) >= (speedY / getMaxAllowedVelocityDirectional(speedY, false)))
-        {
-            return (getMaxAllowedVelocityDirectional(speedX, true) / speedX);
-        }
-        else if((speedX / getMaxAllowedVelocityDirectional(speedX, true)) <= (speedY / getMaxAllowedVelocityDirectional(speedY, false)))
-        {
-            return (getMaxAllowedVelocityDirectional(speedY, false) / speedY);
-        }
-        else
-        {
-            return (((getMaxAllowedVelocityDirectional(speedX, true) / speedX) + (getMaxAllowedVelocityDirectional(speedY, false) / speedY)) / 2);
+        // double maxSpeed = Math.hypot(speedX, speedY);
+        return Math.min(getMaxAllowedVelocityDirectional(speedX, true) / speedX, getMaxAllowedVelocityDirectional(speedY, false) / speedY);
+        // if((speedX / getMaxAllowedVelocityDirectional(speedX, true)) >= (speedY / getMaxAllowedVelocityDirectional(speedY, false)))
+        // {
+        //     return (getMaxAllowedVelocityDirectional(speedX, true) / speedX);
+        // }
+        // else if((speedX / getMaxAllowedVelocityDirectional(speedX, true)) <= (speedY / getMaxAllowedVelocityDirectional(speedY, false)))
+        // {
+        //     return (getMaxAllowedVelocityDirectional(speedY, false) / speedY);
+        // }
+        // else
+        // {
+        //     return (((getMaxAllowedVelocityDirectional(speedX, true) / speedX) + (getMaxAllowedVelocityDirectional(speedY, false) / speedY)) / 2);
     
-        }
+        // }
 
     }
 
