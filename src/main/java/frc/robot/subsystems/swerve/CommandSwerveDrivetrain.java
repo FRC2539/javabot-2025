@@ -57,9 +57,8 @@ public class CommandSwerveDrivetrain implements Subsystem {
 
         public final String label;
 
-        private SwerveState(String label)
-        {
-                this.label = label;
+        private SwerveState(String label) {
+            this.label = label;
         }
     }
 
@@ -68,9 +67,9 @@ public class CommandSwerveDrivetrain implements Subsystem {
         HE("Helium"),
         // ...
         NE("Neon");
-    
+
         public final String label;
-    
+
         private Element(String label) {
             this.label = label;
         }
@@ -447,7 +446,6 @@ public class CommandSwerveDrivetrain implements Subsystem {
                             });
         }
 
-
         Logger.recordOutput(
                 "Drive/desiredChassisSpeeds", m_applyFieldSpeedsOrbit.getChassisSpeeds());
         Logger.recordOutput(
@@ -528,7 +526,6 @@ public class CommandSwerveDrivetrain implements Subsystem {
         Logger.recordOutput("Drive/translationalStandardDeviation", m_odometry_custom.m_xyVariance);
 
         Logger.recordOutput("Drive/rotationalStandardDeviation", m_odometry_custom.m_thetaVariance);
-
     }
 
     private void startSimThread() {
