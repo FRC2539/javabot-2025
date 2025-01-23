@@ -34,10 +34,11 @@ public class TestBase extends SubsystemBase {
     LoggedNetworkBoolean simulation = new LoggedNetworkBoolean("isSimulation", false);
 
     boolean trueOrFalse;
+    Trigger trigger;
+
     public final Trigger trigger2 = new Trigger(() -> simulation.get());
     // change cansparkmax motors
 
-    Trigger trigger;
 
     public TestBase() {
         // boolean stop1, stop2, stop3 = false;

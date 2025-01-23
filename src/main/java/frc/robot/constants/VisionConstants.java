@@ -19,8 +19,6 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 
 public class VisionConstants {
-    public double c = .000469;
-    public double a = .0000206;
     // AprilTag layout
     public static AprilTagFieldLayout aprilTagLayout =
             AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
