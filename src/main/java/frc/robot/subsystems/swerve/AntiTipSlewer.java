@@ -13,58 +13,58 @@ public class AntiTipSlewer {
     private double forwardYRateLimit = 1;
     private double backwardYRateLimit = 1;
 
-
-    public void setFwdXRateLimit(double fwdXRateLimit)
-    {
+    public void setFwdXRateLimit(double fwdXRateLimit) {
         forwardXRateLimit = fwdXRateLimit;
     }
 
-    public void setRevXRateLimit(double revXRateLimit)
-    {
+    public void setRevXRateLimit(double revXRateLimit) {
         backwardXRateLimit = revXRateLimit;
     }
 
-    public void setFwdYRateLimit(double fwdYRateLimit)
-    {
+    public void setFwdYRateLimit(double fwdYRateLimit) {
         forwardYRateLimit = fwdYRateLimit;
     }
 
-    public void setRevYRateLimit(double revYRateLimit)
-    {
+    public void setRevYRateLimit(double revYRateLimit) {
         backwardYRateLimit = revYRateLimit;
     }
 
-    private double getElevatorCOMHeight()
-    {
-        //placeholder
+    private double getElevatorCOMHeight() {
+        // placeholder
         return 1;
-    } 
-    
-    public double getMaxAllowedVelocityDirectional(double speed, boolean isXDirection)
-    {
-        if(isXDirection)
-        {
-                if(speed > 0)
-                {
-                        return 2 * (( GlobalConstants.g * (((GlobalConstants.bumperWidth)/2) - GlobalConstants.robotComXOffset)) /(2 * getElevatorCOMHeight())); 
+    }
 
-                }
-                else if (speed < 0)
-                {
-                        return 2 * (( GlobalConstants.g * (((GlobalConstants.bumperWidth)/2) + GlobalConstants.robotComXOffset)) /(2 * getElevatorCOMHeight())); 
-                }
-        }
-        else if (!isXDirection)
-        {
-                if(speed > 0)
-                {
-                        return 2 * (( 9.81 * (((GlobalConstants.bumperLength)/2) - GlobalConstants.robotComYOffset)) /(2 * getElevatorCOMHeight())); 
+    public double getMaxAllowedVelocityDirectional(double speed, boolean isXDirection) {
+        if (isXDirection) {
+            if (speed > 0) {
+                return 2
+                        * ((GlobalConstants.g
+                                        * (((GlobalConstants.bumperWidth) / 2)
+                                                - GlobalConstants.robotComXOffset))
+                                / (2 * getElevatorCOMHeight()));
 
-                }
-                else if(speed < 0)
-                {
-                        return 2 * (( 9.81 * (((GlobalConstants.bumperLength)/2) + GlobalConstants.robotComYOffset)) /(2 * getElevatorCOMHeight())); 
-                } 
+            } else if (speed < 0) {
+                return 2
+                        * ((GlobalConstants.g
+                                        * (((GlobalConstants.bumperWidth) / 2)
+                                                + GlobalConstants.robotComXOffset))
+                                / (2 * getElevatorCOMHeight()));
+            }
+        } else if (!isXDirection) {
+            if (speed > 0) {
+                return 2
+                        * ((9.81
+                                        * (((GlobalConstants.bumperLength) / 2)
+                                                - GlobalConstants.robotComYOffset))
+                                / (2 * getElevatorCOMHeight()));
+
+            } else if (speed < 0) {
+                return 2
+                        * ((9.81
+                                        * (((GlobalConstants.bumperLength) / 2)
+                                                + GlobalConstants.robotComYOffset))
+                                / (2 * getElevatorCOMHeight()));
+            }
         }
 
         return 0;
@@ -73,23 +73,27 @@ public class AntiTipSlewer {
     public double getMaxAllowedVelocityRatio(double speedX, double speedY) {
 
         // double maxSpeed = Math.hypot(speedX, speedY);
-        return Math.min(getMaxAllowedVelocityDirectional(speedX, true) / speedX, getMaxAllowedVelocityDirectional(speedY, false) / speedY);
-        // if((speedX / getMaxAllowedVelocityDirectional(speedX, true)) >= (speedY / getMaxAllowedVelocityDirectional(speedY, false)))
+        return Math.min(
+                getMaxAllowedVelocityDirectional(speedX, true) / speedX,
+                getMaxAllowedVelocityDirectional(speedY, false) / speedY);
+        // if((speedX / getMaxAllowedVelocityDirectional(speedX, true)) >= (speedY /
+        // getMaxAllowedVelocityDirectional(speedY, false)))
         // {
         //     return (getMaxAllowedVelocityDirectional(speedX, true) / speedX);
         // }
-        // else if((speedX / getMaxAllowedVelocityDirectional(speedX, true)) <= (speedY / getMaxAllowedVelocityDirectional(speedY, false)))
+        // else if((speedX / getMaxAllowedVelocityDirectional(speedX, true)) <= (speedY /
+        // getMaxAllowedVelocityDirectional(speedY, false)))
         // {
         //     return (getMaxAllowedVelocityDirectional(speedY, false) / speedY);
         // }
         // else
         // {
-        //     return (((getMaxAllowedVelocityDirectional(speedX, true) / speedX) + (getMaxAllowedVelocityDirectional(speedY, false) / speedY)) / 2);
-    
+        //     return (((getMaxAllowedVelocityDirectional(speedX, true) / speedX) +
+        // (getMaxAllowedVelocityDirectional(speedY, false) / speedY)) / 2);
+
         // }
 
     }
-
 
     // private final boolean maintainStraightStopping = false;
 
@@ -115,9 +119,7 @@ public class AntiTipSlewer {
         double yAcceleration = toApplyY - slewedFieldChassisSpeeds.vyMetersPerSecond;
 
         ChassisSpeeds accelerations = new ChassisSpeeds(xAcceleration, yAcceleration, 0);
-        accelerations =
-                ChassisSpeeds.fromFieldRelativeSpeeds(
-                        accelerations, rotation);
+        accelerations = ChassisSpeeds.fromFieldRelativeSpeeds(accelerations, rotation);
 
         if (accelerations.vxMetersPerSecond > forwardXRateLimit * timestep) {
             // if (maintainStraightStopping)
@@ -155,9 +157,7 @@ public class AntiTipSlewer {
             accelerations.vyMetersPerSecond = -backwardYRateLimit * timestep;
         }
 
-        accelerations =
-                ChassisSpeeds.fromRobotRelativeSpeeds(
-                        accelerations, rotation);
+        accelerations = ChassisSpeeds.fromRobotRelativeSpeeds(accelerations, rotation);
 
         slewedFieldChassisSpeeds = slewedFieldChassisSpeeds.plus(accelerations);
 

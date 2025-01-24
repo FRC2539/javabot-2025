@@ -25,12 +25,14 @@ public class GlobalConstants {
 
     public static final double g = 9.81;
 
-    //negative for closer to the back of the robot, 0 for the center, positive for closer to the front.
-    //Should be <= bumperWidth/2 and >= -bumperWidth/2 
+    // negative for closer to the back of the robot, 0 for the center, positive for closer to the
+    // front.
+    // Should be <= bumperWidth/2 and >= -bumperWidth/2
     public static final double robotComXOffset = 0.20;
 
-    //negative for closer to the right of the robot, 0 for the center, positive for closer to the left.
-    //Should be <= bumperLength/2 and >= -bumperLength/2
+    // negative for closer to the right of the robot, 0 for the center, positive for closer to the
+    // left.
+    // Should be <= bumperLength/2 and >= -bumperLength/2
     public static final double robotComYOffset = -0.24;
 
     public static final double bumperLength = 0.97;
