@@ -1,5 +1,8 @@
 package frc.robot.subsystems.ModeManager;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -10,8 +13,17 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
+import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
+import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
 public class SuperstructureStateManager extends SubsystemBase {
+
+    public final LoggedMechanismLigament2d m_elevator;
+    public final LoggedMechanismLigament2d m_wrist;
+
+    private static final double kElevatorMinimumLength = 0.5;
+
     public class SuperstructureState {
 
         @FunctionalInterface
@@ -125,6 +137,9 @@ public class SuperstructureStateManager extends SubsystemBase {
                 internalPosition == Position.Sussy ? null : internalPosition);
         Logger.recordOutput(
                 "Superstructure/OutList", outList.toArray(new SuperstructureState.Position[0]));
+
+        m_elevator.setLength(ElevatorSubsystem.getPosition());
+        m_wrist.setAngle(Math.toDegrees(ArmSubsystem.getArmPosition()) + 180);
     }
 
     private void setFinalTarget(SuperstructureState.Position myPosition) {
@@ -264,5 +279,19 @@ public class SuperstructureStateManager extends SubsystemBase {
     public SuperstructureStateManager(ElevatorSubsystem elevatorheight, ArmSubsystem armSubsystem) {
         ElevatorSubsystem = elevatorheight;
         ArmSubsystem = armSubsystem;
+
+        LoggedMechanism2d mech = new LoggedMechanism2d(3, 6);
+
+        LoggedMechanismRoot2d root = mech.getRoot("Elevator", 2, 0);
+
+        m_elevator = new LoggedMechanismLigament2d("elevator", kElevatorMinimumLength, 90);
+
+        m_wrist =
+                new LoggedMechanismLigament2d("wrist", 0.5, 90, 6, new Color8Bit(Color.kAliceBlue));
+
+        m_elevator.append(m_wrist);
+        root.append(m_elevator);
+
+        SmartDashboard.putData("Mech2d", mech);
     }
 }

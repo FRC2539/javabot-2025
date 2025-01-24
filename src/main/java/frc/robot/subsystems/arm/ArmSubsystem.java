@@ -6,7 +6,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class ArmSubsystem extends SubsystemBase {
     private ArmPivotIO armPivotIO;
-    private ArmPivotIOInputsAutoLogged armPivotInputs = new ArmPivotIOInputsAutoLogged();
+    public ArmPivotIOInputsAutoLogged armPivotInputs = new ArmPivotIOInputsAutoLogged();
 
     private WristIO wristIO;
     private WristIOInputsAutoLogged wristInputs = new WristIOInputsAutoLogged();
