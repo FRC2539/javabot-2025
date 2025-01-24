@@ -61,4 +61,20 @@ public class ArmSubsystem extends SubsystemBase {
                     wristIO.setVoltage(voltage);
                 });
     }
+
+    public Command setPosition(double wrist, double arm) {
+        return run(
+                () -> {
+                    armPivotIO.setPosition(arm);
+                    wristIO.setPosition(wrist);
+                });
+    }
+
+    public double getArmPosition() {
+        return armPivotIO.getPosition();
+    }
+
+    public double getWristPosition() {
+        return wristIO.getPosition();
+    }
 }

@@ -9,9 +9,6 @@ import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.function.BooleanSupplier;
-import java.util.function.Function;
-
 import org.littletonrobotics.junction.Logger;
 
 public class SuperstructureStateManager extends SubsystemBase {
@@ -23,37 +20,46 @@ public class SuperstructureStateManager extends SubsystemBase {
         }
 
         private static final StateChecker FALSE = (p, s) -> false;
-        private static final StateChecker TRUE = (p, s) ->  true;
-        private static final StateChecker DEFAULT = (p,s) -> {
-            return (s.internalPosition == p);
-        };
+        private static final StateChecker TRUE = (p, s) -> true;
+        private static final StateChecker DEFAULT =
+                (p, s) -> {
+                    // return (s.internalPosition == p);
+                    double armPosition = s.ArmSubsystem.getArmPosition();
+                    double wristPosition = s.ArmSubsystem.getWristPosition();
+                    double elevatorPosition = s.ElevatorSubsystem.getPosition();
 
+                    if ((Math.abs(armPosition - p.armheight) < 0.1)
+                            && (Math.abs(wristPosition - p.wristrotation) < 0.1)
+                            && (Math.abs(elevatorPosition - p.elevatorheight) < 0.1)) {
+                        return true;
 
+                    } else return false;
+                };
 
         public enum Position {
-            Sussy(1,1,1,null),
-            None(1, 1, 1, null, TRUE),
-            Home(1, 1, 1, None),
-            Preppy(1, 1, 1, None),
-            PreppyNull(1,1,1,Preppy, TRUE),
-            L1Prep(1, 1, 1, PreppyNull),
-            L1(1, 1, 1, L1Prep),
-            L2Prep(1, 1, 1, PreppyNull),
-            L2(1, 1, 1, L2Prep),
-            L3Prep(1, 1, 1, PreppyNull),
-            L3(1, 1, 1, L3Prep),
-            L4Prep(1, 1, 1, PreppyNull),
-            L4(1, 1, 1, L4Prep),
-            L1AlgaePrep(1, 1, 1, PreppyNull),
-            L1Algae(1, 1, 1, L1AlgaePrep),
-            L2AlgaePrep(1, 1, 1, PreppyNull),
-            L2Algae(1, 1, 1, L2AlgaePrep),
-            L3AlgaePrep(1, 1, 1, PreppyNull),
-            L3Algae(1, 1, 1, L3AlgaePrep),
-            L4AlgaePrep(1, 1, 1, PreppyNull),
-            L4Algae(1, 1, 1, L4AlgaePrep),
-            SourcePrep(1, 1, 1, None),
-            Source(1, 1, 1, SourcePrep);
+            Sussy(1, 1, 1, null),
+            None(1, 1, 1, null, TRUE, false),
+            Home(1, 0, 1, None),
+            Preppy(1, 2, 1, None),
+            PreppyNull(1, 3, 1, Preppy, TRUE, false),
+            L1Prep(2, 2, 1, PreppyNull),
+            L1(2, 1, 4, L1Prep),
+            L2Prep(3, 2, 1, PreppyNull),
+            L2(3, 1, 1, L2Prep),
+            L3Prep(4, 2, 1, PreppyNull),
+            L3(4, 1, 1, L3Prep),
+            L4Prep(5, 2, 1, PreppyNull),
+            L4(5, 1, 1, L4Prep),
+            L1AlgaePrep(2, 2, 1, PreppyNull),
+            L1Algae(2, 1, 1, L1AlgaePrep),
+            L2AlgaePrep(3, 2, 1, PreppyNull),
+            L2Algae(3, 1, 1, L2AlgaePrep),
+            L3AlgaePrep(4, 2, 1, PreppyNull),
+            L3Algae(4, 1, 1, L3AlgaePrep),
+            L4AlgaePrep(5, 2, 1, PreppyNull),
+            L4Algae(5, 1, 1, L4AlgaePrep),
+            SourcePrep(1, -2, 1, None),
+            Source(0, -2, 1, SourcePrep);
 
             public double elevatorheight;
             public double armheight;
@@ -61,6 +67,23 @@ public class SuperstructureStateManager extends SubsystemBase {
             public Position position;
             public Position parent;
             public StateChecker isAtTarget;
+            public boolean realPosition;
+
+            private Position(
+                    double elevatorheight,
+                    double armheight,
+                    double wristRotation,
+                    Position parent,
+                    StateChecker isAtTarget,
+                    boolean realPosition) {
+                this.armheight = armheight;
+                this.elevatorheight = elevatorheight;
+                this.position = this;
+                this.parent = parent;
+                this.wristrotation = wristRotation;
+                this.isAtTarget = isAtTarget;
+                this.realPosition = realPosition;
+            }
 
             private Position(
                     double elevatorheight,
@@ -68,12 +91,7 @@ public class SuperstructureStateManager extends SubsystemBase {
                     double wristRotation,
                     Position parent,
                     StateChecker isAtTarget) {
-                this.armheight = armheight;
-                this.elevatorheight = elevatorheight;
-                this.position = this;
-                this.parent = parent;
-                this.wristrotation = wristRotation;
-                this.isAtTarget = isAtTarget;
+                this(elevatorheight, armheight, wristRotation, parent, DEFAULT, true);
             }
 
             private Position(
@@ -81,8 +99,8 @@ public class SuperstructureStateManager extends SubsystemBase {
                     double armheight,
                     double wristRotation,
                     Position parent) {
-                        this(elevatorheight, armheight, wristRotation, parent, DEFAULT);
-                    }
+                this(elevatorheight, armheight, wristRotation, parent, DEFAULT);
+            }
 
             public boolean isAtTarget(SuperstructureStateManager stateManager) {
                 return isAtTarget.isAtTarget(this, stateManager);
@@ -102,8 +120,11 @@ public class SuperstructureStateManager extends SubsystemBase {
         Logger.recordOutput("Superstructure/Target", targetPostition);
         Logger.recordOutput("Superstructure/Last", lastPosition);
         Logger.recordOutput("Superstructure/Internal", internalPosition);
-        Logger.recordOutput("Superstructure/InternalPersistant", internalPosition == Position.Sussy ? null : internalPosition);
-        Logger.recordOutput("Superstructure/OutList", outList.toArray(new SuperstructureState.Position[0]));
+        Logger.recordOutput(
+                "Superstructure/InternalPersistant",
+                internalPosition == Position.Sussy ? null : internalPosition);
+        Logger.recordOutput(
+                "Superstructure/OutList", outList.toArray(new SuperstructureState.Position[0]));
     }
 
     private void setFinalTarget(SuperstructureState.Position myPosition) {
@@ -156,8 +177,22 @@ public class SuperstructureStateManager extends SubsystemBase {
     }
 
     private SuperstructureState.Position internalPosition = Position.Sussy;
+
+    /*
+     * The `internalGoToPosition` command needs to actually command the elevator and the wrist and the arm to go to a position
+     */
     private Command internalGoToPosition(SuperstructureState.Position myPosition) {
-        return Commands.idle().beforeStarting(() -> internalPosition = Position.Sussy).withTimeout(1).andThen(() -> internalPosition = myPosition).andThen(Commands.idle());
+        if (myPosition.realPosition) {
+            return ElevatorSubsystem.setPosition(myPosition.elevatorheight)
+                    .alongWith(
+                            ArmSubsystem.setPosition(
+                                    myPosition.wristrotation, myPosition.armheight));
+        } else {
+            return Commands.idle();
+        }
+        // return Commands.idle().beforeStarting(() -> internalPosition =
+        // Position.Sussy).withTimeout(1).andThen(() -> internalPosition =
+        // myPosition).andThen(Commands.idle());
     }
 
     public Command moveToPosition(SuperstructureState.Position myPosition) {
@@ -183,7 +218,8 @@ public class SuperstructureStateManager extends SubsystemBase {
                             }
                         });
         Command followOutPath = followOutPath();
-        Command outputCommand = setFinalTarget.andThen(followInPath).andThen(clearOutPath).andThen(followOutPath);
+        Command outputCommand =
+                setFinalTarget.andThen(followInPath).andThen(clearOutPath).andThen(followOutPath);
         outputCommand.addRequirements(this);
         return outputCommand;
     }

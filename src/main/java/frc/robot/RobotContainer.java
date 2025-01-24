@@ -11,7 +11,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
 import frc.robot.commands.AlignToReef;
@@ -21,7 +20,6 @@ import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.ModeManager.SuperstructureStateManager;
-import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState;
 import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState.Position;
 import frc.robot.subsystems.arm.ArmPivotIOSim;
 import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
@@ -43,8 +41,6 @@ import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
-
-import java.beans.Statement;
 import java.util.function.DoubleSupplier;
 
 public class RobotContainer {
@@ -70,7 +66,7 @@ public class RobotContainer {
     public ArmSubsystem armSubsystem;
     public Vision vision;
 
-    public SuperstructureStateManager stateManager = new SuperstructureStateManager(elevatorSubsystem, armSubsystem);
+    public SuperstructureStateManager stateManager;
 
     public GripperSubsystem gripperSubsystem;
     // Use open-loop control for drive motors
@@ -107,6 +103,8 @@ public class RobotContainer {
             armSubsystem = new ArmSubsystem(new ArmPivotIOSim(), new WristIOSim());
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
         }
+
+        stateManager = new SuperstructureStateManager(elevatorSubsystem, armSubsystem);
 
         configureBindings();
 
@@ -197,7 +195,6 @@ public class RobotContainer {
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
-        
 
         // operatorController
         //         .getBack()
