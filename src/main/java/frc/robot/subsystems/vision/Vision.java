@@ -33,18 +33,17 @@ import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
 public class Vision extends SubsystemBase {
-    
+
     private final VisionConsumer consumer;
     private final VisionIO[] io;
-    
+
     private final VisionIOInputsAutoLogged[] inputs;
     private final Alert[] disconnectedAlerts;
-    
 
-     //For the standard deviation factors "STD_DEV"
-     //C refers to a constant that is added. A refers to a scalar constant.
-    // Like this -> ((A * calculations) + c) 
-     // MT number is type of megatag. 
+    // For the standard deviation factors "STD_DEV"
+    // C refers to a constant that is added. A refers to a scalar constant.
+    // Like this -> ((A * calculations) + c)
+    // MT number is type of megatag.
 
     private final double STD_DEV_FACTOR_MT2A = 0.0000206;
     private final double STD_DEV_FACTOR_MT2C = 0.000469;
@@ -56,12 +55,11 @@ public class Vision extends SubsystemBase {
     private final double ANGULAR_STD_DEV_MT1C = 0.5;
     private final double ANGULAR_STD_DEV_MT2 = Double.POSITIVE_INFINITY;
 
-   
-    private final double HEIGHT_CONSTANT_CORAL = 1.0; 
+    private final double HEIGHT_CONSTANT_CORAL = 1.0;
 
     private double linearStdDev;
     private double angularStdDev;
-   
+
     public Vision(VisionConsumer consumer, VisionIO... io) {
         this.consumer = consumer;
         this.io = io;
@@ -89,7 +87,7 @@ public class Vision extends SubsystemBase {
      */
     public Rotation2d getTargetX(int cameraIndex) {
         return inputs[cameraIndex].latestTargetObservation.tx();
-        }
+    }
 
     public int[] getTagIDs(int cameraIndex) {
         return inputs[cameraIndex].tagIds;
@@ -168,18 +166,15 @@ public class Vision extends SubsystemBase {
                 }
 
                 // Calculate standard deviations
-                  
 
                 if (observation.type() == PoseObservationType.MEGATAG_2) {
                     linearStdDev =
                             (STD_DEV_FACTOR_MT2A
                                             * (Math.pow(observation.averageTagDistance(), 2.0)
-                                                    / observation.tagCount())) 
+                                                    / observation.tagCount()))
                                     + STD_DEV_FACTOR_MT2C;
                     angularStdDev = ANGULAR_STD_DEV_MT2;
-                } 
-
-                else {
+                } else {
                     linearStdDev =
                             (STD_DEV_FACTOR_MT1A
                                             * (Math.pow(observation.averageTagDistance(), 2.0)
@@ -192,7 +187,6 @@ public class Vision extends SubsystemBase {
                                     + ANGULAR_STD_DEV_MT1C;
                 }
 
-                
                 // linearStdDev = linearStdDevBaseline * stdDevFactor; //multiply them both.
                 // angularStdDev = angularStdDevBaseline * stdDevFactor; //same thing.
 
@@ -200,7 +194,6 @@ public class Vision extends SubsystemBase {
                 //     linearStdDev *= linearStdDevMegatag2Factor; //
                 //     angularStdDev *= angularStdDevMegatag2Factor;
                 // }
-
 
                 if (cameraIndex < cameraStdDevFactors.length) {
                     linearStdDev *= cameraStdDevFactors[cameraIndex];
@@ -245,17 +238,22 @@ public class Vision extends SubsystemBase {
         Logger.recordOutput(
                 "Vision/Summary/RobotPosesRejected",
                 allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()]));
+        Logger.recordOutput("Vision/Summary/CoralVerticality", isCoralVertical(0));
     }
 
-    public boolean isCoralVertical(double height, double width){
-        if (height > (HEIGHT_CONSTANT_CORAL * width)){
+    // is the coral vertical
+    public boolean isCoralVertical(int cameraIndex) {
+        double targetHorizontalExtentPixels =
+                inputs[cameraIndex].latestTargetObservation.getTargetHorizontalExtentPixels();
+        double targetVerticalExtentPixels =
+                inputs[cameraIndex].latestTargetObservation.getTargetVerticalExtentPixels();
+        // inputs[cameraIndex].latestTargetObservation.tx()
+        if (targetVerticalExtentPixels > (targetHorizontalExtentPixels * HEIGHT_CONSTANT_CORAL)) {
             return true;
-        }
-        else{
+        } else {
             return false;
         }
     }
-    
 
     @FunctionalInterface
     public static interface VisionConsumer {
@@ -264,5 +262,4 @@ public class Vision extends SubsystemBase {
                 double timestampSeconds,
                 Matrix<N3, N1> visionMeasurementStdDevs);
     }
-
 }

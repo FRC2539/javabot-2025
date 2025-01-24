@@ -22,19 +22,30 @@ public interface VisionIO {
     public static class VisionIOInputs {
         public boolean connected = false;
         public TargetObservation latestTargetObservation =
-                new TargetObservation(new Rotation2d(), new Rotation2d()); 
+                new TargetObservation(
+                        new Rotation2d(), new Rotation2d(), 0, 0); // default values...
         public PoseObservation[] poseObservations = new PoseObservation[0];
         public int[] tagIds = new int[0];
     }
 
     /** Represents the angle to a simple target, not used for pose estimation. */
-    public static record TargetObservation(Rotation2d tx, Rotation2d ty, double height, double width) {
-        this.tx = 0;
-        this.ty = 0;
-        this.height = 0;
-        this.width = 0;
-    }
+    public static record TargetObservation(
+            Rotation2d tx,
+            Rotation2d ty,
+            double targetHorizontalExtentPixels,
+            double targetVerticalExtentPixels) {
+        public TargetObservation(Rotation2d tx, Rotation2d ty) {
+            this(tx, ty, 0, 0);
+        }
 
+        public double getTargetHorizontalExtentPixels() {
+            return targetHorizontalExtentPixels;
+        }
+
+        public double getTargetVerticalExtentPixels() {
+            return targetVerticalExtentPixels;
+        }
+    }
 
     /** Represents a robot pose sample used for pose estimation. */
     public static record PoseObservation(
@@ -50,4 +61,6 @@ public interface VisionIO {
         MEGATAG_2,
         PHOTONVISION
     }
+
+    public default void updateInputs(VisionIOInputs inputs) {}
 }

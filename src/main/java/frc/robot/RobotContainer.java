@@ -35,6 +35,8 @@ import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.subsystems.vision.VisionIOPhotonVisionSimML;
+
 import java.util.function.DoubleSupplier;
 
 public class RobotContainer {
@@ -85,7 +87,7 @@ public class RobotContainer {
             vision =
                     new Vision(
                             drivetrain::addVisionMeasurement,
-                            new VisionIOPhotonVisionSim(
+                            new VisionIOPhotonVisionSimML(
                                     VisionConstants.camera0Name,
                                     VisionConstants.robotToCamera0,
                                     drivetrain::getRobotPose));
@@ -236,5 +238,9 @@ public class RobotContainer {
                 offset,
                 alignmentPose,
                 Rotation2d.kPi);
+    }
+
+    public boolean getVerticality() {
+        return vision.isCoralVertical(0);
     }
 }

@@ -37,8 +37,8 @@ public class TestBase extends SubsystemBase {
     Trigger trigger;
 
     public final Trigger trigger2 = new Trigger(() -> simulation.get());
-    // change cansparkmax motors
 
+    // change cansparkmax motors
 
     public TestBase() {
         // boolean stop1, stop2, stop3 = false;
