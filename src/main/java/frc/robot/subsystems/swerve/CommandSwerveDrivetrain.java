@@ -327,7 +327,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
 
     public ChassisSpeeds limitFieldRelativeSpeeds(
             ChassisSpeeds inputSpeeds, boolean maintainRotationProportion) {
-        var robotState = getState();
+        // var robotState = getState();
         // double max_speed = Math.hypot(inputSpeeds.vxMetersPerSecond,
         // inputSpeeds.vyMetersPerSecond);
         // double limited_x_speed =
@@ -344,7 +344,8 @@ public class CommandSwerveDrivetrain implements Subsystem {
         // double max_allowed_velocity = max_speed * max_speed_to_allowed_ratio;
 
         if (max_speed_to_allowed_ratio < 1) {
-            new ChassisSpeeds(
+
+            return new ChassisSpeeds(
                     inputSpeeds.vxMetersPerSecond * max_speed_to_allowed_ratio,
                     inputSpeeds.vyMetersPerSecond * max_speed_to_allowed_ratio,
                     (!maintainRotationProportion)
@@ -352,14 +353,20 @@ public class CommandSwerveDrivetrain implements Subsystem {
                             : (inputSpeeds.omegaRadiansPerSecond * max_speed_to_allowed_ratio));
         }
 
-        antiTipSlewer.limitSpeeds(inputSpeeds, robotState.Pose.getRotation());
-
         return inputSpeeds;
     }
 
     private final AntiTipSlewer antiTipSlewer = new AntiTipSlewer();
 
     public ChassisSpeeds limitRobotRelativeAcceleration(ChassisSpeeds speeds) {
+        antiTipSlewer.setFwdXRateLimit(antiTipSlewer.getMaxAllowedAccelerationDirectional(1, true));
+        antiTipSlewer.setRevXRateLimit(
+                antiTipSlewer.getMaxAllowedAccelerationDirectional(-1, true));
+        antiTipSlewer.setFwdYRateLimit(
+                antiTipSlewer.getMaxAllowedAccelerationDirectional(1, false));
+        antiTipSlewer.setRevYRateLimit(
+                antiTipSlewer.getMaxAllowedAccelerationDirectional(-1, false));
+
         return antiTipSlewer.limitSpeeds(speeds, getState().Pose.getRotation());
     }
 

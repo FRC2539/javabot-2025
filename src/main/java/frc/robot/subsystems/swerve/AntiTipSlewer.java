@@ -34,17 +34,22 @@ public class AntiTipSlewer {
         return 1;
     }
 
+    public double getMaxAllowedAccelerationDirectional(double speed, boolean isXDirection) {
+        return getMaxAllowedVelocityDirectional(speed, isXDirection)
+                / GlobalConstants.STOPPING_TIME;
+    }
+
     public double getMaxAllowedVelocityDirectional(double speed, boolean isXDirection) {
         if (isXDirection) {
             if (speed > 0) {
-                return 2
+                return GlobalConstants.STOPPING_TIME
                         * ((GlobalConstants.g
                                         * (((GlobalConstants.bumperWidth) / 2)
                                                 - GlobalConstants.robotComXOffset))
                                 / (2 * getElevatorCOMHeight()));
 
             } else if (speed < 0) {
-                return 2
+                return GlobalConstants.STOPPING_TIME
                         * ((GlobalConstants.g
                                         * (((GlobalConstants.bumperWidth) / 2)
                                                 + GlobalConstants.robotComXOffset))
@@ -52,14 +57,14 @@ public class AntiTipSlewer {
             }
         } else if (!isXDirection) {
             if (speed > 0) {
-                return 2
+                return GlobalConstants.STOPPING_TIME
                         * ((9.81
                                         * (((GlobalConstants.bumperLength) / 2)
                                                 - GlobalConstants.robotComYOffset))
                                 / (2 * getElevatorCOMHeight()));
 
             } else if (speed < 0) {
-                return 2
+                return GlobalConstants.STOPPING_TIME
                         * ((9.81
                                         * (((GlobalConstants.bumperLength) / 2)
                                                 + GlobalConstants.robotComYOffset))

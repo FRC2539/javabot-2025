@@ -24,6 +24,7 @@ public class GlobalConstants {
     public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(11.61);
 
     public static final double g = 9.81;
+    public static final double STOPPING_TIME = 2;
 
     // negative for closer to the back of the robot, 0 for the center, positive for closer to the
     // front.
