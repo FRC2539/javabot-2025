@@ -318,6 +318,61 @@ public class CommandSwerveDrivetrain implements Subsystem {
         return request;
     }
 
+    private double currentMaxAcceleration = 5;
+    private double futureMaxAcceleration = 5;
+
+    public ChassisSpeeds limitFieldRelativeSpeeds(ChassisSpeeds inputSpeeds) {
+        return limitFieldRelativeSpeeds(inputSpeeds, false);
+    }
+
+    public ChassisSpeeds limitFieldRelativeSpeeds(
+            ChassisSpeeds inputSpeeds, boolean maintainRotationProportion) {
+        // var robotState = getState();
+        // double max_speed = Math.hypot(inputSpeeds.vxMetersPerSecond,
+        // inputSpeeds.vyMetersPerSecond);
+        // double limited_x_speed =
+        // antiTipSlewer.getMaxAllowedVelocityDirectional(inputSpeeds.vxMetersPerSecond, true);
+        // double limited_y_speed =
+        // antiTipSlewer.getMaxAllowedVelocityDirectional(inputSpeeds.vyMetersPerSecond, false);
+
+        // double x_ratio = limited_x_speed / inputSpeeds.vxMetersPerSecond;
+        // double y_ratio = limited
+
+        double max_speed_to_allowed_ratio =
+                antiTipSlewer.getMaxAllowedVelocityRatio(
+                        inputSpeeds.vxMetersPerSecond, inputSpeeds.vyMetersPerSecond);
+        // double max_allowed_velocity = max_speed * max_speed_to_allowed_ratio;
+
+        if (max_speed_to_allowed_ratio < 1) {
+
+            return new ChassisSpeeds(
+                    inputSpeeds.vxMetersPerSecond * max_speed_to_allowed_ratio,
+                    inputSpeeds.vyMetersPerSecond * max_speed_to_allowed_ratio,
+                    (!maintainRotationProportion)
+                            ? inputSpeeds.omegaRadiansPerSecond
+                            : (inputSpeeds.omegaRadiansPerSecond * max_speed_to_allowed_ratio));
+        }
+
+        return inputSpeeds;
+    }
+
+    private final AntiTipSlewer antiTipSlewer = new AntiTipSlewer();
+
+    public ChassisSpeeds limitRobotRelativeAcceleration(ChassisSpeeds speeds) {
+        antiTipSlewer.setFwdXRateLimit(antiTipSlewer.getMaxAllowedAccelerationDirectional(1, true));
+        antiTipSlewer.setRevXRateLimit(
+                antiTipSlewer.getMaxAllowedAccelerationDirectional(-1, true));
+        antiTipSlewer.setFwdYRateLimit(
+                antiTipSlewer.getMaxAllowedAccelerationDirectional(1, false));
+        antiTipSlewer.setRevYRateLimit(
+                antiTipSlewer.getMaxAllowedAccelerationDirectional(-1, false));
+
+        return antiTipSlewer.limitSpeeds(speeds, getState().Pose.getRotation());
+    }
+
+    //
+    // The desired robot-relative speeds
+    // returns the module states where robot can drive while obeying physics and not slipping
     public SwerveRequest driveRobotRelative(ChassisSpeeds speeds) {
         m_swerveState = SwerveState.ROBOT_RELATIVE;
         return m_applyRobotSpeeds.withSpeeds(speeds);
@@ -412,6 +467,10 @@ public class CommandSwerveDrivetrain implements Subsystem {
 
     private double lastSpeed = 0;
 
+    private double getMaxAcceleration(double comHeight, double comX) {
+        throw new RuntimeException();
+    }
+
     @Override
     public void periodic() {
         /*
@@ -431,6 +490,13 @@ public class CommandSwerveDrivetrain implements Subsystem {
                                                 : kBlueAlliancePerspectiveRotation);
                                 m_hasAppliedOperatorPerspective = true;
                             });
+        }
+
+        {
+            antiTipSlewer.setFwdXRateLimit(1);
+            antiTipSlewer.setRevXRateLimit(1);
+            antiTipSlewer.setFwdYRateLimit(1);
+            antiTipSlewer.setRevYRateLimit(1);
         }
 
         Logger.recordOutput(
