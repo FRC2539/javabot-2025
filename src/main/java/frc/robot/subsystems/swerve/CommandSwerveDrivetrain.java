@@ -46,6 +46,24 @@ public class CommandSwerveDrivetrain implements Subsystem {
 
     private final CustomOdometry m_odometry_custom;
 
+    private enum SwerveState {
+        ROBOT_RELATIVE("robot relative"),
+        ROBOT_RELATIVE_FFW("robot relative feedforwards"),
+        FIELD_RELATIVE("field relative"),
+        FIELD_RELATIVE_FFW("field relative feedforwards"),
+        DRIVER_RELATIVE("driver relative"),
+        DRIVER_RELATIVE_ORBIT("driver relative orbit-style"); /*,
+        ANTI_TIP_LIMITING */
+
+        public final String label;
+
+        private SwerveState(String label) {
+            this.label = label;
+        }
+    }
+
+    private SwerveState m_swerveState;
+
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
@@ -197,6 +215,8 @@ public class CommandSwerveDrivetrain implements Subsystem {
                     m_drivetrain.resetPose(m_odometry_custom.m_currentPose);
                 });
         m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
+
+        m_swerveState = SwerveState.DRIVER_RELATIVE;
     }
 
     /**
@@ -228,6 +248,8 @@ public class CommandSwerveDrivetrain implements Subsystem {
                 });
 
         m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
+
+        m_swerveState = SwerveState.DRIVER_RELATIVE;
     }
 
     /**
@@ -271,6 +293,8 @@ public class CommandSwerveDrivetrain implements Subsystem {
                 });
 
         m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
+
+        m_swerveState = SwerveState.DRIVER_RELATIVE;
     }
 
     private FieldOrientedOrbitSwerveRequest generateSwerveSetpointConfig() {
@@ -343,10 +367,12 @@ public class CommandSwerveDrivetrain implements Subsystem {
     // The desired robot-relative speeds
     // returns the module states where robot can drive while obeying physics and not slipping
     public SwerveRequest driveRobotRelative(ChassisSpeeds speeds) {
+        m_swerveState = SwerveState.ROBOT_RELATIVE;
         return m_applyRobotSpeeds.withSpeeds(speeds);
     }
 
     public SwerveRequest driveRobotRelative(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
+        m_swerveState = SwerveState.ROBOT_RELATIVE_FFW;
         return m_applyRobotSpeeds
                 .withSpeeds(speeds)
                 .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
@@ -354,10 +380,12 @@ public class CommandSwerveDrivetrain implements Subsystem {
     }
 
     public SwerveRequest driveFieldRelative(ChassisSpeeds speeds) {
+        m_swerveState = SwerveState.FIELD_RELATIVE;
         return m_applyFieldSpeeds.withSpeeds(speeds);
     }
 
     public SwerveRequest driveFieldRelative(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
+        m_swerveState = SwerveState.FIELD_RELATIVE_FFW;
         return m_applyFieldSpeeds
                 .withSpeeds(speeds)
                 .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
@@ -365,10 +393,12 @@ public class CommandSwerveDrivetrain implements Subsystem {
     }
 
     public SwerveRequest driveDriverRelative(ChassisSpeeds speeds) {
+        m_swerveState = SwerveState.DRIVER_RELATIVE;
         return m_applyDriverSpeeds.withSpeeds(speeds);
     }
 
     public SwerveRequest driveDriverRelativeOrbit(ChassisSpeeds speeds) {
+        m_swerveState = SwerveState.DRIVER_RELATIVE_ORBIT;
         return m_applyFieldSpeedsOrbit.withChassisSpeeds(speeds);
     }
 
@@ -526,6 +556,8 @@ public class CommandSwerveDrivetrain implements Subsystem {
         Logger.recordOutput("Drive/pose", getState().Pose);
 
         Logger.recordOutput("Drive/outdatedPose", m_drivetrain.getState().Pose);
+
+        Logger.recordOutput("Drive/currentAction", m_swerveState.label);
 
         Logger.recordOutput("Drive/slippingModule", m_odometry_custom.m_maxSlippingWheelIndex);
 

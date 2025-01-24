@@ -14,6 +14,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public ElevatorSubsystem(ElevatorIO elevatorIO) {
         this.piviotIO = elevatorIO;
+        setDefaultCommand(setPosition(0));
     }
 
     public void periodic() {

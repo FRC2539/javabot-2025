@@ -20,6 +20,11 @@ import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.constants.VisionConstants;
+import frc.robot.subsystems.arm.ArmPivotIOSim;
+import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
+import frc.robot.subsystems.arm.ArmSubsystem;
+import frc.robot.subsystems.arm.WristIONeo550;
+import frc.robot.subsystems.arm.WristIOSim;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
@@ -54,11 +59,10 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    private ElevatorSubsystem elevatorSubsystem;
-    private IntakeSubsystem intakeSubsystem;
-
     public Auto auto = new Auto(drivetrain);
-
+    public IntakeSubsystem intakeSubsystem;
+    public ElevatorSubsystem elevatorSubsystem;
+    public ArmSubsystem armSubsystem;
     public Vision vision;
 
     public GripperSubsystem gripperSubsystem;
@@ -79,6 +83,7 @@ public class RobotContainer {
                                     () -> drivetrain.getRobotPose().getRotation()));
             gripperSubsystem = new GripperSubsystem(new GripperIOFalcon());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
+            armSubsystem = new ArmSubsystem(new ArmPivotIOTalonFX(), new WristIONeo550());
 
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerTalonFX(), new FlipperIOTalon());
         } else {
@@ -92,7 +97,7 @@ public class RobotContainer {
 
             gripperSubsystem = new GripperSubsystem(new GripperIOSim());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSim());
-
+            armSubsystem = new ArmSubsystem(new ArmPivotIOSim(), new WristIOSim());
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
         }
 
