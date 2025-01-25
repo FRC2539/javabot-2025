@@ -33,13 +33,13 @@ import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
 public class Vision extends SubsystemBase {
-    
+
     private final VisionConsumer consumer;
     private final VisionIO[] io;
-    
+
     private final VisionIOInputsAutoLogged[] inputs;
     private final Alert[] disconnectedAlerts;
-    
+
     private final double STD_DEV_FACTOR_MT2A = 0.0000206;
     private final double STD_DEV_FACTOR_MT2C = 0.000469;
 
@@ -160,14 +160,14 @@ public class Vision extends SubsystemBase {
                 }
 
                 // Calculate standard deviations
-                   //C refers to a constant that is added. A refers to a scalar constant.
-                    // Like this -> ((A * calculations) + c) 
+                // C refers to a constant that is added. A refers to a scalar constant.
+                // Like this -> ((A * calculations) + c)
 
                 if (observation.type() == PoseObservationType.MEGATAG_2) {
                     linearStdDev =
                             (STD_DEV_FACTOR_MT2A
                                             * (Math.pow(observation.averageTagDistance(), 2.0)
-                                                    / observation.tagCount())) 
+                                                    / observation.tagCount()))
                                     + STD_DEV_FACTOR_MT2C;
                     angularStdDev = ANGULAR_STD_DEV_MT2;
                 } else {
