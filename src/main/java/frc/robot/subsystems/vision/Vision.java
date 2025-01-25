@@ -239,14 +239,16 @@ public class Vision extends SubsystemBase {
                 "Vision/Summary/RobotPosesRejected",
                 allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()]));
         Logger.recordOutput("Vision/Summary/CoralVerticality", isCoralVertical(0));
+        Logger.recordOutput("Vision/Summary/CoralVerticality/CoralHorizontal", inputs[0].latestTargetObservation.getTargetHorizontalExtentPixels());
+        Logger.recordOutput("Vision/Summary/CoralVerticality/CoralVertical", inputs[0].latestTargetObservation.getTargetVerticalExtentPixels());
     }
 
     // is the coral vertical
     public boolean isCoralVertical(int cameraIndex) {
         double targetHorizontalExtentPixels =
-                inputs[cameraIndex].latestTargetObservation.getTargetHorizontalExtentPixels();
+                Math.abs(inputs[cameraIndex].latestTargetObservation.getTargetHorizontalExtentPixels());
         double targetVerticalExtentPixels =
-                inputs[cameraIndex].latestTargetObservation.getTargetVerticalExtentPixels();
+                Math.abs(inputs[cameraIndex].latestTargetObservation.getTargetVerticalExtentPixels());
         // inputs[cameraIndex].latestTargetObservation.tx()
         if (targetVerticalExtentPixels > (targetHorizontalExtentPixels * HEIGHT_CONSTANT_CORAL)) {
             return true;
