@@ -46,4 +46,8 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     public void setPosition(double position) {
         elevatorLeader.setControl(motionMagicVoltage.withPosition(position));
     }
+
+    public double getPosition() {
+        return elevatorLeader.getPosition().refresh().getValueAsDouble();
+    }
 }

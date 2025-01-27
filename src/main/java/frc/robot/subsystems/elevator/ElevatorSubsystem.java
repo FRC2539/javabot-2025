@@ -60,4 +60,8 @@ public class ElevatorSubsystem extends SubsystemBase {
                     piviotIO.setPosition(position);
                 });
     }
+
+    public double getPosition() {
+        return piviotIO.getPosition();
+    }
 }

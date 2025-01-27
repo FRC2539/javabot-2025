@@ -45,4 +45,8 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
     public void setPosition(double position) {
         armPivotMotor.setControl(motionMagicVoltage.withPosition(position));
     }
+
+    public double getPosition() {
+        return armPivotMotor.getPosition().refresh().getValueAsDouble();
+    }
 }
