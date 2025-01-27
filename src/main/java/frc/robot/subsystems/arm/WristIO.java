@@ -21,4 +21,6 @@ public interface WristIO {
     public void zeroPosition();
 
     public void encoderUpdate();
+
+    public double getPosition();
 }
