@@ -10,8 +10,8 @@ import frc.robot.subsystems.ModeManager.SuperstructureStateManager.Superstructur
 import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
@@ -255,7 +255,7 @@ public class SuperstructureStateManager extends SubsystemBase {
                                                 lastPosition = nextPose;
                                             });
                         },
-                        new HashSet<>()))
+                        Set.of(ElevatorSubsystem, ArmSubsystem)))
                 .repeatedly();
     }
 
@@ -272,7 +272,7 @@ public class SuperstructureStateManager extends SubsystemBase {
                                     .until(() -> nextPose.isAtTarget(this))
                                     .andThen(() -> lastPosition = nextPose);
                         },
-                        new HashSet<>()))
+                        Set.of(ElevatorSubsystem, ArmSubsystem)))
                 .repeatedly();
     }
 
