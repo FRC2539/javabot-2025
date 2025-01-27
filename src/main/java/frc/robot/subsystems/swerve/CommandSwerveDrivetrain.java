@@ -37,12 +37,10 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.TunerConstants.TunerSwerveDrivetrain;
-
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -179,43 +177,44 @@ public class CommandSwerveDrivetrain implements Subsystem {
 
     double lastTimestamp = 0;
 
-    StatusSignal<Current>[] driveMotorStatorCurrentSignals = (StatusSignal<Current>[]) Array.newInstance(StatusSignal.class, 4);
-    StatusSignal<Current>[] driveMotorSupplyCurrentSignals = (StatusSignal<Current>[]) Array.newInstance(StatusSignal.class, 4);
-    StatusSignal<Current>[] turnMotorStatorCurrentsSignals  = (StatusSignal<Current>[]) Array.newInstance(StatusSignal.class, 4);
-    StatusSignal<Current>[] turnMotorSupplyCurrentsSignals  = (StatusSignal<Current>[]) Array.newInstance(StatusSignal.class, 4);
-    StatusSignal<Voltage>[] driveMotorVoltageSignals  = (StatusSignal<Voltage>[]) Array.newInstance(StatusSignal.class, 4);
-    StatusSignal<Voltage>[] turnMotorVoltageSignals  = (StatusSignal<Voltage>[]) Array.newInstance(StatusSignal.class, 4);
+    StatusSignal<Current>[] driveMotorStatorCurrentSignals =
+            (StatusSignal<Current>[]) Array.newInstance(StatusSignal.class, 4);
+    StatusSignal<Current>[] driveMotorSupplyCurrentSignals =
+            (StatusSignal<Current>[]) Array.newInstance(StatusSignal.class, 4);
+    StatusSignal<Current>[] turnMotorStatorCurrentsSignals =
+            (StatusSignal<Current>[]) Array.newInstance(StatusSignal.class, 4);
+    StatusSignal<Current>[] turnMotorSupplyCurrentsSignals =
+            (StatusSignal<Current>[]) Array.newInstance(StatusSignal.class, 4);
+    StatusSignal<Voltage>[] driveMotorVoltageSignals =
+            (StatusSignal<Voltage>[]) Array.newInstance(StatusSignal.class, 4);
+    StatusSignal<Voltage>[] turnMotorVoltageSignals =
+            (StatusSignal<Voltage>[]) Array.newInstance(StatusSignal.class, 4);
     StatusSignal<?>[] statusSignals;
 
     private void createSuppliers() {
         for (int i = 0; i < 4; i++) {
-                var module = m_drivetrain.getModule(i);
-                driveMotorStatorCurrentSignals[i] = 
-                        module.getDriveMotor().getStatorCurrent();
-                driveMotorSupplyCurrentSignals[i] =
-                        module.getDriveMotor().getSupplyCurrent();
-                turnMotorStatorCurrentsSignals[i] =
-                        module.getSteerMotor().getStatorCurrent();
-                turnMotorSupplyCurrentsSignals[i] =
-                        module.getSteerMotor().getSupplyCurrent();
-                driveMotorVoltageSignals[i] =
-                        module.getDriveMotor().getMotorVoltage();
-                turnMotorVoltageSignals[i] =
-                        module.getSteerMotor().getMotorVoltage();
+            var module = m_drivetrain.getModule(i);
+            driveMotorStatorCurrentSignals[i] = module.getDriveMotor().getStatorCurrent();
+            driveMotorSupplyCurrentSignals[i] = module.getDriveMotor().getSupplyCurrent();
+            turnMotorStatorCurrentsSignals[i] = module.getSteerMotor().getStatorCurrent();
+            turnMotorSupplyCurrentsSignals[i] = module.getSteerMotor().getSupplyCurrent();
+            driveMotorVoltageSignals[i] = module.getDriveMotor().getMotorVoltage();
+            turnMotorVoltageSignals[i] = module.getSteerMotor().getMotorVoltage();
         }
 
-
-
-        StatusSignal<?>[] array = new StatusSignal[0]; 
-        for (StatusSignal<?>[] a : new StatusSignal<?>[][] {
-                driveMotorStatorCurrentSignals,
-                driveMotorStatorCurrentSignals,
-                turnMotorStatorCurrentsSignals,
-                turnMotorSupplyCurrentsSignals,
-                driveMotorVoltageSignals,
-                turnMotorVoltageSignals,
-        }) {
-        array = Stream.concat(Arrays.stream(array), Arrays.stream(a)).toArray((i) -> new StatusSignal<?>[i]);
+        StatusSignal<?>[] array = new StatusSignal[0];
+        for (StatusSignal<?>[] a :
+                new StatusSignal<?>[][] {
+                    driveMotorStatorCurrentSignals,
+                    driveMotorStatorCurrentSignals,
+                    turnMotorStatorCurrentsSignals,
+                    turnMotorSupplyCurrentsSignals,
+                    driveMotorVoltageSignals,
+                    turnMotorVoltageSignals,
+                }) {
+            array =
+                    Stream.concat(Arrays.stream(array), Arrays.stream(a))
+                            .toArray((i) -> new StatusSignal<?>[i]);
         }
 
         statusSignals = array;
@@ -475,7 +474,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
             driveMotorSupplyCurrents[i] = driveMotorSupplyCurrentSignals[i].getValueAsDouble();
             turnMotorStatorCurrents[i] = turnMotorStatorCurrentsSignals[i].getValueAsDouble();
             turnMotorSupplyCurrents[i] = turnMotorSupplyCurrentsSignals[i].getValueAsDouble();
-            driveMotorVoltage[i] =  driveMotorVoltageSignals[i].getValueAsDouble();
+            driveMotorVoltage[i] = driveMotorVoltageSignals[i].getValueAsDouble();
             turnMotorVoltage[i] = turnMotorVoltageSignals[i].getValueAsDouble();
         }
 
