@@ -114,77 +114,51 @@ public class RobotContainer {
         TestBase.setDefaultCommand(
                 TestBase.run(
                         () -> {
-                            Logger.recordOutput("Testbase/Motor1", TestBase.motor1.get());
-                            Logger.recordOutput("Testbase/Motor2", TestBase.motor2.get());
-
-                            Logger.recordOutput(
-                                    "Testbase/Motor1Temp", TestBase.motor1.getMotorTemperature());
-                            Logger.recordOutput(
-                                    "Testbase/Motor2Temp", TestBase.motor2.getDeviceTemp().refresh().getValueAsDouble());
-
-                            Logger.recordOutput(
-                                    "Testbase/Motor2Cur", TestBase.motor2.getStatorCurrent().refresh().getValueAsDouble()
-                            );
-                            Logger.recordOutput(
-                                "Testbase/Motor1Cur", TestBase.motor1.getOutputCurrent());
+                    
 
                             // motor 3 info
                             Logger.recordOutput( "Testbase/Motor3", TestBase.motor3.get());
                             Logger.recordOutput( "Testbase/Motor3Temp", TestBase.motor3.getDeviceTemp().refresh().getValueAsDouble());
                             Logger.recordOutput( "Testbase/Motor3Cur", TestBase.motor3.getStatorCurrent().refresh().getValueAsDouble());
 
-                            if (TestBase.motor1.getMotorTemperature() > 60) {
-                                shutdownOne = true;
-                            } else if (TestBase.motor1.getMotorTemperature() < 58) {
-                                shutdownOne = false;
-                            }
+                            shutdownOne = false;
                             shutdownTwo = false;
                             // if (TestBase.motor2.getMotorTemperature() > 60) {
                             //     shutdownTwo = true;
                             // } else if (TestBase.motor2.getMotorTemperature() < 58) {
                             //     shutdownTwo = false;
                             // }
-                            if (!shutdownOne) {
+
+                            double motorSpeed = 0;
+
+                            
                                 if (operatorController.getLeftBumper().getAsBoolean()) {
-                                    TestBase.setMotor1Speed(
-                                            TestBase.motor1SpeedNetworkNumber.get());
+                                    motorSpeed =
+                                            TestBase.motor1SpeedNetworkNumber.get();
                                 } else if (operatorController.getLeftTrigger().getAsBoolean()) {
-                                    TestBase.setMotor1Speed(
-                                            TestBase.motor1SpeedNetworkNumber.get() * -1);
-                                } else {
-                                    TestBase.setMotor1Speed(0);
+                                    motorSpeed =
+                                            TestBase.motor1SpeedNetworkNumber.get() * -1;
                                 }
-                            } else {
-                                TestBase.setMotor1Speed(0);
-                            }
+                            
 
-                            if (!shutdownTwo) {
                                 if (operatorController.getRightBumper().getAsBoolean()) {
-                                    TestBase.setMotor2Speed(
-                                            TestBase.motor2SpeedNetworkNumber.get());
+                                    motorSpeed =
+                                            TestBase.motor2SpeedNetworkNumber.get();
                                 } else if (operatorController.getRightTrigger().getAsBoolean()) {
-                                    TestBase.setMotor2Speed(
+                                    motorSpeed = (
                                             TestBase.motor2SpeedNetworkNumber.get() * -1);
-                                } else {
-                                    TestBase.setMotor2Speed(0);
-                                }
-                            } else {
-                                TestBase.setMotor2Speed(0);
-                            }
+                                } 
 
-                            if (true) {
+                            
                                 if (operatorController.getY().getAsBoolean()) {
-                                    TestBase.setMotor3Speed(
-                                            TestBase.motor2SpeedNetworkNumber.get());
+                                    motorSpeed =
+                                            TestBase.motor3SpeedNetworkNumber.get();
                                 } else if (operatorController.getA().getAsBoolean()) {
-                                    TestBase.setMotor3Speed(
-                                            TestBase.motor2SpeedNetworkNumber.get() * -1);
-                                } else {
-                                    TestBase.setMotor3Speed(0);
+                                    motorSpeed =
+                                            TestBase.motor3SpeedNetworkNumber.get() * -1;
                                 }
-                            } else {
-                                TestBase.setMotor3Speed(0);
-                            }
+
+                                TestBase.setMotor3Speed(motorSpeed);                        
                         }));
         // reset the field-centric heading on left bumper press
         // operatorController
