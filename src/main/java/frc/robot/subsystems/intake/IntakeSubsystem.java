@@ -17,6 +17,12 @@ public class IntakeSubsystem extends SubsystemBase {
     public IntakeSubsystem(IntakeRollerIO intakerollerIO, FlipperIO sflipperIO) {
         piviotIO = intakerollerIO;
         flipperIO = sflipperIO;
+        setDefaultCommand(
+                run(
+                        () -> {
+                            piviotIO.setVoltage(0);
+                            flipperIO.setClose();
+                        }));
     }
 
     public void periodic() {
@@ -33,8 +39,6 @@ public class IntakeSubsystem extends SubsystemBase {
         if (flipperInputs.voltage > 0 && flipperInputs.position >= upperLimit) {
             this.piviotIO.setVoltage(0);
         }
-
-        setDefaultCommand(run(() -> piviotIO.setVoltage(0)));
     }
 
     public Command intake() {

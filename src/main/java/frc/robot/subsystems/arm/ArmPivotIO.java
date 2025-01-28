@@ -1,20 +1,17 @@
-package frc.robot.subsystems.elevator;
+package frc.robot.subsystems.arm;
 
 import org.littletonrobotics.junction.AutoLog;
 
-public interface ElevatorIO {
-
-    public void updateInputs(ElevatorIOInputs inputs);
+public interface ArmPivotIO {
+    public void updateInputs(ArmPivotIOInputs inputs);
 
     @AutoLog
-    public class ElevatorIOInputs {
-
-        // public double voltage = 0;
+    public class ArmPivotIOInputs {
         public double position = 0;
         public double speed = 0;
-        public double voltage;
-        public double temperature = 0;
+        public double voltage = 0;
         public double current = 0;
+        public double temperature = 0;
     }
 
     public void setPosition(double position);

@@ -11,7 +11,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
 import frc.robot.commands.AlignToReef;
@@ -20,6 +19,13 @@ import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.constants.VisionConstants;
+import frc.robot.subsystems.ModeManager.SuperstructureStateManager;
+import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState.Position;
+import frc.robot.subsystems.arm.ArmPivotIOSim;
+import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
+import frc.robot.subsystems.arm.ArmSubsystem;
+import frc.robot.subsystems.arm.WristIONeo550;
+import frc.robot.subsystems.arm.WristIOSim;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
@@ -54,12 +60,13 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    private ElevatorSubsystem elevatorSubsystem;
-    private IntakeSubsystem intakeSubsystem;
-
     public Auto auto = new Auto(drivetrain);
-
+    public IntakeSubsystem intakeSubsystem;
+    public ElevatorSubsystem elevatorSubsystem;
+    public ArmSubsystem armSubsystem;
     public Vision vision;
+
+    public SuperstructureStateManager stateManager;
 
     public GripperSubsystem gripperSubsystem;
     // Use open-loop control for drive motors
@@ -79,6 +86,7 @@ public class RobotContainer {
                                     () -> drivetrain.getRobotPose().getRotation()));
             gripperSubsystem = new GripperSubsystem(new GripperIOFalcon());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
+            armSubsystem = new ArmSubsystem(new ArmPivotIOTalonFX(), new WristIONeo550());
 
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerTalonFX(), new FlipperIOTalon());
         } else {
@@ -92,9 +100,11 @@ public class RobotContainer {
 
             gripperSubsystem = new GripperSubsystem(new GripperIOSim());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSim());
-
+            armSubsystem = new ArmSubsystem(new ArmPivotIOSim(), new WristIOSim());
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
         }
+
+        stateManager = new SuperstructureStateManager(elevatorSubsystem, armSubsystem);
 
         configureBindings();
 
@@ -161,21 +171,21 @@ public class RobotContainer {
         //                                         drivetrain, vision, 10, 0,
         // leftJoystickVelocityX)));
 
-        operatorController.getA().toggleOnTrue(alignToReef(9, 0));
+        // operatorController.getA().toggleOnTrue(alignToReef(9, 0));
         leftDriveController.getBottomThumb().whileTrue(alignToReef(9, 0));
         leftDriveController.getRightThumb().whileTrue(alignToReef(9, 0.4));
         leftDriveController.getLeftThumb().whileTrue(alignToReef(9, -0.4));
-        operatorController
-                .getB()
-                .whileTrue(
-                        drivetrain.applyRequest(
-                                () ->
-                                        point.withModuleDirection(
-                                                new Rotation2d(
-                                                        -operatorController.getLeftYAxis().get(),
-                                                        -operatorController
-                                                                .getLeftXAxis()
-                                                                .get()))));
+        // operatorController
+        //         .getB()
+        //         .whileTrue(
+        //                 drivetrain.applyRequest(
+        //                         () ->
+        //                                 point.withModuleDirection(
+        //                                         new Rotation2d(
+        //                                                 -operatorController.getLeftYAxis().get(),
+        //                                                 -operatorController
+        //                                                         .getLeftXAxis()
+        //                                                         .get()))));
 
         leftDriveController
                 .getTrigger()
@@ -185,22 +195,29 @@ public class RobotContainer {
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
-        operatorController
-                .getBack()
-                .and(operatorController.getY())
-                .whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        operatorController
-                .getBack()
-                .and(operatorController.getX())
-                .whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        operatorController
-                .getStart()
-                .and(operatorController.getY())
-                .whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        operatorController
-                .getStart()
-                .and(operatorController.getX())
-                .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+
+        // operatorController
+        //         .getBack()
+        //         .and(operatorController.getY())
+        //         .whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+        // operatorController
+        //         .getBack()
+        //         .and(operatorController.getX())
+        //         .whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+        // operatorController
+        //         .getStart()
+        //         .and(operatorController.getY())
+        //         .whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+        // operatorController
+        //         .getStart()
+        //         .and(operatorController.getX())
+        //         .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+
+        // operatorController
+        operatorController.getA().onTrue(stateManager.moveToPosition(Position.L4));
+        operatorController.getB().onTrue(stateManager.moveToPosition(Position.L3));
+        operatorController.getX().onTrue(stateManager.moveToPosition(Position.Source));
+        operatorController.getY().onTrue(stateManager.moveToPosition(Position.Home));
 
         // reset the field-centric heading on left bumper press
         operatorController
