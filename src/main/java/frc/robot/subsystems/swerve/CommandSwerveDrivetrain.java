@@ -33,8 +33,12 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
 import frc.robot.constants.GlobalConstants;
+import frc.robot.constants.TunerConstants;
 import frc.robot.constants.TunerConstants.TunerSwerveDrivetrain;
+import frc.robot.utils.simulation.MapleSimSwerveDrivetrain;
 import java.util.function.Supplier;
+
+import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -202,6 +206,9 @@ public class CommandSwerveDrivetrain implements Subsystem {
     public CommandSwerveDrivetrain(
             SwerveDrivetrainConstants drivetrainConstants,
             SwerveModuleConstants<?, ?, ?>... modules) {
+        if (USE_MAPLE_SIM) {
+            modules = MapleSimSwerveDrivetrain.regulateModuleConstantsForSimulation(modules);
+        }
         m_drivetrain = new TunerSwerveDrivetrain(drivetrainConstants, modules);
         if (Utils.isSimulation()) {
             startSimThread();
@@ -234,6 +241,9 @@ public class CommandSwerveDrivetrain implements Subsystem {
             SwerveDrivetrainConstants drivetrainConstants,
             double odometryUpdateFrequency,
             SwerveModuleConstants<?, ?, ?>... modules) {
+        if (USE_MAPLE_SIM) {
+            modules = MapleSimSwerveDrivetrain.regulateModuleConstantsForSimulation(modules);
+        }
         m_drivetrain =
                 new TunerSwerveDrivetrain(drivetrainConstants, odometryUpdateFrequency, modules);
         if (Utils.isSimulation()) {
@@ -273,6 +283,9 @@ public class CommandSwerveDrivetrain implements Subsystem {
             Matrix<N3, N1> odometryStandardDeviation,
             Matrix<N3, N1> visionStandardDeviation,
             SwerveModuleConstants<?, ?, ?>... modules) {
+        if (USE_MAPLE_SIM) {
+            modules = MapleSimSwerveDrivetrain.regulateModuleConstantsForSimulation(modules);
+        }
         m_drivetrain =
                 new TunerSwerveDrivetrain(
                         drivetrainConstants,
@@ -579,23 +592,57 @@ public class CommandSwerveDrivetrain implements Subsystem {
         Logger.recordOutput("Drive/translationalStandardDeviation", m_odometry_custom.m_xyVariance);
 
         Logger.recordOutput("Drive/rotationalStandardDeviation", m_odometry_custom.m_thetaVariance);
+
+        if (mapleSimSwerveDrivetrain != null) {
+                Logger.recordOutput("MapleSim/CoralPoses", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
+                Logger.recordOutput("MapleSim/AlgaePoses", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+
+                Logger.recordOutput("MapleSim/RobotPose", mapleSimSwerveDrivetrain.mapleSimDrive.getSimulatedDriveTrainPose());
+        }
     }
 
+    public static final boolean USE_MAPLE_SIM = true;
+    private MapleSimSwerveDrivetrain mapleSimSwerveDrivetrain = null;
+
+    @SuppressWarnings("unchecked")
     private void startSimThread() {
         m_lastSimTime = Utils.getCurrentTimeSeconds();
 
         /* Run simulation at a faster rate so PID gains behave more reasonably */
-        m_simNotifier =
-                new Notifier(
-                        () -> {
-                            final double currentTime = Utils.getCurrentTimeSeconds();
-                            double deltaTime = currentTime - m_lastSimTime;
-                            m_lastSimTime = currentTime;
+        if (USE_MAPLE_SIM) {
 
-                            /* use the measured time delta, get battery voltage from WPILib */
-                            m_drivetrain.updateSimState(
-                                    deltaTime, RobotController.getBatteryVoltage());
-                        });
+            mapleSimSwerveDrivetrain =
+                    new MapleSimSwerveDrivetrain(
+                            Seconds.of(kSimLoopPeriod),
+                            // TODO: modify the following constants according to your robot
+                            GlobalConstants.ROBOT_MASS, // robot weight
+                            Meters.of(GlobalConstants.bumperLength), // bumper length
+                            Meters.of(GlobalConstants.bumperWidth), // bumper width
+                            GlobalConstants.DRIVE_MOTOR, // drive motor type
+                            GlobalConstants.STEER_MOTOR, // steer motor type
+                            GlobalConstants.COEFFICIENT_OF_FRICTION, // wheel COF
+                            m_drivetrain.getModuleLocations(),
+                            m_drivetrain.getPigeon2(),
+                            m_drivetrain.getModules(),
+                            TunerConstants.FrontLeft,
+                            TunerConstants.FrontRight,
+                            TunerConstants.BackLeft,
+                            TunerConstants.BackRight);
+            /* Run simulation at a faster rate so PID gains behave more reasonably */
+            m_simNotifier = new Notifier(mapleSimSwerveDrivetrain::update);
+        } else {
+            m_simNotifier =
+                    new Notifier(
+                            () -> {
+                                final double currentTime = Utils.getCurrentTimeSeconds();
+                                double deltaTime = currentTime - m_lastSimTime;
+                                m_lastSimTime = currentTime;
+
+                                /* use the measured time delta, get battery voltage from WPILib */
+                                m_drivetrain.updateSimState(
+                                        deltaTime, RobotController.getBatteryVoltage());
+                            });
+        }
         m_simNotifier.startPeriodic(kSimLoopPeriod);
     }
 

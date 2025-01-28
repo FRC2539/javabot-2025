@@ -41,10 +41,8 @@ public class GlobalConstants {
 
     public static final double COEFFICIENT_OF_FRICTION = 1.0;
 
-    public static final DCMotor DRIVE_MOTOR =
-            DCMotor.getKrakenX60Foc(1).withReduction(EXAMPLE_MODULE.DriveMotorGearRatio);
-    public static final DCMotor STEER_MOTOR =
-            DCMotor.getKrakenX60Foc(1).withReduction(EXAMPLE_MODULE.SteerMotorGearRatio);
+    public static final DCMotor DRIVE_MOTOR = DCMotor.getKrakenX60Foc(1);
+    public static final DCMotor STEER_MOTOR = DCMotor.getKrakenX60Foc(1);
 
     public static class ControllerConstants {
         public static final int LEFT_DRIVE_CONTROLLER = 0;
