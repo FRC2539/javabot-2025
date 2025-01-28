@@ -2,7 +2,6 @@ package frc.robot.constants;
 
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.signals.GravityTypeValue;
 
 public class ClimberConstants {
     public static final Slot0Configs slot0Configs =
@@ -13,8 +12,7 @@ public class ClimberConstants {
                     .withKI(0)
                     .withKP(0)
                     .withKS(0)
-                    .withKV(0)
-                    .withGravityType(GravityTypeValue.Elevator_Static);
+                    .withKV(0);
     ;
     public static final MotionMagicConfigs motionMagicConfigs =
             new MotionMagicConfigs()
