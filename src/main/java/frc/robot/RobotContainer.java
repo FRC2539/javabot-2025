@@ -11,6 +11,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
 import frc.robot.commands.AlignToReef;
@@ -172,9 +174,9 @@ public class RobotContainer {
         // leftJoystickVelocityX)));
 
         // operatorController.getA().toggleOnTrue(alignToReef(9, 0));
-        leftDriveController.getBottomThumb().whileTrue(alignToReef(9, 0));
-        leftDriveController.getRightThumb().whileTrue(alignToReef(9, 0.4));
-        leftDriveController.getLeftThumb().whileTrue(alignToReef(9, -0.4));
+        // leftDriveController.getBottomThumb().whileTrue(alignToReef(9, 0));
+        // leftDriveController.getRightThumb().whileTrue(alignToReef(9, 0.4));
+        // leftDriveController.getLeftThumb().whileTrue(alignToReef(9, -0.4));
         // operatorController
         //         .getB()
         //         .whileTrue(
@@ -187,11 +189,11 @@ public class RobotContainer {
         //                                                         .getLeftXAxis()
         //                                                         .get()))));
 
-        leftDriveController
-                .getTrigger()
-                .whileTrue(
-                        new WheelRadiusCharacterization(
-                                WheelRadiusCharacterization.Direction.CLOCKWISE, drivetrain));
+        // leftDriveController
+        //         .getTrigger()
+        //         .whileTrue(
+        //                 new WheelRadiusCharacterization(
+        //                         WheelRadiusCharacterization.Direction.CLOCKWISE, drivetrain));
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
@@ -214,18 +216,42 @@ public class RobotContainer {
         //         .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         // operatorController
-        operatorController.getA().onTrue(stateManager.moveToPosition(Position.L4));
-        operatorController.getB().onTrue(stateManager.moveToPosition(Position.L3));
-        operatorController.getX().onTrue(stateManager.moveToPosition(Position.Source));
-        operatorController.getY().onTrue(stateManager.moveToPosition(Position.Home));
+        // operatorController.getA().onTrue(stateManager.moveToPosition(Position.L4));
+        // operatorController.getB().onTrue(stateManager.moveToPosition(Position.L3));
+        // operatorController.getX().onTrue(stateManager.moveToPosition(Position.Source));
+        // operatorController.getY().onTrue(stateManager.moveToPosition(Position.Home));
 
         // reset the field-centric heading on left bumper press
-        operatorController
-                .getLeftBumper()
-                .onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-        operatorController
-                .getRightBumper()
-                .onTrue(drivetrain.runOnce(() -> drivetrain.resetPose(Pose2d.kZero)));
+        // operatorController
+        //         .getLeftBumper()
+        //         .onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        // operatorController
+        //         .getRightBumper()
+        //         .onTrue(drivetrain.runOnce(() -> drivetrain.resetPose(Pose2d.kZero)));
+
+        // Operator Mode Setting
+        operatorController.getLeftBumper().onTrue(stateManager.setLeftCoralMode());
+
+        // Coral Mode Bindings
+        final Trigger CORAL = stateManager.LEFT_CORAL.or(stateManager.RIGHT_CORAL);
+        CORAL.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.L4));
+
+        // Algae Mode Bindings
+
+
+        // Driver Align Bindings
+        stateManager.LEFT_CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(9, 0));
+
+        //Commands.none();
+
+        // Climb Bindings
+
+
+        // Intake Bindings
+
+
+        // Technical Bindings
+
     }
 
     private double deadband(double value, double deadband) {
