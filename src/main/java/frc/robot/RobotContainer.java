@@ -26,6 +26,9 @@ import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
 import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.arm.WristIONeo550;
 import frc.robot.subsystems.arm.WristIOSim;
+import frc.robot.subsystems.climber.ClimberIOSim;
+import frc.robot.subsystems.climber.ClimberIOTalonFX;
+import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
@@ -63,6 +66,7 @@ public class RobotContainer {
     public Auto auto = new Auto(drivetrain);
     public IntakeSubsystem intakeSubsystem;
     public ElevatorSubsystem elevatorSubsystem;
+    public ClimberSubsystem climberSubsystem;
     public ArmSubsystem armSubsystem;
     public Vision vision;
 
@@ -87,6 +91,7 @@ public class RobotContainer {
             gripperSubsystem = new GripperSubsystem(new GripperIOFalcon());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
             armSubsystem = new ArmSubsystem(new ArmPivotIOTalonFX(), new WristIONeo550());
+            climberSubsystem = new ClimberSubsystem(new ClimberIOTalonFX());
 
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerTalonFX(), new FlipperIOTalon());
         } else {
@@ -102,6 +107,7 @@ public class RobotContainer {
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSim());
             armSubsystem = new ArmSubsystem(new ArmPivotIOSim(), new WristIOSim());
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
+            climberSubsystem = new ClimberSubsystem(new ClimberIOSim());
         }
 
         stateManager = new SuperstructureStateManager(elevatorSubsystem, armSubsystem);
