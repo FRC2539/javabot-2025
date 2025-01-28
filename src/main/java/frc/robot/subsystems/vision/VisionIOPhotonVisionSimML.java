@@ -13,8 +13,6 @@
 
 package frc.robot.subsystems.vision;
 
-import static frc.robot.constants.VisionConstants.aprilTagLayout;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -51,7 +49,7 @@ public class VisionIOPhotonVisionSimML extends VisionIOPhotonVision {
                     new VisionTargetSim[] {
                         new VisionTargetSim(
                                 new Pose3d(5, 5, 0, new Rotation3d(0, 0, 0)),
-                                new TargetModel(.5, 1)),
+                                new TargetModel(.5, 1)), // creates the target in simulation
                     });
         }
 

@@ -32,7 +32,10 @@ public interface VisionIO {
     public static record TargetObservation(
             Rotation2d tx,
             Rotation2d ty,
+
+            // width
             double targetHorizontalExtentPixels,
+            // height
             double targetVerticalExtentPixels) {
         public TargetObservation(Rotation2d tx, Rotation2d ty) {
             this(tx, ty, 0, 0);

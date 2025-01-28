@@ -35,8 +35,6 @@ import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
-import frc.robot.subsystems.vision.VisionIOPhotonVisionSimML;
-
 import java.util.function.DoubleSupplier;
 
 public class RobotContainer {
@@ -87,7 +85,7 @@ public class RobotContainer {
             vision =
                     new Vision(
                             drivetrain::addVisionMeasurement,
-                            new VisionIOPhotonVisionSimML(
+                            new VisionIOPhotonVisionSim(
                                     VisionConstants.camera0Name,
                                     VisionConstants.robotToCamera0,
                                     drivetrain::getRobotPose));
