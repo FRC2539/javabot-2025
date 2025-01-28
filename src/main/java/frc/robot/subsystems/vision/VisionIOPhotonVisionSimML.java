@@ -13,17 +13,19 @@
 
 package frc.robot.subsystems.vision;
 
-import static frc.robot.constants.VisionConstants.aprilTagLayout;
-
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import java.util.function.Supplier;
+import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
+import org.photonvision.simulation.VisionTargetSim;
 
 /** IO implementation for physics sim using PhotonVision simulator. */
-public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
+public class VisionIOPhotonVisionSimML extends VisionIOPhotonVision {
     private static VisionSystemSim visionSim;
 
     private final Supplier<Pose2d> poseSupplier;
@@ -35,15 +37,20 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
      * @param name The name of the camera.
      * @param poseSupplier Supplier for the robot pose to use in simulation.
      */
-    public VisionIOPhotonVisionSim(
+    public VisionIOPhotonVisionSimML(
             String name, Transform3d robotToCamera, Supplier<Pose2d> poseSupplier) {
         super(name, robotToCamera);
         this.poseSupplier = poseSupplier;
 
         // Initialize vision sim
         if (visionSim == null) {
-            visionSim = new VisionSystemSim("main");
-            visionSim.addAprilTags(aprilTagLayout);
+            visionSim = new VisionSystemSim("ml");
+            visionSim.addVisionTargets(
+                    new VisionTargetSim[] {
+                        new VisionTargetSim(
+                                new Pose3d(5, 5, 0, new Rotation3d(0, 0, 0)),
+                                new TargetModel(.5, 1)), // creates the target in simulation
+                    });
         }
 
         // Add sim camera

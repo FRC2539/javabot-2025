@@ -254,4 +254,8 @@ public class RobotContainer {
                 alignmentPose,
                 Rotation2d.kPi);
     }
+
+    public boolean getVerticality() {
+        return vision.isCoralVertical(0);
+    }
 }
