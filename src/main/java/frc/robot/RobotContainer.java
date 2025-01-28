@@ -32,6 +32,7 @@ import frc.robot.subsystems.intake.FlipperIOSim;
 import frc.robot.subsystems.intake.IntakeRollerIOSim;
 import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
+import frc.robot.subsystems.vision.DummyPhotonCamera;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
@@ -79,9 +80,7 @@ public class RobotContainer {
                             new VisionIOLimelight(
                                     VisionConstants.camera0Name,
                                     () -> drivetrain.getRobotPose().getRotation()),
-                            new VisionIOLimelight(
-                                    VisionConstants.camera1Name,
-                                    () -> drivetrain.getRobotPose().getRotation()),
+                            new DummyPhotonCamera(),
                             new VisionIOLimelight(
                                     VisionConstants.camera2Name,
                                     () -> drivetrain.getRobotPose().getRotation()));
@@ -100,10 +99,7 @@ public class RobotContainer {
                                     VisionConstants.camera0Name,
                                     VisionConstants.robotToCamera0,
                                     drivetrain::getRobotPose),
-                            new VisionIOPhotonVisionSim(
-                                    VisionConstants.camera1Name,
-                                    VisionConstants.robotToCamera1,
-                                    drivetrain::getRobotPose),
+                            new DummyPhotonCamera(),
                             new VisionIOPhotonVisionSimML(
                                     VisionConstants.camera2Name,
                                     VisionConstants.robotToCamera2,
