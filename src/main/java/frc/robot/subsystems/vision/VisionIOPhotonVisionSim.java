@@ -52,7 +52,7 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
                     new VisionTargetSim[] {
                         new VisionTargetSim(
                                 new Pose3d(5, 5, 0, new Rotation3d(0, 0, 0)),
-                                new TargetModel(.5, 100)),
+                                new TargetModel(.5, 1)), // creates the target model
                     });
         }
 
