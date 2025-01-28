@@ -41,6 +41,7 @@ import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.subsystems.vision.VisionIOPhotonVisionSimML;
 import java.util.function.DoubleSupplier;
 
 public class RobotContainer {
@@ -83,6 +84,12 @@ public class RobotContainer {
                             drivetrain::addVisionMeasurement,
                             new VisionIOLimelight(
                                     VisionConstants.camera0Name,
+                                    () -> drivetrain.getRobotPose().getRotation()),
+                            new VisionIOLimelight(
+                                    VisionConstants.camera1Name,
+                                    () -> drivetrain.getRobotPose().getRotation()),
+                            new VisionIOLimelight(
+                                    VisionConstants.camera2Name,
                                     () -> drivetrain.getRobotPose().getRotation()));
             gripperSubsystem = new GripperSubsystem(new GripperIOFalcon());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
@@ -96,6 +103,14 @@ public class RobotContainer {
                             new VisionIOPhotonVisionSim(
                                     VisionConstants.camera0Name,
                                     VisionConstants.robotToCamera0,
+                                    drivetrain::getRobotPose),
+                            new VisionIOPhotonVisionSim(
+                                    VisionConstants.camera1Name,
+                                    VisionConstants.robotToCamera1,
+                                    drivetrain::getRobotPose),
+                            new VisionIOPhotonVisionSimML(
+                                    VisionConstants.camera2Name,
+                                    VisionConstants.robotToCamera2,
                                     drivetrain::getRobotPose));
 
             gripperSubsystem = new GripperSubsystem(new GripperIOSim());
