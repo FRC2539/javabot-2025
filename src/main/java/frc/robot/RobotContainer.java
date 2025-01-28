@@ -11,12 +11,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
 import frc.robot.commands.AlignToReef;
-import frc.robot.commands.WheelRadiusCharacterization;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
@@ -238,17 +236,14 @@ public class RobotContainer {
 
         // Algae Mode Bindings
 
-
         // Driver Align Bindings
         stateManager.LEFT_CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(9, 0));
 
-        //Commands.none();
+        // Commands.none(); for pose swap
 
         // Climb Bindings
 
-
         // Intake Bindings
-
 
         // Technical Bindings
 

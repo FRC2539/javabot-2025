@@ -18,8 +18,6 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-
 public class SuperstructureStateManager extends SubsystemBase {
 
     public final LoggedMechanismLigament2d m_elevator;
@@ -129,20 +127,17 @@ public class SuperstructureStateManager extends SubsystemBase {
     private List<SuperstructureState.Position> outList = new ArrayList<>();
 
     private enum CoralAlgaeMode {
-        LeftCoral, 
-        RightCoral, 
+        LeftCoral,
+        RightCoral,
         Algae;
-
     }
 
     private CoralAlgaeMode coralAlgaeMode = CoralAlgaeMode.LeftCoral;
-    
 
     public final Trigger LEFT_CORAL = new Trigger(() -> coralAlgaeMode == CoralAlgaeMode.LeftCoral);
-    public final Trigger RIGHT_CORAL = new Trigger(() -> coralAlgaeMode == CoralAlgaeMode.RightCoral);
+    public final Trigger RIGHT_CORAL =
+            new Trigger(() -> coralAlgaeMode == CoralAlgaeMode.RightCoral);
     public final Trigger ALGAE = new Trigger(() -> coralAlgaeMode == CoralAlgaeMode.Algae);
-
-
 
     public Command setLeftCoralMode() {
         return Commands.runOnce(() -> coralAlgaeMode = CoralAlgaeMode.LeftCoral);
