@@ -16,15 +16,11 @@ package frc.robot.subsystems.vision;
 import static frc.robot.constants.VisionConstants.aprilTagLayout;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import java.util.function.Supplier;
-import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
-import org.photonvision.simulation.VisionTargetSim;
 
 /** IO implementation for physics sim using PhotonVision simulator. */
 public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
@@ -48,12 +44,6 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
         if (visionSim == null) {
             visionSim = new VisionSystemSim("main");
             visionSim.addAprilTags(aprilTagLayout);
-            visionSim.addVisionTargets(
-                    new VisionTargetSim[] {
-                        new VisionTargetSim(
-                                new Pose3d(5, 5, 0, new Rotation3d(0, 0, 0)),
-                                new TargetModel(.5, 1)), // creates the target model
-                    });
         }
 
         // Add sim camera
