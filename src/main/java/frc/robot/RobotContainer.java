@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
@@ -229,17 +230,37 @@ public class RobotContainer {
 
         // Operator Mode Setting
         operatorController.getLeftBumper().onTrue(stateManager.setLeftCoralMode());
+        operatorController.getRightBumper().onTrue(stateManager.setRightCoralMode());
+        operatorController.getRightTrigger().onTrue(stateManager.setAlgaeMode());
 
         // Coral Mode Bindings
         final Trigger CORAL = stateManager.LEFT_CORAL.or(stateManager.RIGHT_CORAL);
+        final Trigger ALGAE = stateManager.ALGAE;
         CORAL.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.L4));
-
+        CORAL.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3));
+        CORAL.and(operatorController.getB()).onTrue(stateManager.moveToPosition(Position.L2));
+        CORAL.and(operatorController.getA()).onTrue(stateManager.moveToPosition(Position.L1));
+        CORAL.and(operatorController.getStart())
+                .onTrue(stateManager.moveToPosition(Position.Source));
+        CORAL.and(operatorController.getDPadDown())
+                .onTrue(stateManager.moveToPosition(Position.Home));
+        CORAL.and(operatorController.getDPadUp())
+                .onTrue(stateManager.moveToPosition(Position.Handoff));
+        CORAL.and(operatorController.getBack()).onTrue(Commands.none());
         // Algae Mode Bindings
-
-        // Driver Align Bindings
-        stateManager.LEFT_CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(9, 0));
-
-        // Commands.none(); for pose swap
+        ALGAE.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.L4Algae));
+        ALGAE.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3Algae));
+        ALGAE.and(operatorController.getB()).onTrue(stateManager.moveToPosition(Position.L2Algae));
+        ALGAE.and(operatorController.getA()).onTrue(stateManager.moveToPosition(Position.L1Algae));
+        ALGAE.and(operatorController.getStart())
+                .onTrue(stateManager.moveToPosition(Position.Icecream));
+        ALGAE.and(operatorController.getDPadDown())
+                .onTrue(stateManager.moveToPosition(Position.Home));
+        ALGAE.and(operatorController.getDPadUp())
+                .onTrue(stateManager.moveToPosition(Position.Handoff));
+        // Driver Align Bindings, for a different/later day
+        // stateManager.LEFT_CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(9,
+        // 0));
 
         // Climb Bindings
 

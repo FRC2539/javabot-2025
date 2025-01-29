@@ -53,6 +53,9 @@ public class SuperstructureStateManager extends SubsystemBase {
             Sussy(1, 1, 1, null),
             None(1, 1, 1, null, TRUE, false),
             Home(1, 0, 1, None),
+            Handoff(1, 0, 1, None),
+            Icecream(1, 1, 1, None),
+
             Preppy(1, 2, 1, None),
             PreppyNull(1, 3, 1, Preppy, TRUE, false),
             L1Prep(2, 2, 1, PreppyNull),
