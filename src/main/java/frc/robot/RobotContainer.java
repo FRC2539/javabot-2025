@@ -174,9 +174,12 @@ public class RobotContainer {
         // leftJoystickVelocityX)));
 
         // operatorController.getA().toggleOnTrue(alignToReef(9, 0));
-        leftDriveController.getBottomThumb().whileTrue(alignToReef(9, 0));
-        leftDriveController.getRightThumb().whileTrue(alignToReef(9, 0.4));
-        leftDriveController.getLeftThumb().whileTrue(alignToReef(9, -0.4));
+        // leftDriveController.getBottomThumb().whileTrue(alignToReef(9, 0));
+        // leftDriveController.getRightThumb().whileTrue(alignToReef(9, 0.4));
+        // leftDriveController.getLeftThumb().whileTrue(alignToReef(9, -0.4));
+
+        leftDriveController.getTrigger().whileTrue(alignToPiece());
+
         // operatorController
         //         .getB()
         //         .whileTrue(
@@ -257,12 +260,16 @@ public class RobotContainer {
                 Rotation2d.kPi);
     }
 
+
+    
+
+
     public Command alignToPiece() {
-        Supplier<Pose2d> piecePositionSupplier = () -> Pose2d.kZero;
+        Supplier<Pose2d> piecePositionSupplier = () -> new Pose2d(9.2, 4.15, Rotation2d.kZero);
         return new AlignToPiece(
                 drivetrain,
                 driverVelocitySupplier,
-                MaxAngularRate,
+                0,
                 piecePositionSupplier,
                 Rotation2d.kZero);
     }
