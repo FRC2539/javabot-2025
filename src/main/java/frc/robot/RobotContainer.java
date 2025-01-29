@@ -6,7 +6,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
-import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -15,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
+import frc.robot.commands.AlignToPiece;
 import frc.robot.commands.AlignToReef;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
@@ -47,15 +47,9 @@ import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSimML;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 public class RobotContainer {
-    private double MaxSpeed =
-            GlobalConstants.MAX_TRANSLATIONAL_SPEED.in(
-                    MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate =
-            GlobalConstants.MAX_ROTATIONAL_SPEED.in(
-                    RadiansPerSecond); // kMaxAngularRate desired top rotational speed
-
     private final ThrustmasterJoystick leftDriveController =
             new ThrustmasterJoystick(ControllerConstants.LEFT_DRIVE_CONTROLLER);
     private final ThrustmasterJoystick rightDriveController =
@@ -75,12 +69,12 @@ public class RobotContainer {
     public SuperstructureStateManager stateManager;
 
     public GripperSubsystem gripperSubsystem;
-    // Use open-loop control for drive motors
-    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-    private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
     private DoubleSupplier leftJoystickVelocityX;
     private DoubleSupplier leftJoystickVelocityY;
+    private DoubleSupplier rightJoystickVelocityTheta;
+
+    private Supplier<ChassisSpeeds> driverVelocitySupplier;
 
     public RobotContainer() {
         if (Robot.isReal()) {
@@ -147,26 +141,27 @@ public class RobotContainer {
                     return -sps(deadband(leftDriveController.getXAxis().get(), 0.1))
                             * GlobalConstants.MAX_TRANSLATIONAL_SPEED.in(MetersPerSecond);
                 };
+        rightJoystickVelocityTheta =
+                () -> {
+                    return -sps(deadband(rightDriveController.getXAxis().get(), 0.1))
+                            * GlobalConstants.MAX_ROTATIONAL_SPEED.in(RadiansPerSecond);
+                };
+
+        driverVelocitySupplier =
+                () ->
+                        new ChassisSpeeds(
+                                leftJoystickVelocityX.getAsDouble(),
+                                leftJoystickVelocityY.getAsDouble(),
+                                rightJoystickVelocityTheta.getAsDouble());
+
         drivetrain.setDefaultCommand(
                 // Drivetrain will execute this command periodically
 
                 drivetrain.applyRequest(
                         () -> {
-                            ChassisSpeeds driverDesiredSpeeds =
-                                    new ChassisSpeeds(
-                                            leftJoystickVelocityX.getAsDouble(),
-                                            leftJoystickVelocityY.getAsDouble(),
-                                            -sps(
-                                                            deadband(
-                                                                    rightDriveController
-                                                                            .getXAxis()
-                                                                            .get(),
-                                                                    0.1))
-                                                    * GlobalConstants.MAX_ROTATIONAL_SPEED.in(
-                                                            RadiansPerSecond));
                             //     return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(
                             //             driverDesiredSpeeds);
-                            return drivetrain.driveDriverRelative(driverDesiredSpeeds);
+                            return drivetrain.driveDriverRelative(driverVelocitySupplier.get());
                         }));
 
         // drive.withVelocityX(-leftDriveController.getYAxis().get() *
@@ -254,7 +249,8 @@ public class RobotContainer {
         operatorController.getRightBumper().onTrue(stateManager.setRightCoralMode());
         operatorController.getRightTrigger().onTrue(stateManager.setAlgaeMode());
         operatorController.getLeftJoystick().toggleOnTrue(Commands.idle()); // L3 Rainbow
-        operatorController.getLeftJoystick().whileTrue(Commands.idle()); // L2 Station Lights
+        operatorController.getLeftTrigger().whileTrue(Commands.idle()); // L2 Station Lights
+
         // Coral Mode Bindings
         final Trigger CORAL = stateManager.LEFT_CORAL.or(stateManager.RIGHT_CORAL);
         final Trigger ALGAE = stateManager.ALGAE;
@@ -333,6 +329,12 @@ public class RobotContainer {
                 offset,
                 alignmentPose,
                 Rotation2d.kPi); // Skibidi
+    }
+
+    public Command alignToPiece() {
+        Supplier<Pose2d> piecePositionSupplier = () -> new Pose2d(9.2, 4.15, Rotation2d.kZero);
+        return new AlignToPiece(
+                drivetrain, driverVelocitySupplier, 0, piecePositionSupplier, Rotation2d.kZero);
     }
 
     public boolean getVerticality() {
