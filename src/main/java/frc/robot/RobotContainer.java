@@ -6,7 +6,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
-import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -15,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
+import frc.robot.commands.AlignToPiece;
 import frc.robot.commands.AlignToReef;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
@@ -27,6 +27,9 @@ import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
 import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.arm.WristIONeo550;
 import frc.robot.subsystems.arm.WristIOSim;
+import frc.robot.subsystems.climber.ClimberIOSim;
+import frc.robot.subsystems.climber.ClimberIOTalonFX;
+import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
@@ -42,7 +45,9 @@ import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.subsystems.vision.VisionIOPhotonVisionSimML;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 public class RobotContainer {
     private double MaxSpeed =
@@ -64,18 +69,19 @@ public class RobotContainer {
     public Auto auto = new Auto(drivetrain);
     public IntakeSubsystem intakeSubsystem;
     public ElevatorSubsystem elevatorSubsystem;
+    public ClimberSubsystem climberSubsystem;
     public ArmSubsystem armSubsystem;
     public Vision vision;
 
     public SuperstructureStateManager stateManager;
 
     public GripperSubsystem gripperSubsystem;
-    // Use open-loop control for drive motors
-    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-    private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
     private DoubleSupplier leftJoystickVelocityX;
     private DoubleSupplier leftJoystickVelocityY;
+    private DoubleSupplier rightJoystickVelocityTheta;
+
+    private Supplier<ChassisSpeeds> driverVelocitySupplier;
 
     public RobotContainer() {
         if (Robot.isReal()) {
@@ -84,10 +90,17 @@ public class RobotContainer {
                             drivetrain::addVisionMeasurement,
                             new VisionIOLimelight(
                                     VisionConstants.camera0Name,
+                                    () -> drivetrain.getRobotPose().getRotation()),
+                            new VisionIOLimelight(
+                                    VisionConstants.camera1Name,
+                                    () -> drivetrain.getRobotPose().getRotation()),
+                            new VisionIOLimelight(
+                                    VisionConstants.camera2Name,
                                     () -> drivetrain.getRobotPose().getRotation()));
             gripperSubsystem = new GripperSubsystem(new GripperIOFalcon());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
             armSubsystem = new ArmSubsystem(new ArmPivotIOTalonFX(), new WristIONeo550());
+            climberSubsystem = new ClimberSubsystem(new ClimberIOTalonFX());
 
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerTalonFX(), new FlipperIOTalon());
         } else {
@@ -97,12 +110,21 @@ public class RobotContainer {
                             new VisionIOPhotonVisionSim(
                                     VisionConstants.camera0Name,
                                     VisionConstants.robotToCamera0,
+                                    drivetrain::getRobotPose),
+                            new VisionIOPhotonVisionSim(
+                                    VisionConstants.camera1Name,
+                                    VisionConstants.robotToCamera1,
+                                    drivetrain::getRobotPose),
+                            new VisionIOPhotonVisionSimML(
+                                    VisionConstants.camera2Name,
+                                    VisionConstants.robotToCamera2,
                                     drivetrain::getRobotPose));
 
             gripperSubsystem = new GripperSubsystem(new GripperIOSim());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSim());
             armSubsystem = new ArmSubsystem(new ArmPivotIOSim(), new WristIOSim());
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
+            climberSubsystem = new ClimberSubsystem(new ClimberIOSim());
         }
 
         stateManager = new SuperstructureStateManager(elevatorSubsystem, armSubsystem);
@@ -126,26 +148,27 @@ public class RobotContainer {
                     return -sps(deadband(leftDriveController.getXAxis().get(), 0.1))
                             * GlobalConstants.MAX_TRANSLATIONAL_SPEED.in(MetersPerSecond);
                 };
+        rightJoystickVelocityTheta =
+                () -> {
+                    return -sps(deadband(rightDriveController.getXAxis().get(), 0.1))
+                            * GlobalConstants.MAX_ROTATIONAL_SPEED.in(RadiansPerSecond);
+                };
+
+        driverVelocitySupplier =
+                () ->
+                        new ChassisSpeeds(
+                                leftJoystickVelocityX.getAsDouble(),
+                                leftJoystickVelocityY.getAsDouble(),
+                                rightJoystickVelocityTheta.getAsDouble());
+
         drivetrain.setDefaultCommand(
                 // Drivetrain will execute this command periodically
 
                 drivetrain.applyRequest(
                         () -> {
-                            ChassisSpeeds driverDesiredSpeeds =
-                                    new ChassisSpeeds(
-                                            leftJoystickVelocityX.getAsDouble(),
-                                            leftJoystickVelocityY.getAsDouble(),
-                                            -sps(
-                                                            deadband(
-                                                                    rightDriveController
-                                                                            .getXAxis()
-                                                                            .get(),
-                                                                    0.1))
-                                                    * GlobalConstants.MAX_ROTATIONAL_SPEED.in(
-                                                            RadiansPerSecond));
                             //     return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(
                             //             driverDesiredSpeeds);
-                            return drivetrain.driveDriverRelative(driverDesiredSpeeds);
+                            return drivetrain.driveDriverRelative(driverVelocitySupplier.get());
                         }));
 
         // drive.withVelocityX(-leftDriveController.getYAxis().get() *
@@ -303,5 +326,15 @@ public class RobotContainer {
                 offset,
                 alignmentPose,
                 Rotation2d.kPi); // Skibidi
+    }
+
+    public Command alignToPiece() {
+        Supplier<Pose2d> piecePositionSupplier = () -> new Pose2d(9.2, 4.15, Rotation2d.kZero);
+        return new AlignToPiece(
+                drivetrain, driverVelocitySupplier, 0, piecePositionSupplier, Rotation2d.kZero);
+    }
+
+    public boolean getVerticality() {
+        return vision.isCoralVertical(0);
     }
 }
