@@ -45,13 +45,6 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 public class RobotContainer {
-    private double MaxSpeed =
-            GlobalConstants.MAX_TRANSLATIONAL_SPEED.in(
-                    MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate =
-            GlobalConstants.MAX_ROTATIONAL_SPEED.in(
-                    RadiansPerSecond); // kMaxAngularRate desired top rotational speed
-
     private final ThrustmasterJoystick leftDriveController =
             new ThrustmasterJoystick(ControllerConstants.LEFT_DRIVE_CONTROLLER);
     private final ThrustmasterJoystick rightDriveController =
@@ -266,6 +259,7 @@ public class RobotContainer {
         operatorController.getRightTrigger().onTrue(stateManager.setAlgaeMode());
         operatorController.getLeftJoystick().toggleOnTrue(Commands.idle()); // L3 Rainbow
         operatorController.getLeftTrigger().whileTrue(Commands.idle()); // L2 Station Lights
+
         // Coral Mode Bindings
         final Trigger CORAL = stateManager.LEFT_CORAL.or(stateManager.RIGHT_CORAL);
         final Trigger ALGAE = stateManager.ALGAE;
@@ -298,14 +292,23 @@ public class RobotContainer {
         ALGAE.and(operatorController.getBack()).onTrue(Commands.none());
 
         // Driver Align Bindings, for a different/later day
-        stateManager.LEFT_CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(9, -1));
-        // stateManager.RIGHT_CORAL.and(rightDriveController.getTrigger()).whileTrue(alignToReef(9,1));
-        // stateManager.ALGAE.and(rightDriveController.get)
+        // CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(9, 0));
 
         // Climb Bindings
+        leftDriveController.getLeftThumb().whileTrue(climberSubsystem.moveClimberDown());
+        leftDriveController.getRightThumb().whileTrue(climberSubsystem.moveClimberUp());
 
         // Intake Bindings
+        rightDriveController.getLeftThumb().whileTrue(intakeSubsystem.intake());
+        rightDriveController.getRightThumb().whileTrue(intakeSubsystem.eject());
 
+        CORAL.and(rightDriveController.getBottomThumb())
+                .whileTrue(gripperSubsystem.intakeSpinCoral());
+        CORAL.and(rightDriveController.getTrigger()).whileTrue(gripperSubsystem.ejectSpinCoral());
+
+        ALGAE.and(rightDriveController.getBottomThumb())
+                .whileTrue(gripperSubsystem.intakeSpinAlgae());
+        ALGAE.and(rightDriveController.getTrigger()).whileTrue(gripperSubsystem.ejectSpinAlgae());
         // Technical Bindings
 
     }
