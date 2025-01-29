@@ -26,6 +26,9 @@ import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
 import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.arm.WristIONeo550;
 import frc.robot.subsystems.arm.WristIOSim;
+import frc.robot.subsystems.climber.ClimberIOSim;
+import frc.robot.subsystems.climber.ClimberIOTalonFX;
+import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
@@ -41,6 +44,7 @@ import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.subsystems.vision.VisionIOPhotonVisionSimML;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -64,6 +68,7 @@ public class RobotContainer {
     public Auto auto = new Auto(drivetrain);
     public IntakeSubsystem intakeSubsystem;
     public ElevatorSubsystem elevatorSubsystem;
+    public ClimberSubsystem climberSubsystem;
     public ArmSubsystem armSubsystem;
     public Vision vision;
 
@@ -84,10 +89,17 @@ public class RobotContainer {
                             drivetrain::addVisionMeasurement,
                             new VisionIOLimelight(
                                     VisionConstants.camera0Name,
+                                    () -> drivetrain.getRobotPose().getRotation()),
+                            new VisionIOLimelight(
+                                    VisionConstants.camera1Name,
+                                    () -> drivetrain.getRobotPose().getRotation()),
+                            new VisionIOLimelight(
+                                    VisionConstants.camera2Name,
                                     () -> drivetrain.getRobotPose().getRotation()));
             gripperSubsystem = new GripperSubsystem(new GripperIOFalcon());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
             armSubsystem = new ArmSubsystem(new ArmPivotIOTalonFX(), new WristIONeo550());
+            climberSubsystem = new ClimberSubsystem(new ClimberIOTalonFX());
 
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerTalonFX(), new FlipperIOTalon());
         } else {
@@ -97,12 +109,21 @@ public class RobotContainer {
                             new VisionIOPhotonVisionSim(
                                     VisionConstants.camera0Name,
                                     VisionConstants.robotToCamera0,
+                                    drivetrain::getRobotPose),
+                            new VisionIOPhotonVisionSim(
+                                    VisionConstants.camera1Name,
+                                    VisionConstants.robotToCamera1,
+                                    drivetrain::getRobotPose),
+                            new VisionIOPhotonVisionSimML(
+                                    VisionConstants.camera2Name,
+                                    VisionConstants.robotToCamera2,
                                     drivetrain::getRobotPose));
 
             gripperSubsystem = new GripperSubsystem(new GripperIOSim());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSim());
             armSubsystem = new ArmSubsystem(new ArmPivotIOSim(), new WristIOSim());
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
+            climberSubsystem = new ClimberSubsystem(new ClimberIOSim());
         }
 
         stateManager = new SuperstructureStateManager(elevatorSubsystem, armSubsystem);
