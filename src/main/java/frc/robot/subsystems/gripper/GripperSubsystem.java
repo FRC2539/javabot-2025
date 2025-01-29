@@ -20,11 +20,19 @@ public class GripperSubsystem extends SubsystemBase {
         Logger.processInputs("RealOutputs/Gripper", armrollerInputs);
     }
 
-    public Command intakeSpin() {
+    public Command intakeSpinCoral() {
         return setVoltage(12);
     }
 
-    public Command ejectSpin() {
+    public Command ejectSpinCoral() {
+        return setVoltage(-12);
+    }
+
+    public Command intakeSpinAlgae() {
+        return setVoltage(12);
+    }
+
+    public Command ejectSpinAlgae() {
         return setVoltage(-12);
     }
 
