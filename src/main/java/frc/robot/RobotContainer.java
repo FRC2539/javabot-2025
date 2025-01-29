@@ -260,18 +260,10 @@ public class RobotContainer {
                 Rotation2d.kPi);
     }
 
-
-    
-
-
     public Command alignToPiece() {
         Supplier<Pose2d> piecePositionSupplier = () -> new Pose2d(9.2, 4.15, Rotation2d.kZero);
         return new AlignToPiece(
-                drivetrain,
-                driverVelocitySupplier,
-                0,
-                piecePositionSupplier,
-                Rotation2d.kZero);
+                drivetrain, driverVelocitySupplier, 0, piecePositionSupplier, Rotation2d.kZero);
     }
 
     public boolean getVerticality() {
