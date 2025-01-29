@@ -232,8 +232,8 @@ public class RobotContainer {
         operatorController.getLeftBumper().onTrue(stateManager.setLeftCoralMode());
         operatorController.getRightBumper().onTrue(stateManager.setRightCoralMode());
         operatorController.getRightTrigger().onTrue(stateManager.setAlgaeMode());
-        operatorController.getLeftJoystick().onTrue(Commands.idle(null)); // L3 Rainbow
-        operatorController.getLeftJoystick().onTrue(Commands.idle(null)); // L2 Station Lights
+        operatorController.getLeftJoystick().toggleOnTrue(Commands.idle()); // L3 Rainbow
+        operatorController.getLeftTrigger().whileTrue(Commands.idle()); // L2 Station Lights
         // Coral Mode Bindings
         final Trigger CORAL = stateManager.LEFT_CORAL.or(stateManager.RIGHT_CORAL);
         final Trigger ALGAE = stateManager.ALGAE;
