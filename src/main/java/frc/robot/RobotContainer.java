@@ -232,7 +232,8 @@ public class RobotContainer {
         operatorController.getLeftBumper().onTrue(stateManager.setLeftCoralMode());
         operatorController.getRightBumper().onTrue(stateManager.setRightCoralMode());
         operatorController.getRightTrigger().onTrue(stateManager.setAlgaeMode());
-
+        operatorController.getLeftJoystick().onTrue(Commands.idle(null)); // L3 Rainbow
+        operatorController.getLeftJoystick().onTrue(Commands.idle(null)); // L2 Station Lights
         // Coral Mode Bindings
         final Trigger CORAL = stateManager.LEFT_CORAL.or(stateManager.RIGHT_CORAL);
         final Trigger ALGAE = stateManager.ALGAE;
@@ -247,7 +248,7 @@ public class RobotContainer {
         CORAL.and(operatorController.getDPadUp())
                 .onTrue(stateManager.moveToPosition(Position.Handoff));
         CORAL.and(operatorController.getBack()).onTrue(Commands.none());
-        // Algae Mode Bindings
+
         ALGAE.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.L4Algae));
         ALGAE.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3Algae));
         ALGAE.and(operatorController.getB()).onTrue(stateManager.moveToPosition(Position.L2Algae));
@@ -258,9 +259,16 @@ public class RobotContainer {
                 .onTrue(stateManager.moveToPosition(Position.Home));
         ALGAE.and(operatorController.getDPadUp())
                 .onTrue(stateManager.moveToPosition(Position.Handoff));
+        ALGAE.and(operatorController.getDPadDownLeft())
+                .onTrue(stateManager.moveToPosition(Position.Quick34));
+        ALGAE.and(operatorController.getDPadRight())
+                .onTrue(stateManager.moveToPosition(Position.Quick23));
+        ALGAE.and(operatorController.getBack()).onTrue(Commands.none());
+
         // Driver Align Bindings, for a different/later day
-        // stateManager.LEFT_CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(9,
-        // 0));
+        stateManager.LEFT_CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(9, -1));
+        // stateManager.RIGHT_CORAL.and(rightDriveController.getTrigger()).whileTrue(alignToReef(9,1));
+        // stateManager.ALGAE.and(rightDriveController.get)
 
         // Climb Bindings
 
@@ -294,6 +302,6 @@ public class RobotContainer {
                 leftJoystickVelocityY,
                 offset,
                 alignmentPose,
-                Rotation2d.kPi);
+                Rotation2d.kPi); // Skibidi
     }
 }
