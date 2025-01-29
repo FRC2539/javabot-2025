@@ -10,11 +10,12 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
 import frc.robot.commands.AlignToPiece;
 import frc.robot.commands.AlignToReef;
-import frc.robot.commands.WheelRadiusCharacterization;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
@@ -198,9 +199,6 @@ public class RobotContainer {
         // leftDriveController.getBottomThumb().whileTrue(alignToReef(9, 0));
         // leftDriveController.getRightThumb().whileTrue(alignToReef(9, 0.4));
         // leftDriveController.getLeftThumb().whileTrue(alignToReef(9, -0.4));
-
-        leftDriveController.getTrigger().whileTrue(alignToPiece());
-
         // operatorController
         //         .getB()
         //         .whileTrue(
@@ -213,11 +211,11 @@ public class RobotContainer {
         //                                                         .getLeftXAxis()
         //                                                         .get()))));
 
-        leftDriveController
-                .getTrigger()
-                .whileTrue(
-                        new WheelRadiusCharacterization(
-                                WheelRadiusCharacterization.Direction.CLOCKWISE, drivetrain));
+        // leftDriveController
+        //         .getTrigger()
+        //         .whileTrue(
+        //                 new WheelRadiusCharacterization(
+        //                         WheelRadiusCharacterization.Direction.CLOCKWISE, drivetrain));
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
@@ -240,18 +238,67 @@ public class RobotContainer {
         //         .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         // operatorController
-        operatorController.getA().onTrue(stateManager.moveToPosition(Position.L4));
-        operatorController.getB().onTrue(stateManager.moveToPosition(Position.L3));
-        operatorController.getX().onTrue(stateManager.moveToPosition(Position.Source));
-        operatorController.getY().onTrue(stateManager.moveToPosition(Position.Home));
+        // operatorController.getA().onTrue(stateManager.moveToPosition(Position.L4));
+        // operatorController.getB().onTrue(stateManager.moveToPosition(Position.L3));
+        // operatorController.getX().onTrue(stateManager.moveToPosition(Position.Source));
+        // operatorController.getY().onTrue(stateManager.moveToPosition(Position.Home));
 
         // reset the field-centric heading on left bumper press
-        operatorController
-                .getLeftBumper()
-                .onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-        operatorController
-                .getRightBumper()
-                .onTrue(drivetrain.runOnce(() -> drivetrain.resetPose(Pose2d.kZero)));
+        // operatorController
+        //         .getLeftBumper()
+        //         .onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        // operatorController
+        //         .getRightBumper()
+        //         .onTrue(drivetrain.runOnce(() -> drivetrain.resetPose(Pose2d.kZero)));
+
+        // Operator Mode Setting
+        operatorController.getLeftBumper().onTrue(stateManager.setLeftCoralMode());
+        operatorController.getRightBumper().onTrue(stateManager.setRightCoralMode());
+        operatorController.getRightTrigger().onTrue(stateManager.setAlgaeMode());
+        operatorController.getLeftJoystick().toggleOnTrue(Commands.idle()); // L3 Rainbow
+        operatorController.getLeftTrigger().whileTrue(Commands.idle()); // L2 Station Lights
+        // Coral Mode Bindings
+        final Trigger CORAL = stateManager.LEFT_CORAL.or(stateManager.RIGHT_CORAL);
+        final Trigger ALGAE = stateManager.ALGAE;
+        CORAL.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.L4));
+        CORAL.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3));
+        CORAL.and(operatorController.getB()).onTrue(stateManager.moveToPosition(Position.L2));
+        CORAL.and(operatorController.getA()).onTrue(stateManager.moveToPosition(Position.L1));
+        CORAL.and(operatorController.getStart())
+                .onTrue(stateManager.moveToPosition(Position.Source));
+        CORAL.and(operatorController.getDPadDown())
+                .onTrue(stateManager.moveToPosition(Position.Home));
+        CORAL.and(operatorController.getDPadUp())
+                .onTrue(stateManager.moveToPosition(Position.Handoff));
+        CORAL.and(operatorController.getBack()).onTrue(Commands.none());
+
+        ALGAE.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.L4Algae));
+        ALGAE.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3Algae));
+        ALGAE.and(operatorController.getB()).onTrue(stateManager.moveToPosition(Position.L2Algae));
+        ALGAE.and(operatorController.getA()).onTrue(stateManager.moveToPosition(Position.L1Algae));
+        ALGAE.and(operatorController.getStart())
+                .onTrue(stateManager.moveToPosition(Position.Icecream));
+        ALGAE.and(operatorController.getDPadDown())
+                .onTrue(stateManager.moveToPosition(Position.Home));
+        ALGAE.and(operatorController.getDPadUp())
+                .onTrue(stateManager.moveToPosition(Position.Handoff));
+        ALGAE.and(operatorController.getDPadDownLeft())
+                .onTrue(stateManager.moveToPosition(Position.Quick34));
+        ALGAE.and(operatorController.getDPadRight())
+                .onTrue(stateManager.moveToPosition(Position.Quick23));
+        ALGAE.and(operatorController.getBack()).onTrue(Commands.none());
+
+        // Driver Align Bindings, for a different/later day
+        stateManager.LEFT_CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(9, -1));
+        // stateManager.RIGHT_CORAL.and(rightDriveController.getTrigger()).whileTrue(alignToReef(9,1));
+        // stateManager.ALGAE.and(rightDriveController.get)
+
+        // Climb Bindings
+
+        // Intake Bindings
+
+        // Technical Bindings
+
     }
 
     private double deadband(double value, double deadband) {
@@ -278,7 +325,7 @@ public class RobotContainer {
                 leftJoystickVelocityY,
                 offset,
                 alignmentPose,
-                Rotation2d.kPi);
+                Rotation2d.kPi); // Skibidi
     }
 
     public Command alignToPiece() {
