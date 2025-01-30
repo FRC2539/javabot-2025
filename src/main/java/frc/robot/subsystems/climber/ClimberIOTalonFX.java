@@ -54,5 +54,5 @@ public class ClimberIOTalonFX implements ClimberIO {
     public double getPosition() { 
         return climbermotor.getPosition().refresh().getValueAsDouble();
     }
-    //Skibity Dibbity Dop
+    //Skibity Dibbity Bop
 }
