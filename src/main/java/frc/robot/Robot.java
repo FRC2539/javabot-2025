@@ -6,12 +6,10 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.util.Elastic;
 import frc.robot.util.Elastic.Notification;
-
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
@@ -79,11 +77,11 @@ public class Robot extends LoggedRobot {
 
         Elastic.selectTab("Teleoperated");
 
-        Elastic.sendNotification(new Notification(
-            Notification.NotificationLevel.INFO,
-            "You're enabled!", "You can drive around now!"
-        )
-        );
+        Elastic.sendNotification(
+                new Notification(
+                        Notification.NotificationLevel.INFO,
+                        "You're enabled!",
+                        "You can drive around now!"));
     }
 
     @Override
