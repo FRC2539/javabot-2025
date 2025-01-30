@@ -19,4 +19,12 @@ public class ClimberConstants {
                     .withMotionMagicAcceleration(4) // these are guesses, come back here
                     .withMotionMagicCruiseVelocity(4) // also guess
                     .withMotionMagicJerk(4);
+
+    public static final double upperLimit = 100;
+
+    public static final double lowerLimit = 0;
+
+    public static final int id = 83;
+
+    public static final String CANbus = "CANivore";
 }
