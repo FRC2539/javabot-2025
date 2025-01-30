@@ -51,8 +51,8 @@ public class ClimberIOTalonFX implements ClimberIO {
         climbermotor.setControl(motionMagicVoltage.withPosition(position));
     }
 
-    public double getPosition() { 
+    public double getPosition() {
         return climbermotor.getPosition().refresh().getValueAsDouble();
     }
-    //Skibity Dibbity Bop
+    // Skibity Dibbity Bop
 }
