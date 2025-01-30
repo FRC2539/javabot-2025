@@ -53,6 +53,7 @@ public class Vision extends SubsystemBase {
 
     private double linearStdDev;
     private double angularStdDev;
+    private final double HEIGHT_CONSTANT_CORAL = 1.0;
 
     public Vision(VisionConsumer consumer, VisionIO... io) {
         this.consumer = consumer;
@@ -233,6 +234,31 @@ public class Vision extends SubsystemBase {
         Logger.recordOutput(
                 "Vision/Summary/RobotPosesRejected",
                 allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()]));
+        Logger.recordOutput("Vision/Summary/CoralVerticality", isCoralVertical(0));
+        Logger.recordOutput(
+                "Vision/Summary/CoralVerticality/CoralHorizontal",
+                inputs[0].latestTargetObservation.getTargetHorizontalExtentPixels());
+        Logger.recordOutput(
+                "Vision/Summary/CoralVerticality/CoralVertical",
+                inputs[0].latestTargetObservation.getTargetVerticalExtentPixels());
+    }
+
+    // is the coral vertical
+    public boolean isCoralVertical(int cameraIndex) {
+        double targetHorizontalExtentPixels =
+                Math.abs(
+                        inputs[cameraIndex].latestTargetObservation
+                                .getTargetHorizontalExtentPixels());
+        double targetVerticalExtentPixels =
+                Math.abs(
+                        inputs[cameraIndex].latestTargetObservation
+                                .getTargetVerticalExtentPixels());
+        // inputs[cameraIndex].latestTargetObservation.tx()
+        if (targetVerticalExtentPixels > (targetHorizontalExtentPixels * HEIGHT_CONSTANT_CORAL)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @FunctionalInterface

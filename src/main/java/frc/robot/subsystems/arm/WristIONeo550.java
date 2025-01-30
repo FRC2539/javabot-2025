@@ -57,4 +57,8 @@ public class WristIONeo550 implements WristIO {
                     pidController.calculate(wristMotor.getEncoder().getPosition(), reference));
         }
     }
+
+    public double getPosition() {
+        return wristMotor.getEncoder().getPosition();
+    }
 }

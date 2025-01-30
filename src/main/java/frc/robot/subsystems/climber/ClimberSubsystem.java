@@ -1,50 +1,50 @@
-package frc.robot.subsystems.elevator;
+package frc.robot.subsystems.climber;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
-public class ElevatorSubsystem extends SubsystemBase {
+public class ClimberSubsystem extends SubsystemBase {
 
-    private ElevatorIO piviotIO;
-    private ElevatorIOInputsAutoLogged elevatorInputs = new ElevatorIOInputsAutoLogged();
+    private ClimberIO piviotIO;
+    private ClimberIOInputsAutoLogged climberInputs = new ClimberIOInputsAutoLogged();
 
     private final double lowerLimit = 0;
     private final double upperLimit = 100;
 
-    public ElevatorSubsystem(ElevatorIO elevatorIO) {
-        this.piviotIO = elevatorIO;
+    public ClimberSubsystem(ClimberIO climberIO) {
+        this.piviotIO = climberIO;
         setDefaultCommand(setPosition(0));
     }
 
     public void periodic() {
 
-        piviotIO.updateInputs(elevatorInputs);
+        piviotIO.updateInputs(climberInputs);
 
-        Logger.processInputs("RealOutputs/Elevator", elevatorInputs);
+        Logger.processInputs("RealOutputs/Climber", climberInputs);
 
-        if (elevatorInputs.voltage < 0 && elevatorInputs.position <= lowerLimit) {
+        if (climberInputs.voltage < 0 && climberInputs.position <= lowerLimit) {
             this.piviotIO.setVoltage(0);
         }
 
-        if (elevatorInputs.voltage > 0 && elevatorInputs.position >= upperLimit) {
+        if (climberInputs.voltage > 0 && climberInputs.position >= upperLimit) {
             this.piviotIO.setVoltage(0);
         }
     }
 
-    public Command zeroElevatorCommand() {
+    public Command zeroClimberCommand() {
         return run(
                 () -> {
                     piviotIO.setPosition(0);
                 });
     }
 
-    public Command moveElevatorUp() {
-        return setVoltage(12).until(() -> elevatorInputs.position >= upperLimit);
+    public Command moveClimberUp() {
+        return setVoltage(12).until(() -> climberInputs.position >= upperLimit);
     }
 
-    public Command moveElevatorDown() {
-        return setVoltage(-12).until(() -> elevatorInputs.position <= lowerLimit);
+    public Command moveClimberDown() {
+        return setVoltage(-12).until(() -> climberInputs.position <= lowerLimit);
     }
 
     public Command setVoltage(double voltage) {

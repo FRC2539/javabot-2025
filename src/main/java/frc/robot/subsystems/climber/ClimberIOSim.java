@@ -1,11 +1,11 @@
-package frc.robot.subsystems.arm;
+package frc.robot.subsystems.climber;
 
-public class ArmPivotIOSim implements ArmPivotIO {
+public class ClimberIOSim implements ClimberIO {
     private double position = 0;
-    private double voltage = 0;
     private double positionSetpoint = 0;
+    private double voltage = 0;
 
-    public void updateInputs(ArmPivotIOInputs inputs) {
+    public void updateInputs(ClimberIOInputs inputs) {
         final double stepAmount = 1;
         if (positionSetpoint > position) {
             position += stepAmount * 0.02;
@@ -22,6 +22,7 @@ public class ArmPivotIOSim implements ArmPivotIO {
     }
 
     public void setPosition(double position) {
+
         this.positionSetpoint = position;
     }
 
