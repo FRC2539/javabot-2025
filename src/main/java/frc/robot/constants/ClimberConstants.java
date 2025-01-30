@@ -1,5 +1,6 @@
 package frc.robot.constants;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 
@@ -19,6 +20,8 @@ public class ClimberConstants {
                     .withMotionMagicAcceleration(4) // these are guesses, come back here
                     .withMotionMagicCruiseVelocity(4) // also guess
                     .withMotionMagicJerk(4);
+
+    public static final CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs();
 
     public static final double upperLimit = 100;
 

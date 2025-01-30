@@ -25,8 +25,4 @@ public class ClimberIOSim implements ClimberIO {
 
         this.positionSetpoint = position;
     }
-
-    public double getPosition() {
-        return position;
-    }
 }

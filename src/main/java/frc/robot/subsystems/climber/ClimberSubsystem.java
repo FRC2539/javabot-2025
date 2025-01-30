@@ -10,12 +10,9 @@ public class ClimberSubsystem extends SubsystemBase {
     private ClimberIO piviotIO;
     private ClimberIOInputsAutoLogged climberInputs = new ClimberIOInputsAutoLogged();
 
-    private final double lowerLimit = 0;
-    private final double upperLimit = 100;
-
     public ClimberSubsystem(ClimberIO climberIO) {
         this.piviotIO = climberIO;
-        setDefaultCommand(setPosition(0));
+        setDefaultCommand(stop());
     }
 
     public void periodic() {
@@ -40,12 +37,12 @@ public class ClimberSubsystem extends SubsystemBase {
                 });
     }
 
-    public Command moveClimberUp() {
-        return setVoltage(12).until(() -> climberInputs.position >= upperLimit);
+    public Command moveClimberUpVoltage() {
+        return setVoltage(12);
     }
 
-    public Command moveClimberDown() {
-        return setVoltage(-12).until(() -> climberInputs.position <= lowerLimit);
+    public Command moveClimberDownVoltage() {
+        return setVoltage(-12);
     }
 
     public Command setVoltage(double voltage) {
@@ -63,7 +60,7 @@ public class ClimberSubsystem extends SubsystemBase {
     }
 
     public double getPosition() {
-        return piviotIO.getPosition();
+        return climberInputs.position;
     }
 
     public Command upPosition() {

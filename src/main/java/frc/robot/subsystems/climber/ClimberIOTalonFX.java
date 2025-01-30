@@ -31,16 +31,18 @@ public class ClimberIOTalonFX implements ClimberIO {
                 new TalonFXConfiguration()
                         .withSoftwareLimitSwitch(softwareLimitSwitchConfigs)
                         .withSlot0(ClimberConstants.slot0Configs)
-                        .withMotionMagic(ClimberConstants.motionMagicConfigs));
+                        .withMotionMagic(ClimberConstants.motionMagicConfigs)
+                        .withCurrentLimits(ClimberConstants.currentLimitsConfigs));
 
         climbermotor.setNeutralMode(NeutralModeValue.Brake);
     }
 
     public void updateInputs(ClimberIOInputs inputs) {
-
-        inputs.position = climbermotor.getPosition().refresh().getValueAsDouble();
-        inputs.voltage = climbermotor.getMotorVoltage().refresh().getValueAsDouble();
-        inputs.speed = climbermotor.getVelocity().refresh().getValueAsDouble();
+        inputs.position = climbermotor.getPosition().getValueAsDouble();
+        inputs.voltage = climbermotor.getMotorVoltage().getValueAsDouble();
+        inputs.speed = climbermotor.getVelocity().getValueAsDouble();
+        inputs.temperature = climbermotor.getDeviceTemp().getValueAsDouble();
+        inputs.current = climbermotor.getStatorCurrent().getValueAsDouble();
     }
 
     public void setVoltage(double voltage) {
@@ -50,9 +52,4 @@ public class ClimberIOTalonFX implements ClimberIO {
     public void setPosition(double position) {
         climbermotor.setControl(motionMagicVoltage.withPosition(position));
     }
-
-    public double getPosition() {
-        return climbermotor.getPosition().refresh().getValueAsDouble();
-    }
-    // Skibity Dibbity Bop
 }
