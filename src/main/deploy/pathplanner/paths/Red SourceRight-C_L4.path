@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.1894230769230765,
-        "y": 6.089102564102564
+        "x": 16.216089743589745,
+        "y": 6.966346153846153
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.1894230769230756,
-        "y": 6.089102564102564
+        "x": 16.026245501138195,
+        "y": 6.214811787375845
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Red Source Right"
     },
     {
       "anchor": {
-        "x": 6.876025641025641,
-        "y": 6.089102564102564
+        "x": 13.978,
+        "y": 5.422496749024708
       },
       "prevControl": {
-        "x": 5.876025641025641,
-        "y": 6.089102564102564
+        "x": 15.031021173189078,
+        "y": 5.52143372975798
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Red Reef CD"
     }
   ],
   "rotationTargets": [],
@@ -33,14 +33,20 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "set location A",
+      "name": "location C",
       "waypointRelativePos": 0,
       "endWaypointRelativePos": null,
       "command": null
     },
     {
-      "name": "set height L2",
+      "name": "height L4",
       "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "place",
+      "waypointRelativePos": 1.0,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -55,13 +61,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -122.10625595511773
   },
   "reversed": false,
-  "folder": null,
+  "folder": "AutoTest",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 54.381510160748206
   },
   "useDefaultConstraints": true
 }
