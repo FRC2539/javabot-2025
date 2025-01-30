@@ -1,7 +1,6 @@
 package frc.robot.subsystems.gripper;
 
 import com.ctre.phoenix6.hardware.TalonFX;
-
 import frc.robot.constants.GripperConstants;
 
 public class GripperIOFalcon implements GripperIO {
