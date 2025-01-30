@@ -2,8 +2,10 @@ package frc.robot.subsystems.gripper;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import frc.robot.constants.GripperConstants;
+
 public class GripperIOFalcon implements GripperIO {
-    private final TalonFX armRoller = new TalonFX(12);
+    private final TalonFX armRoller = new TalonFX(GripperConstants.id);
 
     public GripperIOFalcon() {
         armRoller.setPosition(0);
