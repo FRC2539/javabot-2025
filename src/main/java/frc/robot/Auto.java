@@ -172,23 +172,27 @@ public class Auto {
                 });
     }
 
+
+
     // #146 Constants
+    public static double leftOffset = -1;
+    public static double rightOffset = 1;
     public enum DriveLocation {
         None(0,0, 0),
         SourceLeft(1,13, 0),
         SourceRight(2,12, 0),
-        A(7, 18, -1),
-        B(7, 18, 1),
-        C(8, 17, -1),
-        D(8, 17, 1),
-        E(9, 22, -1),
-        F(9, 22, 1),
-        G(10,21, -1),
-        H(10,21, 1),
-        I(11,20, -1),
-        J(11,20, 1),
-        K(6, 19, -1),
-        L(6, 19, 1),
+        A(7, 18, leftOffset),
+        B(7, 18, rightOffset),
+        C(8, 17, leftOffset),
+        D(8, 17, rightOffset),
+        E(9, 22, leftOffset),
+        F(9, 22, rightOffset),
+        G(10,21, leftOffset),
+        H(10,21, rightOffset),
+        I(11,20, leftOffset),
+        J(11,20, rightOffset),
+        K(6, 19, leftOffset),
+        L(6, 19, rightOffset),
         ;
 
         public int tagRed;

@@ -27,12 +27,6 @@
           "data": {
             "pathName": "Red SourceRight-C_L4"
           }
-        },
-        {
-          "type": "sequential",
-          "data": {
-            "commands": []
-          }
         }
       ]
     }
