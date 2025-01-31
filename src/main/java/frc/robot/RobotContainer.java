@@ -301,7 +301,8 @@ public class RobotContainer {
                 .whileTrue(gripperSubsystem.intakeSpinAlgae());
         ALGAE.and(rightDriveController.getTrigger()).whileTrue(gripperSubsystem.ejectSpinAlgae());
         // Technical Bindings
-
+        
+        leftDriveController.getLeftBottomMiddle().onTrue(climberSubsystem.zeroClimberCommand());
         leftDriveController.getLeftTopMiddle().whileTrue(climberSubsystem.climberTuneable());
     }
 

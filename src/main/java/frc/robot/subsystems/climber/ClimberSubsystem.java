@@ -41,9 +41,9 @@ public class ClimberSubsystem extends SubsystemBase {
     }
 
     public Command zeroClimberCommand() {
-        return run(
+        return runOnce(
                 () -> {
-                    piviotIO.setPosition(0);
+                    piviotIO.resetPosition(0);
                 });
     }
 

@@ -52,4 +52,8 @@ public class ClimberIOTalonFX implements ClimberIO {
     public void setPosition(double position) {
         climbermotor.setControl(motionMagicVoltage.withPosition(position));
     }
+
+    public void resetPosition(double position){
+        climbermotor.setPosition(position);
+    }
 }
