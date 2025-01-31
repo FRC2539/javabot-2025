@@ -3,7 +3,6 @@ package frc.robot.subsystems.gripper;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import frc.robot.constants.GripperConstants;
 
 public class GripperIOFalcon implements GripperIO {
@@ -12,7 +11,9 @@ public class GripperIOFalcon implements GripperIO {
     public GripperIOFalcon() {
         armRoller.setPosition(0);
 
-        armRoller.getConfigurator().apply(new TalonFXConfiguration().withCurrentLimits(GripperConstants.currentLimit));
+        armRoller
+                .getConfigurator()
+                .apply(new TalonFXConfiguration().withCurrentLimits(GripperConstants.currentLimit));
 
         armRoller.setNeutralMode(NeutralModeValue.Brake);
     }
