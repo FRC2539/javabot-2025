@@ -67,13 +67,22 @@ public class VisionIOLimelight implements VisionIO {
                 ((RobotController.getFPGATime() - latencySubscriber.getLastChange()) / 1000) < 250;
         // Update target observation
         var t2dSubscriberValue = t2dSubscriber.get();
-        inputs.latestTargetObservation =
-                new TargetObservation(
-                        Rotation2d.fromDegrees(txSubscriber.get()),
-                        Rotation2d.fromDegrees(tySubscriber.get()),
-                        t2dSubscriberValue[14], // targetHorizontalExtentPixels
-                        t2dSubscriberValue[15] // targetVerticalExtentPixels
-                        );
+        if (t2dSubscriberValue.length >= 15) {
+            inputs.latestTargetObservation =
+                    new TargetObservation(
+                            Rotation2d.fromDegrees(txSubscriber.get()),
+                            Rotation2d.fromDegrees(tySubscriber.get()),
+                            t2dSubscriberValue[14], // targetHorizontalExtentPixels
+                            t2dSubscriberValue[15] // targetVerticalExtentPixels
+                            );
+        } else {
+            inputs.latestTargetObservation =
+                    new TargetObservation(
+                            Rotation2d.fromDegrees(txSubscriber.get()),
+                            Rotation2d.fromDegrees(tySubscriber.get())
+                            // targetVerticalExtentPixels
+                            );
+        }
 
         // Update orientation for MegaTag 2
         orientationPublisher.accept(

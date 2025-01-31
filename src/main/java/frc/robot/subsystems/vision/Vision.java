@@ -33,11 +33,26 @@ import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
 public class Vision extends SubsystemBase {
+
     private final VisionConsumer consumer;
     private final VisionIO[] io;
+
     private final VisionIOInputsAutoLogged[] inputs;
     private final Alert[] disconnectedAlerts;
 
+    private final double STD_DEV_FACTOR_MT2A = 0.0000206;
+    private final double STD_DEV_FACTOR_MT2C = 0.000469;
+
+    private final double STD_DEV_FACTOR_MT1A = 0.001401;
+    private final double STD_DEV_FACTOR_MT1C = 0;
+
+    private final double ANGULAR_STD_DEV_MT1A = 0.0264;
+    private final double ANGULAR_STD_DEV_MT1C = 0.5;
+
+    private final double ANGULAR_STD_DEV_MT2 = Double.POSITIVE_INFINITY;
+
+    private double linearStdDev;
+    private double angularStdDev;
     private final double HEIGHT_CONSTANT_CORAL = 1.0;
 
     public Vision(VisionConsumer consumer, VisionIO... io) {
@@ -146,14 +161,37 @@ public class Vision extends SubsystemBase {
                 }
 
                 // Calculate standard deviations
-                double stdDevFactor =
-                        Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
-                double linearStdDev = linearStdDevBaseline * stdDevFactor;
-                double angularStdDev = angularStdDevBaseline * stdDevFactor;
+                // C refers to a constant that is added. A refers to a scalar constant.
+                // Like this -> ((A * calculations) + c)
+
                 if (observation.type() == PoseObservationType.MEGATAG_2) {
-                    linearStdDev *= linearStdDevMegatag2Factor;
-                    angularStdDev *= angularStdDevMegatag2Factor;
+                    linearStdDev =
+                            (STD_DEV_FACTOR_MT2A
+                                            * (Math.pow(observation.averageTagDistance(), 2.0)
+                                                    / observation.tagCount()))
+                                    + STD_DEV_FACTOR_MT2C;
+                    angularStdDev = ANGULAR_STD_DEV_MT2;
+                } else {
+                    linearStdDev =
+                            (STD_DEV_FACTOR_MT1A
+                                            * (Math.pow(observation.averageTagDistance(), 2.0)
+                                                    / observation.tagCount()))
+                                    + STD_DEV_FACTOR_MT1C;
+                    angularStdDev =
+                            (ANGULAR_STD_DEV_MT1A
+                                            * (Math.pow(observation.averageTagDistance(), 2.0)
+                                                    / observation.tagCount()))
+                                    + ANGULAR_STD_DEV_MT1C;
                 }
+
+                final double stdDevFactor = 10;
+
+                linearStdDev = linearStdDevBaseline * stdDevFactor;
+                angularStdDev = angularStdDevBaseline * stdDevFactor;
+                // if (observation.type() == PoseObservationType.MEGATAG_2) {
+                //     linearStdDev *= linearStdDevMegatag2Factor; //
+                //     angularStdDev *= angularStdDevMegatag2Factor;
+                // }
                 if (cameraIndex < cameraStdDevFactors.length) {
                     linearStdDev *= cameraStdDevFactors[cameraIndex];
                     angularStdDev *= cameraStdDevFactors[cameraIndex];
