@@ -302,6 +302,7 @@ public class RobotContainer {
         ALGAE.and(rightDriveController.getTrigger()).whileTrue(gripperSubsystem.ejectSpinAlgae());
         // Technical Bindings
 
+        leftDriveController.getLeftTopMiddle().whileTrue(climberSubsystem.climberTuneable());
     }
 
     private double deadband(double value, double deadband) {
