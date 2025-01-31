@@ -3,6 +3,7 @@ package frc.robot.subsystems.intake;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class IntakeSubsystem extends SubsystemBase {
     private IntakeRollerIO piviotIO;
@@ -10,6 +11,9 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private FlipperIO flipperIO;
     private FlipperIOInputsAutoLogged flipperInputs = new FlipperIOInputsAutoLogged();
+
+    LoggedNetworkNumber flippervoltage = new LoggedNetworkNumber("FlipperVoltage");
+    LoggedNetworkNumber rollervoltage = new LoggedNetworkNumber("RollerVoltage");
 
     private final double lowerLimit = 0.0;
     private final double upperLimit = 100.0;
@@ -39,6 +43,29 @@ public class IntakeSubsystem extends SubsystemBase {
         if (flipperInputs.voltage > 0 && flipperInputs.position >= upperLimit) {
             this.piviotIO.setVoltage(0);
         }
+    }
+
+    public Command flipperTuneable() {
+        return run(
+                () -> {
+                    double voltage = flippervoltage.get();
+                    piviotIO.setVoltage(voltage);
+                });
+    }
+
+    public Command rollerTuneable() {
+        return run(
+                () -> {
+                    double voltage = rollervoltage.get();
+                    piviotIO.setVoltage(voltage);
+                });
+    }
+
+    public Command zeroflipper() {
+        return runOnce(
+                () -> {
+                    flipperIO.resetPosition(0);
+                });
     }
 
     public Command intake() {

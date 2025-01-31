@@ -18,4 +18,8 @@ public class FlipperIOSim implements FlipperIO {
     }
 
     public void setVoltage(double voltage) {}
+
+    public void resetPosition(double position) {
+        this.position = position;
+    }
 }

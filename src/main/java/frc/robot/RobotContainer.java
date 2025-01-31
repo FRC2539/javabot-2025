@@ -305,6 +305,11 @@ public class RobotContainer {
         rightDriveController
                 .getLeftTopLeft()
                 .onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric()));
+
+        leftDriveController.getLeftBottomLeft().whileTrue(intakeSubsystem.rollerTuneable());
+        leftDriveController.getLeftTopRight().whileTrue(intakeSubsystem.flipperTuneable());
+
+        leftDriveController.getLeftBottomRight().onTrue(intakeSubsystem.zeroflipper());
     }
 
     private double deadband(double value, double deadband) {

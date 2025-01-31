@@ -4,7 +4,6 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import frc.robot.constants.IntakeConstants;
 
 public class FlipperIOTalon implements FlipperIO {
@@ -14,7 +13,9 @@ public class FlipperIOTalon implements FlipperIO {
 
     public FlipperIOTalon() {
 
-        flipperMotor.getConfigurator().apply(new TalonFXConfiguration().withCurrentLimits(IntakeConstants.currentLimit));
+        flipperMotor
+                .getConfigurator()
+                .apply(new TalonFXConfiguration().withCurrentLimits(IntakeConstants.currentLimit));
 
         flipperMotor.setNeutralMode(NeutralModeValue.Brake);
     }
@@ -24,7 +25,7 @@ public class FlipperIOTalon implements FlipperIO {
         inputs.voltage = flipperMotor.getMotorVoltage().getValueAsDouble();
         inputs.temperature = flipperMotor.getDeviceTemp().getValueAsDouble();
         inputs.current = flipperMotor.getStatorCurrent().getValueAsDouble();
-    } 
+    }
 
     public void setOpen() {
 
@@ -37,5 +38,9 @@ public class FlipperIOTalon implements FlipperIO {
 
     public void setVoltage(double voltage) {
         flipperMotor.setVoltage(voltage);
+    }
+
+    public void resetPosition(double position) {
+        flipperMotor.setPosition(position);
     }
 }
