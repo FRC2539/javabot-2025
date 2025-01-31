@@ -184,9 +184,10 @@ public class Vision extends SubsystemBase {
                                     + ANGULAR_STD_DEV_MT1C;
                 }
 
-                // linearStdDev = linearStdDevBaseline * stdDevFactor; //multiply them both.
-                // angularStdDev = angularStdDevBaseline * stdDevFactor; //same thing.
+                final double stdDevFactor = 10;
 
+                linearStdDev = linearStdDevBaseline * stdDevFactor;
+                angularStdDev = angularStdDevBaseline * stdDevFactor;
                 // if (observation.type() == PoseObservationType.MEGATAG_2) {
                 //     linearStdDev *= linearStdDevMegatag2Factor; //
                 //     angularStdDev *= angularStdDevMegatag2Factor;
