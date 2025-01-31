@@ -1,8 +1,10 @@
 package frc.robot.constants;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.signals.GravityTypeValue;
+
 
 public class ElevatorConstants {
     public static final Slot0Configs slot0Configs =
@@ -21,4 +23,15 @@ public class ElevatorConstants {
                     .withMotionMagicAcceleration(4) // these are guesses, come back here
                     .withMotionMagicCruiseVelocity(4) // also guess
                     .withMotionMagicJerk(4);
+
+
+    public static final int elevatorLeaderId = 41;
+    
+    public static final int elevatorFollowerId = 42;
+
+    public static final String elevatorLeaderCanbus = "CANivore";
+
+    public static final String elevatorFollowerCanbus = "CANivore";
+
+    public static final CurrentLimitsConfigs currentLimit = new CurrentLimitsConfigs();
 }
