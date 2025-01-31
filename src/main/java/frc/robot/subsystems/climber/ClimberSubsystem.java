@@ -1,5 +1,9 @@
 package frc.robot.subsystems.climber;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTableValue;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.ClimberConstants;
@@ -10,10 +14,17 @@ public class ClimberSubsystem extends SubsystemBase {
     private ClimberIO piviotIO;
     private ClimberIOInputsAutoLogged climberInputs = new ClimberIOInputsAutoLogged();
 
+    NetworkTableInstance nInstance = NetworkTableInstance.getDefault();
+    NetworkTable table = nInstance.getTable("SmartDashboard");
+    NetworkTableValue climbervoltage = table.getValue("climbervoltage");
+
     public ClimberSubsystem(ClimberIO climberIO) {
         this.piviotIO = climberIO;
         setDefaultCommand(stop());
     }
+
+    double x = 0;
+    double y = 0;
 
     public void periodic() {
 
@@ -39,6 +50,14 @@ public class ClimberSubsystem extends SubsystemBase {
 
     public Command moveClimberUpVoltage() {
         return setVoltage(12);
+    }
+
+    public Command climberTuneable() {
+        return run(
+                () -> {
+                    double voltage = climbervoltage.getDouble();
+                    piviotIO.setVoltage(voltage);
+                });
     }
 
     public Command moveClimberDownVoltage() {
