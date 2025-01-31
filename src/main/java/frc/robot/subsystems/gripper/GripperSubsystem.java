@@ -15,7 +15,7 @@ public class GripperSubsystem extends SubsystemBase {
     // NetworkTable table = nInstance.getTable("SmartDashboard");
     // NetworkTableValue grippervoltage = table.getValue("grippervoltage");
 
-    LoggedNetworkNumber grippervoltage = new LoggedNetworkNumber("Gripper Voltage");
+    LoggedNetworkNumber grippervoltage = new LoggedNetworkNumber("Gripper Voltage", 0);
 
     public GripperSubsystem(GripperIO armrollerIO) {
         this.piviotIO = armrollerIO;
