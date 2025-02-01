@@ -237,30 +237,30 @@ public class Auto {
         NamedCommands.registerCommand(
                 "wait", Commands.waitUntil(() -> (alignCommand == null && heightCommand == null)));
 
+        // Align Trigger
         EventTrigger alignTrigger = new EventTrigger("align");
-        alignTrigger.onTrue(
-                alignCommand =
-                        Commands.runOnce(
-                                        () -> {
-                                            if (alignCommand != null) alignCommand.cancel();
-                                        })
-                                .alongWith(
-                                        robotContainer
-                                                .alignToReef(
-                                                        targetLocation.getTagByTeam(),
-                                                        targetLocation.offset)
-                                                .withTimeout(alignTimeout)));
+        Command alignCommand =
+                Commands.defer(
+                        () ->
+                                robotContainer.alignAndDriveToReef(targetLocation.getTagByTeam(), targetLocation.offset).withTimeout(alignTimeout),
+                        Set.of(
+                                robotContainer.armSubsystem,
+                                robotContainer.elevatorSubsystem,
+                                robotContainer.stateManager));
+        alignTrigger.onTrue(alignCommand);
 
+        // Arm Trigger
         EventTrigger armTrigger = new EventTrigger("arm");
-        armTrigger.onTrue(
-                heightCommand =
-                        Commands.runOnce(
-                                        () -> {
-                                            if (heightCommand != null) heightCommand.cancel();
-                                        })
-                                .alongWith(
-                                        robotContainer.stateManager.moveToPosition(
-                                                targetHeight.position)));
+        Command armCommand =
+                Commands.defer(
+                        () ->
+                                robotContainer.stateManager.moveToPosition(
+                                        targetHeight.position),
+                        Set.of(
+                                robotContainer.armSubsystem,
+                                robotContainer.elevatorSubsystem,
+                                robotContainer.stateManager));
+        armTrigger.onTrue(armCommand);
 
         // Prep Arm Trigger
         EventTrigger prepArmTrigger = new EventTrigger("prepArm");
@@ -275,40 +275,33 @@ public class Auto {
                                 robotContainer.stateManager));
         prepArmTrigger.onTrue(prepArmCommand);
 
+        // Score Trigger
+        EventTrigger scoreTrigger = new EventTrigger("score");
+        Command scoreCommand =
+                Commands.defer(
+                        () ->
+                            robotContainer.stateManager.moveToPosition(targetHeight.position)
+                            .andThen(robotContainer.gripperSubsystem.ejectSpinCoral().withTimeout(placeTimeout))
+                            .andThen(robotContainer.gripperSubsystem.setVoltage(0)),
+                        Set.of(
+                            robotContainer.armSubsystem,
+                            robotContainer.elevatorSubsystem,
+                            robotContainer.stateManager));
+        scoreTrigger.onTrue(scoreCommand);
+
+
+
         EventTrigger placeTrigger = new EventTrigger("place");
         placeTrigger.onTrue(
-                Commands.runOnce(
-                        () -> {
-                            if (alignCommand != null) alignCommand.cancel();
-                            if (heightCommand != null) heightCommand.cancel();
+            prepArmCommand.alongWith(alignCommand)
+            .until(() -> true) // Wait until arm and align are in position 
+            .andThen(armCommand)
+            .until(() -> true) // Wait until arm is in position
+            .andThen(scoreCommand)
+        );
 
-                            alignCommand =
-                                    robotContainer
-                                            .alignToReef(
-                                                    targetLocation.getTagByTeam(),
-                                                    targetLocation.offset)
-                                            .withTimeout(alignTimeout); // Ref: Align Trigger
-                            heightCommand =
-                                    robotContainer.stateManager.moveToPosition(
-                                            targetHeight.position.parent); // Ref: Arm Trigger
-                            alignCommand
-                                    .alongWith(heightCommand)
-                                    .until(() -> (alignCommand == null && heightCommand == null))
-                                    .andThen(
-                                            robotContainer
-                                                    .stateManager
-                                                    .moveToPosition(targetHeight.position)
-                                                    .andThen(
-                                                            robotContainer
-                                                                    .gripperSubsystem
-                                                                    .ejectSpin()
-                                                                    .withTimeout(placeTimeout))
-                                                    .andThen(
-                                                            robotContainer.gripperSubsystem
-                                                                    .setVoltage(0)));
-                        }));
 
-        // #region Aligns and Height
+        // #region Auto create locations and heights 
         for (DriveLocation location : DriveLocation.values()) {
             new EventTrigger("location ".concat(location.name()))
                     .onTrue(
