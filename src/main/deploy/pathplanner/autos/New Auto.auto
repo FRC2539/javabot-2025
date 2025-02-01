@@ -7,43 +7,55 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Start-reef"
+            "pathName": "R-EF"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.75
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Reef-Station"
+            "pathName": "EF-CS2"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.75
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Station-Reef"
+            "pathName": "CS2-CD"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.75
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Reef-Station"
+            "pathName": "CD-CS2"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.75
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Station-Reef"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Reef-Station"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Station-Reef"
+            "pathName": "CS2-AB"
           }
         }
       ]

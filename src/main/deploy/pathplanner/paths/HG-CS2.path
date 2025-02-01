@@ -3,39 +3,55 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.6951704545454547,
-        "y": 0.734375
+        "x": 5.933096590909091,
+        "y": 4.005056818181817
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.38883910783649,
-        "y": 1.725036504537079
+        "x": 6.029259327729446,
+        "y": 3.774291292057963
       },
       "isLocked": false,
-      "linkedName": "station"
+      "linkedName": "HG"
     },
     {
       "anchor": {
-        "x": 7.737954545454546,
-        "y": 4.393948863636362
+        "x": 5.066,
+        "y": 1.62184659090909
       },
       "prevControl": {
-        "x": 9.183835227272727,
-        "y": 3.935255681818182
+        "x": 5.89614387474598,
+        "y": 2.409268096575123
+      },
+      "nextControl": {
+        "x": 3.842202747576178,
+        "y": 0.46103061135567813
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 1.555568181818182,
+        "y": 0.7742613636363649
+      },
+      "prevControl": {
+        "x": 2.340520638783219,
+        "y": 1.0006663017959903
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "reef"
+      "linkedName": "CS2"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.5444319460067477,
-      "maxWaypointRelativePos": 1.0,
+      "minWaypointRelativePos": 1.7,
+      "maxWaypointRelativePos": 2.0,
       "constraints": {
-        "maxVelocity": 2.5,
+        "maxVelocity": 3.0,
         "maxAcceleration": 3.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -47,7 +63,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.6,
+    "maxVelocity": 4.5,
     "maxAcceleration": 7.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -56,13 +72,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 149.68878677331836
+    "rotation": 55.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Reef-CoralStation",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 52.35237935989223
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }
