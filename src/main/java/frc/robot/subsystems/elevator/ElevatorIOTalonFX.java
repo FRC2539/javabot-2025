@@ -6,12 +6,14 @@ import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
 import frc.robot.constants.ElevatorConstants;
 
 public class ElevatorIOTalonFX implements ElevatorIO {
     // TBD: Hardcode IDs or add support to make changeable in method
-    private final TalonFX elevatorLeader = new TalonFX(41, "CANivore");
-    private final TalonFX elevatorFollower = new TalonFX(42, "CANivore");
+    private final TalonFX elevatorLeader = new TalonFX(ElevatorConstants.elevatorLeaderId, ElevatorConstants.elevatorLeaderCanbus);
+    private final TalonFX elevatorFollower = new TalonFX(ElevatorConstants.elevatorFollowerId, ElevatorConstants.elevatorFollowerCanbus);
     private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0);
 
     public ElevatorIOTalonFX() {
@@ -30,6 +32,10 @@ public class ElevatorIOTalonFX implements ElevatorIO {
                         .withMotionMagic(ElevatorConstants.motionMagicConfigs));
 
         elevatorFollower.setControl(new Follower(elevatorFollower.getDeviceID(), false));
+
+        elevatorLeader.getConfigurator().apply(new TalonFXConfiguration().withCurrentLimits(ElevatorConstants.currentLimit));
+
+        elevatorLeader.setNeutralMode(NeutralModeValue.Brake);
     }
 
     public void updateInputs(ElevatorIOInputs inputs) {
@@ -37,6 +43,8 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         inputs.position = elevatorLeader.getPosition().refresh().getValueAsDouble();
         inputs.voltage = elevatorLeader.getMotorVoltage().refresh().getValueAsDouble();
         inputs.speed = elevatorLeader.getVelocity().refresh().getValueAsDouble();
+        inputs.temperature = elevatorLeader.getDeviceTemp().getValueAsDouble();
+        inputs.current = elevatorLeader.getStatorCurrent().getValueAsDouble();
     }
 
     public void setVoltage(double voltage) {
