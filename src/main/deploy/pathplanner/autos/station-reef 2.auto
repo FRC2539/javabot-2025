@@ -1,0 +1,55 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Start-reef"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Reef-Station"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Station-Reef"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Reef-Station"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Station-Reef"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Reef-Station"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Station-Reef"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
