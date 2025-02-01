@@ -2,7 +2,6 @@ package frc.robot.subsystems.elevator;
 
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.configs.TalonFXConfigurator;
 // import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -24,8 +23,6 @@ public class ElevatorIOTalonFX implements ElevatorIO {
 
         motionMagicVoltage.Slot = 0;
 
-        TalonFXConfigurator talonConfig = elevatorLeader.getConfigurator();
-
         SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs =
                 new SoftwareLimitSwitchConfigs()
                         .withForwardSoftLimitEnable(true)
@@ -33,21 +30,20 @@ public class ElevatorIOTalonFX implements ElevatorIO {
                         .withReverseSoftLimitEnable(true)
                         .withForwardSoftLimitThreshold(ElevatorConstants.lowerLimit);
 
-        talonConfig.apply(
+        TalonFXConfiguration config =
                 new TalonFXConfiguration()
                         .withSoftwareLimitSwitch(softwareLimitSwitchConfigs)
                         .withSlot0(ElevatorConstants.slot0Configs)
-                        .withMotionMagic(ElevatorConstants.motionMagicConfigs));
+                        .withMotionMagic(ElevatorConstants.motionMagicConfigs)
+                        .withCurrentLimits(ElevatorConstants.currentLimit);
+
+        elevatorLeader.getConfigurator().apply(config);
+        // elevatorFollower.getConfigurator().apply(config);
 
         // elevatorFollower.setControl(new Follower(elevatorFollower.getDeviceID(), false));
 
-        elevatorLeader
-                .getConfigurator()
-                .apply(
-                        new TalonFXConfiguration()
-                                .withCurrentLimits(ElevatorConstants.currentLimit));
-
         elevatorLeader.setNeutralMode(NeutralModeValue.Brake);
+        // elevatorFollower.setNeutralMode(NeutralModeValue.Brake);
     }
 
     public void updateInputs(ElevatorIOInputs inputs) {
