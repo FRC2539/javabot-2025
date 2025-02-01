@@ -10,16 +10,16 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState.Position;
 import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
+import frc.robot.util.Elastic;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import frc.robot.util.Elastic;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
-import org.littletonrobotics.junction.networktables.LoggedNetworkString;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
+import org.littletonrobotics.junction.networktables.LoggedNetworkString;
 
 public class SuperstructureStateManager extends SubsystemBase {
 
@@ -29,11 +29,16 @@ public class SuperstructureStateManager extends SubsystemBase {
     private static final double kElevatorMinimumLength = 0.5;
 
     public static class SuperstructureState {
-        private static LoggedNetworkNumber elevatorHeightLogged = new LoggedNetworkNumber("Elevator Height", 0);
-        private static LoggedNetworkNumber armHeightLogged = new LoggedNetworkNumber("Arm Height", 0);
-        private static LoggedNetworkNumber wristRotationLogged = new LoggedNetworkNumber("Wrist Rotation", 0);
-        private static LoggedNetworkString parentLogged = new LoggedNetworkString("Superstructure Parent", "Home");
-        private static LoggedNetworkString buttonTargetLogged = new LoggedNetworkString("Superstructure Button Target", "Tunable");
+        private static LoggedNetworkNumber elevatorHeightLogged =
+                new LoggedNetworkNumber("Elevator Height", 0);
+        private static LoggedNetworkNumber armHeightLogged =
+                new LoggedNetworkNumber("Arm Height", 0);
+        private static LoggedNetworkNumber wristRotationLogged =
+                new LoggedNetworkNumber("Wrist Rotation", 0);
+        private static LoggedNetworkString parentLogged =
+                new LoggedNetworkString("Superstructure Parent", "Home");
+        private static LoggedNetworkString buttonTargetLogged =
+                new LoggedNetworkString("Superstructure Button Target", "Tunable");
 
         @FunctionalInterface
         private interface StateChecker {
@@ -57,9 +62,7 @@ public class SuperstructureStateManager extends SubsystemBase {
                     } else return false;
                 };
 
-
         public static enum Position {
-
             Sussy(1, 1, 1, null),
             None(1, 1, 1, null, TRUE, false),
             Home(1, 0, 1, None),
@@ -70,24 +73,24 @@ public class SuperstructureStateManager extends SubsystemBase {
             Preppy(1, 2, 1, None),
             PreppyNull(1, 3, 1, Preppy, TRUE, false),
             L1Prep(2, 2, 1, PreppyNull),
-            L1(2, 1, 4,  L1Prep),
-            L2Prep(3, 2, 1,  PreppyNull),
-            L2(3, 1, 1,  L2Prep),
-            L3Prep(4, 2, 1,  PreppyNull),
-            L3(4, 1, 1,  L3Prep),
-            L4Prep(5, 2, 1,  PreppyNull),
-            L4(5, 1, 1,  L4Prep),
-            L1AlgaePrep(2, 2, 1,  PreppyNull),
-            L1Algae(2, 1, 1,  L1AlgaePrep),
-            L2AlgaePrep(3, 2, 1,  PreppyNull),
-            L2Algae(3, 1, 1,  L2AlgaePrep),
-            L3AlgaePrep(4, 2, 1,  PreppyNull),
-            L3Algae(4, 1, 1,  L3AlgaePrep),
-            L4AlgaePrep(5, 2, 1,  PreppyNull),
-            L4Algae(5, 1, 1,  L4AlgaePrep),
+            L1(2, 1, 4, L1Prep),
+            L2Prep(3, 2, 1, PreppyNull),
+            L2(3, 1, 1, L2Prep),
+            L3Prep(4, 2, 1, PreppyNull),
+            L3(4, 1, 1, L3Prep),
+            L4Prep(5, 2, 1, PreppyNull),
+            L4(5, 1, 1, L4Prep),
+            L1AlgaePrep(2, 2, 1, PreppyNull),
+            L1Algae(2, 1, 1, L1AlgaePrep),
+            L2AlgaePrep(3, 2, 1, PreppyNull),
+            L2Algae(3, 1, 1, L2AlgaePrep),
+            L3AlgaePrep(4, 2, 1, PreppyNull),
+            L3Algae(4, 1, 1, L3AlgaePrep),
+            L4AlgaePrep(5, 2, 1, PreppyNull),
+            L4Algae(5, 1, 1, L4AlgaePrep),
             SourcePrep(1, -2, 25, None),
             Source(0, -2, 1, SourcePrep),
-            Tunable(0,0,0, None, FALSE);
+            Tunable(0, 0, 0, None, FALSE);
 
             private double elevatorHeight;
             private double armHeight;
@@ -134,16 +137,21 @@ public class SuperstructureStateManager extends SubsystemBase {
                 return isAtTarget.isAtTarget(this, stateManager);
             }
 
-            //#region Pointer Methods
+            // #region Pointer Methods
             public double elevatorHeight() {
                 if (this == Position.Tunable) {
-                    elevatorHeight = SuperstructureState.elevatorHeightLogged.get(); // ref: tunable variable armHeight 
+                    elevatorHeight =
+                            SuperstructureState.elevatorHeightLogged
+                                    .get(); // ref: tunable variable armHeight
                 }
                 return elevatorHeight;
             }
+
             public double armHeight() {
                 if (this == Position.Tunable) {
-                    armHeight = SuperstructureState.armHeightLogged.get(); // ref: tunable variable armHeight 
+                    armHeight =
+                            SuperstructureState.armHeightLogged
+                                    .get(); // ref: tunable variable armHeight
                 }
                 return armHeight;
             }
@@ -151,19 +159,18 @@ public class SuperstructureStateManager extends SubsystemBase {
             public double wristRotation() {
                 if (this == Position.Tunable) {
                     wristRotation = SuperstructureState.wristRotationLogged.get();
-                     // ref: tunable variable wristRotation 
+                    // ref: tunable variable wristRotation
                 }
                 return wristRotation;
             }
+
             public Position parent() {
                 if (this == Position.Tunable) {
                     parent = Position.valueOf(parentLogged.get()); // ref: tunable variable parent
                 }
                 return parent;
             }
-            //#endregion
-            
-
+            // #endregion
 
         }
     }
@@ -318,23 +325,25 @@ public class SuperstructureStateManager extends SubsystemBase {
     }
 
     public Command moveToTunablePosition() {
-        return Commands.defer(() -> {
-            try {
-                var nextPos = Position.valueOf(SuperstructureState.buttonTargetLogged.get());
-                nextPos.parent();
-                return moveToPosition(nextPos).asProxy();
-            } catch (IllegalArgumentException e) {
-                return runOnce(() -> {
-                    Elastic.sendNotification(
-                        new Elastic.Notification(
-                            Elastic.Notification.NotificationLevel.ERROR,
-                            "Tunable Does Not Exist",
-                            "The tunable in the superstructure button does not exist."
-                        )
-                    );
-                }).andThen(Commands.idle());
-            }
-        }, Set.of());
+        return Commands.defer(
+                () -> {
+                    try {
+                        var nextPos =
+                                Position.valueOf(SuperstructureState.buttonTargetLogged.get());
+                        nextPos.parent();
+                        return moveToPosition(nextPos).asProxy();
+                    } catch (IllegalArgumentException e) {
+                        return Commands.runOnce(
+                                () -> {
+                                    Elastic.sendNotification(
+                                            new Elastic.Notification(
+                                                    Elastic.Notification.NotificationLevel.ERROR,
+                                                    "Tunable Does Not Exist",
+                                                    "The tunable in the superstructure button does not exist."));
+                                });
+                    }
+                },
+                Set.of());
     }
 
     private Command followOutPath() {
@@ -392,6 +401,4 @@ public class SuperstructureStateManager extends SubsystemBase {
 
         SmartDashboard.putData("Mech2d", mech);
     }
-
-    
 }

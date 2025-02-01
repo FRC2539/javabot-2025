@@ -47,6 +47,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSimML;
+import frc.robot.util.Elastic;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -314,9 +315,27 @@ public class RobotContainer {
 
         leftDriveController.getLeftTopLeft().whileTrue(gripperSubsystem.gripperTuneable());
 
-        leftDriveController.getRightTopLeft().onTrue(
-                stateManager.moveToTunablePosition()
-        );
+        {
+            var tunableCommand =
+                    Commands.runOnce(
+                                    () -> {
+                                        Elastic.sendNotification(
+                                                new Elastic.Notification(
+                                                        Elastic.Notification.NotificationLevel.INFO,
+                                                        "Scheduled COMMAND",
+                                                        "YAYYAYYA."));
+                                    })
+                            .andThen(stateManager.moveToTunablePosition());
+
+            leftDriveController
+                    .getRightTopLeft()
+                    .onTrue(
+                            Commands.runOnce(
+                                    () -> {
+                                        tunableCommand.cancel();
+                                        tunableCommand.schedule();
+                                    }));
+        }
     }
 
     private double deadband(double value, double deadband) {
