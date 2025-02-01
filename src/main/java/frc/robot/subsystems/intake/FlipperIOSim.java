@@ -1,23 +1,28 @@
 package frc.robot.subsystems.intake;
 
+import frc.robot.constants.IntakeConstants;
+
 public class FlipperIOSim implements FlipperIO {
 
     private double position;
+    private double voltage;
 
     public void updateInputs(FlipperIOInputs inputs) {
         inputs.position = position;
-        inputs.voltage = 0;
+        inputs.voltage = voltage;
     }
 
     public void setOpen() {
-        position = 100;
+        position = IntakeConstants.openPosit;
     }
 
     public void setClose() {
-        position = 0;
+        position = IntakeConstants.closedPosit;
     }
 
-    public void setVoltage(double voltage) {}
+    public void setVoltage(double voltage) {
+        this.voltage = voltage;
+    }
 
     public void resetPosition(double position) {
         this.position = position;

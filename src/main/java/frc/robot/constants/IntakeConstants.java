@@ -13,5 +13,7 @@ public class IntakeConstants {
 
     public static final String canbusRoller = "CANivore";
 
+    public static final String canbusFlipper = "CANivore";
+
     public static final CurrentLimitsConfigs currentLimit = new CurrentLimitsConfigs();
 }

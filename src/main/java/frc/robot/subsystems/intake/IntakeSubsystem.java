@@ -12,11 +12,8 @@ public class IntakeSubsystem extends SubsystemBase {
     private FlipperIO flipperIO;
     private FlipperIOInputsAutoLogged flipperInputs = new FlipperIOInputsAutoLogged();
 
-    LoggedNetworkNumber flippervoltage = new LoggedNetworkNumber("FlipperVoltage");
-    LoggedNetworkNumber rollervoltage = new LoggedNetworkNumber("RollerVoltage");
-
-    private final double lowerLimit = 0.0;
-    private final double upperLimit = 100.0;
+    LoggedNetworkNumber flippervoltage = new LoggedNetworkNumber("Flipper Voltage", 0);
+    LoggedNetworkNumber rollervoltage = new LoggedNetworkNumber("Intake Voltage", 0);
 
     public IntakeSubsystem(IntakeRollerIO intakerollerIO, FlipperIO sflipperIO) {
         piviotIO = intakerollerIO;
@@ -37,19 +34,13 @@ public class IntakeSubsystem extends SubsystemBase {
         Logger.processInputs("RealOutputs/IntakeRoller", intakeInputs);
 
         Logger.recordOutput("Flipper/Position", flipperInputs.position);
-        if (flipperInputs.voltage < 0 && flipperInputs.position <= lowerLimit) {
-            this.piviotIO.setVoltage(0);
-        }
-        if (flipperInputs.voltage > 0 && flipperInputs.position >= upperLimit) {
-            this.piviotIO.setVoltage(0);
-        }
     }
 
     public Command flipperTuneable() {
         return run(
                 () -> {
                     double voltage = flippervoltage.get();
-                    piviotIO.setVoltage(voltage);
+                    flipperIO.setVoltage(voltage);
                 });
     }
 
@@ -78,6 +69,22 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public Command openIntake() {
         return run(() -> flipperIO.setOpen());
+    }
+
+    public Command openAndRun() {
+        return run(
+                () -> {
+                    flipperIO.setOpen();
+                    piviotIO.setVoltage(12);
+                });
+    }
+
+    public Command openAndEject() {
+        return run(
+                () -> {
+                    flipperIO.setOpen();
+                    piviotIO.setVoltage(-12);
+                });
     }
 
     public Command closeIntake() {
