@@ -4,6 +4,8 @@ import org.littletonrobotics.junction.AutoLog;
 
 public interface FlipperIO {
 
+    public void resetPosition(double position);
+
     public void updateInputs(FlipperIOInputs inputs);
 
     @AutoLog

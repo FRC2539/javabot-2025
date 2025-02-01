@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
+import frc.robot.commands.AlignAndDriveToReef;
 import frc.robot.commands.AlignToPiece;
 import frc.robot.commands.AlignToReef;
 import frc.robot.constants.GlobalConstants;
@@ -192,6 +193,7 @@ public class RobotContainer {
         // leftDriveController.getBottomThumb().whileTrue(alignToReef(9, 0));
         // leftDriveController.getRightThumb().whileTrue(alignToReef(9, 0.4));
         // leftDriveController.getLeftThumb().whileTrue(alignToReef(9, -0.4));
+        // leftDriveController.getBottomThumb().whileTrue(alignAndDriveToReef(19, 0));
         // operatorController
         //         .getB()
         //         .whileTrue(
@@ -286,12 +288,12 @@ public class RobotContainer {
         // CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(9, 0));
 
         // Climb Bindings
-        leftDriveController.getLeftThumb().whileTrue(climberSubsystem.moveClimberDown());
-        leftDriveController.getRightThumb().whileTrue(climberSubsystem.moveClimberUp());
+        leftDriveController.getLeftThumb().whileTrue(climberSubsystem.downPosition());
+        leftDriveController.getRightThumb().whileTrue(climberSubsystem.upPosition());
 
         // Intake Bindings
-        rightDriveController.getLeftThumb().whileTrue(intakeSubsystem.intake());
-        rightDriveController.getRightThumb().whileTrue(intakeSubsystem.eject());
+        rightDriveController.getLeftThumb().whileTrue(intakeSubsystem.openAndRun());
+        rightDriveController.getRightThumb().whileTrue(intakeSubsystem.openAndEject());
 
         CORAL.and(rightDriveController.getBottomThumb())
                 .whileTrue(gripperSubsystem.intakeSpinCoral());
@@ -302,9 +304,20 @@ public class RobotContainer {
         ALGAE.and(rightDriveController.getTrigger()).whileTrue(gripperSubsystem.ejectSpinAlgae());
 
         // Technical Bindings
+
+        leftDriveController.getLeftBottomMiddle().onTrue(climberSubsystem.zeroClimberCommand());
+        leftDriveController.getLeftTopMiddle().whileTrue(climberSubsystem.climberTuneable());
+
         rightDriveController
                 .getLeftTopLeft()
                 .onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric()));
+
+        leftDriveController.getLeftBottomLeft().whileTrue(intakeSubsystem.rollerTuneable());
+        leftDriveController.getLeftTopRight().whileTrue(intakeSubsystem.flipperTuneable());
+
+        leftDriveController.getLeftBottomRight().onTrue(intakeSubsystem.zeroflipper());
+
+        leftDriveController.getLeftTopLeft().whileTrue(gripperSubsystem.gripperTuneable());
     }
 
     private double deadband(double value, double deadband) {
@@ -332,6 +345,11 @@ public class RobotContainer {
                 offset,
                 alignmentPose,
                 Rotation2d.kPi); // Skibidi
+    }
+
+    public Command alignAndDriveToReef(int tag, double offset) {
+        Pose2d alignmentPose = VisionConstants.aprilTagLayout.getTagPose(tag).get().toPose2d();
+        return new AlignAndDriveToReef(drivetrain, offset, alignmentPose, Rotation2d.kPi);
     }
 
     public Command alignToPiece() {
