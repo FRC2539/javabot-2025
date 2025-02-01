@@ -5,8 +5,8 @@ public class GripperIOSim implements GripperIO {
     public double speed;
 
     public void updateInputs(GripperIOInputs inputs) {
-        voltage = inputs.voltage;
-        speed = inputs.speed;
+        inputs.voltage = voltage;
+        inputs.speed = speed;
     }
 
     public void setVoltage(double voltage) {
