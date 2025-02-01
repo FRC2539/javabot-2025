@@ -26,7 +26,12 @@ public class ElevatorIOTalonFX implements ElevatorIO {
 
         TalonFXConfigurator talonConfig = elevatorLeader.getConfigurator();
 
-        SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = new SoftwareLimitSwitchConfigs();
+        SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs =
+                new SoftwareLimitSwitchConfigs()
+                        .withForwardSoftLimitEnable(true)
+                        .withForwardSoftLimitThreshold(ElevatorConstants.upperLimit)
+                        .withReverseSoftLimitEnable(true)
+                        .withForwardSoftLimitThreshold(ElevatorConstants.lowerLimit);
 
         talonConfig.apply(
                 new TalonFXConfiguration()
