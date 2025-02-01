@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState.Position;
 import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
@@ -52,6 +53,10 @@ public class SuperstructureStateManager extends SubsystemBase {
             Sussy(1, 1, 1, null),
             None(1, 1, 1, null, TRUE, false),
             Home(1, 0, 1, None),
+            Handoff(1, 0, 1, None),
+            Icecream(1, 1, 1, None),
+            Quick34(4, 2, 1, None),
+            Quick23(3, 3, 1, None),
             Preppy(1, 2, 1, None),
             PreppyNull(1, 3, 1, Preppy, TRUE, false),
             L1Prep(2, 2, 1, PreppyNull),
@@ -124,6 +129,32 @@ public class SuperstructureStateManager extends SubsystemBase {
     private SuperstructureState.Position lastPosition = SuperstructureState.Position.None;
 
     private List<SuperstructureState.Position> outList = new ArrayList<>();
+
+    private enum CoralAlgaeMode {
+        LeftCoral,
+        RightCoral,
+        Algae;
+    }
+
+    private CoralAlgaeMode coralAlgaeMode = CoralAlgaeMode.LeftCoral;
+
+    public final Trigger LEFT_CORAL = new Trigger(() -> coralAlgaeMode == CoralAlgaeMode.LeftCoral);
+    public final Trigger RIGHT_CORAL =
+            new Trigger(() -> coralAlgaeMode == CoralAlgaeMode.RightCoral);
+    public final Trigger ALGAE = new Trigger(() -> coralAlgaeMode == CoralAlgaeMode.Algae);
+
+    public Command setLeftCoralMode() {
+        return Commands.runOnce(() -> coralAlgaeMode = CoralAlgaeMode.LeftCoral);
+    }
+
+    public Command setRightCoralMode() {
+        return Commands.runOnce(() -> coralAlgaeMode = CoralAlgaeMode.RightCoral);
+    }
+
+    public Command setAlgaeMode() {
+        return Commands.runOnce(() -> coralAlgaeMode = CoralAlgaeMode.Algae);
+    }
+
     // public List<SuperstructureState.Position> inList = new ArrayList<>();
     private ElevatorSubsystem ElevatorSubsystem;
     private ArmSubsystem ArmSubsystem;
@@ -137,6 +168,10 @@ public class SuperstructureStateManager extends SubsystemBase {
                 internalPosition == Position.Sussy ? null : internalPosition);
         Logger.recordOutput(
                 "Superstructure/OutList", outList.toArray(new SuperstructureState.Position[0]));
+
+        Logger.recordOutput("Superstructure/Algae", ALGAE.getAsBoolean());
+        Logger.recordOutput("Superstructure/LeftCoral", LEFT_CORAL.getAsBoolean());
+        Logger.recordOutput("Superstructure/RightCoral", RIGHT_CORAL.getAsBoolean());
 
         m_elevator.setLength(ElevatorSubsystem.getPosition());
         m_wrist.setAngle(Math.toDegrees(ArmSubsystem.getArmPosition()) + 180);
