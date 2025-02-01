@@ -218,17 +218,33 @@ public class RobotContainer {
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
 
-        SmartDashboard.putData(drivetrain.sysIdDynamic(Direction.kForward).withName("Swerve SysId Dynamic Forward"));
-        SmartDashboard.putData(drivetrain.sysIdDynamic(Direction.kReverse).withName("Swerve SysId Dynamic Reverse"));
-        SmartDashboard.putData(drivetrain.sysIdQuasistatic(Direction.kForward).withName("Swerve SysId Quasistatic Forward"));
-        SmartDashboard.putData(drivetrain.sysIdQuasistatic(Direction.kReverse).withName("Swerve SysId Quasistatic Reverse"));
+        SmartDashboard.putData(
+                drivetrain
+                        .sysIdDynamic(Direction.kForward)
+                        .withName("Swerve SysId Dynamic Forward"));
+        SmartDashboard.putData(
+                drivetrain
+                        .sysIdDynamic(Direction.kReverse)
+                        .withName("Swerve SysId Dynamic Reverse"));
+        SmartDashboard.putData(
+                drivetrain
+                        .sysIdQuasistatic(Direction.kForward)
+                        .withName("Swerve SysId Quasistatic Forward"));
+        SmartDashboard.putData(
+                drivetrain
+                        .sysIdQuasistatic(Direction.kReverse)
+                        .withName("Swerve SysId Quasistatic Reverse"));
 
-        SmartDashboard.putData(drivetrain.sysIdRotationMode().withName("Swerve SysId Rotation Mode"));
+        SmartDashboard.putData(
+                drivetrain.sysIdRotationMode().withName("Swerve SysId Rotation Mode"));
         SmartDashboard.putData(drivetrain.sysIdSteerMode().withName("Swerve SysId Steer Mode"));
-        SmartDashboard.putData(drivetrain.sysIdTranslationMode().withName("Swerve SysId Translation Mode"));
+        SmartDashboard.putData(
+                drivetrain.sysIdTranslationMode().withName("Swerve SysId Translation Mode"));
 
-        SmartDashboard.putData(new WheelRadiusCharacterization(
-                                        WheelRadiusCharacterization.Direction.CLOCKWISE, drivetrain).withName("Wheel Radius Characterization Command"));
+        SmartDashboard.putData(
+                new WheelRadiusCharacterization(
+                                WheelRadiusCharacterization.Direction.CLOCKWISE, drivetrain)
+                        .withName("Wheel Radius Characterization Command"));
 
         // operatorController
         // operatorController.getA().onTrue(stateManager.moveToPosition(Position.L4));
@@ -318,8 +334,6 @@ public class RobotContainer {
         leftDriveController.getLeftTopLeft().whileTrue(gripperSubsystem.gripperTuneable());
 
         leftDriveController.getRightBottomLeft().onTrue(elevatorSubsystem.zeroElevatorCommand());
-
-
     }
 
     private double deadband(double value, double deadband) {

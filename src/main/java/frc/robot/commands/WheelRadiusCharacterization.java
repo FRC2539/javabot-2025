@@ -62,12 +62,13 @@ public class WheelRadiusCharacterization extends Command {
     }
 
     public void execute() {
-        drive.setControl(drive.driveRobotRelative(
-                new ChassisSpeeds(
-                        0,
-                        0,
-                        omegaLimiter.calculate(
-                                omegaDirection.value * characterizationSpeed.get()))));
+        drive.setControl(
+                drive.driveRobotRelative(
+                        new ChassisSpeeds(
+                                0,
+                                0,
+                                omegaLimiter.calculate(
+                                        omegaDirection.value * characterizationSpeed.get()))));
 
         // Get yaw and wheel positions
 
