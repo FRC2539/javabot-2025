@@ -5,8 +5,8 @@ public class IntakeRollerIOSim implements IntakeRollerIO {
     public double speed;
 
     public void updateInputs(IntakeRollerIOInputs inputs) {
-        voltage = inputs.voltage;
-        speed = inputs.speed;
+        inputs.voltage = voltage;
+        inputs.speed = speed;
     }
 
     public void setVoltage(double voltage) {
