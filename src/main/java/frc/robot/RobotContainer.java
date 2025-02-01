@@ -46,6 +46,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSimML;
+import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -284,7 +285,7 @@ public class RobotContainer {
 
         // Driver Align Bindings, for a different/later day
         // CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(9, 0));
-        
+
         // Climb Bindings
         leftDriveController.getLeftThumb().whileTrue(climberSubsystem.downPosition());
         leftDriveController.getRightThumb().whileTrue(climberSubsystem.upPosition());
@@ -300,6 +301,62 @@ public class RobotContainer {
         ALGAE.and(rightDriveController.getBottomThumb())
                 .whileTrue(gripperSubsystem.intakeSpinAlgae());
         ALGAE.and(rightDriveController.getTrigger()).whileTrue(gripperSubsystem.ejectSpinAlgae());
+
+        leftDriveController
+                .getTrigger()
+                .onTrue(
+                        Commands.runOnce(
+                                () ->
+                                        stateManager.setLastScoringPose(
+                                                drivetrain.findNearestAprilTagPose())));
+
+        stateManager
+                .LEFT_CORAL
+                .and(leftDriveController.getTrigger())
+                .onTrue(
+                        Commands.defer(
+                                () -> {
+                                    return new AlignToReef(
+                                            drivetrain,
+                                            leftJoystickVelocityX,
+                                            leftJoystickVelocityY,
+                                            -0.4,
+                                            stateManager.getLastScoringPose(),
+                                            Rotation2d.kPi);
+                                },
+                                Set.of(drivetrain)));
+
+        stateManager
+                .ALGAE
+                .and(leftDriveController.getTrigger())
+                .onTrue(
+                        Commands.defer(
+                                () -> {
+                                    return new AlignToReef(
+                                            drivetrain,
+                                            leftJoystickVelocityX,
+                                            leftJoystickVelocityY,
+                                            0,
+                                            stateManager.getLastScoringPose(),
+                                            Rotation2d.kPi);
+                                },
+                                Set.of(drivetrain)));
+
+        stateManager
+                .RIGHT_CORAL
+                .and(leftDriveController.getTrigger())
+                .onTrue(
+                        Commands.defer(
+                                () -> {
+                                    return new AlignToReef(
+                                            drivetrain,
+                                            leftJoystickVelocityX,
+                                            leftJoystickVelocityY,
+                                            0.4,
+                                            stateManager.getLastScoringPose(),
+                                            Rotation2d.kPi);
+                                },
+                                Set.of(drivetrain)));
 
         // Technical Bindings
 
