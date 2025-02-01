@@ -5,7 +5,6 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 
-
 public class ElevatorConstants {
     public static final Slot0Configs slot0Configs =
             new Slot0Configs()
@@ -24,9 +23,8 @@ public class ElevatorConstants {
                     .withMotionMagicCruiseVelocity(4) // also guess
                     .withMotionMagicJerk(4);
 
-
     public static final int elevatorLeaderId = 41;
-    
+
     public static final int elevatorFollowerId = 42;
 
     public static final String elevatorLeaderCanbus = "CANivore";
