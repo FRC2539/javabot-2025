@@ -1,8 +1,10 @@
 package frc.robot.subsystems.arm;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class ArmSubsystem extends SubsystemBase {
     private ArmPivotIO armPivotIO;
@@ -11,6 +13,8 @@ public class ArmSubsystem extends SubsystemBase {
     private WristIO wristIO;
     private WristIOInputsAutoLogged wristInputs = new WristIOInputsAutoLogged();
 
+    LoggedNetworkNumber wristPosition = new LoggedNetworkNumber("Wrist Position", 0);
+    LoggedNetworkNumber armPosition = new LoggedNetworkNumber("Arm Position", 0);
     public ArmSubsystem(ArmPivotIO armPivotIO, WristIO wristIO) {
         this.armPivotIO = armPivotIO;
         this.wristIO = wristIO;
@@ -30,6 +34,22 @@ public class ArmSubsystem extends SubsystemBase {
         wristIO.encoderUpdate();
         Logger.processInputs("RealOutputs/Arm", armPivotInputs);
         Logger.processInputs("RealOutputs/Wrist", wristInputs);
+    }
+
+    public Command wristTuneable() {
+        return run(
+                () -> {
+                    double Position = wristPosition.get();
+                    wristIO.setPosition(Position);
+                });
+    }
+
+    public Command armTuneable() {
+        return run(
+                () -> {
+                    double position = armPosition.get();
+                    armPivotIO.setPosition(position);
+                });
     }
 
     public Command turnWristRight() {

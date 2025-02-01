@@ -17,11 +17,18 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
+import org.littletonrobotics.junction.networktables.LoggedNetworkString;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class SuperstructureStateManager extends SubsystemBase {
 
     public final LoggedMechanismLigament2d m_elevator;
     public final LoggedMechanismLigament2d m_wrist;
+
+    LoggedNetworkNumber elevatorHeight = new LoggedNetworkNumber("Elevator Height", 0);
+    LoggedNetworkNumber armHeight = new LoggedNetworkNumber("Arm Height", 0);
+    LoggedNetworkNumber wristRotation = new LoggedNetworkNumber("Wrist Rotation", 0);
+    LoggedNetworkString parent = new LoggedNetworkString("Superstructure Position", "None");
 
     private static final double kElevatorMinimumLength = 0.5;
 
@@ -40,93 +47,119 @@ public class SuperstructureStateManager extends SubsystemBase {
                     double armPosition = s.ArmSubsystem.getArmPosition();
                     double wristPosition = s.ArmSubsystem.getWristPosition();
                     double elevatorPosition = s.ElevatorSubsystem.getPosition();
-                    double Enum = s.getEnum();
 
-                    if ((Math.abs(armPosition - p.armheight) < 0.1)
-                            && (Math.abs(wristPosition - p.wristrotation) < 0.1)
-                            && (Math.abs(elevatorPosition - p.elevatorheight) < 0.1)) {
+                    if ((Math.abs(armPosition - p.armHeight) < 0.1)
+                            && (Math.abs(wristPosition - p.wristRotation()) < 0.1)
+                            && (Math.abs(elevatorPosition - p.elevatorHeight()) < 0.1)) {
                         return true;
 
                     } else return false;
                 };
 
+
         public enum Position {
 
-            Sussy(1, 1, 1, 0, null),
-            None(1, 1, 1, 1, null, TRUE, false),
-            Home(1, 0, 1, 2, None),
-            Handoff(1, 0, 1, 3, None),
-            Icecream(1, 1, 1, 4, None),
-            Quick34(4, 2, 1, 5, None),
-            Quick23(3, 3, 1, 6, None),
-            Preppy(1, 2, 1, 7, None),
-            PreppyNull(1, 3, 1, 8, Preppy, TRUE, false),
-            L1Prep(2, 2, 1, 9, PreppyNull),
-            L1(2, 1, 4, 10, L1Prep),
-            L2Prep(3, 2, 1, 11, PreppyNull),
-            L2(3, 1, 1, 12, L2Prep),
-            L3Prep(4, 2, 1, 13, PreppyNull),
-            L3(4, 1, 1, 14, L3Prep),
-            L4Prep(5, 2, 1, 15, PreppyNull),
-            L4(5, 1, 1, 16, L4Prep),
-            L1AlgaePrep(2, 2, 1, 17, PreppyNull),
-            L1Algae(2, 1, 1, 18, L1AlgaePrep),
-            L2AlgaePrep(3, 2, 1, 19, PreppyNull),
-            L2Algae(3, 1, 1, 20, L2AlgaePrep),
-            L3AlgaePrep(4, 2, 1, 21, PreppyNull),
-            L3Algae(4, 1, 1, 22, L3AlgaePrep),
-            L4AlgaePrep(5, 2, 1, 23, PreppyNull),
-            L4Algae(5, 1, 1, 24, L4AlgaePrep),
-            SourcePrep(1, -2, 1, 25, None),
-            Source(0, -2, 1, 26, SourcePrep);
+            Sussy(1, 1, 1, null),
+            None(1, 1, 1, null, TRUE, false),
+            Home(1, 0, 1, None),
+            Handoff(1, 0, 1, None),
+            Icecream(1, 1, 1, None),
+            Quick34(4, 2, 1, None),
+            Quick23(3, 3, 1, None),
+            Preppy(1, 2, 1, None),
+            PreppyNull(1, 3, 1, Preppy, TRUE, false),
+            L1Prep(2, 2, 1, PreppyNull),
+            L1(2, 1, 4,  L1Prep),
+            L2Prep(3, 2, 1,  PreppyNull),
+            L2(3, 1, 1,  L2Prep),
+            L3Prep(4, 2, 1,  PreppyNull),
+            L3(4, 1, 1,  L3Prep),
+            L4Prep(5, 2, 1,  PreppyNull),
+            L4(5, 1, 1,  L4Prep),
+            L1AlgaePrep(2, 2, 1,  PreppyNull),
+            L1Algae(2, 1, 1,  L1AlgaePrep),
+            L2AlgaePrep(3, 2, 1,  PreppyNull),
+            L2Algae(3, 1, 1,  L2AlgaePrep),
+            L3AlgaePrep(4, 2, 1,  PreppyNull),
+            L3Algae(4, 1, 1,  L3AlgaePrep),
+            L4AlgaePrep(5, 2, 1,  PreppyNull),
+            L4Algae(5, 1, 1,  L4AlgaePrep),
+            SourcePrep(1, -2, 25, None),
+            Source(0, -2, 1, SourcePrep),
+            Tunable(0,0,0, None, FALSE);
 
-            public double elevatorheight;
-            public double armheight;
-            public double wristrotation;
+            public double elevatorHeight;
+            public double armHeight;
+            public double wristRotation;
             public Position position;
-            public Position parent;
+            private Position parent;
             public StateChecker isAtTarget;
             public boolean realPosition;
-            public boolean Enum;
 
             private Position(
-                    double elevatorheight,
-                    double armheight,
+                    double elevatorHeight,
+                    double armHeight,
                     double wristRotation,
                     Position parent,
                     StateChecker isAtTarget,
                     boolean realPosition) {
-                this.armheight = armheight;
-                this.elevatorheight = elevatorheight;
+                this.armHeight = armHeight;
+                this.elevatorHeight = elevatorHeight;
                 this.position = this;
                 this.parent = parent;
-                this.wristrotation = wristRotation;
+                this.wristRotation = wristRotation;
                 this.isAtTarget = isAtTarget;
                 this.realPosition = realPosition;
             }
 
             private Position(
-                    double elevatorheight,
-                    double armheight,
+                    double elevatorHeight,
+                    double armHeight,
                     double wristRotation,
                     Position parent,
                     StateChecker isAtTarget) {
-                this(elevatorheight, armheight, wristRotation, parent, DEFAULT, true);
+                this(elevatorHeight, armHeight, wristRotation, parent, DEFAULT, true);
             }
 
             private Position(
-                    double elevatorheight,
-                    double armheight,
+                    double elevatorHeight,
+                    double armHeight,
                     double wristRotation,
                     Position parent) {
-                this(elevatorheight, armheight, wristRotation, parent, DEFAULT);
+                this(elevatorHeight, armHeight, wristRotation, parent, DEFAULT);
             }
 
             public boolean isAtTarget(SuperstructureStateManager stateManager) {
                 return isAtTarget.isAtTarget(this, stateManager);
             }
 
-            LoggedNetworkNumber enumstate = new LoggedNetworkNumber("Enum State", 0);
+            //#region Pointer Methods
+            public double elevatorHeight() {
+                if (this == Position.Tunable) {
+                    return ; // ref: tunable variable armHeight 
+                }
+                return elevatorHeight;
+            }
+            public double armHeight() {
+                if (this == Position.Tunable) {
+                    return ; // ref: tunable variable armHeight 
+                }
+                return armHeight;
+            }
+            public double wristRotation() {
+                if (this == Position.Tunable) {
+                    return ; // ref: tunable variable wristRotation 
+                }
+                return wristRotation;
+            }
+            public Position parent() {
+                if (this == Position.Tunable) {
+                    return position.valueOf("None"); // ref: tunable variable parent
+                }
+                return parent;
+            }
+            //#endregion
+            
 
 
         }
@@ -198,7 +231,7 @@ public class SuperstructureStateManager extends SubsystemBase {
                 found = true;
                 break;
             }
-            myPosition = myPosition.parent;
+            myPosition = myPosition.parent();
         }
 
         if (!found || myPosition == null) {
@@ -227,7 +260,7 @@ public class SuperstructureStateManager extends SubsystemBase {
     private SuperstructureState.Position getChilderNodeInBranch(
             SuperstructureState.Position nodeA, SuperstructureState.Position nodeB) {
         var higherPose = nodeA;
-        if (nodeB.parent == nodeA) {
+        if (nodeB.parent() == nodeA) {
             higherPose = nodeB;
         }
         return higherPose;
@@ -240,10 +273,13 @@ public class SuperstructureStateManager extends SubsystemBase {
      */
     private Command internalGoToPosition(SuperstructureState.Position myPosition) {
         if (myPosition.realPosition) {
-            return ElevatorSubsystem.setPosition(myPosition.elevatorheight)
+            if (myPosition == Position.Tunable) {
+                return 
+            }
+            return ElevatorSubsystem.setPosition(myPosition.elevatorHeight())
                     .alongWith(
                             ArmSubsystem.setPosition(
-                                    myPosition.wristrotation, myPosition.armheight));
+                                    myPosition.wristRotation(), myPosition.armHeight()));
         } else {
             return Commands.idle();
         }
@@ -305,7 +341,7 @@ public class SuperstructureStateManager extends SubsystemBase {
         return (Commands.defer(
                         () -> {
                             SuperstructureState.Position nextPose =
-                                    getChilderNodeInBranch(lastPosition, targetPostition).parent;
+                                    getChilderNodeInBranch(lastPosition, targetPostition).parent();
                             if (nextPose == null) {
                                 return internalGoToPosition(Position.None);
                             }
@@ -318,8 +354,8 @@ public class SuperstructureStateManager extends SubsystemBase {
                 .repeatedly();
     }
 
-    public SuperstructureStateManager(ElevatorSubsystem elevatorheight, ArmSubsystem armSubsystem) {
-        ElevatorSubsystem = elevatorheight;
+    public SuperstructureStateManager(ElevatorSubsystem elevatorHeight, ArmSubsystem armSubsystem) {
+        ElevatorSubsystem = elevatorHeight;
         ArmSubsystem = armSubsystem;
 
         LoggedMechanism2d mech = new LoggedMechanism2d(3, 6);
@@ -337,11 +373,5 @@ public class SuperstructureStateManager extends SubsystemBase {
         SmartDashboard.putData("Mech2d", mech);
     }
 
-    public Command enumTuneable() {
-        return run(
-                () -> {
-                    double enum = Enum.get();
-                    enum.state(enum);
-                });
-    }
+    
 }

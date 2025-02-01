@@ -313,7 +313,6 @@ public class RobotContainer {
                 .onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric()));
 
         leftDriveController.getLeftTopLeft().whileTrue(gripperSubsystem.gripperTuneable());
-        leftDriveController.getLeftBottomMiddle().whileTrue(enumTuneable());
     }
 
     private double deadband(double value, double deadband) {
