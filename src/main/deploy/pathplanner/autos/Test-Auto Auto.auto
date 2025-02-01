@@ -17,15 +17,33 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "wait"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Red C_L4-SourceRight"
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "wait"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Red SourceRight-C_L4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "wait"
           }
         }
       ]

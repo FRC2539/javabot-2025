@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -229,8 +230,12 @@ public class Auto {
 
     // #146: Add a function that will register all triggers
     private double alignTimeout = 5;
+    private double placeTimeout = 0.5;
 
     private void configureBindings() {
+        NamedCommands.registerCommand(
+                "wait", Commands.waitUntil(() -> (alignCommand == null && heightCommand == null)));
+
         EventTrigger placeTrigger = new EventTrigger("place");
         placeTrigger.onTrue(
                 Commands.runOnce(
@@ -245,18 +250,23 @@ public class Auto {
                                                     targetLocation.offset)
                                             .withTimeout(alignTimeout); // Ref: Align Trigger
                             heightCommand =
-                                    Commands.run(
-                                            () -> {
-                                                robotContainer.stateManager.moveToPosition(
-                                                        targetHeight
-                                                                .position
-                                                                .parent); // Ref: Arm Trigger
-                                            });
+                                    robotContainer.stateManager.moveToPosition(
+                                            targetHeight.position.parent); // Ref: Arm Trigger
                             alignCommand
                                     .alongWith(heightCommand)
+                                    .until(() -> (alignCommand == null && heightCommand == null))
                                     .andThen(
-                                            robotContainer.stateManager.moveToPosition(
-                                                    targetHeight.position)); // Score
+                                            robotContainer
+                                                    .stateManager
+                                                    .moveToPosition(targetHeight.position)
+                                                    .andThen(
+                                                            robotContainer
+                                                                    .gripperSubsystem
+                                                                    .ejectSpin()
+                                                                    .withTimeout(placeTimeout))
+                                                    .andThen(
+                                                            robotContainer.gripperSubsystem
+                                                                    .setVoltage(0)));
                         }));
         EventTrigger alignTrigger = new EventTrigger("align");
         alignTrigger.onTrue(
