@@ -212,7 +212,139 @@
     {
       "name": "Debug",
       "grid_layout": {
-        "layouts": [],
+        "layouts": [
+          {
+            "title": "Swerve Characterization",
+            "x": 896.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 512.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Swerve SysId Dynamic Reverse",
+                "x": 512.0,
+                "y": 256.0,
+                "width": 384.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Swerve SysId Dynamic Reverse",
+                  "period": 0.06,
+                  "show_type": true
+                }
+              },
+              {
+                "title": "Swerve SysId Dynamic Forward",
+                "x": 512.0,
+                "y": 384.0,
+                "width": 384.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Swerve SysId Dynamic Forward",
+                  "period": 0.06,
+                  "show_type": true
+                }
+              },
+              {
+                "title": "Swerve SysId Quasistatic Forward",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Swerve SysId Quasistatic Forward",
+                  "period": 0.06,
+                  "show_type": true
+                }
+              },
+              {
+                "title": "Swerve SysId Quasistatic Reverse",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Swerve SysId Quasistatic Reverse",
+                  "period": 0.06,
+                  "show_type": true
+                }
+              },
+              {
+                "title": "Swerve SysId Rotation Mode",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Swerve SysId Rotation Mode",
+                  "period": 0.06,
+                  "show_type": true
+                }
+              },
+              {
+                "title": "Swerve SysId Steer Mode",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Swerve SysId Steer Mode",
+                  "period": 0.06,
+                  "show_type": true
+                }
+              },
+              {
+                "title": "Swerve SysId Translation Mode",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Swerve SysId Translation Mode",
+                  "period": 0.06,
+                  "show_type": true
+                }
+              },
+              {
+                "title": "Wheel Radius Characterization Command",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Wheel Radius Characterization Command",
+                  "period": 0.06,
+                  "show_type": true
+                }
+              },
+              {
+                "title": "WRC Speed",
+                "x": 768.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "WheelRadiusCharacterization/SpeedRadsPerSec",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": true
+                }
+              }
+            ]
+          }
+        ],
         "containers": []
       }
     }
