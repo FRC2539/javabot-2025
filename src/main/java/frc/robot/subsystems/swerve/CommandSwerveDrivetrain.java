@@ -36,6 +36,7 @@ import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.TunerConstants.TunerSwerveDrivetrain;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
+import java.util.List;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements Subsystem so it can easily
@@ -175,6 +176,23 @@ public class CommandSwerveDrivetrain implements Subsystem {
     public Pose2d getRobotPose() {
         return getState().Pose;
     }
+
+public Pose2d findNearestAprilTagPose(List<Pose2d> aprilTagPoses) {
+        //TODO: filter out opossing side tags and non-reef tags
+        Pose2d currentPose = getRobotPose();
+        Pose2d nearestAprilTagPose = null;
+        double nearestDistance = Double.MAX_VALUE;
+
+        for (Pose2d tagPose : aprilTagPoses) {
+                double distance = currentPose.getTranslation().getDistance(tagPose.getTranslation());
+                if (distance < nearestDistance) {
+                        nearestDistance = distance;
+                        nearestAprilTagPose = tagPose;
+                }
+        }
+
+        return nearestAprilTagPose;
+}
 
     public Rotation2d getOperatorForwardDirection() {
         return m_drivetrain.getOperatorForwardDirection();

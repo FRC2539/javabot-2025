@@ -284,7 +284,7 @@ public class RobotContainer {
 
         // Driver Align Bindings, for a different/later day
         // CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(9, 0));
-
+        
         // Climb Bindings
         leftDriveController.getLeftThumb().whileTrue(climberSubsystem.downPosition());
         leftDriveController.getRightThumb().whileTrue(climberSubsystem.upPosition());
