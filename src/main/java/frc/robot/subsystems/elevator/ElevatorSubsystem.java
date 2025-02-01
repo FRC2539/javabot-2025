@@ -13,7 +13,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     private ElevatorIO piviotIO;
     private ElevatorIOInputsAutoLogged elevatorInputs = new ElevatorIOInputsAutoLogged();
 
-    LoggedNetworkNumber elevatorPosition = new LoggedNetworkNumber("Elevator Position", 0);
+    // LoggedNetworkNumber elevatorPosition = new LoggedNetworkNumber("Elevator Position", 0);
 
     private final double lowerLimit = 0;
     private final double upperLimit = 100;
@@ -38,13 +38,13 @@ public class ElevatorSubsystem extends SubsystemBase {
         }
     }
 
-    public Command elevatorTuneable() {
-        return run(
-                () -> {
-                    double position = elevatorPosition.get();
-                    piviotIO.setPosition(position);
-                });
-    }
+    // public Command elevatorTuneable() {
+    //     return run(
+    //             () -> {
+    //                 double position = elevatorPosition.get();
+    //                 piviotIO.setPosition(position);
+    //             });
+    // }
 
     public Command zeroElevatorCommand() {
         return run(

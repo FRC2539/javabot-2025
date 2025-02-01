@@ -13,6 +13,7 @@ import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import frc.robot.util.Elastic;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
@@ -25,14 +26,14 @@ public class SuperstructureStateManager extends SubsystemBase {
     public final LoggedMechanismLigament2d m_elevator;
     public final LoggedMechanismLigament2d m_wrist;
 
-    LoggedNetworkNumber elevatorHeight = new LoggedNetworkNumber("Elevator Height", 0);
-    LoggedNetworkNumber armHeight = new LoggedNetworkNumber("Arm Height", 0);
-    LoggedNetworkNumber wristRotation = new LoggedNetworkNumber("Wrist Rotation", 0);
-    LoggedNetworkString parent = new LoggedNetworkString("Superstructure Position", "None");
-
     private static final double kElevatorMinimumLength = 0.5;
 
-    public class SuperstructureState {
+    public static class SuperstructureState {
+        private static LoggedNetworkNumber elevatorHeightLogged = new LoggedNetworkNumber("Elevator Height", 0);
+        private static LoggedNetworkNumber armHeightLogged = new LoggedNetworkNumber("Arm Height", 0);
+        private static LoggedNetworkNumber wristRotationLogged = new LoggedNetworkNumber("Wrist Rotation", 0);
+        private static LoggedNetworkString parentLogged = new LoggedNetworkString("Superstructure Parent", "Home");
+        private static LoggedNetworkString buttonTargetLogged = new LoggedNetworkString("Superstructure Button Target", "Tunable");
 
         @FunctionalInterface
         private interface StateChecker {
@@ -57,7 +58,7 @@ public class SuperstructureStateManager extends SubsystemBase {
                 };
 
 
-        public enum Position {
+        public static enum Position {
 
             Sussy(1, 1, 1, null),
             None(1, 1, 1, null, TRUE, false),
@@ -88,9 +89,9 @@ public class SuperstructureStateManager extends SubsystemBase {
             Source(0, -2, 1, SourcePrep),
             Tunable(0,0,0, None, FALSE);
 
-            public double elevatorHeight;
-            public double armHeight;
-            public double wristRotation;
+            private double elevatorHeight;
+            private double armHeight;
+            private double wristRotation;
             public Position position;
             private Position parent;
             public StateChecker isAtTarget;
@@ -136,25 +137,27 @@ public class SuperstructureStateManager extends SubsystemBase {
             //#region Pointer Methods
             public double elevatorHeight() {
                 if (this == Position.Tunable) {
-                    return ; // ref: tunable variable armHeight 
+                    elevatorHeight = SuperstructureState.elevatorHeightLogged.get(); // ref: tunable variable armHeight 
                 }
                 return elevatorHeight;
             }
             public double armHeight() {
                 if (this == Position.Tunable) {
-                    return ; // ref: tunable variable armHeight 
+                    armHeight = SuperstructureState.armHeightLogged.get(); // ref: tunable variable armHeight 
                 }
                 return armHeight;
             }
+
             public double wristRotation() {
                 if (this == Position.Tunable) {
-                    return ; // ref: tunable variable wristRotation 
+                    wristRotation = SuperstructureState.wristRotationLogged.get();
+                     // ref: tunable variable wristRotation 
                 }
                 return wristRotation;
             }
             public Position parent() {
                 if (this == Position.Tunable) {
-                    return position.valueOf("None"); // ref: tunable variable parent
+                    parent = Position.valueOf(parentLogged.get()); // ref: tunable variable parent
                 }
                 return parent;
             }
@@ -273,9 +276,6 @@ public class SuperstructureStateManager extends SubsystemBase {
      */
     private Command internalGoToPosition(SuperstructureState.Position myPosition) {
         if (myPosition.realPosition) {
-            if (myPosition == Position.Tunable) {
-                return 
-            }
             return ElevatorSubsystem.setPosition(myPosition.elevatorHeight())
                     .alongWith(
                             ArmSubsystem.setPosition(
@@ -315,6 +315,26 @@ public class SuperstructureStateManager extends SubsystemBase {
                 setFinalTarget.andThen(followInPath).andThen(clearOutPath).andThen(followOutPath);
         outputCommand.addRequirements(this);
         return outputCommand;
+    }
+
+    public Command moveToTunablePosition() {
+        return Commands.defer(() -> {
+            try {
+                var nextPos = Position.valueOf(SuperstructureState.buttonTargetLogged.get());
+                nextPos.parent();
+                return moveToPosition(nextPos).asProxy();
+            } catch (IllegalArgumentException e) {
+                return runOnce(() -> {
+                    Elastic.sendNotification(
+                        new Elastic.Notification(
+                            Elastic.Notification.NotificationLevel.ERROR,
+                            "Tunable Does Not Exist",
+                            "The tunable in the superstructure button does not exist."
+                        )
+                    );
+                }).andThen(Commands.idle());
+            }
+        }, Set.of());
     }
 
     private Command followOutPath() {

@@ -13,8 +13,8 @@ public class ArmSubsystem extends SubsystemBase {
     private WristIO wristIO;
     private WristIOInputsAutoLogged wristInputs = new WristIOInputsAutoLogged();
 
-    LoggedNetworkNumber wristPosition = new LoggedNetworkNumber("Wrist Position", 0);
-    LoggedNetworkNumber armPosition = new LoggedNetworkNumber("Arm Position", 0);
+    // LoggedNetworkNumber wristPosition = new LoggedNetworkNumber("Wrist Position", 0);
+    // LoggedNetworkNumber armPosition = new LoggedNetworkNumber("Arm Position", 0);
     public ArmSubsystem(ArmPivotIO armPivotIO, WristIO wristIO) {
         this.armPivotIO = armPivotIO;
         this.wristIO = wristIO;
@@ -36,21 +36,21 @@ public class ArmSubsystem extends SubsystemBase {
         Logger.processInputs("RealOutputs/Wrist", wristInputs);
     }
 
-    public Command wristTuneable() {
-        return run(
-                () -> {
-                    double Position = wristPosition.get();
-                    wristIO.setPosition(Position);
-                });
-    }
+    // public Command wristTuneable() {
+    //     return run(
+    //             () -> {
+    //                 double Position = wristPosition.get();
+    //                 wristIO.setPosition(Position);
+    //             });
+    // }
 
-    public Command armTuneable() {
-        return run(
-                () -> {
-                    double position = armPosition.get();
-                    armPivotIO.setPosition(position);
-                });
-    }
+    // public Command armTuneable() {
+    //     return run(
+    //             () -> {
+    //                 double position = armPosition.get();
+    //                 armPivotIO.setPosition(position);
+    //             });
+    // }
 
     public Command turnWristRight() {
         return setVoltageWrist(12);

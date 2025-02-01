@@ -8,57 +8,6 @@
         "layouts": [],
         "containers": [
           {
-            "title": "Left Coral Mode",
-            "x": 0.0,
-            "y": 0.0,
-            "width": 384.0,
-            "height": 128.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/FMSInfo/IsRedAlliance",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "Algae Mode",
-            "x": 384.0,
-            "y": 0.0,
-            "width": 512.0,
-            "height": 128.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/FMSInfo/IsRedAlliance",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "Right Coral Mode",
-            "x": 896.0,
-            "y": 0.0,
-            "width": 384.0,
-            "height": 128.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/FMSInfo/IsRedAlliance",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
             "title": "Alerts",
             "x": 1024.0,
             "y": 128.0,
@@ -104,7 +53,7 @@
             "properties": {
               "topic": "/SmartDashboard/Auto Path",
               "period": 0.06,
-              "field_game": "Reefscape",
+              "field_game": "Crescendo",
               "robot_width": 0.85,
               "robot_length": 0.85,
               "show_other_objects": true,
@@ -112,6 +61,57 @@
               "field_rotation": -90.0,
               "robot_color": 4294198070,
               "trajectory_color": 4294967295
+            }
+          },
+          {
+            "title": "Algae",
+            "x": 384.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/Superstructure/Algae",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4278255370,
+              "false_color": 4278190080,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "LeftCoral",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/Superstructure/LeftCoral",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4278255370,
+              "false_color": 4278190080,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "RightCoral",
+            "x": 896.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/Superstructure/RightCoral",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4278255370,
+              "false_color": 4278190080,
+              "true_icon": "None",
+              "false_icon": "None"
             }
           }
         ]
@@ -132,7 +132,7 @@
             "properties": {
               "topic": "/SmartDashboard/Auto Path",
               "period": 0.06,
-              "field_game": "Reefscape",
+              "field_game": "Crescendo",
               "robot_width": 0.85,
               "robot_length": 0.85,
               "show_other_objects": true,
@@ -196,7 +196,7 @@
             "properties": {
               "topic": "/SmartDashboard/Auto Path",
               "period": 0.06,
-              "field_game": "Reefscape",
+              "field_game": "Crescendo",
               "robot_width": 0.85,
               "robot_length": 0.85,
               "show_other_objects": true,
@@ -212,8 +212,121 @@
     {
       "name": "Debug",
       "grid_layout": {
-        "layouts": [],
-        "containers": []
+        "layouts": [
+          {
+            "title": "Superstructure Tunable",
+            "x": 256.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 384.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Elevator Height",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "Elevator Height",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Arm Height",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "Arm Height",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Wrist Rotation",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "Wrist Rotation",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Superstructure Parent",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "Superstructure Parent",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          }
+        ],
+        "containers": [
+          {
+            "title": "Climber Voltage",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "Climber Voltage",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Gripper Voltage",
+            "x": 0.0,
+            "y": 128.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "Gripper Voltage",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Superstructure Button Target",
+            "x": 256.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "Superstructure Button Target",
+              "period": 0.06,
+              "data_type": "string",
+              "show_submit_button": false
+            }
+          }
+        ]
       }
     }
   ]
