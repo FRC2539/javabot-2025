@@ -286,8 +286,8 @@ public class RobotContainer {
         // CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(9, 0));
 
         // Climb Bindings
-        leftDriveController.getLeftThumb().whileTrue(climberSubsystem.moveClimberDown());
-        leftDriveController.getRightThumb().whileTrue(climberSubsystem.moveClimberUp());
+        leftDriveController.getLeftThumb().whileTrue(climberSubsystem.downPosition());
+        leftDriveController.getRightThumb().whileTrue(climberSubsystem.upPosition());
 
         // Intake Bindings
         rightDriveController.getLeftThumb().whileTrue(intakeSubsystem.intake());
@@ -302,6 +302,10 @@ public class RobotContainer {
         ALGAE.and(rightDriveController.getTrigger()).whileTrue(gripperSubsystem.ejectSpinAlgae());
 
         // Technical Bindings
+
+        leftDriveController.getLeftBottomMiddle().onTrue(climberSubsystem.zeroClimberCommand());
+        leftDriveController.getLeftTopMiddle().whileTrue(climberSubsystem.climberTuneable());
+
         rightDriveController
                 .getLeftTopLeft()
                 .onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric()));
@@ -310,6 +314,8 @@ public class RobotContainer {
         leftDriveController.getLeftTopRight().whileTrue(intakeSubsystem.flipperTuneable());
 
         leftDriveController.getLeftBottomRight().onTrue(intakeSubsystem.zeroflipper());
+      
+        leftDriveController.getLeftTopLeft().whileTrue(gripperSubsystem.gripperTuneable());
     }
 
     private double deadband(double value, double deadband) {

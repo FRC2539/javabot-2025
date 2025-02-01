@@ -22,11 +22,10 @@ public class ClimberIOSim implements ClimberIO {
     }
 
     public void setPosition(double position) {
-
         this.positionSetpoint = position;
     }
 
-    public double getPosition() {
-        return position;
+    public void resetPosition(double position) {
+        this.position = position;
     }
 }
