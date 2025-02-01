@@ -40,6 +40,7 @@ public class SuperstructureStateManager extends SubsystemBase {
                     double armPosition = s.ArmSubsystem.getArmPosition();
                     double wristPosition = s.ArmSubsystem.getWristPosition();
                     double elevatorPosition = s.ElevatorSubsystem.getPosition();
+                    double Enum = s.getEnum();
 
                     if ((Math.abs(armPosition - p.armheight) < 0.1)
                             && (Math.abs(wristPosition - p.wristrotation) < 0.1)
@@ -50,33 +51,34 @@ public class SuperstructureStateManager extends SubsystemBase {
                 };
 
         public enum Position {
-            Sussy(1, 1, 1, null),
-            None(1, 1, 1, null, TRUE, false),
-            Home(1, 0, 1, None),
-            Handoff(1, 0, 1, None),
-            Icecream(1, 1, 1, None),
-            Quick34(4, 2, 1, None),
-            Quick23(3, 3, 1, None),
-            Preppy(1, 2, 1, None),
-            PreppyNull(1, 3, 1, Preppy, TRUE, false),
-            L1Prep(2, 2, 1, PreppyNull),
-            L1(2, 1, 4, L1Prep),
-            L2Prep(3, 2, 1, PreppyNull),
-            L2(3, 1, 1, L2Prep),
-            L3Prep(4, 2, 1, PreppyNull),
-            L3(4, 1, 1, L3Prep),
-            L4Prep(5, 2, 1, PreppyNull),
-            L4(5, 1, 1, L4Prep),
-            L1AlgaePrep(2, 2, 1, PreppyNull),
-            L1Algae(2, 1, 1, L1AlgaePrep),
-            L2AlgaePrep(3, 2, 1, PreppyNull),
-            L2Algae(3, 1, 1, L2AlgaePrep),
-            L3AlgaePrep(4, 2, 1, PreppyNull),
-            L3Algae(4, 1, 1, L3AlgaePrep),
-            L4AlgaePrep(5, 2, 1, PreppyNull),
-            L4Algae(5, 1, 1, L4AlgaePrep),
-            SourcePrep(1, -2, 1, None),
-            Source(0, -2, 1, SourcePrep);
+
+            Sussy(1, 1, 1, 0, null),
+            None(1, 1, 1, 1, null, TRUE, false),
+            Home(1, 0, 1, 2, None),
+            Handoff(1, 0, 1, 3, None),
+            Icecream(1, 1, 1, 4, None),
+            Quick34(4, 2, 1, 5, None),
+            Quick23(3, 3, 1, 6, None),
+            Preppy(1, 2, 1, 7, None),
+            PreppyNull(1, 3, 1, 8, Preppy, TRUE, false),
+            L1Prep(2, 2, 1, 9, PreppyNull),
+            L1(2, 1, 4, 10, L1Prep),
+            L2Prep(3, 2, 1, 11, PreppyNull),
+            L2(3, 1, 1, 12, L2Prep),
+            L3Prep(4, 2, 1, 13, PreppyNull),
+            L3(4, 1, 1, 14, L3Prep),
+            L4Prep(5, 2, 1, 15, PreppyNull),
+            L4(5, 1, 1, 16, L4Prep),
+            L1AlgaePrep(2, 2, 1, 17, PreppyNull),
+            L1Algae(2, 1, 1, 18, L1AlgaePrep),
+            L2AlgaePrep(3, 2, 1, 19, PreppyNull),
+            L2Algae(3, 1, 1, 20, L2AlgaePrep),
+            L3AlgaePrep(4, 2, 1, 21, PreppyNull),
+            L3Algae(4, 1, 1, 22, L3AlgaePrep),
+            L4AlgaePrep(5, 2, 1, 23, PreppyNull),
+            L4Algae(5, 1, 1, 24, L4AlgaePrep),
+            SourcePrep(1, -2, 1, 25, None),
+            Source(0, -2, 1, 26, SourcePrep);
 
             public double elevatorheight;
             public double armheight;
@@ -85,6 +87,7 @@ public class SuperstructureStateManager extends SubsystemBase {
             public Position parent;
             public StateChecker isAtTarget;
             public boolean realPosition;
+            public boolean Enum;
 
             private Position(
                     double elevatorheight,
@@ -122,6 +125,10 @@ public class SuperstructureStateManager extends SubsystemBase {
             public boolean isAtTarget(SuperstructureStateManager stateManager) {
                 return isAtTarget.isAtTarget(this, stateManager);
             }
+
+            LoggedNetworkNumber enumstate = new LoggedNetworkNumber("Enum State", 0);
+
+
         }
     }
 
@@ -328,5 +335,13 @@ public class SuperstructureStateManager extends SubsystemBase {
         root.append(m_elevator);
 
         SmartDashboard.putData("Mech2d", mech);
+    }
+
+    public Command enumTuneable() {
+        return run(
+                () -> {
+                    double enum = Enum.get();
+                    enum.state(enum);
+                });
     }
 }
