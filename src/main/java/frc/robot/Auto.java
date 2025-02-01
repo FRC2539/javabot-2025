@@ -25,6 +25,7 @@ import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class Auto {
@@ -236,6 +237,44 @@ public class Auto {
         NamedCommands.registerCommand(
                 "wait", Commands.waitUntil(() -> (alignCommand == null && heightCommand == null)));
 
+        EventTrigger alignTrigger = new EventTrigger("align");
+        alignTrigger.onTrue(
+                alignCommand =
+                        Commands.runOnce(
+                                        () -> {
+                                            if (alignCommand != null) alignCommand.cancel();
+                                        })
+                                .alongWith(
+                                        robotContainer
+                                                .alignToReef(
+                                                        targetLocation.getTagByTeam(),
+                                                        targetLocation.offset)
+                                                .withTimeout(alignTimeout)));
+
+        EventTrigger armTrigger = new EventTrigger("arm");
+        armTrigger.onTrue(
+                heightCommand =
+                        Commands.runOnce(
+                                        () -> {
+                                            if (heightCommand != null) heightCommand.cancel();
+                                        })
+                                .alongWith(
+                                        robotContainer.stateManager.moveToPosition(
+                                                targetHeight.position)));
+
+        // Prep Arm Trigger
+        EventTrigger prepArmTrigger = new EventTrigger("prepArm");
+        Command prepArmCommand =
+                Commands.defer(
+                        () ->
+                                robotContainer.stateManager.moveToPosition(
+                                        targetHeight.position.parent),
+                        Set.of(
+                                robotContainer.armSubsystem,
+                                robotContainer.elevatorSubsystem,
+                                robotContainer.stateManager));
+        prepArmTrigger.onTrue(prepArmCommand);
+
         EventTrigger placeTrigger = new EventTrigger("place");
         placeTrigger.onTrue(
                 Commands.runOnce(
@@ -268,168 +307,25 @@ public class Auto {
                                                             robotContainer.gripperSubsystem
                                                                     .setVoltage(0)));
                         }));
-        EventTrigger alignTrigger = new EventTrigger("align");
-        alignTrigger.onTrue(
-                alignCommand =
-                        Commands.runOnce(
-                                () -> {
-                                    if (alignCommand != null) alignCommand.cancel();
-                                    robotContainer
-                                            .alignToReef(
-                                                    targetLocation.getTagByTeam(),
-                                                    targetLocation.offset)
-                                            .withTimeout(alignTimeout); // Ref: Align Trigger
-                                }));
-        EventTrigger armTrigger = new EventTrigger("arm");
-        armTrigger.onTrue(
-                heightCommand =
-                        Commands.runOnce(
-                                () -> {
-                                    if (heightCommand != null) heightCommand.cancel();
-                                    robotContainer.stateManager.moveToPosition(
-                                            targetHeight.position); // Ref: Arm Trigger
-                                }));
-        EventTrigger prepArmTrigger = new EventTrigger("prepArm");
-        prepArmTrigger.onTrue(
-                heightCommand =
-                        Commands.runOnce(
-                                () -> {
-                                    if (heightCommand != null) heightCommand.cancel();
-                                    robotContainer.stateManager.moveToPosition(
-                                            targetHeight
-                                                    .position
-                                                    .parent); // Ref: Arm Trigger Modified for
-                                    // Parent
-                                }));
 
-        // #region Aligns and Heights
-        EventTrigger align_None = new EventTrigger("location None");
-        align_None.onTrue(
-                Commands.runOnce(
-                        () -> {
-                            targetLocation = DriveLocation.None;
-                        }));
-        EventTrigger align_SourceLeft = new EventTrigger("location Source Left");
-        align_SourceLeft.onTrue(
-                Commands.runOnce(
-                        () -> {
-                            targetLocation = DriveLocation.None;
-                        }));
-        EventTrigger align_SourceRight = new EventTrigger("location Source Right");
-        align_SourceRight.onTrue(
-                Commands.runOnce(
-                        () -> {
-                            targetLocation = DriveLocation.None;
-                        }));
-        EventTrigger align_A = new EventTrigger("location A");
-        align_A.onTrue(
-                Commands.runOnce(
-                        () -> {
-                            targetLocation = DriveLocation.A;
-                        }));
-        EventTrigger align_B = new EventTrigger("location B");
-        align_B.onTrue(
-                Commands.runOnce(
-                        () -> {
-                            targetLocation = DriveLocation.B;
-                        }));
-        EventTrigger align_C = new EventTrigger("location C");
-        align_C.onTrue(
-                Commands.runOnce(
-                        () -> {
-                            targetLocation = DriveLocation.C;
-                        }));
-        EventTrigger align_D = new EventTrigger("location D");
-        align_D.onTrue(
-                Commands.runOnce(
-                        () -> {
-                            targetLocation = DriveLocation.D;
-                        }));
-        EventTrigger align_E = new EventTrigger("location E");
-        align_E.onTrue(
-                Commands.runOnce(
-                        () -> {
-                            targetLocation = DriveLocation.E;
-                        }));
-        EventTrigger align_F = new EventTrigger("location F");
-        align_F.onTrue(
-                Commands.runOnce(
-                        () -> {
-                            targetLocation = DriveLocation.F;
-                        }));
-        EventTrigger align_G = new EventTrigger("location G");
-        align_G.onTrue(
-                Commands.runOnce(
-                        () -> {
-                            targetLocation = DriveLocation.G;
-                        }));
-        EventTrigger align_H = new EventTrigger("location H");
-        align_H.onTrue(
-                Commands.runOnce(
-                        () -> {
-                            targetLocation = DriveLocation.H;
-                        }));
-        EventTrigger align_I = new EventTrigger("location I");
-        align_I.onTrue(
-                Commands.runOnce(
-                        () -> {
-                            targetLocation = DriveLocation.I;
-                        }));
-        EventTrigger align_J = new EventTrigger("location J");
-        align_J.onTrue(
-                Commands.runOnce(
-                        () -> {
-                            targetLocation = DriveLocation.J;
-                        }));
-        EventTrigger align_K = new EventTrigger("location K");
-        align_K.onTrue(
-                Commands.runOnce(
-                        () -> {
-                            targetLocation = DriveLocation.K;
-                        }));
-        EventTrigger align_L = new EventTrigger("location L");
-        align_L.onTrue(
-                Commands.runOnce(
-                        () -> {
-                            targetLocation = DriveLocation.L;
-                        }));
+        // #region Aligns and Height
+        for (DriveLocation location : DriveLocation.values()) {
+            new EventTrigger("location ".concat(location.name()))
+                    .onTrue(
+                            Commands.runOnce(
+                                    () -> {
+                                        targetLocation = location;
+                                    }));
+        }
 
-        EventTrigger arm_None = new EventTrigger("height None");
-        arm_None.onTrue(
-                Commands.runOnce(
-                        () -> {
-                            targetHeight = ArmHeight.None;
-                        }));
-        EventTrigger arm_source = new EventTrigger("height Source");
-        arm_source.onTrue(
-                Commands.runOnce(
-                        () -> {
-                            targetHeight = ArmHeight.Source;
-                        }));
-        EventTrigger arm_L1 = new EventTrigger("height L1");
-        arm_L1.onTrue(
-                Commands.runOnce(
-                        () -> {
-                            targetHeight = ArmHeight.L1;
-                        }));
-        EventTrigger arm_L2 = new EventTrigger("height L2");
-        arm_L2.onTrue(
-                Commands.runOnce(
-                        () -> {
-                            targetHeight = ArmHeight.L2;
-                        }));
-        EventTrigger arm_L3 = new EventTrigger("height L3");
-        arm_L3.onTrue(
-                Commands.runOnce(
-                        () -> {
-                            targetHeight = ArmHeight.L3;
-                        }));
-        EventTrigger arm_L4 = new EventTrigger("height L4");
-        arm_L4.onTrue(
-                Commands.runOnce(
-                        () -> {
-                            targetHeight = ArmHeight.L4;
-                        }));
+        for (ArmHeight height : ArmHeight.values()) {
+            new EventTrigger("height ".concat(height.name()))
+                    .onTrue(
+                            Commands.runOnce(
+                                    () -> {
+                                        targetHeight = height;
+                                    }));
+        }
         // #endregion
     }
     ;
