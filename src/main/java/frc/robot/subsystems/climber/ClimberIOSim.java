@@ -22,7 +22,6 @@ public class ClimberIOSim implements ClimberIO {
     }
 
     public void setPosition(double position) {
-
         this.positionSetpoint = position;
     }
 

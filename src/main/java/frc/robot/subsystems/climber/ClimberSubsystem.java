@@ -15,15 +15,12 @@ public class ClimberSubsystem extends SubsystemBase {
     // NetworkTable table = nInstance.getTable("SmartDashboard");
     // NetworkTableValue climbervoltage = table.getValue("climbervoltage");
 
-    LoggedNetworkNumber climbervoltage = new LoggedNetworkNumber("Climber Voltage");
+    LoggedNetworkNumber climbervoltage = new LoggedNetworkNumber("Climber Voltage", 0);
 
     public ClimberSubsystem(ClimberIO climberIO) {
         this.piviotIO = climberIO;
         setDefaultCommand(stop());
     }
-
-    double x = 0;
-    double y = 0;
 
     public void periodic() {
 

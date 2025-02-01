@@ -50,6 +50,13 @@ public class ClimberIOTalonFX implements ClimberIO {
     }
 
     public void setPosition(double position) {
+        if (position > ClimberConstants.upperLimit) {
+            position = ClimberConstants.upperLimit;
+        }
+        if (position < ClimberConstants.lowerLimit) {
+            position = ClimberConstants.lowerLimit;
+        }
+
         climbermotor.setControl(motionMagicVoltage.withPosition(position));
     }
 

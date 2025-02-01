@@ -8,8 +8,6 @@ public interface ClimberIO {
 
     @AutoLog
     public class ClimberIOInputs {
-
-        // public double voltage = 0;
         public double position = 0;
         public double speed = 0;
         public double voltage;
