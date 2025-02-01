@@ -26,7 +26,7 @@ public class ElevatorIOSim implements ElevatorIO {
         this.positionSetpoint = position;
     }
 
-    public double getPosition() {
-        return position;
+    public void resetPosition(double position) {
+        this.position = position;
     }
 }
