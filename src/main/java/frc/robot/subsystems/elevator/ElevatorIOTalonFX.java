@@ -3,7 +3,7 @@ package frc.robot.subsystems.elevator;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
-import com.ctre.phoenix6.controls.Follower;
+// import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -13,9 +13,10 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     // TBD: Hardcode IDs or add support to make changeable in method
     private final TalonFX elevatorLeader =
             new TalonFX(ElevatorConstants.elevatorLeaderId, ElevatorConstants.elevatorLeaderCanbus);
-    private final TalonFX elevatorFollower =
-            new TalonFX(
-                    ElevatorConstants.elevatorFollowerId, ElevatorConstants.elevatorFollowerCanbus);
+    // private final TalonFX elevatorFollower =
+    //         new TalonFX(
+    //                 ElevatorConstants.elevatorFollowerId,
+    // ElevatorConstants.elevatorFollowerCanbus);
     private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0);
 
     public ElevatorIOTalonFX() {
@@ -33,7 +34,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
                         .withSlot0(ElevatorConstants.slot0Configs)
                         .withMotionMagic(ElevatorConstants.motionMagicConfigs));
 
-        elevatorFollower.setControl(new Follower(elevatorFollower.getDeviceID(), false));
+        // elevatorFollower.setControl(new Follower(elevatorFollower.getDeviceID(), false));
 
         elevatorLeader
                 .getConfigurator()
@@ -58,10 +59,16 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     }
 
     public void setPosition(double position) {
+        if (position > ElevatorConstants.upperLimit) {
+            position = ElevatorConstants.upperLimit;
+        }
+        if (position < ElevatorConstants.lowerLimit) {
+            position = ElevatorConstants.lowerLimit;
+        }
         elevatorLeader.setControl(motionMagicVoltage.withPosition(position));
     }
 
-    public double getPosition() {
-        return elevatorLeader.getPosition().refresh().getValueAsDouble();
+    public void resetPosition(double position) {
+        elevatorLeader.setPosition(position);
     }
 }

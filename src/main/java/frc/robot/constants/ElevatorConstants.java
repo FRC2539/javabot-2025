@@ -32,4 +32,7 @@ public class ElevatorConstants {
     public static final String elevatorFollowerCanbus = "CANivore";
 
     public static final CurrentLimitsConfigs currentLimit = new CurrentLimitsConfigs();
+
+    public static final double lowerLimit = 0;
+    public static final double upperLimit = 100;
 }

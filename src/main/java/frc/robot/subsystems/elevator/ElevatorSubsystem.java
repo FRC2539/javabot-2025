@@ -9,9 +9,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     private ElevatorIO piviotIO;
     private ElevatorIOInputsAutoLogged elevatorInputs = new ElevatorIOInputsAutoLogged();
 
-    private final double lowerLimit = 0;
-    private final double upperLimit = 100;
-
     public ElevatorSubsystem(ElevatorIO elevatorIO) {
         this.piviotIO = elevatorIO;
         setDefaultCommand(setPosition(0));
@@ -22,29 +19,21 @@ public class ElevatorSubsystem extends SubsystemBase {
         piviotIO.updateInputs(elevatorInputs);
 
         Logger.processInputs("RealOutputs/Elevator", elevatorInputs);
-
-        if (elevatorInputs.voltage < 0 && elevatorInputs.position <= lowerLimit) {
-            this.piviotIO.setVoltage(0);
-        }
-
-        if (elevatorInputs.voltage > 0 && elevatorInputs.position >= upperLimit) {
-            this.piviotIO.setVoltage(0);
-        }
     }
 
     public Command zeroElevatorCommand() {
-        return run(
+        return runOnce(
                 () -> {
-                    piviotIO.setPosition(0);
+                    piviotIO.resetPosition(0);
                 });
     }
 
     public Command moveElevatorUp() {
-        return setVoltage(12).until(() -> elevatorInputs.position >= upperLimit);
+        return setVoltage(12);
     }
 
     public Command moveElevatorDown() {
-        return setVoltage(-12).until(() -> elevatorInputs.position <= lowerLimit);
+        return setVoltage(-12);
     }
 
     public Command setVoltage(double voltage) {
@@ -62,6 +51,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public double getPosition() {
-        return piviotIO.getPosition();
+        return elevatorInputs.position;
     }
 }
