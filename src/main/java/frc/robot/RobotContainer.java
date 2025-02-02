@@ -47,6 +47,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSimML;
+import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -303,6 +304,20 @@ public class RobotContainer {
                 .whileTrue(gripperSubsystem.intakeSpinAlgae());
         ALGAE.and(rightDriveController.getTrigger()).whileTrue(gripperSubsystem.ejectSpinAlgae());
 
+        leftDriveController
+                .getTrigger()
+                .onTrue(
+                        Commands.runOnce(
+                                () ->
+                                        stateManager.setLastScoringPose(
+                                                drivetrain.findNearestAprilTagPose())));
+
+        stateManager.LEFT_CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(-0.2));
+
+        stateManager.ALGAE.and(leftDriveController.getTrigger()).whileTrue(alignToReef(0));
+
+        stateManager.RIGHT_CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(0.2));
+
         // Technical Bindings
 
         leftDriveController.getLeftBottomMiddle().onTrue(climberSubsystem.zeroClimberCommand());
@@ -347,6 +362,21 @@ public class RobotContainer {
                 offset,
                 alignmentPose,
                 Rotation2d.kPi); // Skibidi
+    }
+
+    // Automatically chooses closest tag
+    public Command alignToReef(double offset) {
+        return Commands.defer(
+                () -> {
+                    return new AlignToReef(
+                            drivetrain,
+                            leftJoystickVelocityX,
+                            leftJoystickVelocityY,
+                            offset,
+                            stateManager.getLastScoringPose(),
+                            Rotation2d.kPi);
+                },
+                Set.of(drivetrain));
     }
 
     public Command alignAndDriveToReef(int tag, double offset) {

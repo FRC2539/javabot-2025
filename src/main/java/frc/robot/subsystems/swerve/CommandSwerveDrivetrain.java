@@ -34,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.TunerConstants.TunerSwerveDrivetrain;
+import frc.robot.constants.VisionConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -174,6 +175,43 @@ public class CommandSwerveDrivetrain implements Subsystem {
 
     public Pose2d getRobotPose() {
         return getState().Pose;
+    }
+
+    public Pose2d findNearestAprilTagPose() {
+        // TODO: filter out opposing side tags and non-reef tags
+        Pose2d currentPose = getRobotPose();
+        Pose2d nearestAprilTagPose = null;
+        double nearestDistance = Double.MAX_VALUE;
+
+        Pose2d[] aprilTagPoses = new Pose2d[6];
+
+        if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
+            for (int i = 0; i < 6; i++) {
+                aprilTagPoses[i] =
+                        VisionConstants.aprilTagLayout
+                                .getTagPose(GlobalConstants.redReefTagIDs[i])
+                                .get()
+                                .toPose2d();
+            }
+        } else {
+            for (int i = 0; i < 6; i++) {
+                aprilTagPoses[i] =
+                        VisionConstants.aprilTagLayout
+                                .getTagPose(GlobalConstants.blueReefTagIDs[i])
+                                .get()
+                                .toPose2d();
+            }
+        }
+
+        for (Pose2d tagPose : aprilTagPoses) {
+            double distance = currentPose.getTranslation().getDistance(tagPose.getTranslation());
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestAprilTagPose = tagPose;
+            }
+        }
+
+        return nearestAprilTagPose;
     }
 
     public Rotation2d getOperatorForwardDirection() {
