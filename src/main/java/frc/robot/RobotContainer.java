@@ -312,53 +312,11 @@ public class RobotContainer {
                                         stateManager.setLastScoringPose(
                                                 drivetrain.findNearestAprilTagPose())));
 
-        stateManager
-                .LEFT_CORAL
-                .and(leftDriveController.getTrigger())
-                .onTrue(
-                        Commands.defer(
-                                () -> {
-                                    return new AlignToReef(
-                                            drivetrain,
-                                            leftJoystickVelocityX,
-                                            leftJoystickVelocityY,
-                                            -0.4,
-                                            stateManager.getLastScoringPose(),
-                                            Rotation2d.kPi);
-                                },
-                                Set.of(drivetrain)));
+        stateManager.LEFT_CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(-0.2));
 
-        stateManager
-                .ALGAE
-                .and(leftDriveController.getTrigger())
-                .onTrue(
-                        Commands.defer(
-                                () -> {
-                                    return new AlignToReef(
-                                            drivetrain,
-                                            leftJoystickVelocityX,
-                                            leftJoystickVelocityY,
-                                            0,
-                                            stateManager.getLastScoringPose(),
-                                            Rotation2d.kPi);
-                                },
-                                Set.of(drivetrain)));
+        stateManager.ALGAE.and(leftDriveController.getTrigger()).whileTrue(alignToReef(0));
 
-        stateManager
-                .RIGHT_CORAL
-                .and(leftDriveController.getTrigger())
-                .onTrue(
-                        Commands.defer(
-                                () -> {
-                                    return new AlignToReef(
-                                            drivetrain,
-                                            leftJoystickVelocityX,
-                                            leftJoystickVelocityY,
-                                            0.4,
-                                            stateManager.getLastScoringPose(),
-                                            Rotation2d.kPi);
-                                },
-                                Set.of(drivetrain)));
+        stateManager.RIGHT_CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(0.2));
 
         // Technical Bindings
 
@@ -404,6 +362,21 @@ public class RobotContainer {
                 offset,
                 alignmentPose,
                 Rotation2d.kPi); // Skibidi
+    }
+
+    // Automatically chooses closest tag
+    public Command alignToReef(double offset) {
+        return Commands.defer(
+                () -> {
+                    return new AlignToReef(
+                            drivetrain,
+                            leftJoystickVelocityX,
+                            leftJoystickVelocityY,
+                            offset,
+                            stateManager.getLastScoringPose(),
+                            Rotation2d.kPi);
+                },
+                Set.of(drivetrain));
     }
 
     public Command alignAndDriveToReef(int tag, double offset) {
