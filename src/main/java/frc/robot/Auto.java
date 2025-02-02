@@ -6,7 +6,6 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.events.EventTrigger;
 import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -169,26 +168,32 @@ public class Auto {
     }
 
     // #146 Constants
-    public static double leftOffset = -1;
-    public static double rightOffset = 1;
+    public static double leftOffset = -0.2;
+    public static double rightOffset = 0.2;
+    public static double centerOffset = 0;
 
     public enum DriveLocation {
         None(0, 0, 0),
         SourceLeft(1, 13, 0),
         SourceRight(2, 12, 0),
         A(7, 18, leftOffset),
+        AB(7, 18, centerOffset),
         B(7, 18, rightOffset),
         C(8, 17, leftOffset),
+        CD(8, 17, centerOffset),
         D(8, 17, rightOffset),
         E(9, 22, leftOffset),
+        EF(9, 22, centerOffset),
         F(9, 22, rightOffset),
         G(10, 21, leftOffset),
+        GH(10, 21, centerOffset),
         H(10, 21, rightOffset),
         I(11, 20, leftOffset),
+        JH(11, 20, centerOffset),
         J(11, 20, rightOffset),
         K(6, 19, leftOffset),
-        L(6, 19, rightOffset),
-        ;
+        KL(6, 19, centerOffset),
+        L(6, 19, rightOffset);
 
         public int tagRed;
         public int tagBlue;
@@ -212,19 +217,21 @@ public class Auto {
     }
 
     public enum ArmHeight {
-        None(Position.None, 0),
-        Home(Position.Home, 0),
-        L1(Position.L1, 1),
-        L2(Position.L2, 1),
-        L3(Position.L3, 1),
-        L4(Position.L4, 1),
-        Source(Position.Source, -1);
+        None(Position.None, Position.None, 0),
+        Home(Position.Home, Position.Home, 0),
+        L1(Position.L1, Position.L1Prep, 1),
+        L2(Position.L2, Position.L2Prep, 1),
+        L3(Position.L3, Position.L3Prep, 1),
+        L4(Position.L4, Position.L4Prep, 1),
+        Source(Position.Source, Position.SourcePrep, -1);
 
         public Position position;
         public double armMotorSpeed;
+        public Position prep;
 
-        private ArmHeight(Position position, double armMotorSpeed) {
+        private ArmHeight(Position position, Position prep, double armMotorSpeed) {
             this.position = position;
+            this.prep = prep;
             this.armMotorSpeed = armMotorSpeed;
         }
     }
@@ -238,88 +245,85 @@ public class Auto {
                 "wait", Commands.waitUntil(() -> (alignCommand == null && heightCommand == null)));
 
         // Align Trigger
-        EventTrigger alignTrigger = new EventTrigger("align");
         Command alignCommand =
                 Commands.defer(
                         () ->
-                                robotContainer.alignAndDriveToReef(targetLocation.getTagByTeam(), targetLocation.offset).withTimeout(alignTimeout),
-                        Set.of(
-                                robotContainer.armSubsystem,
-                                robotContainer.elevatorSubsystem,
-                                robotContainer.stateManager));
-        alignTrigger.onTrue(alignCommand);
+                                robotContainer
+                                        .alignAndDriveToReef(
+                                                targetLocation.getTagByTeam(),
+                                                targetLocation.offset)
+                                        .withTimeout(alignTimeout),
+                        Set.of(robotContainer.drivetrain));
+        NamedCommands.registerCommand("align", alignCommand);
 
         // Arm Trigger
-        EventTrigger armTrigger = new EventTrigger("arm");
         Command armCommand =
                 Commands.defer(
-                        () ->
-                                robotContainer.stateManager.moveToPosition(
-                                        targetHeight.position),
+                        () -> robotContainer.stateManager.moveToPosition(targetHeight.position),
                         Set.of(
                                 robotContainer.armSubsystem,
                                 robotContainer.elevatorSubsystem,
                                 robotContainer.stateManager));
-        armTrigger.onTrue(armCommand);
+        NamedCommands.registerCommand("arm", armCommand.asProxy());
 
         // Prep Arm Trigger
-        EventTrigger prepArmTrigger = new EventTrigger("prepArm");
         Command prepArmCommand =
                 Commands.defer(
-                        () ->
-                                robotContainer.stateManager.moveToPosition(
-                                        targetHeight.position.parent),
+                        () -> robotContainer.stateManager.moveToPosition(targetHeight.prep),
                         Set.of(
                                 robotContainer.armSubsystem,
                                 robotContainer.elevatorSubsystem,
                                 robotContainer.stateManager));
-        prepArmTrigger.onTrue(prepArmCommand);
+        NamedCommands.registerCommand("prep", prepArmCommand.asProxy());
 
         // Score Trigger
-        EventTrigger scoreTrigger = new EventTrigger("score");
         Command scoreCommand =
-                Commands.defer(
-                        () ->
-                            robotContainer.stateManager.moveToPosition(targetHeight.position)
-                            .andThen(robotContainer.gripperSubsystem.ejectSpinCoral().withTimeout(placeTimeout))
-                            .andThen(robotContainer.gripperSubsystem.setVoltage(0)),
-                        Set.of(
-                            robotContainer.armSubsystem,
-                            robotContainer.elevatorSubsystem,
-                            robotContainer.stateManager));
-        scoreTrigger.onTrue(scoreCommand);
+                robotContainer.gripperSubsystem.ejectSpinCoral().withTimeout(placeTimeout);
+        NamedCommands.registerCommand("score", prepArmCommand.asProxy());
 
+        // Place Trigger
+        Command placeCommand =
+                prepArmCommand
+                        .asProxy()
+                        .until(() -> true) // Wait until arm and align are in position
+                        .andThen(
+                                (Commands.waitUntil(() -> true)) // Wait until arm is in position
+                                        .andThen(scoreCommand.asProxy()))
+                        .deadlineFor(armCommand.asProxy())
+                        .deadlineFor(alignCommand)
+                        .andThen(
+                                robotContainer
+                                        .stateManager
+                                        .moveToPosition(Position.Home)
+                                        .asProxy());
+        NamedCommands.registerCommand("score", placeCommand);
 
+        // Intake Trigger
+        Command intakeCommand = robotContainer.intakeSubsystem.intake();
+        NamedCommands.registerCommand("intake", intakeCommand.asProxy());
 
-        EventTrigger placeTrigger = new EventTrigger("place");
-        placeTrigger.onTrue(
-            prepArmCommand.alongWith(alignCommand)
-            .until(() -> true) // Wait until arm and align are in position 
-            .andThen(armCommand)
-            .until(() -> true) // Wait until arm is in position
-            .andThen(scoreCommand)
-        );
-
-
-        // #region Auto create locations and heights 
+        // #region Auto create locations and heights
         for (DriveLocation location : DriveLocation.values()) {
-            new EventTrigger("location ".concat(location.name()))
-                    .onTrue(
-                            Commands.runOnce(
-                                    () -> {
-                                        targetLocation = location;
-                                    }));
+            NamedCommands.registerCommand(
+                    "location ".concat(location.name()),
+                    Commands.runOnce(
+                            () -> {
+                                targetLocation = location;
+                            }));
         }
 
         for (ArmHeight height : ArmHeight.values()) {
-            new EventTrigger("height ".concat(height.name()))
-                    .onTrue(
-                            Commands.runOnce(
-                                    () -> {
-                                        targetHeight = height;
-                                    }));
+            NamedCommands.registerCommand(
+                    "height ".concat(height.name()),
+                    Commands.runOnce(
+                            () -> {
+                                targetHeight = height;
+                            }));
         }
         // #endregion
     }
-    ;
+
+    private boolean armReadyToScore() {
+        throw new UnsupportedOperationException("Not implemented");
+    }
 }
