@@ -21,5 +21,5 @@ public interface ElevatorIO {
 
     public void setVoltage(double voltage);
 
-    public double getPosition();
+    public void resetPosition(double position);
 }
