@@ -10,7 +10,7 @@ public class WristIONeo550 implements WristIO {
             new SparkMax(ArmConstants.WRIST_MOTOR_ID, SparkLowLevel.MotorType.kBrushless);
 
     private final DutyCycleEncoder throughboreEncoder =
-            new DutyCycleEncoder(ArmConstants.ARM_THROUGHBORE_ENCODER_ID, 2 * Math.PI, 0);
+            new DutyCycleEncoder(ArmConstants.WRIST_THROUGHBORE_ENCODER_ID, 2 * Math.PI, 0);
 
     public WristIONeo550() {
         wristMotor.getEncoder().setPosition(0);

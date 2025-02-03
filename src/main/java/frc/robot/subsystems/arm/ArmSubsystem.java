@@ -19,7 +19,7 @@ public class ArmSubsystem extends SubsystemBase {
 
     public ArmSubsystem(ArmPivotIO armPivotIO) {
         this.armPivotIO = armPivotIO;
-        setDefaultCommand(setVoltage(0));
+        setDefaultCommand(setVoltage(0)); 
     }
 
     public void periodic() {
@@ -39,11 +39,12 @@ public class ArmSubsystem extends SubsystemBase {
         return setVoltage(-12);
     }
 
-    public Command setPosition(double arm) {
+    public Command setPosition(double position) {
         return startRun(
             () -> {
-                reference = arm;
+                reference = position;
             },
+
             () -> {
                 double voltage = controller.calculate(armPivotInputs.throughboreEncoderPosition, reference);
                 voltage = Math.min(12.0, Math.max(-12.0, voltage)); // Clamp voltage
@@ -53,24 +54,24 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
 
-    private Command profileToReference() {
-        return startRun(
-            () -> {
-                goal = new TrapezoidProfile.State(reference, 0);
-                state = new TrapezoidProfile.State(armPivotInputs.position, armPivotInputs.velocity);
-            }, () -> {
-                double voltage = controller.calculate(armPivotInputs.position, state.position);
-                voltage = Math.min(12.0, Math.max(-12.0, voltage)); // Clamp voltage
-                armPivotIO.setVoltage(voltage);
-                if (profile.timeLeftUntil(goal.position) <= 0.25) {
-
-                };
-                state = profile.calculate(0.02, state, goal);
-            });
-    }
+    // private Command profileToReference() {
+    //     return startRun(
+    //         () -> {
+    //             goal = new TrapezoidProfile.State(reference, 0);
+    //             state = new TrapezoidProfile.State(armPivotInputs.position, armPivotInputs.velocity);
+    //         }, () -> {
+    //             double voltage = controller.calculate(armPivotInputs.position, state.position);
+    //             voltage = Math.min(12.0, Math.max(-12.0, voltage)); // Clamp voltage
+    //             armPivotIO.setVoltage(voltage);
+    //             if (profile.timeLeftUntil(goal.position) <= 0.25) {
+                    
+    //             };
+    //             state = profile.calculate(0.02, state, goal);
+    //         });
+    // }
 
     private Command pidLoopAtReference() {
-
+        
     }
 
     public double getArmPosition() {
