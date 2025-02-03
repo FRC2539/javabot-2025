@@ -292,6 +292,7 @@ public class RobotContainer {
         // Climb Bindings
         leftDriveController.getLeftThumb().whileTrue(climberSubsystem.moveClimberDown());
         leftDriveController.getRightThumb().whileTrue(climberSubsystem.moveClimberUp());
+        leftDriveController.getLeftBottomMiddle().whileTrue(alignToPiece());
 
         // Intake Bindings
         rightDriveController.getLeftThumb().whileTrue(intakeSubsystem.intake());
