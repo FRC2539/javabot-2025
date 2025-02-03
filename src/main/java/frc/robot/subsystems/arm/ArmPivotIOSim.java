@@ -24,8 +24,4 @@ public class ArmPivotIOSim implements ArmPivotIO {
     public void setPosition(double position) {
         this.positionSetpoint = position;
     }
-
-    public double getPosition() {
-        return position;
-    }
 }

@@ -8,15 +8,14 @@ public interface ArmPivotIO {
     @AutoLog
     public class ArmPivotIOInputs {
         public double position = 0;
-        public double speed = 0;
+        public double velocity = 0;
         public double voltage = 0;
         public double current = 0;
         public double temperature = 0;
+        public double throughboreEncoderPosition = 0;
     }
 
-    public void setPosition(double position);
+    // public void setPosition(double position);
 
     public void setVoltage(double voltage);
-
-    public double getPosition();
 }

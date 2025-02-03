@@ -28,6 +28,7 @@ import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
 import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.arm.WristIONeo550;
 import frc.robot.subsystems.arm.WristIOSim;
+import frc.robot.subsystems.arm.WristSubsystem;
 import frc.robot.subsystems.climber.ClimberIOSim;
 import frc.robot.subsystems.climber.ClimberIOTalonFX;
 import frc.robot.subsystems.climber.ClimberSubsystem;
@@ -65,7 +66,7 @@ public class RobotContainer {
     public IntakeSubsystem intakeSubsystem;
     public ElevatorSubsystem elevatorSubsystem;
     public ClimberSubsystem climberSubsystem;
-    public ArmSubsystem armSubsystem;
+    public WristSubsystem armSubsystem;
     public Vision vision;
 
     public SuperstructureStateManager stateManager;
@@ -94,7 +95,8 @@ public class RobotContainer {
                                     () -> drivetrain.getRobotPose().getRotation()));
             gripperSubsystem = new GripperSubsystem(new GripperIOFalcon());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
-            armSubsystem = new ArmSubsystem(new ArmPivotIOTalonFX(), new WristIONeo550());
+            armSubsystem = new ArmSubsystem(new ArmPivotIOTalonFX());
+            wristSubsystem = new WristSubsystem(new WristIONeo550());
             climberSubsystem = new ClimberSubsystem(new ClimberIOTalonFX());
 
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerTalonFX(), new FlipperIOTalon());
@@ -117,12 +119,13 @@ public class RobotContainer {
 
             gripperSubsystem = new GripperSubsystem(new GripperIOSim());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSim());
-            armSubsystem = new ArmSubsystem(new ArmPivotIOSim(), new WristIOSim());
+            armSubsystem = new ArmSubsystem(new ArmPivotIOSim());
+            wristSubsystem = new WristSubsystem(new WristIOSim());
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
             climberSubsystem = new ClimberSubsystem(new ClimberIOSim());
         }
 
-        stateManager = new SuperstructureStateManager(elevatorSubsystem, armSubsystem);
+        stateManager = new SuperstructureStateManager(elevatorSubsystem, armSubsystem, wristSubsystem);
 
         configureBindings();
 
@@ -161,33 +164,36 @@ public class RobotContainer {
 
                 drivetrain.applyRequest(
                         () -> {
-                            //     return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(
-                            //             driverDesiredSpeeds);
+                            // return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(
+                            // driverDesiredSpeeds);
                             return drivetrain.driveDriverRelative(driverVelocitySupplier.get());
                         }));
 
         // drive.withVelocityX(-leftDriveController.getYAxis().get() *
-        // GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive forward with negative Y (forward)
-        //     .withVelocityY(-leftDriveController.getXAxis().get() *
+        // GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive forward with negative Y
+        // (forward)
+        // .withVelocityY(-leftDriveController.getXAxis().get() *
         // GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive left with negative X (left)
-        //     .withRotationalRate(-rightDriveController.getXAxis().get() *
-        // GlobalConstants.MAX_ROTATIONAL_SPEED) // Drive counterclockwise with negative X (left)
+        // .withRotationalRate(-rightDriveController.getXAxis().get() *
+        // GlobalConstants.MAX_ROTATIONAL_SPEED) // Drive counterclockwise with negative
+        // X (left)
 
         // operatorController.getA().whileTrue(drivetrain.applyRequest(() -> brake));
-        // operatorController.getA().onTrue(new alignToTargetX(drivetrain, vision, 10, 0));
+        // operatorController.getA().onTrue(new alignToTargetX(drivetrain, vision, 10,
+        // 0));
 
         // operatorController
-        //         .getA()
-        //         .onTrue(
-        //                 new AlignToAngle(
-        //                                 drivetrain,
-        //                                 new Rotation2d(),
-        //                                 true,
-        //                                 leftJoystickVelocityX,
-        //                                 leftJoystickVelocityY)
-        //                         .andThen(
-        //                                 new alignToTargetX(
-        //                                         drivetrain, vision, 10, 0,
+        // .getA()
+        // .onTrue(
+        // new AlignToAngle(
+        // drivetrain,
+        // new Rotation2d(),
+        // true,
+        // leftJoystickVelocityX,
+        // leftJoystickVelocityY)
+        // .andThen(
+        // new alignToTargetX(
+        // drivetrain, vision, 10, 0,
         // leftJoystickVelocityX)));
 
         // operatorController.getA().toggleOnTrue(alignToReef(9, 0));
@@ -196,42 +202,42 @@ public class RobotContainer {
         // leftDriveController.getLeftThumb().whileTrue(alignToReef(9, -0.4));
         // leftDriveController.getBottomThumb().whileTrue(alignAndDriveToReef(19, 0));
         // operatorController
-        //         .getB()
-        //         .whileTrue(
-        //                 drivetrain.applyRequest(
-        //                         () ->
-        //                                 point.withModuleDirection(
-        //                                         new Rotation2d(
-        //                                                 -operatorController.getLeftYAxis().get(),
-        //                                                 -operatorController
-        //                                                         .getLeftXAxis()
-        //                                                         .get()))));
+        // .getB()
+        // .whileTrue(
+        // drivetrain.applyRequest(
+        // () ->
+        // point.withModuleDirection(
+        // new Rotation2d(
+        // -operatorController.getLeftYAxis().get(),
+        // -operatorController
+        // .getLeftXAxis()
+        // .get()))));
 
         // leftDriveController
-        //         .getTrigger()
-        //         .whileTrue(
-        //                 new WheelRadiusCharacterization(
-        //                         WheelRadiusCharacterization.Direction.CLOCKWISE, drivetrain));
+        // .getTrigger()
+        // .whileTrue(
+        // new WheelRadiusCharacterization(
+        // WheelRadiusCharacterization.Direction.CLOCKWISE, drivetrain));
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
 
         // operatorController
-        //         .getBack()
-        //         .and(operatorController.getY())
-        //         .whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+        // .getBack()
+        // .and(operatorController.getY())
+        // .whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
         // operatorController
-        //         .getBack()
-        //         .and(operatorController.getX())
-        //         .whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+        // .getBack()
+        // .and(operatorController.getX())
+        // .whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
         // operatorController
-        //         .getStart()
-        //         .and(operatorController.getY())
-        //         .whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+        // .getStart()
+        // .and(operatorController.getY())
+        // .whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         // operatorController
-        //         .getStart()
-        //         .and(operatorController.getX())
-        //         .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        // .getStart()
+        // .and(operatorController.getX())
+        // .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         // operatorController
         // operatorController.getA().onTrue(stateManager.moveToPosition(Position.L4));
@@ -241,11 +247,11 @@ public class RobotContainer {
 
         // reset the field-centric heading on left bumper press
         // operatorController
-        //         .getLeftBumper()
-        //         .onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        // .getLeftBumper()
+        // .onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         // operatorController
-        //         .getRightBumper()
-        //         .onTrue(drivetrain.runOnce(() -> drivetrain.resetPose(Pose2d.kZero)));
+        // .getRightBumper()
+        // .onTrue(drivetrain.runOnce(() -> drivetrain.resetPose(Pose2d.kZero)));
 
         // Operator Mode Setting
         operatorController.getLeftBumper().onTrue(stateManager.setLeftCoralMode());
@@ -388,9 +394,5 @@ public class RobotContainer {
         Supplier<Pose2d> piecePositionSupplier = () -> new Pose2d(9.2, 4.15, Rotation2d.kZero);
         return new AlignToPiece(
                 drivetrain, driverVelocitySupplier, 0, piecePositionSupplier, Rotation2d.kZero);
-    }
-
-    public boolean getVerticality() {
-        return vision.isCoralVertical(0);
     }
 }

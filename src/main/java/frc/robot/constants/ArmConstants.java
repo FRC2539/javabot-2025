@@ -7,7 +7,13 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 public class ArmConstants {
 
     public static final int ARM_PIVOT_MOTOR_ID = 0; // not correct motor ID
+    public static final String ARM_PIVOT_CANBUS = "CANivore";
+
     public static final int WRIST_MOTOR_ID = 1; // not correct motor ID
+    public static final String WRIST_CANBUS = "CANivore";
+
+    public static final int ARM_THROUGHBORE_ENCODER_ID = 0;
+    public static final int WRIST_THROUGHBORE_ENCODER_ID = 1;
 
     public static final Slot0Configs slot0Configs =
             new Slot0Configs()
