@@ -70,9 +70,9 @@ public class ArmSubsystem extends SubsystemBase {
     //         });
     // }
 
-    private Command pidLoopAtReference() {
+    // private Command pidLoopAtReference() {
         
-    }
+    // }
 
     public double getArmPosition() {
         return armPivotInputs.position;

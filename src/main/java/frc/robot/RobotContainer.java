@@ -66,7 +66,8 @@ public class RobotContainer {
     public IntakeSubsystem intakeSubsystem;
     public ElevatorSubsystem elevatorSubsystem;
     public ClimberSubsystem climberSubsystem;
-    public WristSubsystem armSubsystem;
+    public ArmSubsystem armSubsystem;
+    public WristSubsystem wristSubsystem;
     public Vision vision;
 
     public SuperstructureStateManager stateManager;
