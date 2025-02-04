@@ -9,6 +9,8 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.util.Units;
@@ -19,6 +21,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.constants.GlobalConstants;
+import frc.robot.constants.VisionConstants;
+import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState;
 import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState.Position;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import java.util.ArrayList;
@@ -242,21 +246,16 @@ public class Auto {
 
     private void configureBindings() {
         NamedCommands.registerCommand(
-                "wait", Commands.waitUntil(() -> (alignCommand == null && heightCommand == null)));
+                "wait", Commands.waitUntil(() -> armInPlace() && robotInPlace()));
 
-        // Align Trigger
         Command alignCommand =
                 Commands.defer(
                         () ->
-                                robotContainer
-                                        .alignAndDriveToReef(
-                                                targetLocation.getTagByTeam(),
-                                                targetLocation.offset)
-                                        .withTimeout(alignTimeout),
+                                robotContainer.alignAndDriveToReef(
+                                        targetLocation.getTagByTeam(), targetLocation.offset),
                         Set.of(robotContainer.drivetrain));
         NamedCommands.registerCommand("align", alignCommand);
 
-        // Arm Trigger
         Command armCommand =
                 Commands.defer(
                         () -> robotContainer.stateManager.moveToPosition(targetHeight.position),
@@ -266,7 +265,6 @@ public class Auto {
                                 robotContainer.stateManager));
         NamedCommands.registerCommand("arm", armCommand.asProxy());
 
-        // Prep Arm Trigger
         Command prepArmCommand =
                 Commands.defer(
                         () -> robotContainer.stateManager.moveToPosition(targetHeight.prep),
@@ -274,31 +272,28 @@ public class Auto {
                                 robotContainer.armSubsystem,
                                 robotContainer.elevatorSubsystem,
                                 robotContainer.stateManager));
-        NamedCommands.registerCommand("prep", prepArmCommand.asProxy());
+        NamedCommands.registerCommand("preparm", prepArmCommand.asProxy());
 
-        // Score Trigger
         Command scoreCommand =
                 robotContainer.gripperSubsystem.ejectSpinCoral().withTimeout(placeTimeout);
         NamedCommands.registerCommand("score", prepArmCommand.asProxy());
 
-        // Place Trigger
+        // spotless:off
         Command placeCommand =
-                prepArmCommand
-                        .asProxy()
-                        .until(() -> true) // Wait until arm and align are in position
-                        .andThen(
-                                (Commands.waitUntil(() -> true)) // Wait until arm is in position
-                                        .andThen(scoreCommand.asProxy()))
-                        .deadlineFor(armCommand.asProxy())
-                        .deadlineFor(alignCommand)
-                        .andThen(
-                                robotContainer
-                                        .stateManager
-                                        .moveToPosition(Position.Home)
-                                        .asProxy());
-        NamedCommands.registerCommand("score", placeCommand);
+                prepArmCommand.asProxy()
+                .until(() -> robotInPlace()) // Wait until arm and align are in position
+                .andThen(
+                    (
+                        Commands.waitUntil(() -> armInPlace())
+                        .andThen(scoreCommand.asProxy())
+                    )
+                    .deadlineFor(armCommand.asProxy())
+                )
+                .deadlineFor(alignCommand);
 
-        // Intake Trigger
+        NamedCommands.registerCommand("score", placeCommand);
+        // spotless:on
+
         Command intakeCommand = robotContainer.intakeSubsystem.intake();
         NamedCommands.registerCommand("intake", intakeCommand.asProxy());
 
@@ -323,7 +318,14 @@ public class Auto {
         // #endregion
     }
 
-    private boolean armReadyToScore() {
-        throw new UnsupportedOperationException("Not implemented");
+    private boolean armInPlace() {
+        return SuperstructureState.DEFAULT.isAtTarget(targetHeight.position, robotContainer.stateManager);
+    }
+
+    private boolean robotInPlace() {
+        Pose2d alignmentPose = VisionConstants.aprilTagLayout.getTagPose(targetLocation.getTagByTeam()).get().toPose2d().plus(new Transform2d(0, targetLocation.offset, Rotation2d.kZero));
+        Pose2d currentPose = robotContainer.drivetrain.getRobotPose();
+        Pose2d relativePos = alignmentPose.relativeTo(currentPose);
+        return (Math.abs(relativePos.getX()) < 0.1) && (Math.abs(relativePos.getY()) < 0.1) && (Math.abs(relativePos.getRotation().getRadians()) < 0.1);  
     }
 }
