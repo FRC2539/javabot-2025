@@ -260,17 +260,24 @@ public class RobotContainer {
         operatorController.getRightBumper().onTrue(stateManager.setRightCoralMode());
         operatorController.getRightTrigger().onTrue(stateManager.setAlgaeMode());
         operatorController.getLeftJoystick().toggleOnTrue(Commands.idle()); // L3 Rainbow
-        operatorController.getLeftTrigger().whileTrue(Commands.idle()); // L2 Station Lights
+        // operatorController.getLeftTrigger().whileTrue(Commands.idle()); // L2 Station Lights
+        operatorController.getLeftTrigger().onTrue(stateManager.setArmWristMode());
 
         // Coral Mode Bindings
         final Trigger CORAL = stateManager.LEFT_CORAL.or(stateManager.RIGHT_CORAL);
         final Trigger ALGAE = stateManager.ALGAE;
+        final Trigger ARMWRIST = stateManager.ARMWRIST;
+        ARMWRIST.and(operatorController.getY()).whileTrue(armSubsystem.armPivotUp());
+        ARMWRIST.and(operatorController.getA()).whileTrue(armSubsystem.armpivotDown());
+        ARMWRIST.and(operatorController.getX()).whileTrue(wristSubsystem.turnWristLeft());
+        ARMWRIST.and(operatorController.getB()).whileTrue(wristSubsystem.turnWristRight());
         CORAL.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.L4));
         CORAL.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3));
         CORAL.and(operatorController.getB()).onTrue(stateManager.moveToPosition(Position.L2));
         CORAL.and(operatorController.getA()).onTrue(stateManager.moveToPosition(Position.L1));
         CORAL.and(operatorController.getStart())
                 .onTrue(stateManager.moveToPosition(Position.Source));
+
         CORAL.and(operatorController.getDPadDown())
                 .onTrue(stateManager.moveToPosition(Position.Home));
         CORAL.and(operatorController.getDPadUp())
@@ -343,6 +350,9 @@ public class RobotContainer {
         leftDriveController.getLeftTopLeft().whileTrue(gripperSubsystem.gripperTuneable());
 
         leftDriveController.getRightBottomLeft().onTrue(elevatorSubsystem.zeroElevatorCommand());
+
+        // test
+        // operatorController.get
     }
 
     private double deadband(double value, double deadband) {

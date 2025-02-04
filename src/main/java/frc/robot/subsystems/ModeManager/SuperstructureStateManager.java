@@ -135,7 +135,8 @@ public class SuperstructureStateManager extends SubsystemBase {
     private enum CoralAlgaeMode {
         LeftCoral,
         RightCoral,
-        Algae;
+        Algae,
+        ArmWrist;
     }
 
     private CoralAlgaeMode coralAlgaeMode = CoralAlgaeMode.LeftCoral;
@@ -154,6 +155,7 @@ public class SuperstructureStateManager extends SubsystemBase {
     public final Trigger RIGHT_CORAL =
             new Trigger(() -> coralAlgaeMode == CoralAlgaeMode.RightCoral);
     public final Trigger ALGAE = new Trigger(() -> coralAlgaeMode == CoralAlgaeMode.Algae);
+    public final Trigger ARMWRIST = new Trigger(() -> coralAlgaeMode == CoralAlgaeMode.ArmWrist);
 
     public Command setLeftCoralMode() {
         return Commands.runOnce(() -> coralAlgaeMode = CoralAlgaeMode.LeftCoral);
@@ -165,6 +167,10 @@ public class SuperstructureStateManager extends SubsystemBase {
 
     public Command setAlgaeMode() {
         return Commands.runOnce(() -> coralAlgaeMode = CoralAlgaeMode.Algae);
+    }
+
+    public Command setArmWristMode() {
+        return Commands.runOnce(() -> coralAlgaeMode = CoralAlgaeMode.ArmWrist);
     }
 
     // public List<SuperstructureState.Position> inList = new ArrayList<>();
