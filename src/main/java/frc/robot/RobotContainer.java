@@ -42,6 +42,7 @@ import frc.robot.subsystems.intake.FlipperIOTalon;
 import frc.robot.subsystems.intake.IntakeRollerIOSim;
 import frc.robot.subsystems.intake.IntakeRollerTalonFX;
 import frc.robot.subsystems.intake.IntakeSubsystem;
+import frc.robot.subsystems.lights.LightsSubsystem;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -67,6 +68,7 @@ public class RobotContainer {
     public ClimberSubsystem climberSubsystem;
     public ArmSubsystem armSubsystem;
     public Vision vision;
+    public LightsSubsystem lights;
 
     public SuperstructureStateManager stateManager;
 
@@ -96,6 +98,7 @@ public class RobotContainer {
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
             armSubsystem = new ArmSubsystem(new ArmPivotIOTalonFX(), new WristIONeo550());
             climberSubsystem = new ClimberSubsystem(new ClimberIOTalonFX());
+            lights = new LightsSubsystem();
 
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerTalonFX(), new FlipperIOTalon());
         } else {
@@ -120,6 +123,7 @@ public class RobotContainer {
             armSubsystem = new ArmSubsystem(new ArmPivotIOSim(), new WristIOSim());
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
             climberSubsystem = new ClimberSubsystem(new ClimberIOSim());
+            lights = new LightsSubsystem();
         }
 
         stateManager = new SuperstructureStateManager(elevatorSubsystem, armSubsystem);
@@ -251,8 +255,8 @@ public class RobotContainer {
         operatorController.getLeftBumper().onTrue(stateManager.setLeftCoralMode());
         operatorController.getRightBumper().onTrue(stateManager.setRightCoralMode());
         operatorController.getRightTrigger().onTrue(stateManager.setAlgaeMode());
-        operatorController.getLeftJoystick().toggleOnTrue(Commands.idle()); // L3 Rainbow
-        operatorController.getLeftTrigger().whileTrue(Commands.idle()); // L2 Station Lights
+        operatorController.getLeftJoystick().toggleOnTrue(Commands.runOnce((() -> LightsSubsystem.LEDSegment.MainStrip.setRainbowAnimation(1)))); // L3 Rainbow
+        operatorController.getLeftTrigger().whileTrue(Commands.runOnce((() -> LightsSubsystem.LEDSegment.MainStrip.setStrobeAnimation(LightsSubsystem.purple, 1)))); // L2 tation Lights
 
         // Coral Mode Bindings
         final Trigger CORAL = stateManager.LEFT_CORAL.or(stateManager.RIGHT_CORAL);
