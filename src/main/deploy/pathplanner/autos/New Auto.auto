@@ -11,21 +11,9 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.75
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "EF-CS2"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.75
           }
         },
         {
@@ -35,21 +23,9 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.75
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "CD-CS2"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.75
           }
         },
         {

@@ -55,7 +55,7 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    public Auto auto = new Auto(drivetrain);
+   // public Auto auto = new Auto(drivetrain);
     public IntakeSubsystem intakeSubsystem;
     public ElevatorSubsystem elevatorSubsystem;
     public ClimberSubsystem climberSubsystem;
@@ -74,16 +74,16 @@ public class RobotContainer {
 
     public RobotContainer() {
         if (Robot.isReal()) {
-            vision =
-                    new Vision(
-                            drivetrain::addVisionMeasurement,
-                            new VisionIOLimelight(
-                                    VisionConstants.camera0Name,
-                                    () -> drivetrain.getRobotPose().getRotation()),
-                            new DummyPhotonCamera(),
-                            new VisionIOLimelight(
-                                    VisionConstants.camera2Name,
-                                    () -> drivetrain.getRobotPose().getRotation()));
+        //     vision =
+        //             new Vision(
+        //                     drivetrain::addVisionMeasurement,
+        //                     new VisionIOLimelight(
+        //                             VisionConstants.camera0Name,
+        //                             () -> drivetrain.getRobotPose().getRotation()),
+        //                     new DummyPhotonCamera(),
+        //                     new VisionIOLimelight(
+        //                             VisionConstants.camera2Name,
+        //                             () -> drivetrain.getRobotPose().getRotation()));
 
             armSubsystem = new ArmSubsystem(new ArmPivotIOSim(), new WristIOSim());
 
@@ -344,7 +344,8 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return auto.getAuto();
+        //return auto.getAuto();
+        return Commands.none();
 
         // return drivetrain.applyRequest(() ->
         //                 drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(new
