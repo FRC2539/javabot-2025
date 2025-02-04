@@ -319,13 +319,21 @@ public class Auto {
     }
 
     private boolean armInPlace() {
-        return SuperstructureState.DEFAULT.isAtTarget(targetHeight.position, robotContainer.stateManager);
+        return SuperstructureState.DEFAULT.isAtTarget(
+                targetHeight.position, robotContainer.stateManager);
     }
 
     private boolean robotInPlace() {
-        Pose2d alignmentPose = VisionConstants.aprilTagLayout.getTagPose(targetLocation.getTagByTeam()).get().toPose2d().plus(new Transform2d(0, targetLocation.offset, Rotation2d.kZero));
+        Pose2d alignmentPose =
+                VisionConstants.aprilTagLayout
+                        .getTagPose(targetLocation.getTagByTeam())
+                        .get()
+                        .toPose2d()
+                        .plus(new Transform2d(0, targetLocation.offset, Rotation2d.kZero));
         Pose2d currentPose = robotContainer.drivetrain.getRobotPose();
         Pose2d relativePos = alignmentPose.relativeTo(currentPose);
-        return (Math.abs(relativePos.getX()) < 0.1) && (Math.abs(relativePos.getY()) < 0.1) && (Math.abs(relativePos.getRotation().getRadians()) < 0.1);  
+        return (Math.abs(relativePos.getX()) < 0.1)
+                && (Math.abs(relativePos.getY()) < 0.1)
+                && (Math.abs(relativePos.getRotation().getRadians()) < 0.1);
     }
 }
