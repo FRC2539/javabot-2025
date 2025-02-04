@@ -126,7 +126,8 @@ public class RobotContainer {
             climberSubsystem = new ClimberSubsystem(new ClimberIOSim());
         }
 
-        stateManager = new SuperstructureStateManager(elevatorSubsystem, armSubsystem, wristSubsystem);
+        stateManager =
+                new SuperstructureStateManager(elevatorSubsystem, armSubsystem, wristSubsystem);
 
         configureBindings();
 

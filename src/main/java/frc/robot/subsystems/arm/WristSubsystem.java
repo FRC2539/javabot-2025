@@ -14,8 +14,8 @@ public class WristSubsystem extends SubsystemBase {
     private TrapezoidProfile profile = new TrapezoidProfile(new TrapezoidProfile.Constraints(1, 1));
 
     private double reference = 0;
-    private TrapezoidProfile.State state = new TrapezoidProfile.State(0,0);
-    private TrapezoidProfile.State goal = new TrapezoidProfile.State(0,0);
+    private TrapezoidProfile.State state = new TrapezoidProfile.State(0, 0);
+    private TrapezoidProfile.State goal = new TrapezoidProfile.State(0, 0);
 
     public WristSubsystem(WristIO wristIO) {
         this.wristIO = wristIO;
@@ -41,16 +41,15 @@ public class WristSubsystem extends SubsystemBase {
 
     public Command setPosition(double position) {
         return startRun(
-            () -> {
-                reference = position;
-            },
-            
-            () -> {
-                double voltage = controller.calculate(wristInputs.throughboreEncoderPosition, reference);
-                voltage = Math.min(12.0, Math.max(-12.0, voltage)); // Clamp voltage
-                wristIO.setVoltage(voltage);
-            }
-        );
+                () -> {
+                    reference = position;
+                },
+                () -> {
+                    double voltage =
+                            controller.calculate(wristInputs.throughboreEncoderPosition, reference);
+                    voltage = Math.min(12.0, Math.max(-12.0, voltage)); // Clamp voltage
+                    wristIO.setVoltage(voltage);
+                });
     }
 
     public double getPosition() {
