@@ -5,10 +5,12 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class ArmSubsystem extends SubsystemBase {
     private ArmPivotIO armPivotIO;
     public ArmPivotIOInputsAutoLogged armPivotInputs = new ArmPivotIOInputsAutoLogged();
+    public LoggedNetworkNumber armTuneables = new LoggedNetworkNumber("arm tuneable", 9);
 
     private PIDController controller = new PIDController(0.1, 0, 0);
     private TrapezoidProfile profile = new TrapezoidProfile(new TrapezoidProfile.Constraints(1, 1));
@@ -37,6 +39,10 @@ public class ArmSubsystem extends SubsystemBase {
 
     public Command armpivotDown() {
         return setVoltage(-12);
+    }
+
+    public Command tuneable() {
+        return run(() -> setVoltage(armTuneables.get()));
     }
 
     public Command setPosition(double position) {
