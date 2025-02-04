@@ -9,14 +9,17 @@ import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
 import frc.robot.commands.AlignAndDriveToReef;
 import frc.robot.commands.AlignToPiece;
 import frc.robot.commands.AlignToReef;
+import frc.robot.commands.WheelRadiusCharacterization;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
@@ -216,22 +219,33 @@ public class RobotContainer {
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
 
-        // operatorController
-        //         .getBack()
-        //         .and(operatorController.getY())
-        //         .whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        // operatorController
-        //         .getBack()
-        //         .and(operatorController.getX())
-        //         .whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        // operatorController
-        //         .getStart()
-        //         .and(operatorController.getY())
-        //         .whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        // operatorController
-        //         .getStart()
-        //         .and(operatorController.getX())
-        //         .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        SmartDashboard.putData(
+                drivetrain
+                        .sysIdDynamic(Direction.kForward)
+                        .withName("Swerve SysId Dynamic Forward"));
+        SmartDashboard.putData(
+                drivetrain
+                        .sysIdDynamic(Direction.kReverse)
+                        .withName("Swerve SysId Dynamic Reverse"));
+        SmartDashboard.putData(
+                drivetrain
+                        .sysIdQuasistatic(Direction.kForward)
+                        .withName("Swerve SysId Quasistatic Forward"));
+        SmartDashboard.putData(
+                drivetrain
+                        .sysIdQuasistatic(Direction.kReverse)
+                        .withName("Swerve SysId Quasistatic Reverse"));
+
+        SmartDashboard.putData(
+                drivetrain.sysIdRotationMode().withName("Swerve SysId Rotation Mode"));
+        SmartDashboard.putData(drivetrain.sysIdSteerMode().withName("Swerve SysId Steer Mode"));
+        SmartDashboard.putData(
+                drivetrain.sysIdTranslationMode().withName("Swerve SysId Translation Mode"));
+
+        SmartDashboard.putData(
+                new WheelRadiusCharacterization(
+                                WheelRadiusCharacterization.Direction.CLOCKWISE, drivetrain)
+                        .withName("Wheel Radius Characterization Command"));
 
         // operatorController
         // operatorController.getA().onTrue(stateManager.moveToPosition(Position.L4));
