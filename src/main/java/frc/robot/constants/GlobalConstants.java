@@ -52,6 +52,9 @@ public class GlobalConstants {
         public static final int OPERATOR_CONTROLLER = 2;
     }
 
+    public static final int[] blueReefTagIDs = {17, 18, 19, 20, 21, 22};
+    public static final int[] redReefTagIDs = {6, 7, 8, 9, 10, 11};
+
     private static RobotConfig robotConfigPathplanner;
 
     public static RobotConfig getRobotConfigPathplanner() {
