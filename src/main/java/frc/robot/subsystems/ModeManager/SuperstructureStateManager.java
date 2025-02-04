@@ -1,5 +1,6 @@
 package frc.robot.subsystems.ModeManager;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
@@ -137,6 +138,16 @@ public class SuperstructureStateManager extends SubsystemBase {
     }
 
     private CoralAlgaeMode coralAlgaeMode = CoralAlgaeMode.LeftCoral;
+
+    private Pose2d lastScoringPose = Pose2d.kZero;
+
+    public void setLastScoringPose(Pose2d pose) {
+        lastScoringPose = pose;
+    }
+
+    public Pose2d getLastScoringPose() {
+        return lastScoringPose;
+    }
 
     public final Trigger LEFT_CORAL = new Trigger(() -> coralAlgaeMode == CoralAlgaeMode.LeftCoral);
     public final Trigger RIGHT_CORAL =

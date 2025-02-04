@@ -29,11 +29,13 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.TunerConstants.TunerSwerveDrivetrain;
+import frc.robot.constants.VisionConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -174,6 +176,43 @@ public class CommandSwerveDrivetrain implements Subsystem {
 
     public Pose2d getRobotPose() {
         return getState().Pose;
+    }
+
+    public Pose2d findNearestAprilTagPose() {
+        // TODO: filter out opposing side tags and non-reef tags
+        Pose2d currentPose = getRobotPose();
+        Pose2d nearestAprilTagPose = null;
+        double nearestDistance = Double.MAX_VALUE;
+
+        Pose2d[] aprilTagPoses = new Pose2d[6];
+
+        if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
+            for (int i = 0; i < 6; i++) {
+                aprilTagPoses[i] =
+                        VisionConstants.aprilTagLayout
+                                .getTagPose(GlobalConstants.redReefTagIDs[i])
+                                .get()
+                                .toPose2d();
+            }
+        } else {
+            for (int i = 0; i < 6; i++) {
+                aprilTagPoses[i] =
+                        VisionConstants.aprilTagLayout
+                                .getTagPose(GlobalConstants.blueReefTagIDs[i])
+                                .get()
+                                .toPose2d();
+            }
+        }
+
+        for (Pose2d tagPose : aprilTagPoses) {
+            double distance = currentPose.getTranslation().getDistance(tagPose.getTranslation());
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestAprilTagPose = tagPose;
+            }
+        }
+
+        return nearestAprilTagPose;
     }
 
     public Rotation2d getOperatorForwardDirection() {
@@ -451,7 +490,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
      * @return Command to run
      */
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutineToApply.quasistatic(direction);
+        return defer(() -> m_sysIdRoutineToApply.quasistatic(direction));
     }
 
     /**
@@ -462,7 +501,19 @@ public class CommandSwerveDrivetrain implements Subsystem {
      * @return Command to run
      */
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutineToApply.dynamic(direction);
+        return defer(() -> m_sysIdRoutineToApply.dynamic(direction));
+    }
+
+    public Command sysIdTranslationMode() {
+        return Commands.runOnce(() -> m_sysIdRoutineToApply = m_sysIdRoutineTranslation);
+    }
+
+    public Command sysIdSteerMode() {
+        return Commands.runOnce(() -> m_sysIdRoutineToApply = m_sysIdRoutineSteer);
+    }
+
+    public Command sysIdRotationMode() {
+        return Commands.runOnce(() -> m_sysIdRoutineToApply = m_sysIdRoutineRotation);
     }
 
     private double lastSpeed = 0;

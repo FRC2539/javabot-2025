@@ -9,14 +9,17 @@ import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
 import frc.robot.commands.AlignAndDriveToReef;
 import frc.robot.commands.AlignToPiece;
 import frc.robot.commands.AlignToReef;
+import frc.robot.commands.WheelRadiusCharacterization;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
@@ -47,6 +50,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSimML;
+import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -215,22 +219,33 @@ public class RobotContainer {
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
 
-        // operatorController
-        //         .getBack()
-        //         .and(operatorController.getY())
-        //         .whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        // operatorController
-        //         .getBack()
-        //         .and(operatorController.getX())
-        //         .whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        // operatorController
-        //         .getStart()
-        //         .and(operatorController.getY())
-        //         .whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        // operatorController
-        //         .getStart()
-        //         .and(operatorController.getX())
-        //         .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        SmartDashboard.putData(
+                drivetrain
+                        .sysIdDynamic(Direction.kForward)
+                        .withName("Swerve SysId Dynamic Forward"));
+        SmartDashboard.putData(
+                drivetrain
+                        .sysIdDynamic(Direction.kReverse)
+                        .withName("Swerve SysId Dynamic Reverse"));
+        SmartDashboard.putData(
+                drivetrain
+                        .sysIdQuasistatic(Direction.kForward)
+                        .withName("Swerve SysId Quasistatic Forward"));
+        SmartDashboard.putData(
+                drivetrain
+                        .sysIdQuasistatic(Direction.kReverse)
+                        .withName("Swerve SysId Quasistatic Reverse"));
+
+        SmartDashboard.putData(
+                drivetrain.sysIdRotationMode().withName("Swerve SysId Rotation Mode"));
+        SmartDashboard.putData(drivetrain.sysIdSteerMode().withName("Swerve SysId Steer Mode"));
+        SmartDashboard.putData(
+                drivetrain.sysIdTranslationMode().withName("Swerve SysId Translation Mode"));
+
+        SmartDashboard.putData(
+                new WheelRadiusCharacterization(
+                                WheelRadiusCharacterization.Direction.CLOCKWISE, drivetrain)
+                        .withName("Wheel Radius Characterization Command"));
 
         // operatorController
         // operatorController.getA().onTrue(stateManager.moveToPosition(Position.L4));
@@ -303,6 +318,20 @@ public class RobotContainer {
                 .whileTrue(gripperSubsystem.intakeSpinAlgae());
         ALGAE.and(rightDriveController.getTrigger()).whileTrue(gripperSubsystem.ejectSpinAlgae());
 
+        leftDriveController
+                .getTrigger()
+                .onTrue(
+                        Commands.runOnce(
+                                () ->
+                                        stateManager.setLastScoringPose(
+                                                drivetrain.findNearestAprilTagPose())));
+
+        stateManager.LEFT_CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(-0.2));
+
+        stateManager.ALGAE.and(leftDriveController.getTrigger()).whileTrue(alignToReef(0));
+
+        stateManager.RIGHT_CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(0.2));
+
         // Technical Bindings
 
         leftDriveController.getLeftBottomMiddle().onTrue(climberSubsystem.zeroClimberCommand());
@@ -347,6 +376,21 @@ public class RobotContainer {
                 offset,
                 alignmentPose,
                 Rotation2d.kPi); // Skibidi
+    }
+
+    // Automatically chooses closest tag
+    public Command alignToReef(double offset) {
+        return Commands.defer(
+                () -> {
+                    return new AlignToReef(
+                            drivetrain,
+                            leftJoystickVelocityX,
+                            leftJoystickVelocityY,
+                            offset,
+                            stateManager.getLastScoringPose(),
+                            Rotation2d.kPi);
+                },
+                Set.of(drivetrain));
     }
 
     public Command alignAndDriveToReef(int tag, double offset) {
