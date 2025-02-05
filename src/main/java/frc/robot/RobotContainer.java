@@ -256,7 +256,6 @@ public class RobotContainer {
         operatorController.getRightBumper().onTrue(stateManager.setRightCoralMode());
         operatorController.getRightTrigger().onTrue(stateManager.setAlgaeMode());
         operatorController
-                
                 .getLeftJoystick()
                 .toggleOnTrue(
                         Commands.runOnce(
