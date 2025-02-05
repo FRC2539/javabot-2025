@@ -13,6 +13,7 @@ public interface ArmPivotIO {
         public double current = 0;
         public double temperature = 0;
         public double throughboreEncoderPosition = 0;
+        public boolean throughboreConnected = false;
     }
 
     // public void setPosition(double position);

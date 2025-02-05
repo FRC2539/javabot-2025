@@ -39,7 +39,7 @@ public class SuperstructureStateManager extends SubsystemBase {
         private static final StateChecker DEFAULT =
                 (p, s) -> {
                     // return (s.internalPosition == p);
-                    double armPosition = s.armSubsystem.getArmPosition();
+                    double armPosition = s.armSubsystem.getPosition();
                     double wristPosition = s.wristSubsystem.getPosition();
                     double elevatorPosition = s.elevatorSubsystem.getPosition();
 
@@ -193,7 +193,7 @@ public class SuperstructureStateManager extends SubsystemBase {
         Logger.recordOutput("Superstructure/RightCoral", RIGHT_CORAL.getAsBoolean());
 
         m_elevator.setLength(elevatorSubsystem.getPosition());
-        m_wrist.setAngle(Math.toDegrees(armSubsystem.getArmPosition()) + 180);
+        m_wrist.setAngle(Math.toDegrees(armSubsystem.getPosition()) + 180);
     }
 
     private void setFinalTarget(SuperstructureState.Position myPosition) {

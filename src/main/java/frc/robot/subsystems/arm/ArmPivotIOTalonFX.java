@@ -3,6 +3,7 @@ package frc.robot.subsystems.arm;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import frc.robot.constants.ArmConstants;
 
@@ -27,27 +28,23 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
         // SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = new SoftwareLimitSwitchConfigs();
 
         talonConfig.apply(
-                new TalonFXConfiguration()
-                        // .withSoftwareLimitSwitch(softwareLimitSwitchConfigs)
-                        .withSlot0(ArmConstants.slot0Configs)
-                        .withMotionMagic(ArmConstants.motionMagicConfigs));
+                new TalonFXConfiguration().withCurrentLimits(ArmConstants.currentLimitConfigs));
+
+        armPivotMotor.setNeutralMode(NeutralModeValue.Brake);
     }
 
     public void updateInputs(ArmPivotIOInputs inputs) {
 
-        inputs.position = armPivotMotor.getPosition().refresh().getValueAsDouble();
-        inputs.voltage = armPivotMotor.getMotorVoltage().refresh().getValueAsDouble();
-        inputs.velocity = armPivotMotor.getVelocity().refresh().getValueAsDouble();
+        inputs.position = armPivotMotor.getPosition().getValueAsDouble();
+        inputs.voltage = armPivotMotor.getMotorVoltage().getValueAsDouble();
+        inputs.velocity = armPivotMotor.getVelocity().getValueAsDouble();
         inputs.temperature = armPivotMotor.getDeviceTemp().getValueAsDouble();
         inputs.current = armPivotMotor.getStatorCurrent().getValueAsDouble();
         inputs.throughboreEncoderPosition = throughboreEncoder.get();
+        inputs.throughboreConnected = throughboreEncoder.isConnected();
     }
 
     public void setVoltage(double voltage) {
         armPivotMotor.setVoltage(voltage);
     }
-
-    // public void setPosition(double position) {
-    //     armPivotMotor.setControl(motionMagicVoltage.withPosition(position));
-    // }
 }

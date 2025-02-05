@@ -260,6 +260,8 @@ public class RobotContainer {
         operatorController.getRightBumper().onTrue(stateManager.setRightCoralMode());
         operatorController.getRightTrigger().onTrue(stateManager.setAlgaeMode());
         operatorController.getLeftJoystick().toggleOnTrue(Commands.idle()); // L3 Rainbow
+
+        operatorController.getBack().onTrue(wristSubsystem.flipWristPosition());
         // operatorController.getLeftTrigger().whileTrue(Commands.idle()); // L2 Station Lights
         leftDriveController.getRightTopRight().onTrue(stateManager.setArmWristMode());
 

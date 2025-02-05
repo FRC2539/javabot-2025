@@ -2,6 +2,7 @@ package frc.robot.subsystems.wrist;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
@@ -15,7 +16,10 @@ public class WristSubsystem extends SubsystemBase {
 
     private double reference = 0;
 
+    private boolean isWristFlipped = false;
+
     public WristSubsystem(WristIO wristIO) {
+        controller.setTolerance(0.1);
         this.wristIO = wristIO;
         setDefaultCommand(setVoltage(0));
     }
@@ -33,8 +37,12 @@ public class WristSubsystem extends SubsystemBase {
         return setVoltage(-12);
     }
 
-    public Command tuneable() {
+    public Command tuneableVoltage() {
         return run(() -> setVoltage(wristTuneable.get()));
+    }
+
+    public Command tunablePose() {
+        return runOnce(() -> reference = wristTuneable.get()).andThen(followReferenceThrubore());
     }
 
     public Command setVoltage(double voltage) {
@@ -42,19 +50,45 @@ public class WristSubsystem extends SubsystemBase {
     }
 
     public Command setPosition(double position) {
-        return startRun(
+        return runOnce(
+                        () -> {
+                            reference = position;
+                        })
+                .andThen(followReferenceThrubore());
+    }
+
+    public Command flipWristPosition() {
+        return Commands.runOnce(
                 () -> {
-                    reference = position;
-                },
+                    isWristFlipped = !isWristFlipped;
+                });
+    }
+
+    private Command followReferenceThrubore() {
+        return run(
                 () -> {
                     double voltage =
-                            controller.calculate(wristInputs.throughboreEncoderPosition, reference);
-                    voltage = Math.min(12.0, Math.max(-12.0, voltage)); // Clamp voltage
+                            controller.calculate(
+                                    wristInputs.throughboreEncoderPosition,
+                                    isWristFlipped ? -reference : reference);
+                    if (controller.atSetpoint()) {
+                        voltage = 0;
+                    } else {
+                        voltage = Math.min(12.0, Math.max(-12.0, voltage)); // Clamp voltage
+                    }
                     wristIO.setVoltage(voltage);
                 });
     }
 
     public double getPosition() {
+        return wristInputs.throughboreEncoderPosition;
+    }
+
+    public double getInternalEncoderPosition() {
         return wristInputs.position;
+    }
+
+    public boolean isEncoderConnected() {
+        return wristInputs.throughboreConnected;
     }
 }

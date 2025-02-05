@@ -8,6 +8,8 @@ public class ArmPivotIOSim implements ArmPivotIO {
         position += 0.02 * voltage;
 
         inputs.position = position;
+        inputs.throughboreEncoderPosition = position;
+        inputs.throughboreConnected = true;
     }
 
     public void setVoltage(double voltage) {

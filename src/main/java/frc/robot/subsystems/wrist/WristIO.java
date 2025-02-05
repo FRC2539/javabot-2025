@@ -12,6 +12,8 @@ public interface WristIO {
         public double current = 0;
         public double voltage = 0;
         public double throughboreEncoderPosition = 0;
+        public boolean shutdown = false;
+        public boolean throughboreConnected = false;
     }
 
     public void setVoltage(double voltage);
