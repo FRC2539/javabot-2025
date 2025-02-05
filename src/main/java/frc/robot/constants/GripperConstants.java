@@ -9,4 +9,7 @@ public class GripperConstants {
             new CurrentLimitsConfigs().withStatorCurrentLimit(50);
 
     public static final String canbus = "CANivore";
+
+    public static final int gripperSensorChannel = 60;
+
 }
