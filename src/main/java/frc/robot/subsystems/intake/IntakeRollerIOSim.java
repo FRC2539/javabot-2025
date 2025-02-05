@@ -6,7 +6,8 @@ public class IntakeRollerIOSim implements IntakeRollerIO {
     public double voltage;
     public double speed;
 
-    public LoggedNetworkBoolean intakeGPSensorBool = new LoggedNetworkBoolean("Intake Sensor Sim", true);
+    public LoggedNetworkBoolean intakeGPSensorBool =
+            new LoggedNetworkBoolean("Intake Sensor Sim", true);
 
     public void updateInputs(IntakeRollerIOInputs inputs) {
         inputs.voltage = voltage;

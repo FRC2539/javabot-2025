@@ -11,5 +11,4 @@ public class GripperConstants {
     public static final String canbus = "CANivore";
 
     public static final int gripperSensorChannel = 60;
-
 }

@@ -3,15 +3,13 @@ package frc.robot.subsystems.intake;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.wpilibj.DigitalInput;
-import frc.robot.constants.GripperConstants;
 import frc.robot.constants.IntakeConstants;
 
 public class IntakeRollerTalonFX implements IntakeRollerIO {
     private final TalonFX intakeroller =
             new TalonFX(IntakeConstants.idRoller, IntakeConstants.canbusRoller);
-            
+
     private DigitalInput intakeGPSensor = new DigitalInput(IntakeConstants.intakeGPSensor);
 
     public IntakeRollerTalonFX() {

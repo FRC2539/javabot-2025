@@ -3,7 +3,6 @@ package frc.robot.subsystems.gripper;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.constants.GripperConstants;
 
