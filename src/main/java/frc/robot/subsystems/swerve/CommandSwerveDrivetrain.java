@@ -515,7 +515,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
         double acceleration = (currentSpeed - lastSpeed) / 0.02;
         lastSpeed = currentSpeed;
 
-        Logger.recordOutput("Drive/Velocity", currentSpeed);
+        Logger.recordOutput("Drive/Velocity", getState().Speeds);
         Logger.recordOutput("Drive/Acceleration", acceleration);
 
         Logger.recordOutput(

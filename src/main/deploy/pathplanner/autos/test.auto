@@ -7,7 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "QuarterSprint"
+            "pathName": "test1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "test2"
           }
         }
       ]
@@ -15,5 +21,5 @@
   },
   "resetOdom": true,
   "folder": null,
-  "choreoAuto": true
+  "choreoAuto": false
 }

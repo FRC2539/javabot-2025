@@ -344,8 +344,8 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        //return auto.getAuto();
-        return Commands.none();
+        return auto.getAuto();
+       // return Commands.none();
 
         // return drivetrain.applyRequest(() ->
         //                 drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(new
