@@ -1,7 +1,5 @@
 package frc.robot.subsystems.lights;
 
-import java.util.function.BooleanSupplier;
-
 import com.ctre.phoenix.led.Animation;
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
@@ -14,20 +12,29 @@ import com.ctre.phoenix.led.LarsonAnimation.BounceMode;
 import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.SingleFadeAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
-
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.function.BooleanSupplier;
 
 public class LightsSubsystem extends SubsystemBase {
     public static final class LightsConstants {
         public static final int CANDLE_PORT = 12;
-        
+
         public static final int SENSOR_PORT = 0;
     }
 
     private BooleanSupplier hasPiece = () -> false;
 
-    private static final CANdle candle = new CANdle(LightsConstants.CANDLE_PORT);
+    private static final CANdle candle;
+
+    static {
+        if (RobotBase.isReal()) {
+            candle = new CANdle(LightsConstants.CANDLE_PORT);
+        } else {
+            candle = null;
+        }
+    }
 
     // Team colors
     public static final Color orange = new Color(255, 25, 0);
@@ -44,35 +51,41 @@ public class LightsSubsystem extends SubsystemBase {
     public static final Color red = new Color(255, 0, 0);
 
     public LightsSubsystem() {
-        CANdleConfiguration candleConfiguration = new CANdleConfiguration();
-        candleConfiguration.statusLedOffWhenActive = true;
-        candleConfiguration.disableWhenLOS = false;
-        candleConfiguration.stripType = LEDStripType.RGB;
-        candleConfiguration.brightnessScalar = 1.0;
-        candleConfiguration.vBatOutputMode = VBatOutputMode.Modulated;
-        candle.configAllSettings(candleConfiguration, 100);
+        if (candle != null) {
+            CANdleConfiguration candleConfiguration = new CANdleConfiguration();
+            candleConfiguration.statusLedOffWhenActive = true;
+            candleConfiguration.disableWhenLOS = false;
+            candleConfiguration.stripType = LEDStripType.RGB;
+            candleConfiguration.brightnessScalar = 1.0;
+            candleConfiguration.vBatOutputMode = VBatOutputMode.Modulated;
+            candle.configAllSettings(candleConfiguration, 100);
+        }
 
         setDefaultCommand(defaultCommand());
     }
 
     public static void setBrightness(double percent) {
-        candle.configBrightnessScalar(percent, 100);
+        if (candle != null) {
+            candle.configBrightnessScalar(percent, 100);
+        }
     }
 
     public Command defaultCommand() {
-        return run(() -> {
-            LEDSegment.BatteryIndicator.fullClear();
-            LEDSegment.DriverstationIndicator.fullClear();
-            LEDSegment.ExtraAIndicator.fullClear();
-            LEDSegment.ExtraBIndicator.fullClear();
-            LEDSegment.PivotEncoderIndicator.fullClear();
+        return run(
+                () -> {
+                    LEDSegment.BatteryIndicator.fullClear();
+                    LEDSegment.DriverstationIndicator.fullClear();
+                    LEDSegment.ExtraAIndicator.fullClear();
+                    LEDSegment.ExtraBIndicator.fullClear();
+                    LEDSegment.PivotEncoderIndicator.fullClear();
 
-            if (hasPiece.getAsBoolean()) {
-                LightsSubsystem.LEDSegment.MainStrip.setStrobeAnimation(LightsSubsystem.white, 0.3);
-            } else {
-                LEDSegment.MainStrip.setColor(orange);
-            }
-        });
+                    if (hasPiece.getAsBoolean()) {
+                        LightsSubsystem.LEDSegment.MainStrip.setStrobeAnimation(
+                                LightsSubsystem.white, 0.3);
+                    } else {
+                        LEDSegment.MainStrip.setColor(orange);
+                    }
+                });
     }
 
     public void setHasPieceSupplier(BooleanSupplier hasPiece) {
@@ -80,10 +93,11 @@ public class LightsSubsystem extends SubsystemBase {
     }
 
     public Command clearSegmentCommand(LEDSegment segment) {
-        return runOnce(() -> {
-            segment.clearAnimation();
-            segment.disableLEDs();
-        });
+        return runOnce(
+                () -> {
+                    segment.clearAnimation();
+                    segment.disableLEDs();
+                });
     }
 
     public static enum LEDSegment {
@@ -106,45 +120,74 @@ public class LightsSubsystem extends SubsystemBase {
         }
 
         public void setColor(Color color) {
-            clearAnimation();
-            candle.setLEDs(color.red, color.green, color.blue, 0, startIndex, segmentSize);
+            if (candle != null) {
+                clearAnimation();
+                candle.setLEDs(color.red, color.green, color.blue, 0, startIndex, segmentSize);
+            }
         }
 
         private void setAnimation(Animation animation) {
-            candle.animate(animation, animationSlot);
+            if (candle != null) {
+                candle.animate(animation, animationSlot);
+            }
         }
 
         public void fullClear() {
-            clearAnimation();
-            disableLEDs();
+            if (candle != null) {
+                clearAnimation();
+                disableLEDs();
+            }
         }
 
         public void clearAnimation() {
-            candle.clearAnimation(animationSlot);
+            if (candle != null) {
+                candle.clearAnimation(animationSlot);
+            }
         }
 
         public void disableLEDs() {
-            setColor(black);
+            if (candle != null) {
+                setColor(black);
+            }
         }
 
         public void setFlowAnimation(Color color, double speed) {
-            setAnimation(new ColorFlowAnimation(
-                    color.red, color.green, color.blue, 0, speed, segmentSize, Direction.Forward, startIndex));
+            setAnimation(
+                    new ColorFlowAnimation(
+                            color.red,
+                            color.green,
+                            color.blue,
+                            0,
+                            speed,
+                            segmentSize,
+                            Direction.Forward,
+                            startIndex));
         }
 
         public void setFadeAnimation(Color color, double speed) {
             setAnimation(
-                    new SingleFadeAnimation(color.red, color.green, color.blue, 0, speed, segmentSize, startIndex));
+                    new SingleFadeAnimation(
+                            color.red, color.green, color.blue, 0, speed, segmentSize, startIndex));
         }
-        
 
         public void setBandAnimation(Color color, double speed) {
-            setAnimation(new LarsonAnimation(
-                    color.red, color.green, color.blue, 0, speed, segmentSize, BounceMode.Front, 3, startIndex));
+            setAnimation(
+                    new LarsonAnimation(
+                            color.red,
+                            color.green,
+                            color.blue,
+                            0,
+                            speed,
+                            segmentSize,
+                            BounceMode.Front,
+                            3,
+                            startIndex));
         }
 
         public void setStrobeAnimation(Color color, double speed) {
-            setAnimation(new StrobeAnimation(color.red, color.green, color.blue, 0, speed, segmentSize, startIndex));
+            setAnimation(
+                    new StrobeAnimation(
+                            color.red, color.green, color.blue, 0, speed, segmentSize, startIndex));
         }
 
         public void setRainbowAnimation(double speed) {
@@ -164,8 +207,8 @@ public class LightsSubsystem extends SubsystemBase {
         }
 
         /**
-         * Highly imperfect way of dimming the LEDs. It does not maintain color or
-         * accurately adjust perceived brightness.
+         * Highly imperfect way of dimming the LEDs. It does not maintain color or accurately adjust
+         * perceived brightness.
          *
          * @param dimFactor
          * @return The dimmed color
@@ -187,7 +230,7 @@ public class LightsSubsystem extends SubsystemBase {
         setBrightness(0);
     }
 
-     public static void enableLEDs() {
+    public static void enableLEDs() {
         setBrightness(1);
     }
 }

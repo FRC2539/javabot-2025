@@ -255,8 +255,21 @@ public class RobotContainer {
         operatorController.getLeftBumper().onTrue(stateManager.setLeftCoralMode());
         operatorController.getRightBumper().onTrue(stateManager.setRightCoralMode());
         operatorController.getRightTrigger().onTrue(stateManager.setAlgaeMode());
-        operatorController.getLeftJoystick().toggleOnTrue(Commands.runOnce((() -> LightsSubsystem.LEDSegment.MainStrip.setRainbowAnimation(1)))); // L3 Rainbow
-        operatorController.getLeftTrigger().whileTrue(Commands.runOnce((() -> LightsSubsystem.LEDSegment.MainStrip.setStrobeAnimation(LightsSubsystem.purple, 1)))); // L2 tation Lights
+        operatorController
+                
+                .getLeftJoystick()
+                .toggleOnTrue(
+                        Commands.runOnce(
+                                (() ->
+                                        LightsSubsystem.LEDSegment.MainStrip.setRainbowAnimation(
+                                                1)))); // L3 Rainbow
+        operatorController
+                .getLeftTrigger()
+                .whileTrue(
+                        Commands.runOnce(
+                                (() ->
+                                        LightsSubsystem.LEDSegment.MainStrip.setStrobeAnimation(
+                                                LightsSubsystem.purple, 1)))); // L2 tation Lights
 
         // Coral Mode Bindings
         final Trigger CORAL = stateManager.LEFT_CORAL.or(stateManager.RIGHT_CORAL);
