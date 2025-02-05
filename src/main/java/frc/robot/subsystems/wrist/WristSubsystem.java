@@ -1,7 +1,6 @@
-package frc.robot.subsystems.arm;
+package frc.robot.subsystems.wrist;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
@@ -13,7 +12,7 @@ public class WristSubsystem extends SubsystemBase {
     private LoggedNetworkNumber wristTuneable = new LoggedNetworkNumber("wrist tuneable", 0);
 
     private PIDController controller = new PIDController(0.1, 0, 0);
-    
+
     private double reference = 0;
 
     public WristSubsystem(WristIO wristIO) {

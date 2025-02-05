@@ -1,4 +1,4 @@
-package frc.robot.subsystems.arm;
+package frc.robot.subsystems.wrist;
 
 public class WristIOSim implements WristIO {
     private double position = 0;
