@@ -49,6 +49,7 @@ public class SuperstructureStateManager extends SubsystemBase {
 
                     } else return false;
                 };
+        public static final StateChecker AUTO = DEFAULT;
 
         public enum Position {
             Sussy(1, 1, 1, null),

@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.constants.AligningConstants;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState;
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class Auto {
@@ -39,20 +41,14 @@ public class Auto {
 
     // #146
     private RobotContainer robotContainer;
-    private DriveLocation targetLocation = DriveLocation.None;
-    private ArmHeight targetHeight = ArmHeight.None;
-    private Command alignCommand;
-    private Command heightCommand;
-    /* private void setTargetHeight(ArmHeight targetHeight)
-    {
-        this.targetHeight = targetHeight;
-        robotContainer.stateManager.moveToPosition(targetHeight.position.parent);
-    } */
+    private DriveLocation targetLocation = DriveLocation.GH;
+    private ArmHeight targetHeight = ArmHeight.Home;
 
     // *NEW
     private final Field2d m_trajectoryField = new Field2d();
 
     public Auto(CommandSwerveDrivetrain drivetrain, RobotContainer robotContainer) {
+        this.robotContainer = robotContainer;
         setUpPathPlanner(drivetrain);
         autoChooser = new LoggedDashboardChooser<>("Auto Routine", AutoBuilder.buildAutoChooser());
         SmartDashboard.putData("Auto Path", m_trajectoryField);
@@ -161,8 +157,6 @@ public class Auto {
                 },
                 drivetrain);
 
-        configureBindings(); // #146
-
         // Logging callback for target robot pose
         PathPlannerLogging.setLogTargetPoseCallback(
                 (pose) -> {
@@ -172,12 +166,11 @@ public class Auto {
     }
 
     // #146 Constants
-    public static double leftOffset = -0.2;
-    public static double rightOffset = 0.2;
-    public static double centerOffset = 0;
+    public static double leftOffset = AligningConstants.leftOffset;
+    public static double rightOffset = AligningConstants.rightOffset;
+    public static double centerOffset = AligningConstants.centerOffset;
 
     public enum DriveLocation {
-        None(0, 0, 0),
         SourceLeft(1, 13, 0),
         SourceRight(2, 12, 0),
         A(7, 18, leftOffset),
@@ -221,30 +214,27 @@ public class Auto {
     }
 
     public enum ArmHeight {
-        None(Position.None, Position.None, 0),
-        Home(Position.Home, Position.Home, 0),
-        L1(Position.L1, Position.L1Prep, 1),
-        L2(Position.L2, Position.L2Prep, 1),
-        L3(Position.L3, Position.L3Prep, 1),
-        L4(Position.L4, Position.L4Prep, 1),
-        Source(Position.Source, Position.SourcePrep, -1);
+        Home(Position.Home, Position.Home),
+        L1(Position.L1, Position.L1Prep),
+        L2(Position.L2, Position.L2Prep),
+        L3(Position.L3, Position.L3Prep),
+        L4(Position.L4, Position.L4Prep),
+        Source(Position.Source, Position.SourcePrep);
 
         public Position position;
         public double armMotorSpeed;
         public Position prep;
 
-        private ArmHeight(Position position, Position prep, double armMotorSpeed) {
+        private ArmHeight(Position position, Position prep) {
             this.position = position;
             this.prep = prep;
-            this.armMotorSpeed = armMotorSpeed;
         }
     }
 
     // #146: Add a function that will register all triggers
-    private double alignTimeout = 5;
     private double placeTimeout = 0.5;
 
-    private void configureBindings() {
+    public void configureBindings() {
         NamedCommands.registerCommand(
                 "wait", Commands.waitUntil(() -> armInPlace() && robotInPlace()));
 
@@ -276,7 +266,10 @@ public class Auto {
 
         Command scoreCommand =
                 robotContainer.gripperSubsystem.ejectSpinCoral().withTimeout(placeTimeout);
-        NamedCommands.registerCommand("score", prepArmCommand.asProxy());
+        NamedCommands.registerCommand("score", scoreCommand.asProxy());
+
+        Command intakeCommand = robotContainer.intakeSubsystem.intake();
+        NamedCommands.registerCommand("intake", intakeCommand.asProxy());
 
         // spotless:off
         Command placeCommand =
@@ -290,12 +283,8 @@ public class Auto {
                     .deadlineFor(armCommand.asProxy())
                 )
                 .deadlineFor(alignCommand);
-
-        NamedCommands.registerCommand("score", placeCommand);
+        NamedCommands.registerCommand("place", placeCommand);
         // spotless:on
-
-        Command intakeCommand = robotContainer.intakeSubsystem.intake();
-        NamedCommands.registerCommand("intake", intakeCommand.asProxy());
 
         // #region Auto create locations and heights
         for (DriveLocation location : DriveLocation.values()) {
@@ -304,6 +293,7 @@ public class Auto {
                     Commands.runOnce(
                             () -> {
                                 targetLocation = location;
+                                Logger.recordOutput("Auto/Chosen Location", location);
                             }));
         }
 
@@ -313,13 +303,14 @@ public class Auto {
                     Commands.runOnce(
                             () -> {
                                 targetHeight = height;
+                                Logger.recordOutput("Auto/Chosen Height", height);
                             }));
         }
         // #endregion
     }
 
     private boolean armInPlace() {
-        return SuperstructureState.DEFAULT.isAtTarget(
+        return SuperstructureState.AUTO.isAtTarget(
                 targetHeight.position, robotContainer.stateManager);
     }
 
@@ -332,8 +323,8 @@ public class Auto {
                         .plus(new Transform2d(0, targetLocation.offset, Rotation2d.kZero));
         Pose2d currentPose = robotContainer.drivetrain.getRobotPose();
         Pose2d relativePos = alignmentPose.relativeTo(currentPose);
-        return (Math.abs(relativePos.getX()) < 0.1)
-                && (Math.abs(relativePos.getY()) < 0.1)
-                && (Math.abs(relativePos.getRotation().getRadians()) < 0.1);
+        return (Math.abs(relativePos.getX()) < 0.03)
+                && (Math.abs(relativePos.getY()) < 0.03)
+                && (Math.abs(relativePos.getRotation().getRadians()) < 0.025);
     }
 }

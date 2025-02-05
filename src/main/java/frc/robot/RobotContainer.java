@@ -20,6 +20,7 @@ import frc.robot.commands.AlignAndDriveToReef;
 import frc.robot.commands.AlignToPiece;
 import frc.robot.commands.AlignToReef;
 import frc.robot.commands.WheelRadiusCharacterization;
+import frc.robot.constants.AligningConstants;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
@@ -127,6 +128,7 @@ public class RobotContainer {
 
         stateManager = new SuperstructureStateManager(elevatorSubsystem, armSubsystem);
 
+        auto.configureBindings();
         configureBindings();
 
         drivetrain.setUpPathPlanner();
@@ -326,11 +328,20 @@ public class RobotContainer {
                                         stateManager.setLastScoringPose(
                                                 drivetrain.findNearestAprilTagPose())));
 
-        stateManager.LEFT_CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(-0.2));
+        stateManager
+                .LEFT_CORAL
+                .and(leftDriveController.getTrigger())
+                .whileTrue(alignToReef(AligningConstants.leftOffset));
 
-        stateManager.ALGAE.and(leftDriveController.getTrigger()).whileTrue(alignToReef(0));
+        stateManager
+                .ALGAE
+                .and(leftDriveController.getTrigger())
+                .whileTrue(alignToReef(AligningConstants.centerOffset));
 
-        stateManager.RIGHT_CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(0.2));
+        stateManager
+                .RIGHT_CORAL
+                .and(leftDriveController.getTrigger())
+                .whileTrue(alignToReef(AligningConstants.rightOffset));
 
         // Technical Bindings
 
