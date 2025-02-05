@@ -31,6 +31,8 @@ public class WristIONeo550 implements WristIO {
 
     private boolean shutdown = false;
 
+    private double lastVoltage = 0;
+
     public void updateInputs(WristIOInputs inputs) {
         inputs.position = wristMotor.getEncoder().getPosition();
         inputs.voltage = wristMotor.getBusVoltage() * wristMotor.getAppliedOutput();
@@ -41,16 +43,29 @@ public class WristIONeo550 implements WristIO {
 
         if (inputs.temperature > 60) {
             shutdown = true;
-            wristMotor.stopMotor();
         } else if (inputs.temperature < 58) {
             shutdown = false;
         }
 
         inputs.shutdown = shutdown;
+
+        if (inputs.throughboreEncoderPosition >= WristConstants.upperLimit && lastVoltage > 0) {
+            lastVoltage = 0;
+        }
+        if (inputs.throughboreEncoderPosition <= WristConstants.lowerLimit && lastVoltage < 0) {
+            lastVoltage = 0;
+        }
+        if (!inputs.throughboreConnected) {
+            lastVoltage = 0;
+        }
+        if (shutdown) {
+            lastVoltage = 0;
+        }
+
+        wristMotor.setVoltage(lastVoltage);
     }
 
     public void setVoltage(double voltage) {
-        if (shutdown) return;
-        wristMotor.setVoltage(voltage);
+        lastVoltage = voltage;
     }
 }

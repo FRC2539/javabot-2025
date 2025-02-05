@@ -4,6 +4,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.constants.WristConstants;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -12,7 +13,9 @@ public class WristSubsystem extends SubsystemBase {
     private WristIOInputsAutoLogged wristInputs = new WristIOInputsAutoLogged();
     private LoggedNetworkNumber wristTuneable = new LoggedNetworkNumber("wrist tuneable", 0);
 
-    private PIDController controller = new PIDController(0.1, 0, 0);
+    private PIDController controller =
+            new PIDController(
+                    WristConstants.WRIST_KP, WristConstants.WRIST_KI, WristConstants.WRIST_KD);
 
     private double reference = 0;
 
@@ -50,9 +53,16 @@ public class WristSubsystem extends SubsystemBase {
     }
 
     public Command setPosition(double position) {
+        if (position > WristConstants.upperLimit) {
+            position = WristConstants.upperLimit;
+        }
+        if (position < WristConstants.lowerLimit) {
+            position = WristConstants.lowerLimit;
+        }
+        double nextPosition = position;
         return runOnce(
                         () -> {
-                            reference = position;
+                            reference = nextPosition;
                         })
                 .andThen(followReferenceThrubore());
     }

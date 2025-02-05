@@ -4,6 +4,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.ArmConstants;
+import frc.robot.constants.WristConstants;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -19,7 +20,7 @@ public class ArmSubsystem extends SubsystemBase {
 
     public ArmSubsystem(ArmPivotIO armPivotIO) {
         this.armPivotIO = armPivotIO;
-        controller.setTolerance(0.1);
+        controller.setTolerance(ArmConstants.ARM_TOLERANCE);
         setDefaultCommand(setVoltage(0));
     }
 
@@ -49,17 +50,19 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public Command setPosition(double position) {
-        return startRun(
-                () -> {
-                    reference = position;
-                },
-                () -> {
-                    double voltage =
-                            controller.calculate(
-                                    armPivotInputs.throughboreEncoderPosition, reference);
-                    voltage = Math.min(12.0, Math.max(-12.0, voltage)); // Clamp voltage
-                    armPivotIO.setVoltage(voltage);
-                });
+        if (position > WristConstants.upperLimit) {
+            position = WristConstants.upperLimit;
+        }
+        if (position < WristConstants.lowerLimit) {
+            position = WristConstants.lowerLimit;
+        }
+        double nextPosition = position;
+
+        return runOnce(
+                        () -> {
+                            reference = nextPosition;
+                        })
+                .andThen(followReference());
     }
 
     public double getPosition() {

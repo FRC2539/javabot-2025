@@ -18,6 +18,8 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
     private final DutyCycleEncoder throughboreEncoder =
             new DutyCycleEncoder(ArmConstants.ARM_THROUGHBORE_ENCODER_ID, 2 * Math.PI, 0);
 
+    private double lastVoltage = 0;
+
     public ArmPivotIOTalonFX() {
         armPivotMotor.setPosition(0);
 
@@ -42,9 +44,20 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
         inputs.current = armPivotMotor.getStatorCurrent().getValueAsDouble();
         inputs.throughboreEncoderPosition = throughboreEncoder.get();
         inputs.throughboreConnected = throughboreEncoder.isConnected();
+
+        if (inputs.throughboreEncoderPosition >= ArmConstants.upperLimit && lastVoltage > 0) {
+            lastVoltage = 0;
+        }
+        if (inputs.throughboreEncoderPosition <= ArmConstants.lowerLimit && lastVoltage < 0) {
+            lastVoltage = 0;
+        }
+        if (!inputs.throughboreConnected) {
+            lastVoltage = 0;
+        }
+        armPivotMotor.setVoltage(lastVoltage);
     }
 
     public void setVoltage(double voltage) {
-        armPivotMotor.setVoltage(voltage);
+        lastVoltage = voltage;
     }
 }
