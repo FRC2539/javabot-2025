@@ -67,7 +67,7 @@ public class VisionIOLimelight implements VisionIO {
                 ((RobotController.getFPGATime() - latencySubscriber.getLastChange()) / 1000) < 250;
         // Update target observation
         var t2dSubscriberValue = t2dSubscriber.get();
-        if (t2dSubscriberValue.length >= 15) {
+        if (t2dSubscriberValue.length >= 16) {
             inputs.latestTargetObservation =
                     new TargetObservation(
                             Rotation2d.fromDegrees(txSubscriber.get()),
