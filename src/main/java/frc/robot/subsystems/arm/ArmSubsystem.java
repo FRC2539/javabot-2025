@@ -13,11 +13,8 @@ public class ArmSubsystem extends SubsystemBase {
     public LoggedNetworkNumber armTuneables = new LoggedNetworkNumber("arm tuneable", 9);
 
     private PIDController controller = new PIDController(0.1, 0, 0);
-    private TrapezoidProfile profile = new TrapezoidProfile(new TrapezoidProfile.Constraints(1, 1));
-
+    
     private double reference = 0;
-    private TrapezoidProfile.State state = new TrapezoidProfile.State(0, 0);
-    private TrapezoidProfile.State goal = new TrapezoidProfile.State(0, 0);
 
     public ArmSubsystem(ArmPivotIO armPivotIO) {
         this.armPivotIO = armPivotIO;
@@ -59,6 +56,20 @@ public class ArmSubsystem extends SubsystemBase {
                 });
     }
 
+    public double getArmPosition() {
+        return armPivotInputs.position;
+    }
+
+    public Command holdArmPosition() {
+        return startRun(
+                () -> {
+                    reference = armPivotInputs.position;
+                },
+                () -> {});
+    }
+
+    /* THE FOLLOWING CODE WILL NO LONGER WORK
+     * We aren't using TrapezoidProfile on either Arm or Wrist as per Supreme Leader's decision. */
     // private Command profileToReference() {
     //     return startRun(
     //         () -> {
@@ -80,15 +91,4 @@ public class ArmSubsystem extends SubsystemBase {
 
     // }
 
-    public double getArmPosition() {
-        return armPivotInputs.position;
-    }
-
-    public Command holdArmPosition() {
-        return startRun(
-                () -> {
-                    reference = armPivotInputs.position;
-                },
-                () -> {});
-    }
 }

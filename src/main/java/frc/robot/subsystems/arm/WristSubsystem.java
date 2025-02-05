@@ -13,11 +13,8 @@ public class WristSubsystem extends SubsystemBase {
     private LoggedNetworkNumber wristTuneable = new LoggedNetworkNumber("wrist tuneable", 0);
 
     private PIDController controller = new PIDController(0.1, 0, 0);
-    private TrapezoidProfile profile = new TrapezoidProfile(new TrapezoidProfile.Constraints(1, 1));
-
+    
     private double reference = 0;
-    private TrapezoidProfile.State state = new TrapezoidProfile.State(0, 0);
-    private TrapezoidProfile.State goal = new TrapezoidProfile.State(0, 0);
 
     public WristSubsystem(WristIO wristIO) {
         this.wristIO = wristIO;
