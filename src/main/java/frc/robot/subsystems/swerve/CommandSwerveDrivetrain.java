@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
@@ -489,7 +490,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
      * @return Command to run
      */
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutineToApply.quasistatic(direction);
+        return defer(() -> m_sysIdRoutineToApply.quasistatic(direction));
     }
 
     /**
@@ -500,7 +501,19 @@ public class CommandSwerveDrivetrain implements Subsystem {
      * @return Command to run
      */
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutineToApply.dynamic(direction);
+        return defer(() -> m_sysIdRoutineToApply.dynamic(direction));
+    }
+
+    public Command sysIdTranslationMode() {
+        return Commands.runOnce(() -> m_sysIdRoutineToApply = m_sysIdRoutineTranslation);
+    }
+
+    public Command sysIdSteerMode() {
+        return Commands.runOnce(() -> m_sysIdRoutineToApply = m_sysIdRoutineSteer);
+    }
+
+    public Command sysIdRotationMode() {
+        return Commands.runOnce(() -> m_sysIdRoutineToApply = m_sysIdRoutineRotation);
     }
 
     private double lastSpeed = 0;
