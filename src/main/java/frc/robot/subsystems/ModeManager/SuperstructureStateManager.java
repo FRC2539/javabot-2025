@@ -340,5 +340,7 @@ public class SuperstructureStateManager extends SubsystemBase {
         root.append(m_elevator);
 
         SmartDashboard.putData("Mech2d", mech);
+
+        setDefaultCommand(moveToPosition(Position.Home));
     }
 }

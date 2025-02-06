@@ -11,6 +11,7 @@ import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.util.Units;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -50,6 +52,7 @@ public class Auto {
     public Auto(CommandSwerveDrivetrain drivetrain, RobotContainer robotContainer) {
         this.robotContainer = robotContainer;
         setUpPathPlanner(drivetrain);
+        configureBindings();
         autoChooser = new LoggedDashboardChooser<>("Auto Routine", AutoBuilder.buildAutoChooser());
         SmartDashboard.putData("Auto Path", m_trajectoryField);
     }
@@ -307,24 +310,39 @@ public class Auto {
                             }));
         }
         // #endregion
+
     }
 
+    @AutoLogOutput(key = "Auto/Arm In Place")
     private boolean armInPlace() {
         return SuperstructureState.AUTO.isAtTarget(
                 targetHeight.position, robotContainer.stateManager);
     }
 
+    @AutoLogOutput(key = "Auto/Arm In Prep")
+    private boolean armInPrep() {
+        return SuperstructureState.AUTO.isAtTarget(targetHeight.prep, robotContainer.stateManager);
+    }
+
+    @AutoLogOutput(key = "Auto/Robot In Place")
     private boolean robotInPlace() {
         Pose2d alignmentPose =
                 VisionConstants.aprilTagLayout
                         .getTagPose(targetLocation.getTagByTeam())
                         .get()
                         .toPose2d()
-                        .plus(new Transform2d(0, targetLocation.offset, Rotation2d.kZero));
+                        .plus(
+                                new Transform2d(
+                                        new Translation2d(
+                                                Units.feetToMeters(3) / 2, targetLocation.offset),
+                                        Rotation2d.k180deg));
+        Logger.recordOutput("Auto/Physical Target Pose", alignmentPose);
         Pose2d currentPose = robotContainer.drivetrain.getRobotPose();
         Pose2d relativePos = alignmentPose.relativeTo(currentPose);
-        return (Math.abs(relativePos.getX()) < 0.03)
-                && (Math.abs(relativePos.getY()) < 0.03)
-                && (Math.abs(relativePos.getRotation().getRadians()) < 0.025);
+        Logger.recordOutput("Auto/Physical Relative Pose", relativePos);
+        return (Math.abs(relativePos.getX()) < Units.inchesToMeters(0.7))
+                && (Math.abs(relativePos.getY()) < Units.inchesToMeters(0.7))
+                && ((Math.abs(relativePos.getRotation().getRadians()) % Math.PI)
+                        < Units.degreesToRadians(2));
     }
 }

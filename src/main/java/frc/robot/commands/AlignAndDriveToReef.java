@@ -12,9 +12,9 @@ import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 public class AlignAndDriveToReef extends Command {
     private CommandSwerveDrivetrain drivetrain;
 
-    private PIDController thetaController = new PIDController(4, 0, 0);
-    private PIDController yController = new PIDController(6, 0, 0);
-    private PIDController xController = new PIDController(3, 0, 0);
+    private PIDController thetaController = new PIDController(6, 0, 0);
+    private PIDController yController = new PIDController(8, 0, 0);
+    private PIDController xController = new PIDController(5, 0, 0);
     private Pose2d targetPose;
     private double offset;
     private Rotation2d rotationOffset;
@@ -40,7 +40,7 @@ public class AlignAndDriveToReef extends Command {
         thetaController.setSetpoint(rotationOffset.getRadians());
         yController.setSetpoint(offset);
         thetaController.enableContinuousInput(0, 2 * Math.PI);
-        thetaController.setTolerance(Units.degreesToRadians(0.5));
+        thetaController.setTolerance(Units.degreesToRadians(1));
         yController.setTolerance(Units.inchesToMeters(0.4));
         xController.setTolerance(Units.inchesToMeters(0.4));
     }
