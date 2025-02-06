@@ -16,4 +16,6 @@ public class IntakeConstants {
     public static final String canbusFlipper = "CANivore";
 
     public static final CurrentLimitsConfigs currentLimit = new CurrentLimitsConfigs();
+
+    public static final int intakeGPSensor = 99;
 }

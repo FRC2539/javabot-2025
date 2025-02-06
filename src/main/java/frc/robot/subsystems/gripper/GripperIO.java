@@ -11,6 +11,7 @@ public interface GripperIO {
         public double voltage = 0;
         public double temperature = 0;
         public double current = 0;
+        public boolean sensor = false;
     }
 
     public void setVoltage(double voltage);
