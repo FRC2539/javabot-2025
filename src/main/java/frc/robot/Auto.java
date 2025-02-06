@@ -189,7 +189,7 @@ public class Auto {
         GH(10, 21, centerOffset),
         H(10, 21, rightOffset),
         I(11, 20, leftOffset),
-        JH(11, 20, centerOffset),
+        IJ(11, 20, centerOffset),
         J(11, 20, rightOffset),
         K(6, 19, leftOffset),
         KL(6, 19, centerOffset),

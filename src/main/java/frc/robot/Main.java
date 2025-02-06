@@ -7,9 +7,14 @@ package frc.robot;
 import edu.wpi.first.wpilibj.RobotBase;
 
 public final class Main {
-  private Main() {}
+    private Main() {}
 
-  public static void main(String... args) {
-    RobotBase.startRobot(Robot::new);
-  }
+    public static void main(String... args) {
+        String generateTrajectories = System.getenv("GENERATE_TRAJECTORIES");
+        if ("true".equalsIgnoreCase(generateTrajectories)) {
+            RobotBase.startRobot(AutoGenerators.AutoGeneratorRobot::new);
+        } else {
+            RobotBase.startRobot(Robot::new);
+        }
+    }
 }

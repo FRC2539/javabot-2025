@@ -184,3 +184,6 @@ ctre_sim/
 # clangd
 /.cache
 compile_commands.json
+
+# paths
+src/main/deploy/pathplanner/paths

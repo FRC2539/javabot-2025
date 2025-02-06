@@ -3,10 +3,7 @@
   "robotLength": 0.921,
   "holonomicMode": true,
   "pathFolders": [
-    "CoralStation-Reef",
-    "Reef-CoralStation",
-    "Start-Reef",
-    "AutoTest"
+    "Auto Generated"
   ],
   "autoFolders": [],
   "defaultMaxVel": 4.1,
