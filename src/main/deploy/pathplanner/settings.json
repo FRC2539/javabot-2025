@@ -5,7 +5,8 @@
   "pathFolders": [
     "CoralStation-Reef",
     "Reef-CoralStation",
-    "Start-Reef"
+    "Start-Reef",
+    "AutoTest"
   ],
   "autoFolders": [],
   "defaultMaxVel": 4.1,

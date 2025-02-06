@@ -15,6 +15,12 @@
           "data": {
             "pathName": "test2"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "height L4"
+          }
         }
       ]
     }

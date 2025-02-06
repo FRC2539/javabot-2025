@@ -1,5 +1,6 @@
 package frc.robot.subsystems.ModeManager;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
@@ -28,13 +29,13 @@ public class SuperstructureStateManager extends SubsystemBase {
     public class SuperstructureState {
 
         @FunctionalInterface
-        private interface StateChecker {
+        public interface StateChecker {
             boolean isAtTarget(Position position, SuperstructureStateManager stateManager);
         }
 
-        private static final StateChecker FALSE = (p, s) -> false;
-        private static final StateChecker TRUE = (p, s) -> true;
-        private static final StateChecker DEFAULT =
+        public static final StateChecker FALSE = (p, s) -> false;
+        public static final StateChecker TRUE = (p, s) -> true;
+        public static final StateChecker DEFAULT =
                 (p, s) -> {
                     // return (s.internalPosition == p);
                     double armPosition = s.ArmSubsystem.getArmPosition();
@@ -48,6 +49,7 @@ public class SuperstructureStateManager extends SubsystemBase {
 
                     } else return false;
                 };
+        public static final StateChecker AUTO = DEFAULT;
 
         public enum Position {
             Sussy(1, 1, 1, null),
@@ -137,6 +139,16 @@ public class SuperstructureStateManager extends SubsystemBase {
     }
 
     private CoralAlgaeMode coralAlgaeMode = CoralAlgaeMode.LeftCoral;
+
+    private Pose2d lastScoringPose = Pose2d.kZero;
+
+    public void setLastScoringPose(Pose2d pose) {
+        lastScoringPose = pose;
+    }
+
+    public Pose2d getLastScoringPose() {
+        return lastScoringPose;
+    }
 
     public final Trigger LEFT_CORAL = new Trigger(() -> coralAlgaeMode == CoralAlgaeMode.LeftCoral);
     public final Trigger RIGHT_CORAL =
@@ -328,5 +340,7 @@ public class SuperstructureStateManager extends SubsystemBase {
         root.append(m_elevator);
 
         SmartDashboard.putData("Mech2d", mech);
+
+        setDefaultCommand(moveToPosition(Position.Home));
     }
 }
