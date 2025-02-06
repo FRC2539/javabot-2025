@@ -2,7 +2,13 @@ package frc.robot.subsystems.arm;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+
+import static edu.wpi.first.units.Units.Volts;
+
 import org.littletonrobotics.junction.Logger;
+
+import com.ctre.phoenix6.SignalLogger;
 
 public class ArmSubsystem extends SubsystemBase {
     private ArmPivotIO armPivotIO;
@@ -10,6 +16,16 @@ public class ArmSubsystem extends SubsystemBase {
 
     private WristIO wristIO;
     private WristIOInputsAutoLogged wristInputs = new WristIOInputsAutoLogged();
+    
+    private SysIdRoutine armSysIdRoutine = 
+        new SysIdRoutine(
+            new SysIdRoutine.Config(null, Volts.of(4), null, state -> SignalLogger.writeString("SysIdElevator_State", state.toString())),  
+            new SysIdRoutine.Mechanism((voltage) -> armPivotIO.setVoltage(voltage.in(Volts)), null, this));
+
+     private SysIdRoutine wristSysIdRoutine = 
+        new SysIdRoutine(
+            new SysIdRoutine.Config(null, Volts.of(4), null, state -> SignalLogger.writeString("SysIdElevator_State", state.toString())),  
+            new SysIdRoutine.Mechanism((voltage) -> wristIO.setVoltage(voltage.in(Volts)), null, this));
 
     public ArmSubsystem(ArmPivotIO armPivotIO, WristIO wristIO) {
         this.armPivotIO = armPivotIO;
@@ -32,6 +48,22 @@ public class ArmSubsystem extends SubsystemBase {
         Logger.processInputs("RealOutputs/Wrist", wristInputs);
     }
 
+    public Command runQStaticArmSysId(SysIdRoutine.Direction direction) {
+        return armSysIdRoutine.quasistatic(direction);
+    }
+
+    public Command runDynamicArmSysId(SysIdRoutine.Direction direction) {
+        return armSysIdRoutine.dynamic(direction);
+    }
+
+    public Command runQStaticWristSysId(SysIdRoutine.Direction direction) {
+        return wristSysIdRoutine.quasistatic(direction);
+    }
+
+    public Command runDynamicWristSysId(SysIdRoutine.Direction direction) {
+        return wristSysIdRoutine.dynamic(direction);
+    }
+    
     public Command turnWristRight() {
         return setVoltageWrist(12);
     }
