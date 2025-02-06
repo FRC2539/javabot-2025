@@ -15,6 +15,8 @@ public interface ElevatorIO {
         public double voltage;
         public double temperature = 0;
         public double current = 0;
+        
+
     }
 
     public void setPosition(double position);
