@@ -29,13 +29,13 @@ public class SuperstructureStateManager extends SubsystemBase {
     public class SuperstructureState {
 
         @FunctionalInterface
-        private interface StateChecker {
+        public interface StateChecker {
             boolean isAtTarget(Position position, SuperstructureStateManager stateManager);
         }
 
-        private static final StateChecker FALSE = (p, s) -> false;
-        private static final StateChecker TRUE = (p, s) -> true;
-        private static final StateChecker DEFAULT =
+        public static final StateChecker FALSE = (p, s) -> false;
+        public static final StateChecker TRUE = (p, s) -> true;
+        public static final StateChecker DEFAULT =
                 (p, s) -> {
                     // return (s.internalPosition == p);
                     double armPosition = s.ArmSubsystem.getArmPosition();
@@ -49,6 +49,7 @@ public class SuperstructureStateManager extends SubsystemBase {
 
                     } else return false;
                 };
+        public static final StateChecker AUTO = DEFAULT;
 
         public enum Position {
             Sussy(1, 1, 1, null),
@@ -339,5 +340,7 @@ public class SuperstructureStateManager extends SubsystemBase {
         root.append(m_elevator);
 
         SmartDashboard.putData("Mech2d", mech);
+
+        setDefaultCommand(moveToPosition(Position.Home));
     }
 }
