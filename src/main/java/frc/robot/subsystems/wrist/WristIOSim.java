@@ -9,6 +9,7 @@ public class WristIOSim implements WristIO {
 
         inputs.position = position;
         inputs.throughboreEncoderPosition = position;
+        inputs.throughboreConnected = true;
     }
 
     public void setVoltage(double voltage) {
