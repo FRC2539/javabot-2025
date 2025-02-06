@@ -19,8 +19,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
-import frc.robot.commands.AlignAndDriveToReef;
 import frc.lib.vision.PinholeModel3D;
+import frc.robot.commands.AlignAndDriveToReef;
 import frc.robot.commands.AlignToPiece;
 import frc.robot.commands.AlignToReef;
 import frc.robot.commands.WheelRadiusCharacterization;
@@ -34,7 +34,6 @@ import frc.robot.subsystems.arm.ArmPivotIOSim;
 import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.arm.WristIOSim;
 import frc.robot.subsystems.climber.ClimberIOSim;
-import frc.robot.subsystems.climber.ClimberIOTalonFX;
 import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
@@ -423,24 +422,27 @@ public class RobotContainer {
     }
 
     public Command alignToPiece() {
-        Supplier<Pose2d> piecePositionSupplier = () -> {
-               Pose2d robotPose = drivetrain.getRobotPose();
-            Translation2d lastPieceTranslation = PinholeModel3D.getTranslationToTarget(
-                    new Translation3d(
-                            1,
-                        vision.getTargetX(2).unaryMinus().getTan(),
-                            
-                                    vision.getLastTargetObersevation(2).ty().getTan()),
-                    VisionConstants.robotToCamera2,
-                    0);
-            Pose2d poseAtTime = robotPose;
+        Supplier<Pose2d> piecePositionSupplier =
+                () -> {
+                    Pose2d robotPose = drivetrain.getRobotPose();
+                    Translation2d lastPieceTranslation =
+                            PinholeModel3D.getTranslationToTarget(
+                                    new Translation3d(
+                                            1,
+                                            vision.getTargetX(2).unaryMinus().getTan(),
+                                            vision.getLastTargetObersevation(2).ty().getTan()),
+                                    VisionConstants.robotToCamera2,
+                                    0);
+                    Pose2d poseAtTime = robotPose;
 
-            Pose2d newPiecePose = poseAtTime.plus(new Transform2d(lastPieceTranslation, new Rotation2d()));
-        
-            return newPiecePose;
-        };
+                    Pose2d newPiecePose =
+                            poseAtTime.plus(
+                                    new Transform2d(lastPieceTranslation, new Rotation2d()));
+
+                    return newPiecePose;
+                };
         return new AlignToPiece(
-                drivetrain, driverVelocitySupplier, 0, piecePositionSupplier, Rotation2d.kZero);
+                drivetrain, driverVelocitySupplier, 0, piecePositionSupplier, Rotation2d.kCCW_90deg);
     }
 
     public boolean getVerticality() {

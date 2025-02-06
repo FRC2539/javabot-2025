@@ -28,7 +28,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import frc.robot.subsystems.vision.VisionIO.TargetObservation;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -86,7 +85,7 @@ public class Vision extends SubsystemBase {
         return inputs[cameraIndex].latestTargetObservation.tx();
     }
 
-    public TargetObservation getLastTargetObersevation(int camera){
+    public TargetObservation getLastTargetObersevation(int camera) {
         return inputs[camera].latestTargetObservation;
     }
 

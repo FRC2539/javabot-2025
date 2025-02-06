@@ -9,6 +9,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class AlignToPiece extends Command {
     private CommandSwerveDrivetrain drivetrain;
@@ -60,6 +61,7 @@ public class AlignToPiece extends Command {
         Pose2d currentPose = drivetrain.getState().Pose;
 
         Pose2d piecePose = targetPose.get();
+        Logger.recordOutput("AlignToPiece/Piece", piecePose);
 
         piecePose =
                 new Pose2d(
