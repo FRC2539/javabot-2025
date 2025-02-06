@@ -8,7 +8,10 @@ import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -20,6 +23,7 @@ import frc.robot.commands.AlignAndDriveToReef;
 import frc.robot.commands.AlignToPiece;
 import frc.robot.commands.AlignToReef;
 import frc.robot.commands.WheelRadiusCharacterization;
+import frc.robot.constants.AligningConstants;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
@@ -64,7 +68,7 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    public Auto auto = new Auto(drivetrain);
+    public Auto auto; // #146: Pass in RobotContainer
     public IntakeSubsystem intakeSubsystem;
     public ElevatorSubsystem elevatorSubsystem;
     public ClimberSubsystem climberSubsystem;
@@ -127,9 +131,8 @@ public class RobotContainer {
 
         stateManager = new SuperstructureStateManager(elevatorSubsystem, armSubsystem);
 
+        auto = new Auto(drivetrain, this);
         configureBindings();
-
-        drivetrain.setUpPathPlanner();
         // Establish the "Trajectory Field" Field2d into the dashboard
     }
 
@@ -326,11 +329,20 @@ public class RobotContainer {
                                         stateManager.setLastScoringPose(
                                                 drivetrain.findNearestAprilTagPose())));
 
-        stateManager.LEFT_CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(-0.2));
+        stateManager
+                .LEFT_CORAL
+                .and(leftDriveController.getTrigger())
+                .whileTrue(alignToReef(AligningConstants.leftOffset));
 
-        stateManager.ALGAE.and(leftDriveController.getTrigger()).whileTrue(alignToReef(0));
+        stateManager
+                .ALGAE
+                .and(leftDriveController.getTrigger())
+                .whileTrue(alignToReef(AligningConstants.centerOffset));
 
-        stateManager.RIGHT_CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(0.2));
+        stateManager
+                .RIGHT_CORAL
+                .and(leftDriveController.getTrigger())
+                .whileTrue(alignToReef(AligningConstants.rightOffset));
 
         // Technical Bindings
 
@@ -368,12 +380,20 @@ public class RobotContainer {
     }
 
     public Command alignToReef(int tag, double offset) {
-        Pose2d alignmentPose = VisionConstants.aprilTagLayout.getTagPose(tag).get().toPose2d();
+        Pose2d alignmentPose =
+                VisionConstants.aprilTagLayout
+                        .getTagPose(tag)
+                        .get()
+                        .toPose2d()
+                        .plus(
+                                new Transform2d(
+                                        new Translation2d(Units.feetToMeters(3) / 2, offset),
+                                        new Rotation2d()));
         return new AlignToReef(
                 drivetrain,
                 leftJoystickVelocityX,
                 leftJoystickVelocityY,
-                offset,
+                0,
                 alignmentPose,
                 Rotation2d.kPi); // Skibidi
     }
@@ -382,20 +402,38 @@ public class RobotContainer {
     public Command alignToReef(double offset) {
         return Commands.defer(
                 () -> {
+                    Pose2d alignmentPose =
+                            stateManager
+                                    .getLastScoringPose()
+                                    .plus(
+                                            new Transform2d(
+                                                    new Translation2d(
+                                                            Units.feetToMeters(3) / 2, offset),
+                                                    new Rotation2d()));
+                    //         return new AlignAndDriveToReef(drivetrain, 0, alignmentPose,
+                    // Rotation2d.kPi);
                     return new AlignToReef(
                             drivetrain,
                             leftJoystickVelocityX,
                             leftJoystickVelocityY,
-                            offset,
-                            stateManager.getLastScoringPose(),
+                            0,
+                            alignmentPose,
                             Rotation2d.kPi);
                 },
                 Set.of(drivetrain));
     }
 
     public Command alignAndDriveToReef(int tag, double offset) {
-        Pose2d alignmentPose = VisionConstants.aprilTagLayout.getTagPose(tag).get().toPose2d();
-        return new AlignAndDriveToReef(drivetrain, offset, alignmentPose, Rotation2d.kPi);
+        Pose2d alignmentPose =
+                VisionConstants.aprilTagLayout
+                        .getTagPose(tag)
+                        .get()
+                        .toPose2d()
+                        .plus(
+                                new Transform2d(
+                                        new Translation2d(Units.feetToMeters(3) / 2, offset),
+                                        new Rotation2d()));
+        return new AlignAndDriveToReef(drivetrain, 0, alignmentPose, Rotation2d.kPi);
     }
 
     public Command alignToPiece() {
