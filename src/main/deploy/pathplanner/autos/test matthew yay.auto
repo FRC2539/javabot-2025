@@ -1,0 +1,61 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "source to ab"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "location B"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "height L4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "place"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "ab to bc"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "location C"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "height L2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "place"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
