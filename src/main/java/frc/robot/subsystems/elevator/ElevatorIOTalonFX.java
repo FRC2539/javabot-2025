@@ -10,7 +10,6 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.constants.ElevatorConstants;
@@ -26,10 +25,19 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0);
 
     private final VoltageOut voltageReq = new VoltageOut(0.0);
-    private SysIdRoutine elevatorRoutine = 
-        new SysIdRoutine(
-            new SysIdRoutine.Config(null, Volts.of(4), null, state -> SignalLogger.writeString("SysIdElevator_State", state.toString())),  
-            new SysIdRoutine.Mechanism(voltage -> elevatorLeader.setControl(voltageReq.withOutput(voltage)),null, (Subsystem) this));
+    private SysIdRoutine elevatorRoutine =
+            new SysIdRoutine(
+                    new SysIdRoutine.Config(
+                            null,
+                            Volts.of(4),
+                            null,
+                            state ->
+                                    SignalLogger.writeString(
+                                            "SysIdElevator_State", state.toString())),
+                    new SysIdRoutine.Mechanism(
+                            voltage -> elevatorLeader.setControl(voltageReq.withOutput(voltage)),
+                            null,
+                            (Subsystem) this));
 
     public ElevatorIOTalonFX() {
         elevatorLeader.setPosition(0);

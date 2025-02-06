@@ -1,7 +1,5 @@
 package frc.robot.subsystems.elevator;
 
-import com.ctre.phoenix6.hardware.TalonFX;
-
 public class ElevatorIOSim implements ElevatorIO {
     private double position = 0;
     private double positionSetpoint = 0;
