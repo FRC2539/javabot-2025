@@ -27,7 +27,6 @@ import frc.robot.subsystems.arm.ArmPivotIOSim;
 import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.arm.WristIOSim;
 import frc.robot.subsystems.climber.ClimberIOSim;
-import frc.robot.subsystems.climber.ClimberIOTalonFX;
 import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
@@ -345,7 +344,7 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
         return auto.getAuto();
-       // return Commands.none();
+        // return Commands.none();
 
         // return drivetrain.applyRequest(() ->
         //                 drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(new
