@@ -7,43 +7,31 @@
         {
           "type": "path",
           "data": {
-            "pathName": "R-EF"
+            "pathName": "RStart-E"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "EF-CS2"
+            "pathName": "E-CS2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "CS2-CD"
+            "pathName": "CS2-D"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "CD-CS2"
+            "pathName": "D-CS2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "CS2-CD"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "CD-CS2"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "CS2-AB"
+            "pathName": "CS2-C"
           }
         }
       ]
