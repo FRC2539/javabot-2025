@@ -11,6 +11,24 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "location E"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "height L1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "place"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "E-CS2"
@@ -23,6 +41,24 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "location D"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "height L1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "place"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "D-CS2"
@@ -32,6 +68,54 @@
           "type": "path",
           "data": {
             "pathName": "CS2-C"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "location C"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "height L1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "place"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "C-CS2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CS2-B"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "location B"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "height L1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "place"
           }
         }
       ]
