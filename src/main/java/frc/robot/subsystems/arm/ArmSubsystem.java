@@ -14,7 +14,7 @@ public class ArmSubsystem extends SubsystemBase {
     public LoggedNetworkNumber armTuneables = new LoggedNetworkNumber("arm tuneable", 9);
 
     private PIDController controller =
-            new PIDController(ArmConstants.ARM_KP, ArmConstants.ARM_KI, ArmConstants.ARM_KP);
+            new PIDController(ArmConstants.ARM_KP, ArmConstants.ARM_KI, ArmConstants.ARM_KD);
 
     private double reference = 0;
 

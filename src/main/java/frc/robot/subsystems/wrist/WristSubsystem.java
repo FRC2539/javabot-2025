@@ -22,7 +22,7 @@ public class WristSubsystem extends SubsystemBase {
     private boolean isWristFlipped = false;
 
     public WristSubsystem(WristIO wristIO) {
-        controller.setTolerance(0.1);
+        controller.setTolerance(WristConstants.WRIST_TOLERANCE);
         this.wristIO = wristIO;
         setDefaultCommand(setVoltage(0));
     }
@@ -92,6 +92,12 @@ public class WristSubsystem extends SubsystemBase {
 
     public double getPosition() {
         return wristInputs.throughboreEncoderPosition;
+    }
+
+    public double getFlippedPosition() {
+        return isWristFlipped
+                ? -wristInputs.throughboreEncoderPosition
+                : wristInputs.throughboreEncoderPosition;
     }
 
     public double getInternalEncoderPosition() {

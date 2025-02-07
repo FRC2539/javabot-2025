@@ -7,11 +7,11 @@ public class WristConstants {
 
     public static final int WRIST_THROUGHBORE_ENCODER_ID = 1;
 
-    public static final double WRIST_KP = 0;
+    public static final double WRIST_KP = 5;
     public static final double WRIST_KD = 0;
     public static final double WRIST_KI = 0;
 
-    public static final double WRIST_TOLERANCE = 0.1;
+    public static final double WRIST_TOLERANCE = 0.01;
 
     public static final double WristCurrent = 0;
 

@@ -321,6 +321,7 @@ public class RobotContainer {
         ARMWRIST.and(operatorController.getA()).whileTrue(armSubsystem.armpivotDown());
         ARMWRIST.and(operatorController.getX()).whileTrue(wristSubsystem.turnWristLeft());
         ARMWRIST.and(operatorController.getB()).whileTrue(wristSubsystem.turnWristRight());
+
         CORAL.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.L4));
         CORAL.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3));
         CORAL.and(operatorController.getB()).onTrue(stateManager.moveToPosition(Position.L2));
@@ -332,7 +333,6 @@ public class RobotContainer {
                 .onTrue(stateManager.moveToPosition(Position.Home));
         CORAL.and(operatorController.getDPadUp())
                 .onTrue(stateManager.moveToPosition(Position.Handoff));
-        CORAL.and(operatorController.getBack()).onTrue(Commands.none());
 
         ALGAE.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.L4Algae));
         ALGAE.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3Algae));
@@ -348,7 +348,8 @@ public class RobotContainer {
                 .onTrue(stateManager.moveToPosition(Position.Quick34));
         ALGAE.and(operatorController.getDPadRight())
                 .onTrue(stateManager.moveToPosition(Position.Quick23));
-        ALGAE.and(operatorController.getBack()).onTrue(Commands.none());
+
+        operatorController.getBack().onTrue(wristSubsystem.flipWristPosition());
 
         // Driver Align Bindings, for a different/later day
         // CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(9, 0));

@@ -40,7 +40,7 @@ public class SuperstructureStateManager extends SubsystemBase {
                 (p, s) -> {
                     // return (s.internalPosition == p);
                     double armPosition = s.armSubsystem.getPosition();
-                    double wristPosition = s.wristSubsystem.getPosition();
+                    double wristPosition = s.wristSubsystem.getFlippedPosition();
                     double elevatorPosition = s.elevatorSubsystem.getPosition();
 
                     if ((Math.abs(armPosition - p.armheight) < 0.1)
