@@ -10,10 +10,7 @@ public class PinholeModel3D {
             Translation3d targetDirectionFromCamera,
             Transform3d robotToCamera,
             double targetHeight) {
-
-        double coralHeight = targetHeight;
-
-        double heightDifference = coralHeight - robotToCamera.getTranslation().getZ();
+        double heightDifference = targetHeight - robotToCamera.getTranslation().getZ();
 
         Transform3d targetDirectionTransform =
                 new Transform3d(targetDirectionFromCamera, new Rotation3d());

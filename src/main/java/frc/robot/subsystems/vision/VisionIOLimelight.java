@@ -22,6 +22,8 @@ import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
+
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -73,16 +75,18 @@ public class VisionIOLimelight implements VisionIO {
                             Rotation2d.fromDegrees(txSubscriber.get()),
                             Rotation2d.fromDegrees(tySubscriber.get()),
                             t2dSubscriberValue[14], // targetHorizontalExtentPixels
-                            t2dSubscriberValue[15] // targetVerticalExtentPixels
-                            );
-        } else {
-            inputs.latestTargetObservation =
-                    new TargetObservation(
-                            Rotation2d.fromDegrees(txSubscriber.get()),
-                            Rotation2d.fromDegrees(tySubscriber.get())
-                            // targetVerticalExtentPixels
+                            t2dSubscriberValue[15], // targetVerticalExtentPixels
+                            (t2dSubscriberValue[2] + t2dSubscriberValue[3]) / 1000 + Timer.getTimestamp()//latency
                             );
         }
+        // } else {
+        //     inputs.latestTargetObservation =
+        //             new TargetObservation(
+        //                     Rotation2d.fromDegrees(txSubscriber.get()),
+        //                     Rotation2d.fromDegrees(tySubscriber.get())
+        //                     // targetVerticalExtentPixels
+        //                     );
+        // }
 
         // Update orientation for MegaTag 2
         orientationPublisher.accept(

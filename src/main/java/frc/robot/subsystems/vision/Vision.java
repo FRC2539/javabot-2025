@@ -247,6 +247,9 @@ public class Vision extends SubsystemBase {
         Logger.recordOutput(
                 "Vision/Summary/CoralVerticality/CoralVertical",
                 inputs[0].latestTargetObservation.getTargetVerticalExtentPixels());
+        Logger.recordOutput("Vision/Summary/X", getTagIDs(2));
+        Logger.recordOutput("Vision/Summary/Y", getLastTargetObersevation(2).ty());
+
     }
 
     // is the coral vertical

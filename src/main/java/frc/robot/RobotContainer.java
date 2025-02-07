@@ -424,13 +424,14 @@ public class RobotContainer {
     public Command alignToPiece() {
         Supplier<Pose2d> piecePositionSupplier =
                 () -> {
+                    var lastObservation = vision.getLastTargetObersevation(2);
                     Pose2d robotPose = drivetrain.getRobotPose();
                     Translation2d lastPieceTranslation =
                             PinholeModel3D.getTranslationToTarget(
                                     new Translation3d(
                                             1,
-                                            vision.getTargetX(2).unaryMinus().getTan(),
-                                            vision.getLastTargetObersevation(2).ty().getTan()),
+                                            lastObservation.tx().unaryMinus().getTan(),
+                                            lastObservation.ty().getTan()),
                                     VisionConstants.robotToCamera2,
                                     0);
                     Pose2d poseAtTime = robotPose;
@@ -442,7 +443,11 @@ public class RobotContainer {
                     return newPiecePose;
                 };
         return new AlignToPiece(
-                drivetrain, driverVelocitySupplier, 0, piecePositionSupplier, Rotation2d.kCCW_90deg);
+                drivetrain,
+                driverVelocitySupplier,
+                0,
+                piecePositionSupplier,
+                Rotation2d.kCCW_90deg);
     }
 
     public boolean getVerticality() {
