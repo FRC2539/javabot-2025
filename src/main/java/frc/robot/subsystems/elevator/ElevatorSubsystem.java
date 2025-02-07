@@ -2,7 +2,6 @@ package frc.robot.subsystems.elevator;
 
 import static edu.wpi.first.units.Units.Volts;
 
-import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -20,8 +19,8 @@ public class ElevatorSubsystem extends SubsystemBase {
                             Volts.of(4),
                             null,
                             state ->
-                                    SignalLogger.writeString(
-                                            "SysIdElevator_State", state.toString())),
+                                    Logger.recordOutput(
+                                            "Elevator/SysIdElevator_State", state.toString())),
                     new SysIdRoutine.Mechanism(
                             (voltage) -> piviotIO.setVoltage(voltage.in(Volts)), null, this));
 
