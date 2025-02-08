@@ -349,6 +349,14 @@ public class RobotContainer {
         leftDriveController.getLeftTopLeft().whileTrue(gripperSubsystem.gripperTuneable());
 
         leftDriveController.getRightBottomLeft().onTrue(elevatorSubsystem.zeroElevatorCommand());
+
+        leftDriveController
+                .getRightTopMiddle()
+                .onTrue(armSubsystem.runDynamicArmSysId(Direction.kForward));
+
+        leftDriveController
+                .getRightBottomMiddle()
+                .onTrue(armSubsystem.runDynamicArmSysId(Direction.kReverse));
     }
 
     private double deadband(double value, double deadband) {

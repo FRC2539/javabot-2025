@@ -21,9 +21,7 @@ public class ArmSubsystem extends SubsystemBase {
                             null,
                             Volts.of(4),
                             null,
-                            state ->
-                                    SignalLogger.writeString(
-                                            "SysIdElevator_State", state.toString())),
+                            state -> Logger.recordOutput("SysIdElevator_State", state.toString())),
                     new SysIdRoutine.Mechanism(
                             (voltage) -> armPivotIO.setVoltage(voltage.in(Volts)), null, this));
 
