@@ -1,6 +1,7 @@
 package frc.robot.subsystems.ModeManager;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
@@ -354,6 +355,12 @@ public class SuperstructureStateManager extends SubsystemBase {
 
         SmartDashboard.putData("Mech2d", mech);
 
-        setDefaultCommand(moveToPosition(Position.Home));
+        Command defaultcom =
+                Commands.either(
+                        Commands.idle(),
+                        moveToPosition(Position.Home).asProxy(),
+                        () -> !RobotState.isAutonomous());
+        defaultcom.addRequirements(this);
+        setDefaultCommand(defaultcom);
     }
 }

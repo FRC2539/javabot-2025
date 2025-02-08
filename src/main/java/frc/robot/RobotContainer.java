@@ -282,6 +282,24 @@ public class RobotContainer {
                                 WheelRadiusCharacterization.Direction.CLOCKWISE, drivetrain)
                         .withName("Wheel Radius Characterization Command"));
 
+        SmartDashboard.putData(
+                elevatorSubsystem
+                        .runDynamicElevatorSysId(Direction.kForward)
+                        .withName("Elevator SysId Dynamic Forward"));
+        SmartDashboard.putData(
+                elevatorSubsystem
+                        .runDynamicElevatorSysId(Direction.kReverse)
+                        .withName("Elevator SysId Dynamic Reverse"));
+        SmartDashboard.putData(
+                elevatorSubsystem
+                        .runQStaticElevatorSysId(Direction.kForward)
+                        .withName("Elevator SysId Quasistatic Forward"));
+        SmartDashboard.putData(
+                elevatorSubsystem
+                        .runQStaticElevatorSysId(Direction.kReverse)
+                        .withName("Elevator SysId Quasistatic Reverse"));
+
+        SmartDashboard.putData(elevatorSubsystem);
         // operatorController
         // operatorController.getA().onTrue(stateManager.moveToPosition(Position.L4));
         // operatorController.getB().onTrue(stateManager.moveToPosition(Position.L3));
