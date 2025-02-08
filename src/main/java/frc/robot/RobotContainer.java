@@ -338,6 +338,9 @@ public class RobotContainer {
         ALGAE.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3Algae));
         ALGAE.and(operatorController.getB()).onTrue(stateManager.moveToPosition(Position.L2Algae));
         ALGAE.and(operatorController.getA()).onTrue(stateManager.moveToPosition(Position.L1Algae));
+        
+
+
         ALGAE.and(operatorController.getStart())
                 .onTrue(stateManager.moveToPosition(Position.Icecream));
         ALGAE.and(operatorController.getDPadDown())
@@ -351,7 +354,6 @@ public class RobotContainer {
 
         operatorController.getBack().onTrue(wristSubsystem.flipWristPosition());
 
-        // Driver Align Bindings, for a different/later day
         // CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(9, 0));
 
         // Climb Bindings

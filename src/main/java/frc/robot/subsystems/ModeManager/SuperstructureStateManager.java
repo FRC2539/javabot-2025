@@ -56,12 +56,13 @@ public class SuperstructureStateManager extends SubsystemBase {
             Sussy(1, 1, 1, null),
             None(1, 1, 1, null, TRUE, false),
             Home(1, 0, 1, None),
-            Handoff(1, 0, 1, None),
             Icecream(1, 1, 1, None),
             Quick34(4, 2, 1, None),
             Quick23(3, 3, 1, None),
             Preppy(1, 2, 1, None),
             PreppyNull(1, 3, 1, Preppy, TRUE, false),
+            HandoffPrep(2, 0, 1, PreppyNull),
+            Handoff(1, 0, 1, None),
             L1Prep(2, 2, 1, PreppyNull),
             L1(2, 1, 4, L1Prep),
             L2Prep(3, 2, 1, PreppyNull),
@@ -266,6 +267,8 @@ public class SuperstructureStateManager extends SubsystemBase {
         // myPosition).andThen(Commands.idle());
     }
 
+    //following lists
+
     public Command moveToPosition(SuperstructureState.Position myPosition) {
         Command setFinalTarget = Commands.runOnce(() -> setFinalTarget(myPosition));
         Command followInPath =
@@ -294,6 +297,7 @@ public class SuperstructureStateManager extends SubsystemBase {
         outputCommand.addRequirements(this);
         return outputCommand;
     }
+    //following lists for keeping track of pose
 
     private Command followOutPath() {
         return (Commands.defer(
@@ -340,6 +344,7 @@ public class SuperstructureStateManager extends SubsystemBase {
         this.armSubsystem = armSubsystem;
         this.wristSubsystem = wristSubsystem;
 
+        // Create the mechanism 2d
         LoggedMechanism2d mech = new LoggedMechanism2d(3, 6);
 
         LoggedMechanismRoot2d root = mech.getRoot("Elevator", 2, 0);
