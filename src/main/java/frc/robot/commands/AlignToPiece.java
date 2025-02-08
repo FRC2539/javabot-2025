@@ -16,7 +16,7 @@ public class AlignToPiece extends Command {
 
     private Supplier<ChassisSpeeds> velocity;
 
-    private PIDController yController = new PIDController(6, 0, 0);
+    private PIDController yController = new PIDController(2, 0, 0);
     private Supplier<Pose2d> targetPose;
     private double offset;
     private Rotation2d rotationOffset;
@@ -52,7 +52,7 @@ public class AlignToPiece extends Command {
         // tagId
         // Rotation to face the tag
         yController.setSetpoint(offset);
-        yController.setTolerance(Units.inchesToMeters(0.4));
+        yController.setTolerance(Units.inchesToMeters(0.8));
     }
 
     @Override

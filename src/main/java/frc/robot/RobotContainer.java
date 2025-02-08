@@ -445,7 +445,7 @@ public class RobotContainer {
         return new AlignToPiece(
                 drivetrain,
                 driverVelocitySupplier,
-                0,
+                .15,
                 piecePositionSupplier,
                 Rotation2d.kCCW_90deg);
     }
