@@ -296,6 +296,7 @@ public class RobotContainer {
                         .runQStaticElevatorSysId(Direction.kReverse)
                         .withName("Elevator SysId Quasistatic Reverse"));
 
+        SmartDashboard.putData(elevatorSubsystem);
         // operatorController
         // operatorController.getA().onTrue(stateManager.moveToPosition(Position.L4));
         // operatorController.getB().onTrue(stateManager.moveToPosition(Position.L3));
@@ -427,14 +428,6 @@ public class RobotContainer {
         leftDriveController.getLeftTopLeft().whileTrue(gripperSubsystem.gripperTuneable());
 
         leftDriveController.getRightBottomLeft().onTrue(elevatorSubsystem.zeroElevatorCommand());
-
-        rightDriveController
-                .getRightTopRight()
-                .onTrue(elevatorSubsystem.runDynamicElevatorSysId(Direction.kForward));
-
-        rightDriveController
-                .getRightBottomRight()
-                .onTrue(elevatorSubsystem.runDynamicElevatorSysId(Direction.kReverse));
 
         // test
         // operatorController.get
