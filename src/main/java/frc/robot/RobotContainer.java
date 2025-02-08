@@ -297,6 +297,25 @@ public class RobotContainer {
                         .withName("Elevator SysId Quasistatic Reverse"));
 
         SmartDashboard.putData(elevatorSubsystem);
+
+        SmartDashboard.putData(
+                armSubsystem
+                        .runDynamicArmSysId(Direction.kForward)
+                        .withName("Arm SysId Dynamic Forward"));
+        SmartDashboard.putData(
+                armSubsystem
+                        .runDynamicArmSysId(Direction.kReverse)
+                        .withName("Arm SysId Dynamic Reverse"));
+        SmartDashboard.putData(
+                armSubsystem
+                        .runQStaticArmSysId(Direction.kForward)
+                        .withName("Arm SysId Quasistatic Forward"));
+        SmartDashboard.putData(
+                armSubsystem
+                        .runQStaticArmSysId(Direction.kReverse)
+                        .withName("Arm SysId Quasistatic Reverse"));
+
+        SmartDashboard.putData(armSubsystem);
         // operatorController
         // operatorController.getA().onTrue(stateManager.moveToPosition(Position.L4));
         // operatorController.getB().onTrue(stateManager.moveToPosition(Position.L3));
@@ -335,7 +354,7 @@ public class RobotContainer {
         final Trigger CORAL = stateManager.LEFT_CORAL.or(stateManager.RIGHT_CORAL);
         final Trigger ALGAE = stateManager.ALGAE;
         final Trigger ARMWRIST = stateManager.ARMWRIST;
-        ARMWRIST.and(operatorController.getY()).whileTrue(armSubsystem.armPivotUp());
+        ARMWRIST.and(operatorController.getY()).whileTrue(armSubsystem.armpivotUp());
         ARMWRIST.and(operatorController.getA()).whileTrue(armSubsystem.armpivotDown());
         ARMWRIST.and(operatorController.getX()).whileTrue(wristSubsystem.turnWristLeft());
         ARMWRIST.and(operatorController.getB()).whileTrue(wristSubsystem.turnWristRight());
@@ -428,9 +447,6 @@ public class RobotContainer {
         leftDriveController.getLeftTopLeft().whileTrue(gripperSubsystem.gripperTuneable());
 
         leftDriveController.getRightBottomLeft().onTrue(elevatorSubsystem.zeroElevatorCommand());
-
-        // test
-        // operatorController.get
     }
 
     private double deadband(double value, double deadband) {
