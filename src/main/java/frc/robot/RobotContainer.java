@@ -32,9 +32,7 @@ import frc.robot.subsystems.ModeManager.SuperstructureStateManager;
 import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState.Position;
 import frc.robot.subsystems.arm.ArmPivotIOSim;
 import frc.robot.subsystems.arm.ArmSubsystem;
-import frc.robot.subsystems.arm.WristIOSim;
 import frc.robot.subsystems.climber.ClimberIOSim;
-import frc.robot.subsystems.climber.ClimberIOTalonFX;
 import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
@@ -43,12 +41,15 @@ import frc.robot.subsystems.gripper.GripperSubsystem;
 import frc.robot.subsystems.intake.FlipperIOSim;
 import frc.robot.subsystems.intake.IntakeRollerIOSim;
 import frc.robot.subsystems.intake.IntakeSubsystem;
+import frc.robot.subsystems.lights.LightsSubsystem;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.DummyPhotonCamera;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSimML;
+import frc.robot.subsystems.wrist.WristIOSim;
+import frc.robot.subsystems.wrist.WristSubsystem;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -68,7 +69,9 @@ public class RobotContainer {
     public ElevatorSubsystem elevatorSubsystem;
     public ClimberSubsystem climberSubsystem;
     public ArmSubsystem armSubsystem;
+    public WristSubsystem wristSubsystem;
     public Vision vision;
+    public LightsSubsystem lights;
 
     public SuperstructureStateManager stateManager;
 
@@ -92,15 +95,12 @@ public class RobotContainer {
                             new VisionIOLimelight(
                                     VisionConstants.camera2Name,
                                     () -> drivetrain.getRobotPose().getRotation()));
-
-            armSubsystem = new ArmSubsystem(new ArmPivotIOSim(), new WristIOSim());
-
             gripperSubsystem = new GripperSubsystem(new GripperIOSim());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSim());
-
-            intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
-
+            armSubsystem = new ArmSubsystem(new ArmPivotIOSim());
+            wristSubsystem = new WristSubsystem(new WristIOSim());
             climberSubsystem = new ClimberSubsystem(new ClimberIOSim());
+            lights = new LightsSubsystem();
         } else {
             vision =
                     new Vision(
@@ -117,12 +117,15 @@ public class RobotContainer {
 
             gripperSubsystem = new GripperSubsystem(new GripperIOSim());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSim());
-            armSubsystem = new ArmSubsystem(new ArmPivotIOSim(), new WristIOSim());
+            armSubsystem = new ArmSubsystem(new ArmPivotIOSim());
+            wristSubsystem = new WristSubsystem(new WristIOSim());
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
             climberSubsystem = new ClimberSubsystem(new ClimberIOSim());
+            lights = new LightsSubsystem();
         }
 
-        stateManager = new SuperstructureStateManager(elevatorSubsystem, armSubsystem);
+        stateManager =
+                new SuperstructureStateManager(elevatorSubsystem, armSubsystem, wristSubsystem);
 
         auto = new Auto(drivetrain, this);
         configureBindings();
@@ -160,33 +163,36 @@ public class RobotContainer {
 
                 drivetrain.applyRequest(
                         () -> {
-                            //     return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(
-                            //             driverDesiredSpeeds);
+                            // return drivetrain.m_applyFieldSpeedsOrbit.withChassisSpeeds(
+                            // driverDesiredSpeeds);
                             return drivetrain.driveDriverRelative(driverVelocitySupplier.get());
                         }));
 
         // drive.withVelocityX(-leftDriveController.getYAxis().get() *
-        // GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive forward with negative Y (forward)
-        //     .withVelocityY(-leftDriveController.getXAxis().get() *
+        // GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive forward with negative Y
+        // (forward)
+        // .withVelocityY(-leftDriveController.getXAxis().get() *
         // GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive left with negative X (left)
-        //     .withRotationalRate(-rightDriveController.getXAxis().get() *
-        // GlobalConstants.MAX_ROTATIONAL_SPEED) // Drive counterclockwise with negative X (left)
+        // .withRotationalRate(-rightDriveController.getXAxis().get() *
+        // GlobalConstants.MAX_ROTATIONAL_SPEED) // Drive counterclockwise with negative
+        // X (left)
 
         // operatorController.getA().whileTrue(drivetrain.applyRequest(() -> brake));
-        // operatorController.getA().onTrue(new alignToTargetX(drivetrain, vision, 10, 0));
+        // operatorController.getA().onTrue(new alignToTargetX(drivetrain, vision, 10,
+        // 0));
 
         // operatorController
-        //         .getA()
-        //         .onTrue(
-        //                 new AlignToAngle(
-        //                                 drivetrain,
-        //                                 new Rotation2d(),
-        //                                 true,
-        //                                 leftJoystickVelocityX,
-        //                                 leftJoystickVelocityY)
-        //                         .andThen(
-        //                                 new alignToTargetX(
-        //                                         drivetrain, vision, 10, 0,
+        // .getA()
+        // .onTrue(
+        // new AlignToAngle(
+        // drivetrain,
+        // new Rotation2d(),
+        // true,
+        // leftJoystickVelocityX,
+        // leftJoystickVelocityY)
+        // .andThen(
+        // new alignToTargetX(
+        // drivetrain, vision, 10, 0,
         // leftJoystickVelocityX)));
 
         // operatorController.getA().toggleOnTrue(alignToReef(9, 0));
@@ -195,22 +201,22 @@ public class RobotContainer {
         // leftDriveController.getLeftThumb().whileTrue(alignToReef(9, -0.4));
         // leftDriveController.getBottomThumb().whileTrue(alignAndDriveToReef(19, 0));
         // operatorController
-        //         .getB()
-        //         .whileTrue(
-        //                 drivetrain.applyRequest(
-        //                         () ->
-        //                                 point.withModuleDirection(
-        //                                         new Rotation2d(
-        //                                                 -operatorController.getLeftYAxis().get(),
-        //                                                 -operatorController
-        //                                                         .getLeftXAxis()
-        //                                                         .get()))));
+        // .getB()
+        // .whileTrue(
+        // drivetrain.applyRequest(
+        // () ->
+        // point.withModuleDirection(
+        // new Rotation2d(
+        // -operatorController.getLeftYAxis().get(),
+        // -operatorController
+        // .getLeftXAxis()
+        // .get()))));
 
         // leftDriveController
-        //         .getTrigger()
-        //         .whileTrue(
-        //                 new WheelRadiusCharacterization(
-        //                         WheelRadiusCharacterization.Direction.CLOCKWISE, drivetrain));
+        // .getTrigger()
+        // .whileTrue(
+        // new WheelRadiusCharacterization(
+        // WheelRadiusCharacterization.Direction.CLOCKWISE, drivetrain));
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
@@ -230,6 +236,23 @@ public class RobotContainer {
         //         .getStart()
         //         .and(operatorController.getX())
         //         .whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+
+        // operatorController
+        // .getBack()
+        // .and(operatorController.getY())
+        // .whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+        // operatorController
+        // .getBack()
+        // .and(operatorController.getX())
+        // .whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+        // operatorController
+        // .getStart()
+        // .and(operatorController.getY())
+        // .whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+        // operatorController
+        // .getStart()
+        // .and(operatorController.getX())
+        // .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         SmartDashboard.putData(
                 drivetrain
@@ -267,33 +290,52 @@ public class RobotContainer {
 
         // reset the field-centric heading on left bumper press
         // operatorController
-        //         .getLeftBumper()
-        //         .onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        // .getLeftBumper()
+        // .onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         // operatorController
-        //         .getRightBumper()
-        //         .onTrue(drivetrain.runOnce(() -> drivetrain.resetPose(Pose2d.kZero)));
+        // .getRightBumper()
+        // .onTrue(drivetrain.runOnce(() -> drivetrain.resetPose(Pose2d.kZero)));
 
         // Operator Mode Setting
         operatorController.getLeftBumper().onTrue(stateManager.setLeftCoralMode());
         operatorController.getRightBumper().onTrue(stateManager.setRightCoralMode());
         operatorController.getRightTrigger().onTrue(stateManager.setAlgaeMode());
-        operatorController.getLeftJoystick().toggleOnTrue(Commands.idle()); // L3 Rainbow
-        operatorController.getLeftTrigger().whileTrue(Commands.idle()); // L2 Station Lights
+        leftDriveController.getRightTopRight().onTrue(stateManager.setArmWristMode());
+        operatorController
+                .getLeftJoystick()
+                .toggleOnTrue(
+                        Commands.runOnce(
+                                (() ->
+                                        LightsSubsystem.LEDSegment.MainStrip.setRainbowAnimation(
+                                                1)))); // L3 Rainbow
+        operatorController
+                .getLeftTrigger()
+                .whileTrue(
+                        Commands.runOnce(
+                                (() ->
+                                        LightsSubsystem.LEDSegment.MainStrip.setStrobeAnimation(
+                                                LightsSubsystem.purple, 1)))); // L2 tation Lights
 
         // Coral Mode Bindings
         final Trigger CORAL = stateManager.LEFT_CORAL.or(stateManager.RIGHT_CORAL);
         final Trigger ALGAE = stateManager.ALGAE;
+        final Trigger ARMWRIST = stateManager.ARMWRIST;
+        ARMWRIST.and(operatorController.getY()).whileTrue(armSubsystem.armPivotUp());
+        ARMWRIST.and(operatorController.getA()).whileTrue(armSubsystem.armpivotDown());
+        ARMWRIST.and(operatorController.getX()).whileTrue(wristSubsystem.turnWristLeft());
+        ARMWRIST.and(operatorController.getB()).whileTrue(wristSubsystem.turnWristRight());
+
         CORAL.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.L4));
         CORAL.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3));
         CORAL.and(operatorController.getB()).onTrue(stateManager.moveToPosition(Position.L2));
         CORAL.and(operatorController.getA()).onTrue(stateManager.moveToPosition(Position.L1));
         CORAL.and(operatorController.getStart())
                 .onTrue(stateManager.moveToPosition(Position.Source));
+
         CORAL.and(operatorController.getDPadDown())
                 .onTrue(stateManager.moveToPosition(Position.Home));
         CORAL.and(operatorController.getDPadUp())
                 .onTrue(stateManager.moveToPosition(Position.Handoff));
-        CORAL.and(operatorController.getBack()).onTrue(Commands.none());
 
         ALGAE.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.L4Algae));
         ALGAE.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3Algae));
@@ -309,7 +351,8 @@ public class RobotContainer {
                 .onTrue(stateManager.moveToPosition(Position.Quick34));
         ALGAE.and(operatorController.getDPadRight())
                 .onTrue(stateManager.moveToPosition(Position.Quick23));
-        ALGAE.and(operatorController.getBack()).onTrue(Commands.none());
+
+        operatorController.getBack().onTrue(wristSubsystem.flipWristPosition());
 
         // Driver Align Bindings, for a different/later day
         // CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(9, 0));
@@ -370,6 +413,9 @@ public class RobotContainer {
         leftDriveController.getLeftTopLeft().whileTrue(gripperSubsystem.gripperTuneable());
 
         leftDriveController.getRightBottomLeft().onTrue(elevatorSubsystem.zeroElevatorCommand());
+
+        // test
+        // operatorController.get
     }
 
     private double deadband(double value, double deadband) {
@@ -458,9 +504,5 @@ public class RobotContainer {
         Supplier<Pose2d> piecePositionSupplier = () -> new Pose2d(9.2, 4.15, Rotation2d.kZero);
         return new AlignToPiece(
                 drivetrain, driverVelocitySupplier, 0, piecePositionSupplier, Rotation2d.kZero);
-    }
-
-    public boolean getVerticality() {
-        return vision.isCoralVertical(0);
     }
 }

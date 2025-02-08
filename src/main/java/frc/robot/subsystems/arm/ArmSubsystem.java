@@ -1,80 +1,94 @@
 package frc.robot.subsystems.arm;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.constants.ArmConstants;
+import frc.robot.constants.WristConstants;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class ArmSubsystem extends SubsystemBase {
     private ArmPivotIO armPivotIO;
     public ArmPivotIOInputsAutoLogged armPivotInputs = new ArmPivotIOInputsAutoLogged();
+    public LoggedNetworkNumber armTuneables = new LoggedNetworkNumber("arm tuneable", 9);
 
-    private WristIO wristIO;
-    private WristIOInputsAutoLogged wristInputs = new WristIOInputsAutoLogged();
+    private PIDController controller =
+            new PIDController(ArmConstants.ARM_KP, ArmConstants.ARM_KI, ArmConstants.ARM_KD);
 
-    public ArmSubsystem(ArmPivotIO armPivotIO, WristIO wristIO) {
+    private double reference = 0;
+
+    public ArmSubsystem(ArmPivotIO armPivotIO) {
         this.armPivotIO = armPivotIO;
-        this.wristIO = wristIO;
-
-        setDefaultCommand(
-                run(
-                        () -> {
-                            armPivotIO.setPosition(0);
-                            wristIO.setPosition(0);
-                        }));
+        controller.setTolerance(ArmConstants.ARM_TOLERANCE);
+        setDefaultCommand(setVoltage(0));
     }
 
     public void periodic() {
         armPivotIO.updateInputs(armPivotInputs);
-        wristIO.updateInputs(wristInputs);
-
-        wristIO.encoderUpdate();
         Logger.processInputs("RealOutputs/Arm", armPivotInputs);
-        Logger.processInputs("RealOutputs/Wrist", wristInputs);
     }
 
-    public Command turnWristRight() {
-        return setVoltageWrist(12);
-    }
-
-    public Command turnWristLeft() {
-        return setVoltageWrist(-12);
+    public Command setVoltage(double voltage) {
+        return run(() -> armPivotIO.setVoltage(voltage));
     }
 
     public Command armPivotUp() {
-        return setVoltageArm(12);
+        return setVoltage(12);
     }
 
     public Command armpivotDown() {
-        return setVoltageArm(-12);
+        return setVoltage(-12);
     }
 
-    public Command setVoltageArm(double voltage) {
+    public Command tuneableVoltage() {
+        return run(() -> setVoltage(armTuneables.get()));
+    }
+
+    public Command tunablePose() {
+        return runOnce(() -> reference = armTuneables.get()).andThen(followReference());
+    }
+
+    public Command setPosition(double position) {
+        if (position > WristConstants.upperLimit) {
+            position = WristConstants.upperLimit;
+        }
+        if (position < WristConstants.lowerLimit) {
+            position = WristConstants.lowerLimit;
+        }
+        double nextPosition = position;
+
+        return runOnce(
+                        () -> {
+                            reference = nextPosition;
+                        })
+                .andThen(followReference());
+    }
+
+    public double getPosition() {
+        return armPivotInputs.throughboreEncoderPosition;
+    }
+
+    private Command followReference() {
         return run(
                 () -> {
+                    double voltage =
+                            controller.calculate(
+                                    armPivotInputs.throughboreEncoderPosition, reference);
+                    if (controller.atSetpoint()) {
+                        voltage = 0;
+                    } else {
+                        voltage = Math.min(12.0, Math.max(-12.0, voltage)); // Clamp voltage
+                    }
                     armPivotIO.setVoltage(voltage);
                 });
     }
 
-    public Command setVoltageWrist(double voltage) {
-        return run(
-                () -> {
-                    wristIO.setVoltage(voltage);
-                });
+    public double getInternalEncoderPosition() {
+        return armPivotInputs.position;
     }
 
-    public Command setPosition(double wrist, double arm) {
-        return run(
-                () -> {
-                    armPivotIO.setPosition(arm);
-                    wristIO.setPosition(wrist);
-                });
-    }
-
-    public double getArmPosition() {
-        return armPivotIO.getPosition();
-    }
-
-    public double getWristPosition() {
-        return wristIO.getPosition();
+    public boolean isEncoderConnected() {
+        return armPivotInputs.throughboreConnected;
     }
 }

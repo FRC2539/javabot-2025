@@ -255,6 +255,7 @@ public class Auto {
                         Set.of(
                                 robotContainer.armSubsystem,
                                 robotContainer.elevatorSubsystem,
+                                robotContainer.wristSubsystem,
                                 robotContainer.stateManager));
         NamedCommands.registerCommand("arm", armCommand.asProxy());
 
@@ -264,6 +265,7 @@ public class Auto {
                         Set.of(
                                 robotContainer.armSubsystem,
                                 robotContainer.elevatorSubsystem,
+                                robotContainer.wristSubsystem,
                                 robotContainer.stateManager));
         NamedCommands.registerCommand("preparm", prepArmCommand.asProxy());
 
