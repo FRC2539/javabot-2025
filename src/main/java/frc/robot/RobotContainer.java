@@ -339,7 +339,6 @@ public class RobotContainer {
         ARMWRIST.and(operatorController.getX()).whileTrue(wristSubsystem.turnWristLeft());
         ARMWRIST.and(operatorController.getB()).whileTrue(wristSubsystem.turnWristRight());
 
-
         CORAL.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.L4));
         CORAL.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3));
         CORAL.and(operatorController.getB()).onTrue(stateManager.moveToPosition(Position.L2));
@@ -429,7 +428,13 @@ public class RobotContainer {
 
         leftDriveController.getRightBottomLeft().onTrue(elevatorSubsystem.zeroElevatorCommand());
 
-        rightDriveController.getRightBottomMiddle().onTrue(elevatorSubsystem.runDynamicElevatorSysId(Direction.kForward));
+        rightDriveController
+                .getRightTopRight()
+                .onTrue(elevatorSubsystem.runDynamicElevatorSysId(Direction.kForward));
+
+        rightDriveController
+                .getRightBottomRight()
+                .onTrue(elevatorSubsystem.runDynamicElevatorSysId(Direction.kReverse));
 
         // test
         // operatorController.get
