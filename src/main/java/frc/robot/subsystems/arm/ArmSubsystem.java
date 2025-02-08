@@ -4,7 +4,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.ArmConstants;
-import frc.robot.constants.WristConstants;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -50,11 +49,11 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public Command setPosition(double position) {
-        if (position > WristConstants.upperLimit) {
-            position = WristConstants.upperLimit;
+        if (position > ArmConstants.upperLimit) {
+            position = ArmConstants.upperLimit;
         }
-        if (position < WristConstants.lowerLimit) {
-            position = WristConstants.lowerLimit;
+        if (position < ArmConstants.lowerLimit) {
+            position = ArmConstants.lowerLimit;
         }
         double nextPosition = position;
 
