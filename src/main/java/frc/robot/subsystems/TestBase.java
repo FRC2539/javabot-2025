@@ -1,21 +1,18 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig;
-import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import java.util.Scanner; 
-
-
-
-import edu.wpi.first.wpilibj.Timer;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -31,13 +28,14 @@ public class TestBase extends SubsystemBase {
             new LoggedNetworkNumber("motorThreeSpeed", 0.1);
 
     public SparkMax motor1 = new SparkMax(2, MotorType.kBrushless);
-    public TalonFX motor2 = new TalonFX(12);
+    // public TalonFX motor2 = new TalonFX(12);
+    public TalonSRX motor2 = new TalonSRX(12);
     public TalonFX motor3 = new TalonFX(9);
     // run motors 1/2 forward and backwards at a certain speed.
-    //private final Timer startTimer = new Timer();
-    //private boolean stop1, stop2, stop3;
+    // private final Timer startTimer = new Timer();
+    // private boolean stop1, stop2, stop3;
     LoggedNetworkBoolean simulation = new LoggedNetworkBoolean("isSimulation", false);
-    
+
     boolean trueOrFalse;
     public final Trigger trigger2 = new Trigger(() -> simulation.get());
     // change cansparkmax motors
@@ -45,17 +43,23 @@ public class TestBase extends SubsystemBase {
     Trigger trigger;
 
     public TestBase() {
-        // boolean stop1, stop2, stop3 = false; 
+        // boolean stop1, stop2, stop3 = false;
         // startTimer.reset();\
-        SparkBaseConfig test = new SparkMaxConfig().smartCurrentLimit(20).secondaryCurrentLimit(20).idleMode(IdleMode.kBrake);
+        SparkBaseConfig test =
+                new SparkMaxConfig()
+                        .smartCurrentLimit(20)
+                        .secondaryCurrentLimit(20)
+                        .idleMode(IdleMode.kBrake);
         motor1.configure(test, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
-        motor2.getConfigurator().apply(new CurrentLimitsConfigs().withStatorCurrentLimit(90));
-        motor2.getConfigurator().apply(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
+        // motor2.getConfigurator().apply(new CurrentLimitsConfigs().withStatorCurrentLimit(90));
+        // motor2.getConfigurator()
+        //         .apply(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
 
         motor3.getConfigurator().apply(new CurrentLimitsConfigs().withStatorCurrentLimit(120));
-        motor3.getConfigurator().apply(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
-        //motor2.configure(test, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+        motor3.getConfigurator()
+                .apply(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
+        // motor2.configure(test, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     public void setMotor1Speed(double speed) {
@@ -63,11 +67,12 @@ public class TestBase extends SubsystemBase {
     }
 
     public void setMotor2Speed(double speed) {
-        motor2.set(speed);
+        // motor2.set(speed);
+        motor2.set(ControlMode.PercentOutput, speed);
     }
 
     public void setMotor3Speed(double speed) {
-        motor2.set(speed);
+        motor3.set(speed);
     }
 
     public Command move() {
@@ -79,8 +84,8 @@ public class TestBase extends SubsystemBase {
 
     public void setSpeed() {
         motor1.set(motor1SpeedNetworkNumber.get());
-        motor2.set(motor2SpeedNetworkNumber.get());
-    }//engeeders hope
+        // motor2.set(motor2SpeedNetworkNumber.get());
+    } // engeeders hope
 
     public Command moveForwardMotor1() {
         return run(
@@ -92,7 +97,7 @@ public class TestBase extends SubsystemBase {
     public Command moveForwardMotor2() {
         return run(
                 () -> {
-                    motor2.set(1);
+                    motor2.set(ControlMode.PercentOutput, 1);
                 });
     }
 
@@ -108,7 +113,7 @@ public class TestBase extends SubsystemBase {
 
         return run(
                 () -> {
-                    motor2.set(-1);
+                    motor2.set(ControlMode.PercentOutput, -1);
                 });
     }
 
@@ -116,10 +121,9 @@ public class TestBase extends SubsystemBase {
         return run(
                 () -> {
                     motor1.set(0);
-                    motor2.set(0);
+                    motor2.set(ControlMode.PercentOutput, 0);
                 });
     }
-
 
     public boolean simulationGetBoolean() {
         return simulation.get();

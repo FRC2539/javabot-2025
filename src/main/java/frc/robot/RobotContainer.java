@@ -16,12 +16,9 @@ import org.littletonrobotics.junction.Logger;
 
 public class RobotContainer {
 
-    private final ThrustmasterJoystick leftDriveController =
-            new ThrustmasterJoystick(0);
-    private final ThrustmasterJoystick rightDriveController =
-            new ThrustmasterJoystick(1);
-    private final LogitechController operatorController =
-            new LogitechController(2);
+    private final ThrustmasterJoystick leftDriveController = new ThrustmasterJoystick(0);
+    private final ThrustmasterJoystick rightDriveController = new ThrustmasterJoystick(1);
+    private final LogitechController operatorController = new LogitechController(2);
 
     // public final CommandSwerveDrivetrain driveTrain = TunerConstants.createDrivetrain();
 
@@ -32,6 +29,7 @@ public class RobotContainer {
     // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+
     public RobotContainer() {
         configureBindings();
 
@@ -115,23 +113,35 @@ public class RobotContainer {
                 TestBase.run(
                         () -> {
                             Logger.recordOutput("Testbase/Motor1", TestBase.motor1.get());
-                            Logger.recordOutput("Testbase/Motor2", TestBase.motor2.get());
+                            // Logger.recordOutput("Testbase/Motor2", TestBase.motor2.get());
 
                             Logger.recordOutput(
                                     "Testbase/Motor1Temp", TestBase.motor1.getMotorTemperature());
-                            Logger.recordOutput(
-                                    "Testbase/Motor2Temp", TestBase.motor2.getDeviceTemp().refresh().getValueAsDouble());
+                            //     Logger.recordOutput(
+                            //             "Testbase/Motor2Temp",
+                            //
+                            // TestBase.motor2.getDeviceTemp().refresh().getValueAsDouble());
 
+                            //     Logger.recordOutput(
+                            //             "Testbase/Motor2Cur",
+                            //             TestBase.motor2
+                            //                     .getStatorCurrent()
+                            //                     .refresh()
+                            //                     .getValueAsDouble());
                             Logger.recordOutput(
-                                    "Testbase/Motor2Cur", TestBase.motor2.getStatorCurrent().refresh().getValueAsDouble()
-                            );
-                            Logger.recordOutput(
-                                "Testbase/Motor1Cur", TestBase.motor1.getOutputCurrent());
+                                    "Testbase/Motor1Cur", TestBase.motor1.getOutputCurrent());
 
                             // motor 3 info
-                            Logger.recordOutput( "Testbase/Motor3", TestBase.motor3.get());
-                            Logger.recordOutput( "Testbase/Motor3Temp", TestBase.motor3.getDeviceTemp().refresh().getValueAsDouble());
-                            Logger.recordOutput( "Testbase/Motor3Cur", TestBase.motor3.getStatorCurrent().refresh().getValueAsDouble());
+                            Logger.recordOutput("Testbase/Motor3", TestBase.motor3.get());
+                            Logger.recordOutput(
+                                    "Testbase/Motor3Temp",
+                                    TestBase.motor3.getDeviceTemp().refresh().getValueAsDouble());
+                            Logger.recordOutput(
+                                    "Testbase/Motor3Cur",
+                                    TestBase.motor3
+                                            .getStatorCurrent()
+                                            .refresh()
+                                            .getValueAsDouble());
 
                             if (TestBase.motor1.getMotorTemperature() > 60) {
                                 shutdownOne = true;
