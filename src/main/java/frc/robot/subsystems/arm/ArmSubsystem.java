@@ -1,19 +1,12 @@
 package frc.robot.subsystems.arm;
 
-<<<<<<< HEAD
 import static edu.wpi.first.units.Units.Volts;
 
-import com.ctre.phoenix6.SignalLogger;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-=======
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.constants.ArmConstants;
-import frc.robot.constants.WristConstants;
->>>>>>> main
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -25,35 +18,21 @@ public class ArmSubsystem extends SubsystemBase {
     private PIDController controller =
             new PIDController(ArmConstants.ARM_KP, ArmConstants.ARM_KI, ArmConstants.ARM_KD);
 
-<<<<<<< HEAD
+    private double reference = 0;
+
     private SysIdRoutine armSysIdRoutine =
             new SysIdRoutine(
                     new SysIdRoutine.Config(
                             null,
                             Volts.of(4),
                             null,
-                            state -> Logger.recordOutput("SysIdElevator_State", state.toString())),
+                            state ->
+                                    Logger.recordOutput(
+                                            "Elevator/SysIdArm_State", state.toString())),
                     new SysIdRoutine.Mechanism(
                             (voltage) -> armPivotIO.setVoltage(voltage.in(Volts)), null, this));
 
-    private SysIdRoutine wristSysIdRoutine =
-            new SysIdRoutine(
-                    new SysIdRoutine.Config(
-                            null,
-                            Volts.of(4),
-                            null,
-                            state ->
-                                    SignalLogger.writeString(
-                                            "SysIdElevator_State", state.toString())),
-                    new SysIdRoutine.Mechanism(
-                            (voltage) -> wristIO.setVoltage(voltage.in(Volts)), null, this));
-
-    public ArmSubsystem(ArmPivotIO armPivotIO, WristIO wristIO) {
-=======
-    private double reference = 0;
-
     public ArmSubsystem(ArmPivotIO armPivotIO) {
->>>>>>> main
         this.armPivotIO = armPivotIO;
         controller.setTolerance(ArmConstants.ARM_TOLERANCE);
         setDefaultCommand(setVoltage(0));
@@ -64,7 +43,6 @@ public class ArmSubsystem extends SubsystemBase {
         Logger.processInputs("RealOutputs/Arm", armPivotInputs);
     }
 
-<<<<<<< HEAD
     public Command runQStaticArmSysId(SysIdRoutine.Direction direction) {
         return armSysIdRoutine.quasistatic(direction);
     }
@@ -73,27 +51,11 @@ public class ArmSubsystem extends SubsystemBase {
         return armSysIdRoutine.dynamic(direction);
     }
 
-    public Command runQStaticWristSysId(SysIdRoutine.Direction direction) {
-        return wristSysIdRoutine.quasistatic(direction);
-    }
-
-    public Command runDynamicWristSysId(SysIdRoutine.Direction direction) {
-        return wristSysIdRoutine.dynamic(direction);
-    }
-
-    public Command turnWristRight() {
-        return setVoltageWrist(12);
-    }
-
-    public Command turnWristLeft() {
-        return setVoltageWrist(-12);
-=======
     public Command setVoltage(double voltage) {
         return run(() -> armPivotIO.setVoltage(voltage));
->>>>>>> main
     }
 
-    public Command armPivotUp() {
+    public Command armpivotUp() {
         return setVoltage(12);
     }
 
@@ -110,11 +72,11 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public Command setPosition(double position) {
-        if (position > WristConstants.upperLimit) {
-            position = WristConstants.upperLimit;
+        if (position > ArmConstants.upperLimit) {
+            position = ArmConstants.upperLimit;
         }
-        if (position < WristConstants.lowerLimit) {
-            position = WristConstants.lowerLimit;
+        if (position < ArmConstants.lowerLimit) {
+            position = ArmConstants.lowerLimit;
         }
         double nextPosition = position;
 
