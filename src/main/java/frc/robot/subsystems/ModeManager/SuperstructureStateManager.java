@@ -267,7 +267,7 @@ public class SuperstructureStateManager extends SubsystemBase {
         // myPosition).andThen(Commands.idle());
     }
 
-    //following lists
+    // following lists
 
     public Command moveToPosition(SuperstructureState.Position myPosition) {
         Command setFinalTarget = Commands.runOnce(() -> setFinalTarget(myPosition));
@@ -297,7 +297,8 @@ public class SuperstructureStateManager extends SubsystemBase {
         outputCommand.addRequirements(this);
         return outputCommand;
     }
-    //following lists for keeping track of pose
+
+    // following lists for keeping track of pose
 
     private Command followOutPath() {
         return (Commands.defer(
