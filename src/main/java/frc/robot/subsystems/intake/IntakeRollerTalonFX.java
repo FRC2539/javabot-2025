@@ -14,6 +14,12 @@ public class IntakeRollerTalonFX implements IntakeRollerIO {
     public IntakeRollerTalonFX() {
         intakeroller.set(ControlMode.PercentOutput, 0);
 
+        intakeroller.enableVoltageCompensation(true);
+
+        // intakeroller.configSupplyCurrentLimit(IntakeConstants.rollerSupplyCurrentLimit);
+
+        // intakeroller.configContinuousCurrentLimit(IntakeConstants.rollerContinuousCurrentLimit);
+
         intakeroller.setNeutralMode(NeutralMode.Brake);
     }
 
@@ -26,6 +32,6 @@ public class IntakeRollerTalonFX implements IntakeRollerIO {
     }
 
     public void setVoltage(double voltage) {
-        intakeroller.set(ControlMode.PercentOutput, 40);
+        intakeroller.set(ControlMode.PercentOutput, voltage / 12.0);
     }
 }
