@@ -172,8 +172,6 @@ public class CommandSwerveDrivetrain implements Subsystem {
     private SwerveSetpointGenerator setpointGenerator;
     private SwerveSetpoint previousSetpoint;
 
-    public void setUpPathPlanner() {}
-
     public Pose2d getRobotPose() {
         return getState().Pose;
     }

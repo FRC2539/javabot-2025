@@ -9,8 +9,10 @@ public class ElevatorIOSim implements ElevatorIO {
         final double stepAmount = 1;
         if (positionSetpoint > position) {
             position += stepAmount * 0.02;
+            if (position > positionSetpoint) position = positionSetpoint;
         } else if (positionSetpoint < position) {
             position -= stepAmount * 0.02;
+            if (position < positionSetpoint) position = positionSetpoint;
         }
 
         inputs.position = position;

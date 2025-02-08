@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -8,6 +9,9 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.util.Units;
@@ -17,11 +21,18 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.constants.AligningConstants;
 import frc.robot.constants.GlobalConstants;
+import frc.robot.constants.VisionConstants;
+import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState;
+import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState.Position;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class Auto {
@@ -30,11 +41,18 @@ public class Auto {
     private Alliance previousAlliance = Alliance.Blue;
     private RobotConfig config; // PathPlanner robot configuration
 
+    // #146
+    private RobotContainer robotContainer;
+    private DriveLocation targetLocation = DriveLocation.GH;
+    private ArmHeight targetHeight = ArmHeight.Home;
+
     // *NEW
     private final Field2d m_trajectoryField = new Field2d();
 
-    public Auto(CommandSwerveDrivetrain drivetrain) {
+    public Auto(CommandSwerveDrivetrain drivetrain, RobotContainer robotContainer) {
+        this.robotContainer = robotContainer;
         setUpPathPlanner(drivetrain);
+        configureBindings();
         autoChooser = new LoggedDashboardChooser<>("Auto Routine", AutoBuilder.buildAutoChooser());
         SmartDashboard.putData("Auto Path", m_trajectoryField);
     }
@@ -148,5 +166,185 @@ public class Auto {
                     // Do whatever you want with the pose here
                     m_trajectoryField.getObject("Robot").setPose(pose);
                 });
+    }
+
+    // #146 Constants
+    public static double leftOffset = AligningConstants.leftOffset;
+    public static double rightOffset = AligningConstants.rightOffset;
+    public static double centerOffset = AligningConstants.centerOffset;
+
+    public enum DriveLocation {
+        SourceLeft(1, 13, 0),
+        SourceRight(2, 12, 0),
+        A(7, 18, leftOffset),
+        AB(7, 18, centerOffset),
+        B(7, 18, rightOffset),
+        C(8, 17, leftOffset),
+        CD(8, 17, centerOffset),
+        D(8, 17, rightOffset),
+        E(9, 22, leftOffset),
+        EF(9, 22, centerOffset),
+        F(9, 22, rightOffset),
+        G(10, 21, leftOffset),
+        GH(10, 21, centerOffset),
+        H(10, 21, rightOffset),
+        I(11, 20, leftOffset),
+        JH(11, 20, centerOffset),
+        J(11, 20, rightOffset),
+        K(6, 19, leftOffset),
+        KL(6, 19, centerOffset),
+        L(6, 19, rightOffset);
+
+        public int tagRed;
+        public int tagBlue;
+        public double offset;
+
+        private DriveLocation(int tagRed, int tagBlue, double offset) {
+            this.tagRed = tagRed;
+            this.tagBlue = tagBlue;
+            this.offset = offset;
+        }
+
+        public int getTagByTeam() {
+            Optional<Alliance> ally = DriverStation.getAlliance();
+            if (ally.isPresent()) {
+                if (ally.get() == Alliance.Red) return tagRed;
+                if (ally.get() == Alliance.Blue) return tagBlue;
+            }
+
+            return tagRed;
+        }
+    }
+
+    public enum ArmHeight {
+        Home(Position.Home, Position.Home),
+        L1(Position.L1, Position.L1Prep),
+        L2(Position.L2, Position.L2Prep),
+        L3(Position.L3, Position.L3Prep),
+        L4(Position.L4, Position.L4Prep),
+        Source(Position.Source, Position.SourcePrep);
+
+        public Position position;
+        public double armMotorSpeed;
+        public Position prep;
+
+        private ArmHeight(Position position, Position prep) {
+            this.position = position;
+            this.prep = prep;
+        }
+    }
+
+    // #146: Add a function that will register all triggers
+    private double placeTimeout = 0.5;
+
+    public void configureBindings() {
+        NamedCommands.registerCommand(
+                "wait", Commands.waitUntil(() -> armInPlace() && robotInPlace()));
+
+        Command alignCommand =
+                Commands.defer(
+                        () ->
+                                robotContainer.alignAndDriveToReef(
+                                        targetLocation.getTagByTeam(), targetLocation.offset),
+                        Set.of(robotContainer.drivetrain));
+        NamedCommands.registerCommand("align", alignCommand);
+
+        Command armCommand =
+                Commands.defer(
+                        () -> robotContainer.stateManager.moveToPosition(targetHeight.position),
+                        Set.of(
+                                robotContainer.armSubsystem,
+                                robotContainer.elevatorSubsystem,
+                                robotContainer.wristSubsystem,
+                                robotContainer.stateManager));
+        NamedCommands.registerCommand("arm", armCommand.asProxy());
+
+        Command prepArmCommand =
+                Commands.defer(
+                        () -> robotContainer.stateManager.moveToPosition(targetHeight.prep),
+                        Set.of(
+                                robotContainer.armSubsystem,
+                                robotContainer.elevatorSubsystem,
+                                robotContainer.wristSubsystem,
+                                robotContainer.stateManager));
+        NamedCommands.registerCommand("preparm", prepArmCommand.asProxy());
+
+        Command scoreCommand =
+                robotContainer.gripperSubsystem.ejectSpinCoral().withTimeout(placeTimeout);
+        NamedCommands.registerCommand("score", scoreCommand.asProxy());
+
+        Command intakeCommand = robotContainer.intakeSubsystem.intake();
+        NamedCommands.registerCommand("intake", intakeCommand.asProxy());
+
+        // spotless:off
+        Command placeCommand =
+                prepArmCommand.asProxy()
+                .until(() -> robotInPlace()) // Wait until arm and align are in position
+                .andThen(
+                    (
+                        Commands.waitUntil(() -> armInPlace())
+                        .andThen(scoreCommand.asProxy())
+                    )
+                    .deadlineFor(armCommand.asProxy())
+                )
+                .deadlineFor(alignCommand);
+        NamedCommands.registerCommand("place", placeCommand);
+        // spotless:on
+
+        // #region Auto create locations and heights
+        for (DriveLocation location : DriveLocation.values()) {
+            NamedCommands.registerCommand(
+                    "location ".concat(location.name()),
+                    Commands.runOnce(
+                            () -> {
+                                targetLocation = location;
+                                Logger.recordOutput("Auto/Chosen Location", location);
+                            }));
+        }
+
+        for (ArmHeight height : ArmHeight.values()) {
+            NamedCommands.registerCommand(
+                    "height ".concat(height.name()),
+                    Commands.runOnce(
+                            () -> {
+                                targetHeight = height;
+                                Logger.recordOutput("Auto/Chosen Height", height);
+                            }));
+        }
+        // #endregion
+
+    }
+
+    @AutoLogOutput(key = "Auto/Arm In Place")
+    private boolean armInPlace() {
+        return SuperstructureState.AUTO.isAtTarget(
+                targetHeight.position, robotContainer.stateManager);
+    }
+
+    @AutoLogOutput(key = "Auto/Arm In Prep")
+    private boolean armInPrep() {
+        return SuperstructureState.AUTO.isAtTarget(targetHeight.prep, robotContainer.stateManager);
+    }
+
+    @AutoLogOutput(key = "Auto/Robot In Place")
+    private boolean robotInPlace() {
+        Pose2d alignmentPose =
+                VisionConstants.aprilTagLayout
+                        .getTagPose(targetLocation.getTagByTeam())
+                        .get()
+                        .toPose2d()
+                        .plus(
+                                new Transform2d(
+                                        new Translation2d(
+                                                Units.feetToMeters(3) / 2, targetLocation.offset),
+                                        Rotation2d.k180deg));
+        Logger.recordOutput("Auto/Physical Target Pose", alignmentPose);
+        Pose2d currentPose = robotContainer.drivetrain.getRobotPose();
+        Pose2d relativePos = alignmentPose.relativeTo(currentPose);
+        Logger.recordOutput("Auto/Physical Relative Pose", relativePos);
+        return (Math.abs(relativePos.getX()) < Units.inchesToMeters(0.7))
+                && (Math.abs(relativePos.getY()) < Units.inchesToMeters(0.7))
+                && ((Math.abs(relativePos.getRotation().getRadians()) % Math.PI)
+                        < Units.degreesToRadians(2));
     }
 }
