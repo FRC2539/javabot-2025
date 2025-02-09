@@ -1,0 +1,20 @@
+package frc.robot.constants;
+
+public class ChuteConstants {
+
+    public static final int CHUTE_MOTOR_ID = 40;
+    public static final String WRIST_CANBUS = "CANivore";
+
+    // public static final int WRIST_THROUGHBORE_ENCODER_ID = 1;
+
+    public static final double CHUTE_KP = 5;
+    public static final double CHUTE_KI = 0;
+    public static final double CHUTE_KD = 0;
+
+    public static final double CHUTE_TOLERANCE = 0.01;
+
+    public static final double ChuteCurrent = 0;
+
+    public static final double upperLimit = 100;
+    public static final double lowerLimit = 0;
+}
