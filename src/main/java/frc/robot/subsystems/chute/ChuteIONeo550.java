@@ -7,8 +7,6 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import frc.robot.constants.ChuteConstants;
 
 public class ChuteIONeo550 implements ChuteIO {
@@ -39,13 +37,13 @@ public class ChuteIONeo550 implements ChuteIO {
         // inputs.throughboreEncoderPosition = throughboreEncoder.get();
         // inputs.throughboreConnected = throughboreEncoder.isConnected();
 
-        if (inputs.temperature > 60) {
-            shutdown = true;
-        } else if (inputs.temperature < 58) {
-            shutdown = false;
-        }
+        // if (inputs.temperature > 60) {
+        //     shutdown = true;
+        // } else if (inputs.temperature < 58) {
+        //     shutdown = false;
+        // }
 
-        inputs.shutdown = shutdown;
+        // inputs.shutdown = shutdown;
 
         // if (inputs.throughboreEncoderPosition >= ChuteConstants.upperLimit && lastVoltage > 0) {
         //     lastVoltage = 0;

@@ -4,6 +4,7 @@ import org.littletonrobotics.junction.AutoLog;
 
 public interface ChuteIO {
     public void updateInputs(ChuteIOInputs inputs);
+
     @AutoLog
     public class ChuteIOInputs {
         public double position = 0;
@@ -11,7 +12,7 @@ public interface ChuteIO {
         public double current = 0;
         public double voltage = 0;
         // public double throughboreEncoderPosition = 0;
-        public boolean shutdown = false;
+        // public boolean shutdown = false;
         // public boolean throughboreConnected = false;
     }
 

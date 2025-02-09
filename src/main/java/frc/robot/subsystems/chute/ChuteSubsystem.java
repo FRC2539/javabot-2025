@@ -2,10 +2,8 @@ package frc.robot.subsystems.chute;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.ChuteConstants;
-import frc.robot.constants.WristConstants;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -51,7 +49,7 @@ public class ChuteSubsystem extends SubsystemBase {
         return run(() -> chuteIO.setVoltage(voltage));
     }
 
-    public Command setPosition(double position) {
+    public Command movetoPosition(double position) {
         if (position > ChuteConstants.upperLimit) {
             position = ChuteConstants.upperLimit;
         }
@@ -60,42 +58,42 @@ public class ChuteSubsystem extends SubsystemBase {
         }
         double nextPosition = position;
         return runOnce(
-                        () -> {
-                            reference = nextPosition;
-                        });
+                () -> {
+                    reference = nextPosition;
+                });
     }
 
-//     private Command followReferenceThrubore() {
-//         return run(
-//                 () -> {
-//                     double voltage =
-//                             controller.calculate(
-//                                     wristInputs.throughboreEncoderPosition,
-//                                     isWristFlipped ? -reference : reference);
-//                     if (controller.atSetpoint()) {
-//                         voltage = 0;
-//                     } else {
-//                         voltage = Math.min(12.0, Math.max(-12.0, voltage)); // Clamp voltage
-//                     }
-//                     wristIO.setVoltage(voltage);
-//                 });
-//     }
+    //     private Command followReferenceThrubore() {
+    //         return run(
+    //                 () -> {
+    //                     double voltage =
+    //                             controller.calculate(
+    //                                     wristInputs.throughboreEncoderPosition,
+    //                                     isWristFlipped ? -reference : reference);
+    //                     if (controller.atSetpoint()) {
+    //                         voltage = 0;
+    //                     } else {
+    //                         voltage = Math.min(12.0, Math.max(-12.0, voltage)); // Clamp voltage
+    //                     }
+    //                     wristIO.setVoltage(voltage);
+    //                 });
+    //     }
 
-//     public double getPosition() {
-//         return wristInputs.throughboreEncoderPosition;
-//     }
+    //     public double getPosition() {
+    //         return wristInputs.throughboreEncoderPosition;
+    //     }
 
-//     public double getFlippedPosition() {
-//         return isWristFlipped
-//                 ? -wristInputs.throughboreEncoderPosition
-//                 : wristInputs.throughboreEncoderPosition;
-//     }
+    //     public double getFlippedPosition() {
+    //         return isWristFlipped
+    //                 ? -wristInputs.throughboreEncoderPosition
+    //                 : wristInputs.throughboreEncoderPosition;
+    //     }
 
-//     public double getInternalEncoderPosition() {
-//         return wristInputs.position;
-//     }
+    //     public double getInternalEncoderPosition() {
+    //         return wristInputs.position;
+    //     }
 
-//     public boolean isEncoderConnected() {
-//         return wristInputs.throughboreConnected;
-//     }
+    //     public boolean isEncoderConnected() {
+    //         return wristInputs.throughboreConnected;
+    //     }
 }
