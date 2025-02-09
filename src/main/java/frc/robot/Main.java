@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.auto.AutoGenerators;
 
 public final class Main {
     private Main() {}

@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
+import frc.robot.auto.Auto;
 import frc.robot.commands.AlignAndDriveToReef;
 import frc.robot.commands.AlignToPiece;
 import frc.robot.commands.AlignToReef;

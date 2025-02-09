@@ -79,7 +79,7 @@ task(replayWatch, type: JavaExec) {
 def simGUI
 
 task(generateTrajectories, type: JavaExec) {
-    mainClass = "frc.robot.AutoGenerators"
+    mainClass = "frc.robot.auto.AutoGenerators"
     classpath = sourceSets.main.runtimeClasspath
 }
 

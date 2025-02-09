@@ -52,18 +52,32 @@ public class PathEval {
         var nextTraj = path.getIdealTrajectory(configs).get();
         double collisions = 0;
         for (var zone : keepOutZones) {
-            for (PathPlannerTrajectoryState stateu : nextTraj.getStates()) {
-                boolean collide = testRobotForCollision(stateu.pose, zone);
+            List<PathPlannerTrajectoryState> states = nextTraj.getStates();
+            for (int i = 0; i < states.size() - 1; i++) {
+                boolean collide = testRobotForCollision(states.get(i).pose, zone);
                 if (!collide) {
-                    collisions += stateu.timeSeconds;
+                    collisions += (states.get(i + 1).timeSeconds - states.get(i).timeSeconds);
                 }
             }
         }
         return -collisions;
     }
 
+    public Double kinkOnly(PathPlannerPath path) {
+        var nextTraj = path.getIdealTrajectory(configs).get();
+        double collisions = 0;
+        List<PathPlannerTrajectoryState> states = nextTraj.getStates();
+        for (int i = 0; i < states.size() - 1; i++) {
+            boolean collide = Math.abs(states.get(i).heading.minus(states.get(i+1).heading).getRadians()) / (states.get(i + 1).timeSeconds - states.get(i).timeSeconds) > (Math.PI * 10);
+            if (collide) {
+                collisions += (states.get(i + 1).timeSeconds - states.get(i).timeSeconds);
+            }
+        }
+        return -collisions;
+    }
+
     public Double timeAndCollisions(PathPlannerPath path) {
-        return timeOnly(path) + collisionsOnly(path) * 30;
+        return timeOnly(path) + collisionsOnly(path) * 30;// + kinkOnly(path) * 100;
     }
 
     private static boolean keepOutTest(
