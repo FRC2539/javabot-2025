@@ -15,4 +15,6 @@ public class ChuteIOSim implements ChuteIO {
     public void setVoltage(double voltage) {
         this.voltage = voltage;
     }
+
+    public void setPosition(double position) {}
 }

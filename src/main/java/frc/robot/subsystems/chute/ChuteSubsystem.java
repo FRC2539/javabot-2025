@@ -18,6 +18,9 @@ public class ChuteSubsystem extends SubsystemBase {
 
     private double reference = 0;
 
+    private double upSetpoint = 10;
+    private double downSetpoint = -10;
+
     public ChuteSubsystem(ChuteIO chuteIO) {
         controller.setTolerance(ChuteConstants.CHUTE_TOLERANCE);
         this.chuteIO = chuteIO;
@@ -27,14 +30,6 @@ public class ChuteSubsystem extends SubsystemBase {
     public void periodic() {
         chuteIO.updateInputs(chuteInputs);
         Logger.processInputs("RealOutputs/Chute", chuteInputs);
-    }
-
-    public Command chuteUp() {
-        return setVoltage(12);
-    }
-
-    public Command chuteDown() {
-        return setVoltage(-12);
     }
 
     public Command tuneableVoltage() {
@@ -61,6 +56,14 @@ public class ChuteSubsystem extends SubsystemBase {
                 () -> {
                     reference = nextPosition;
                 });
+    }
+
+    public Command moveChuteUp() {
+        return runOnce(() -> chuteIO.setPosition(upSetpoint));
+    }
+
+    public Command moveChuteDown() {
+        return runOnce(() -> chuteIO.setPosition(downSetpoint));
     }
 
     //     private Command followReferenceThrubore() {
