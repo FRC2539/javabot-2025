@@ -378,10 +378,10 @@ public class RobotContainer {
         leftDriveController.getLeftThumb().whileTrue(climberSubsystem.downPosition());
         leftDriveController.getRightThumb().whileTrue(climberSubsystem.upPosition());
 
-        leftDriveController.getBottomThumb().whileTrue(alignToPiece());
+        // leftDriveController.getBottomThumb().whileTrue(alignToPiece());
 
         // Intake Bindings
-        rightDriveController.getLeftThumb().whileTrue(intakeSubsystem.openAndRun());
+        rightDriveController.getLeftThumb().whileTrue(intakeSubsystem.openAndRun().alongWith(alignToPiece()));
         rightDriveController.getRightThumb().whileTrue(intakeSubsystem.openAndEject());
 
         CORAL.and(rightDriveController.getBottomThumb())
