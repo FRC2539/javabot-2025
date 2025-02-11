@@ -33,6 +33,9 @@ import frc.robot.subsystems.ModeManager.SuperstructureStateManager.Superstructur
 import frc.robot.subsystems.arm.ArmPivotIOSim;
 import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
 import frc.robot.subsystems.arm.ArmSubsystem;
+import frc.robot.subsystems.chute.ChuteIONeo550;
+import frc.robot.subsystems.chute.ChuteIOSim;
+import frc.robot.subsystems.chute.ChuteSubsystem;
 import frc.robot.subsystems.climber.ClimberIOSim;
 import frc.robot.subsystems.climber.ClimberIOTalonFX;
 import frc.robot.subsystems.climber.ClimberSubsystem;
@@ -78,7 +81,7 @@ public class RobotContainer {
     public WristSubsystem wristSubsystem;
     public Vision vision;
     public LightsSubsystem lights;
-
+    public ChuteSubsystem chuteSubsystem;
     public SuperstructureStateManager stateManager;
 
     public GripperSubsystem gripperSubsystem;
@@ -109,6 +112,7 @@ public class RobotContainer {
             wristSubsystem = new WristSubsystem(new WristIONeo550());
             climberSubsystem = new ClimberSubsystem(new ClimberIOTalonFX());
             lights = new LightsSubsystem();
+            chuteSubsystem = new ChuteSubsystem(new ChuteIONeo550());
 
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerTalonFX(), new FlipperIOTalon());
         } else {
@@ -135,6 +139,7 @@ public class RobotContainer {
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
             climberSubsystem = new ClimberSubsystem(new ClimberIOSim());
             lights = new LightsSubsystem();
+            chuteSubsystem = new ChuteSubsystem(new ChuteIOSim());
         }
 
         stateManager =
@@ -370,6 +375,8 @@ public class RobotContainer {
                 .onTrue(stateManager.moveToPosition(Position.Home));
         CORAL.and(operatorController.getDPadUp())
                 .onTrue(stateManager.moveToPosition(Position.Handoff));
+        CORAL.and(operatorController.getDPadLeft()).onTrue(chuteSubsystem.moveChuteUp());
+        CORAL.and(operatorController.getDPadRight()).onTrue(chuteSubsystem.moveChuteDown());
 
         ALGAE.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.L4Algae));
         ALGAE.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3Algae));
@@ -381,7 +388,7 @@ public class RobotContainer {
                 .onTrue(stateManager.moveToPosition(Position.Home));
         ALGAE.and(operatorController.getDPadUp())
                 .onTrue(stateManager.moveToPosition(Position.Handoff));
-        ALGAE.and(operatorController.getDPadDownLeft())
+        ALGAE.and(operatorController.getDPadLeft())
                 .onTrue(stateManager.moveToPosition(Position.Quick34));
         ALGAE.and(operatorController.getDPadRight())
                 .onTrue(stateManager.moveToPosition(Position.Quick23));
