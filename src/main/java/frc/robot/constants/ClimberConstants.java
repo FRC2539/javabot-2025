@@ -27,7 +27,7 @@ public class ClimberConstants {
 
     public static final double lowerLimit = 0;
 
-    public static final int id = 83;
+    public static final int id = 16;
 
     public static final String CANbus = "CANivore";
 }
