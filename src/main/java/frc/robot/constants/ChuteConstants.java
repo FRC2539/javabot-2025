@@ -2,7 +2,7 @@ package frc.robot.constants;
 
 public class ChuteConstants {
 
-    public static final int CHUTE_MOTOR_ID = 40;
+    public static final int CHUTE_MOTOR_ID = 19;
     public static final String WRIST_CANBUS = "CANivore";
 
     // public static final int WRIST_THROUGHBORE_ENCODER_ID = 1;

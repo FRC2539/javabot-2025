@@ -11,8 +11,8 @@ public interface ChuteIO {
         public double temperature = 0;
         public double current = 0;
         public double voltage = 0;
+        public boolean shutdown = false;
         // public double throughboreEncoderPosition = 0;
-        // public boolean shutdown = false;
         // public boolean throughboreConnected = false;
     }
 
