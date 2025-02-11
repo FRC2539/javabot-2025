@@ -1,10 +1,10 @@
-package frc.robot.subsystems.arm;
+package frc.robot.subsystems.wrist;
 
-public class ArmPivotIOSim implements ArmPivotIO {
+public class WristIOSim implements WristIO {
     private double position = 0;
     private double voltage = 0;
 
-    public void updateInputs(ArmPivotIOInputs inputs) {
+    public void updateInputs(WristIOInputs inputs) {
         position += 0.02 * voltage;
 
         inputs.position = position;
