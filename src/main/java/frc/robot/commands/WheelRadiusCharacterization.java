@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.commands;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -62,12 +62,13 @@ public class WheelRadiusCharacterization extends Command {
     }
 
     public void execute() {
-        drive.driveRobotRelative(
-                new ChassisSpeeds(
-                        0,
-                        0,
-                        omegaLimiter.calculate(
-                                omegaDirection.value * characterizationSpeed.get())));
+        drive.setControl(
+                drive.driveRobotRelative(
+                        new ChassisSpeeds(
+                                0,
+                                0,
+                                omegaLimiter.calculate(
+                                        omegaDirection.value * characterizationSpeed.get()))));
 
         // Get yaw and wheel positions
 

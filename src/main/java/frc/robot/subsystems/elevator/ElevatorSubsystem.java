@@ -1,50 +1,62 @@
 package frc.robot.subsystems.elevator;
 
+import static edu.wpi.first.units.Units.Volts;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.elevator.ElevatorIO.ElevatorIOInputs;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.Logger;
 
 public class ElevatorSubsystem extends SubsystemBase {
 
     private ElevatorIO piviotIO;
-    private ElevatorIOInputs elevatorInputs = new ElevatorIOInputs();
+    private ElevatorIOInputsAutoLogged elevatorInputs = new ElevatorIOInputsAutoLogged();
 
-    private final double lowerLimit = 0;
-    private final double upperLimit = 100;
+    private SysIdRoutine elevatorSysIdRoutine =
+            new SysIdRoutine(
+                    new SysIdRoutine.Config(
+                            null,
+                            Volts.of(4),
+                            null,
+                            state ->
+                                    Logger.recordOutput(
+                                            "Elevator/SysIdElevator_State", state.toString())),
+                    new SysIdRoutine.Mechanism(
+                            (voltage) -> piviotIO.setVoltage(voltage.in(Volts)), null, this));
 
     public ElevatorSubsystem(ElevatorIO elevatorIO) {
         this.piviotIO = elevatorIO;
+        setDefaultCommand(setVoltage(0));
     }
 
     public void periodic() {
 
         piviotIO.updateInputs(elevatorInputs);
 
-        Logger.recordOutput("Elevator/Voltage", elevatorInputs.voltage);
+        Logger.processInputs("RealOutputs/Elevator", elevatorInputs);
+    }
 
-        if (elevatorInputs.voltage < 0 && elevatorInputs.position <= lowerLimit) {
-            this.piviotIO.setVoltage(0);
-        }
+    public Command runQStaticElevatorSysId(SysIdRoutine.Direction direction) {
+        return elevatorSysIdRoutine.quasistatic(direction);
+    }
 
-        if (elevatorInputs.voltage > 0 && elevatorInputs.position >= upperLimit) {
-            this.piviotIO.setVoltage(0);
-        }
+    public Command runDynamicElevatorSysId(SysIdRoutine.Direction direction) {
+        return elevatorSysIdRoutine.dynamic(direction);
     }
 
     public Command zeroElevatorCommand() {
-        return run(
+        return runOnce(
                 () -> {
-                    piviotIO.setPosition(0);
+                    piviotIO.resetPosition(0);
                 });
     }
 
     public Command moveElevatorUp() {
-        return setVoltage(12).until(() -> elevatorInputs.position >= upperLimit);
+        return setVoltage(12);
     }
 
     public Command moveElevatorDown() {
-        return setVoltage(-12).until(() -> elevatorInputs.position <= lowerLimit);
+        return setVoltage(-12);
     }
 
     public Command setVoltage(double voltage) {
@@ -59,5 +71,9 @@ public class ElevatorSubsystem extends SubsystemBase {
                 () -> {
                     piviotIO.setPosition(position);
                 });
+    }
+
+    public double getPosition() {
+        return elevatorInputs.position;
     }
 }

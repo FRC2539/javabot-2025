@@ -32,11 +32,13 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.TunerConstants.TunerSwerveDrivetrain;
+import frc.robot.constants.VisionConstants;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.function.Supplier;
@@ -51,6 +53,24 @@ public class CommandSwerveDrivetrain implements Subsystem {
     private final TunerSwerveDrivetrain m_drivetrain;
 
     private final CustomOdometry m_odometry_custom;
+
+    private enum SwerveState {
+        ROBOT_RELATIVE("robot relative"),
+        ROBOT_RELATIVE_FFW("robot relative feedforwards"),
+        FIELD_RELATIVE("field relative"),
+        FIELD_RELATIVE_FFW("field relative feedforwards"),
+        DRIVER_RELATIVE("driver relative"),
+        DRIVER_RELATIVE_ORBIT("driver relative orbit-style"); /*,
+        ANTI_TIP_LIMITING */
+
+        public final String label;
+
+        private SwerveState(String label) {
+            this.label = label;
+        }
+    }
+
+    private SwerveState m_swerveState;
 
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
@@ -74,8 +94,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
     private final SwerveRequest.ApplyRobotSpeeds m_applyRobotSpeeds =
             new SwerveRequest.ApplyRobotSpeeds()
                     .withDriveRequestType(DriveRequestType.Velocity)
-                    .withSteerRequestType(SteerRequestType.MotionMagicExpo)
-                    .withDesaturateWheelSpeeds(false);
+                    .withSteerRequestType(SteerRequestType.MotionMagicExpo);
 
     public final SwerveRequest.ApplyFieldSpeeds m_applyDriverSpeeds =
             new SwerveRequest.ApplyFieldSpeeds()
@@ -83,11 +102,13 @@ public class CommandSwerveDrivetrain implements Subsystem {
                     .withSteerRequestType(SteerRequestType.MotionMagicExpo)
                     .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective);
 
-    public final SwerveRequest.ApplyFieldSpeeds m_applyFieldSpeeds =
+    private final SwerveRequest.ApplyFieldSpeeds m_applyFieldSpeeds =
             new SwerveRequest.ApplyFieldSpeeds()
-                    .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective);
+                    .withDriveRequestType(DriveRequestType.Velocity)
+                    .withSteerRequestType(SteerRequestType.MotionMagicExpo)
+                    .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance);
 
-    public final FieldOrientedOrbitSwerveRequest m_applyFieldSpeedsOrbit;
+    private final FieldOrientedOrbitSwerveRequest m_applyFieldSpeedsOrbit;
     RobotConfig config; // PathPlanner robot configuration
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
@@ -157,10 +178,45 @@ public class CommandSwerveDrivetrain implements Subsystem {
     private SwerveSetpointGenerator setpointGenerator;
     private SwerveSetpoint previousSetpoint;
 
-    public void setUpPathPlanner() {}
-
     public Pose2d getRobotPose() {
         return getState().Pose;
+    }
+
+    public Pose2d findNearestAprilTagPose() {
+        // TODO: filter out opposing side tags and non-reef tags
+        Pose2d currentPose = getRobotPose();
+        Pose2d nearestAprilTagPose = null;
+        double nearestDistance = Double.MAX_VALUE;
+
+        Pose2d[] aprilTagPoses = new Pose2d[6];
+
+        if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
+            for (int i = 0; i < 6; i++) {
+                aprilTagPoses[i] =
+                        VisionConstants.aprilTagLayout
+                                .getTagPose(GlobalConstants.redReefTagIDs[i])
+                                .get()
+                                .toPose2d();
+            }
+        } else {
+            for (int i = 0; i < 6; i++) {
+                aprilTagPoses[i] =
+                        VisionConstants.aprilTagLayout
+                                .getTagPose(GlobalConstants.blueReefTagIDs[i])
+                                .get()
+                                .toPose2d();
+            }
+        }
+
+        for (Pose2d tagPose : aprilTagPoses) {
+            double distance = currentPose.getTranslation().getDistance(tagPose.getTranslation());
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestAprilTagPose = tagPose;
+            }
+        }
+
+        return nearestAprilTagPose;
     }
 
     public Rotation2d getOperatorForwardDirection() {
@@ -246,6 +302,8 @@ public class CommandSwerveDrivetrain implements Subsystem {
                 });
         m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
         createSuppliers();
+
+        m_swerveState = SwerveState.DRIVER_RELATIVE;
     }
 
     /**
@@ -278,6 +336,8 @@ public class CommandSwerveDrivetrain implements Subsystem {
 
         m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
         createSuppliers();
+
+        m_swerveState = SwerveState.DRIVER_RELATIVE;
     }
 
     /**
@@ -322,6 +382,8 @@ public class CommandSwerveDrivetrain implements Subsystem {
 
         m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
         createSuppliers();
+
+        m_swerveState = SwerveState.DRIVER_RELATIVE;
     }
 
     private FieldOrientedOrbitSwerveRequest generateSwerveSetpointConfig() {
@@ -345,13 +407,95 @@ public class CommandSwerveDrivetrain implements Subsystem {
         return request;
     }
 
+    private double currentMaxAcceleration = 5;
+    private double futureMaxAcceleration = 5;
+
+    public ChassisSpeeds limitFieldRelativeSpeeds(ChassisSpeeds inputSpeeds) {
+        return limitFieldRelativeSpeeds(inputSpeeds, false);
+    }
+
+    public ChassisSpeeds limitFieldRelativeSpeeds(
+            ChassisSpeeds inputSpeeds, boolean maintainRotationProportion) {
+        // var robotState = getState();
+        // double max_speed = Math.hypot(inputSpeeds.vxMetersPerSecond,
+        // inputSpeeds.vyMetersPerSecond);
+        // double limited_x_speed =
+        // antiTipSlewer.getMaxAllowedVelocityDirectional(inputSpeeds.vxMetersPerSecond, true);
+        // double limited_y_speed =
+        // antiTipSlewer.getMaxAllowedVelocityDirectional(inputSpeeds.vyMetersPerSecond, false);
+
+        // double x_ratio = limited_x_speed / inputSpeeds.vxMetersPerSecond;
+        // double y_ratio = limited
+
+        double max_speed_to_allowed_ratio =
+                antiTipSlewer.getMaxAllowedVelocityRatio(
+                        inputSpeeds.vxMetersPerSecond, inputSpeeds.vyMetersPerSecond);
+        // double max_allowed_velocity = max_speed * max_speed_to_allowed_ratio;
+
+        if (max_speed_to_allowed_ratio < 1) {
+
+            return new ChassisSpeeds(
+                    inputSpeeds.vxMetersPerSecond * max_speed_to_allowed_ratio,
+                    inputSpeeds.vyMetersPerSecond * max_speed_to_allowed_ratio,
+                    (!maintainRotationProportion)
+                            ? inputSpeeds.omegaRadiansPerSecond
+                            : (inputSpeeds.omegaRadiansPerSecond * max_speed_to_allowed_ratio));
+        }
+
+        return inputSpeeds;
+    }
+
+    private final AntiTipSlewer antiTipSlewer = new AntiTipSlewer();
+
+    public ChassisSpeeds limitRobotRelativeAcceleration(ChassisSpeeds speeds) {
+        antiTipSlewer.setFwdXRateLimit(antiTipSlewer.getMaxAllowedAccelerationDirectional(1, true));
+        antiTipSlewer.setRevXRateLimit(
+                antiTipSlewer.getMaxAllowedAccelerationDirectional(-1, true));
+        antiTipSlewer.setFwdYRateLimit(
+                antiTipSlewer.getMaxAllowedAccelerationDirectional(1, false));
+        antiTipSlewer.setRevYRateLimit(
+                antiTipSlewer.getMaxAllowedAccelerationDirectional(-1, false));
+
+        return antiTipSlewer.limitSpeeds(speeds, getState().Pose.getRotation());
+    }
+
+    //
+    // The desired robot-relative speeds
+    // returns the module states where robot can drive while obeying physics and not slipping
     public SwerveRequest driveRobotRelative(ChassisSpeeds speeds) {
-        return m_applyFieldSpeedsOrbit.withChassisSpeeds(speeds);
-        // Method that will drive the robot given target module states
+        m_swerveState = SwerveState.ROBOT_RELATIVE;
+        return m_applyRobotSpeeds.withSpeeds(speeds);
+    }
+
+    public SwerveRequest driveRobotRelative(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
+        m_swerveState = SwerveState.ROBOT_RELATIVE_FFW;
+        return m_applyRobotSpeeds
+                .withSpeeds(speeds)
+                .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+                .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons());
     }
 
     public SwerveRequest driveFieldRelative(ChassisSpeeds speeds) {
+        m_swerveState = SwerveState.FIELD_RELATIVE;
         return m_applyFieldSpeeds.withSpeeds(speeds);
+    }
+
+    public SwerveRequest driveFieldRelative(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
+        m_swerveState = SwerveState.FIELD_RELATIVE_FFW;
+        return m_applyFieldSpeeds
+                .withSpeeds(speeds)
+                .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+                .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons());
+    }
+
+    public SwerveRequest driveDriverRelative(ChassisSpeeds speeds) {
+        m_swerveState = SwerveState.DRIVER_RELATIVE;
+        return m_applyDriverSpeeds.withSpeeds(speeds);
+    }
+
+    public SwerveRequest driveDriverRelativeOrbit(ChassisSpeeds speeds) {
+        m_swerveState = SwerveState.DRIVER_RELATIVE_ORBIT;
+        return m_applyFieldSpeedsOrbit.withChassisSpeeds(speeds);
     }
 
     //     public SwerveRequest driveFieldRelativeNoSetpointGenerator(ChassisSpeeds speeds) {
@@ -359,13 +503,13 @@ public class CommandSwerveDrivetrain implements Subsystem {
     //         return driveRobotRelative()
     //     }
 
-    public SwerveRequest driveWithFeedforwards(
-            ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
-        return m_applyRobotSpeeds
-                .withSpeeds(speeds)
-                .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
-                .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons());
-    }
+    //     public SwerveRequest driveWithFeedforwards(
+    //             ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
+    //         return m_applyRobotSpeeds
+    //                 .withSpeeds(speeds)
+    //                 .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+    //                 .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons());
+    //     }
 
     /**
      * Returns a command that applies the specified control request to this swerve drivetrain.
@@ -396,7 +540,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
      * @return Command to run
      */
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutineToApply.quasistatic(direction);
+        return defer(() -> m_sysIdRoutineToApply.quasistatic(direction));
     }
 
     /**
@@ -407,10 +551,26 @@ public class CommandSwerveDrivetrain implements Subsystem {
      * @return Command to run
      */
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutineToApply.dynamic(direction);
+        return defer(() -> m_sysIdRoutineToApply.dynamic(direction));
+    }
+
+    public Command sysIdTranslationMode() {
+        return Commands.runOnce(() -> m_sysIdRoutineToApply = m_sysIdRoutineTranslation);
+    }
+
+    public Command sysIdSteerMode() {
+        return Commands.runOnce(() -> m_sysIdRoutineToApply = m_sysIdRoutineSteer);
+    }
+
+    public Command sysIdRotationMode() {
+        return Commands.runOnce(() -> m_sysIdRoutineToApply = m_sysIdRoutineRotation);
     }
 
     private double lastSpeed = 0;
+
+    private double getMaxAcceleration(double comHeight, double comX) {
+        throw new RuntimeException();
+    }
 
     @Override
     public void periodic() {
@@ -431,6 +591,13 @@ public class CommandSwerveDrivetrain implements Subsystem {
                                                 : kBlueAlliancePerspectiveRotation);
                                 m_hasAppliedOperatorPerspective = true;
                             });
+        }
+
+        {
+            antiTipSlewer.setFwdXRateLimit(1);
+            antiTipSlewer.setRevXRateLimit(1);
+            antiTipSlewer.setFwdYRateLimit(1);
+            antiTipSlewer.setRevYRateLimit(1);
         }
 
         Logger.recordOutput(
@@ -492,6 +659,8 @@ public class CommandSwerveDrivetrain implements Subsystem {
         Logger.recordOutput("Drive/pose", getState().Pose);
 
         Logger.recordOutput("Drive/outdatedPose", m_drivetrain.getState().Pose);
+
+        Logger.recordOutput("Drive/currentAction", m_swerveState.label);
 
         Logger.recordOutput("Drive/slippingModule", m_odometry_custom.m_maxSlippingWheelIndex);
 

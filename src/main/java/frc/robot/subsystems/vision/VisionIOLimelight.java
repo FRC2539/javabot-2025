@@ -38,6 +38,7 @@ public class VisionIOLimelight implements VisionIO {
     private final DoubleSubscriber tySubscriber;
     private final DoubleArraySubscriber megatag1Subscriber;
     private final DoubleArraySubscriber megatag2Subscriber;
+    private final DoubleArraySubscriber t2dSubscriber;
 
     /**
      * Creates a new VisionIOLimelight.
@@ -56,6 +57,7 @@ public class VisionIOLimelight implements VisionIO {
                 table.getDoubleArrayTopic("botpose_wpiblue").subscribe(new double[] {});
         megatag2Subscriber =
                 table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[] {});
+        t2dSubscriber = table.getDoubleArrayTopic("t2d").subscribe(new double[] {});
     }
 
     @Override
@@ -63,12 +65,24 @@ public class VisionIOLimelight implements VisionIO {
         // Update connection status based on whether an update has been seen in the last 250ms
         inputs.connected =
                 ((RobotController.getFPGATime() - latencySubscriber.getLastChange()) / 1000) < 250;
-
         // Update target observation
-        inputs.latestTargetObservation =
-                new TargetObservation(
-                        Rotation2d.fromDegrees(txSubscriber.get()),
-                        Rotation2d.fromDegrees(tySubscriber.get()));
+        var t2dSubscriberValue = t2dSubscriber.get();
+        if (t2dSubscriberValue.length >= 15) {
+            inputs.latestTargetObservation =
+                    new TargetObservation(
+                            Rotation2d.fromDegrees(txSubscriber.get()),
+                            Rotation2d.fromDegrees(tySubscriber.get()),
+                            t2dSubscriberValue[14], // targetHorizontalExtentPixels
+                            t2dSubscriberValue[15] // targetVerticalExtentPixels
+                            );
+        } else {
+            inputs.latestTargetObservation =
+                    new TargetObservation(
+                            Rotation2d.fromDegrees(txSubscriber.get()),
+                            Rotation2d.fromDegrees(tySubscriber.get())
+                            // targetVerticalExtentPixels
+                            );
+        }
 
         // Update orientation for MegaTag 2
         orientationPublisher.accept(
