@@ -35,6 +35,9 @@ import frc.robot.subsystems.ModeManager.SuperstructureStateManager.Superstructur
 import frc.robot.subsystems.arm.ArmPivotIOSim;
 import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
 import frc.robot.subsystems.arm.ArmSubsystem;
+import frc.robot.subsystems.chute.ChuteIONeo550;
+import frc.robot.subsystems.chute.ChuteIOSim;
+import frc.robot.subsystems.chute.ChuteSubsystem;
 import frc.robot.subsystems.climber.ClimberIOSim;
 import frc.robot.subsystems.climber.ClimberIOTalonFX;
 import frc.robot.subsystems.climber.ClimberSubsystem;
@@ -80,7 +83,7 @@ public class RobotContainer {
     public WristSubsystem wristSubsystem;
     public Vision vision;
     public LightsSubsystem lights;
-
+    public ChuteSubsystem chuteSubsystem;
     public SuperstructureStateManager stateManager;
 
     public GripperSubsystem gripperSubsystem;
@@ -111,6 +114,7 @@ public class RobotContainer {
             wristSubsystem = new WristSubsystem(new WristIONeo550());
             climberSubsystem = new ClimberSubsystem(new ClimberIOTalonFX());
             lights = new LightsSubsystem();
+            chuteSubsystem = new ChuteSubsystem(new ChuteIONeo550());
 
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerTalonFX(), new FlipperIOTalon());
         } else {
@@ -137,6 +141,7 @@ public class RobotContainer {
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
             climberSubsystem = new ClimberSubsystem(new ClimberIOSim());
             lights = new LightsSubsystem();
+            chuteSubsystem = new ChuteSubsystem(new ChuteIOSim());
         }
 
         stateManager =
@@ -299,6 +304,25 @@ public class RobotContainer {
                         .withName("Elevator SysId Quasistatic Reverse"));
 
         SmartDashboard.putData(elevatorSubsystem);
+
+        SmartDashboard.putData(
+                armSubsystem
+                        .runDynamicArmSysId(Direction.kForward)
+                        .withName("Arm SysId Dynamic Forward"));
+        SmartDashboard.putData(
+                armSubsystem
+                        .runDynamicArmSysId(Direction.kReverse)
+                        .withName("Arm SysId Dynamic Reverse"));
+        SmartDashboard.putData(
+                armSubsystem
+                        .runQStaticArmSysId(Direction.kForward)
+                        .withName("Arm SysId Quasistatic Forward"));
+        SmartDashboard.putData(
+                armSubsystem
+                        .runQStaticArmSysId(Direction.kReverse)
+                        .withName("Arm SysId Quasistatic Reverse"));
+
+        SmartDashboard.putData(armSubsystem);
         // operatorController
         // operatorController.getA().onTrue(stateManager.moveToPosition(Position.L4));
         // operatorController.getB().onTrue(stateManager.moveToPosition(Position.L3));
@@ -337,7 +361,7 @@ public class RobotContainer {
         final Trigger CORAL = stateManager.LEFT_CORAL.or(stateManager.RIGHT_CORAL);
         final Trigger ALGAE = stateManager.ALGAE;
         final Trigger ARMWRIST = stateManager.ARMWRIST;
-        ARMWRIST.and(operatorController.getY()).whileTrue(armSubsystem.armPivotUp());
+        ARMWRIST.and(operatorController.getY()).whileTrue(armSubsystem.armpivotUp());
         ARMWRIST.and(operatorController.getA()).whileTrue(armSubsystem.armpivotDown());
         ARMWRIST.and(operatorController.getX()).whileTrue(wristSubsystem.turnWristLeft());
         ARMWRIST.and(operatorController.getB()).whileTrue(wristSubsystem.turnWristRight());
@@ -353,6 +377,8 @@ public class RobotContainer {
                 .onTrue(stateManager.moveToPosition(Position.Home));
         CORAL.and(operatorController.getDPadUp())
                 .onTrue(stateManager.moveToPosition(Position.Handoff));
+        CORAL.and(operatorController.getDPadLeft()).onTrue(chuteSubsystem.moveChuteUp());
+        CORAL.and(operatorController.getDPadRight()).onTrue(chuteSubsystem.moveChuteDown());
 
         ALGAE.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.L4Algae));
         ALGAE.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3Algae));
@@ -364,7 +390,7 @@ public class RobotContainer {
                 .onTrue(stateManager.moveToPosition(Position.Home));
         ALGAE.and(operatorController.getDPadUp())
                 .onTrue(stateManager.moveToPosition(Position.Handoff));
-        ALGAE.and(operatorController.getDPadDownLeft())
+        ALGAE.and(operatorController.getDPadLeft())
                 .onTrue(stateManager.moveToPosition(Position.Quick34));
         ALGAE.and(operatorController.getDPadRight())
                 .onTrue(stateManager.moveToPosition(Position.Quick23));
@@ -381,7 +407,9 @@ public class RobotContainer {
         // leftDriveController.getBottomThumb().whileTrue(alignToPiece());
 
         // Intake Bindings
-        rightDriveController.getLeftThumb().whileTrue(intakeSubsystem.openAndRun().alongWith(alignToPiece()));
+        rightDriveController
+                .getLeftThumb()
+                .whileTrue(intakeSubsystem.openAndRun().alongWith(alignToPiece()));
         rightDriveController.getRightThumb().whileTrue(intakeSubsystem.openAndEject());
 
         CORAL.and(rightDriveController.getBottomThumb())
@@ -432,9 +460,6 @@ public class RobotContainer {
         leftDriveController.getLeftTopLeft().whileTrue(gripperSubsystem.gripperTuneable());
 
         leftDriveController.getRightBottomLeft().onTrue(elevatorSubsystem.zeroElevatorCommand());
-
-        // test
-        // operatorController.get
     }
 
     private double deadband(double value, double deadband) {
