@@ -4,13 +4,13 @@ import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 
 public class IntakeConstants {
-    public static final int idFlipper = 14;
+    public static final int idFlipper = 17;
 
     public static final int openPosit = 100;
 
     public static final int closedPosit = 0;
 
-    public static final int idRoller = 13;
+    public static final int idRoller = 18;
 
     public static final String canbusRoller = "CANivore";
 
