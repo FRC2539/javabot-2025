@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.constants.AligningConstants;
+import frc.robot.constants.AutoConstants;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState;
@@ -66,6 +67,17 @@ public class Auto {
             previousAlliance = currentAlliance;
 
             previousAuto = currentCommand;
+
+            if(AutoConstants.autoList.get(currentCommand.getName()) != null)
+            {
+                Logger.recordOutput("Auto/AutoDescription", AutoConstants.autoList.get(currentCommand.getName()));
+            }
+            else
+            {
+                Logger.recordOutput("Auto/AutoDescription", "No description found. Check if you actually added it to auto constants or not");
+            }
+
+            
 
             Command command = previousAuto;
             Optional<Alliance> alliance = DriverStation.getAlliance();
