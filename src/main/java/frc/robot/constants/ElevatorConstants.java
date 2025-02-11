@@ -23,13 +23,11 @@ public class ElevatorConstants {
                     .withMotionMagicCruiseVelocity(4) // also guess
                     .withMotionMagicJerk(4);
 
-    public static final int elevatorLeaderId = 41;
-
-    public static final int elevatorFollowerId = 42;
+    public static final int elevatorLeaderId = 9;
 
     public static final String elevatorLeaderCanbus = "CANivore";
 
-    public static final String elevatorFollowerCanbus = "CANivore";
+    // public static final String elevatorFollowerCanbus = "CANivore";
 
     public static final CurrentLimitsConfigs currentLimit = new CurrentLimitsConfigs();
 
