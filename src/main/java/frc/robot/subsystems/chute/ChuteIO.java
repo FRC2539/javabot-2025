@@ -17,6 +17,4 @@ public interface ChuteIO {
     }
 
     public void setVoltage(double voltage);
-
-    public void setPosition(double position);
 }

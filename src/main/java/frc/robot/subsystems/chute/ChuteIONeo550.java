@@ -25,18 +25,15 @@ public class ChuteIONeo550 implements ChuteIO {
                 config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }
 
-    private double lastVoltage = 0;
     private boolean shutdown = false;
 
-    private double lastSetPosition = 0;
+    private double lastVoltage = 0;
 
     public void updateInputs(ChuteIOInputs inputs) {
         inputs.position = chuteMotor.getEncoder().getPosition();
         inputs.voltage = chuteMotor.getBusVoltage() * chuteMotor.getAppliedOutput();
         inputs.current = chuteMotor.getOutputCurrent();
         inputs.temperature = chuteMotor.getMotorTemperature();
-        // inputs.throughboreEncoderPosition = throughboreEncoder.get();
-        // inputs.throughboreConnected = throughboreEncoder.isConnected();
 
         if (inputs.temperature > 60) {
             shutdown = true;
@@ -46,15 +43,6 @@ public class ChuteIONeo550 implements ChuteIO {
 
         inputs.shutdown = shutdown;
 
-        // if (inputs.throughboreEncoderPosition >= ChuteConstants.upperLimit && lastVoltage > 0) {
-        //     lastVoltage = 0;
-        // }
-        // if (inputs.throughboreEncoderPosition <= ChuteConstants.lowerLimit && lastVoltage < 0) {
-        //     lastVoltage = 0;
-        // }
-        // if (!inputs.throughboreConnected) {
-        //     lastVoltage = 0;
-        // }
         if (shutdown) {
             lastVoltage = 0;
         }
@@ -64,16 +52,5 @@ public class ChuteIONeo550 implements ChuteIO {
 
     public void setVoltage(double voltage) {
         lastVoltage = voltage;
-    }
-
-    public void setPosition(double position) {
-        lastSetPosition = position;
-        if (position > chuteMotor.getEncoder().getPosition()) {
-            setVoltage(12);
-        }
-
-        if (position < chuteMotor.getEncoder().getPosition()) {
-            setVoltage(-12);
-        }
     }
 }
