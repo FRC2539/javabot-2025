@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
+import frc.robot.subsystems.vision.VisionIO.TargetObservation;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -82,6 +83,10 @@ public class Vision extends SubsystemBase {
      */
     public Rotation2d getTargetX(int cameraIndex) {
         return inputs[cameraIndex].latestTargetObservation.tx();
+    }
+
+    public TargetObservation getLastTargetObersevation(int camera) {
+        return inputs[camera].latestTargetObservation;
     }
 
     public int[] getTagIDs(int cameraIndex) {
@@ -242,6 +247,8 @@ public class Vision extends SubsystemBase {
         Logger.recordOutput(
                 "Vision/Summary/CoralVerticality/CoralVertical",
                 inputs[0].latestTargetObservation.getTargetVerticalExtentPixels());
+        Logger.recordOutput("Vision/Summary/X", getTagIDs(2));
+        Logger.recordOutput("Vision/Summary/Y", getLastTargetObersevation(2).ty());
     }
 
     // is the coral vertical

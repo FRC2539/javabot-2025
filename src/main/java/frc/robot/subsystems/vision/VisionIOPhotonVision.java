@@ -56,10 +56,8 @@ public class VisionIOPhotonVision implements VisionIO {
                                 result.getBestTarget().getDetectedCorners().get(2).x
                                         - result.getBestTarget().getDetectedCorners().get(3).x,
                                 result.getBestTarget().getDetectedCorners().get(3).y
-                                        - result.getBestTarget().getDetectedCorners().get(0).y);
-            } else {
-                inputs.latestTargetObservation =
-                        new TargetObservation(new Rotation2d(), new Rotation2d());
+                                        - result.getBestTarget().getDetectedCorners().get(0).y,
+                                result.getTimestampSeconds());
             }
 
             // Add pose observation
