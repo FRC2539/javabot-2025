@@ -33,6 +33,8 @@ import frc.robot.subsystems.ModeManager.SuperstructureStateManager.Superstructur
 import frc.robot.subsystems.arm.ArmPivotIOSim;
 import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
 import frc.robot.subsystems.arm.ArmSubsystem;
+import frc.robot.subsystems.climber.ClimberHeadIONeo550;
+import frc.robot.subsystems.climber.ClimberHeadIOSim;
 import frc.robot.subsystems.climber.ClimberIOSim;
 import frc.robot.subsystems.climber.ClimberIOTalonFX;
 import frc.robot.subsystems.climber.ClimberSubsystem;
@@ -80,7 +82,7 @@ public class RobotContainer {
     public LightsSubsystem lights;
 
     public SuperstructureStateManager stateManager;
-
+    public ClimberSubsystem climberHeadSubsystem;
     public GripperSubsystem gripperSubsystem;
 
     private DoubleSupplier leftJoystickVelocityX;
@@ -107,7 +109,8 @@ public class RobotContainer {
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
             armSubsystem = new ArmSubsystem(new ArmPivotIOTalonFX());
             wristSubsystem = new WristSubsystem(new WristIONeo550());
-            climberSubsystem = new ClimberSubsystem(new ClimberIOTalonFX());
+            climberSubsystem =
+                    new ClimberSubsystem(new ClimberIOTalonFX(), new ClimberHeadIONeo550());
             lights = new LightsSubsystem();
 
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerTalonFX(), new FlipperIOTalon());
@@ -133,7 +136,7 @@ public class RobotContainer {
             armSubsystem = new ArmSubsystem(new ArmPivotIOSim());
             wristSubsystem = new WristSubsystem(new WristIOSim());
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
-            climberSubsystem = new ClimberSubsystem(new ClimberIOSim());
+            climberSubsystem = new ClimberSubsystem(new ClimberIOSim(), new ClimberHeadIOSim());
             lights = new LightsSubsystem();
         }
 
@@ -394,6 +397,7 @@ public class RobotContainer {
         // Climb Bindings
         leftDriveController.getLeftThumb().whileTrue(climberSubsystem.downPosition());
         leftDriveController.getRightThumb().whileTrue(climberSubsystem.upPosition());
+        leftDriveController.getBottomThumb().whileTrue(climberSubsystem.intakeCage());
 
         // Intake Bindings
         rightDriveController.getLeftThumb().whileTrue(intakeSubsystem.openAndRun());

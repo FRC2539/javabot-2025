@@ -6,7 +6,7 @@ public class ClimberHeadIOSim implements ClimberHeadIO {
 
     public void updateInputs(ClimberHeadIOInputs inputs) {
 
-        position += 0.02 * voltage;
+        position -= 0.02 * voltage;
 
         inputs.position = position;
     }
