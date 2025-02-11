@@ -90,4 +90,8 @@ public class IntakeSubsystem extends SubsystemBase {
     public Command closeIntake() {
         return run(() -> flipperIO.setClose());
     }
+
+    public boolean hasPiece() {
+        return intakeInputs.sensor;
+    }
 }

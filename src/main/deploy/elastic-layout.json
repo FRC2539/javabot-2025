@@ -210,7 +210,7 @@
       }
     },
     {
-      "name": "Debug",
+      "name": "Debug SysId",
       "grid_layout": {
         "layouts": [
           {
@@ -251,19 +251,6 @@
                 }
               },
               {
-                "title": "Swerve SysId Quasistatic Forward",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 256.0,
-                "height": 128.0,
-                "type": "Command",
-                "properties": {
-                  "topic": "/SmartDashboard/Swerve SysId Quasistatic Forward",
-                  "period": 0.06,
-                  "show_type": true
-                }
-              },
-              {
                 "title": "Swerve SysId Quasistatic Reverse",
                 "x": 0.0,
                 "y": 0.0,
@@ -272,6 +259,19 @@
                 "type": "Command",
                 "properties": {
                   "topic": "/SmartDashboard/Swerve SysId Quasistatic Reverse",
+                  "period": 0.06,
+                  "show_type": true
+                }
+              },
+              {
+                "title": "Swerve SysId Quasistatic Forward",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Swerve SysId Quasistatic Forward",
                   "period": 0.06,
                   "show_type": true
                 }
@@ -290,19 +290,6 @@
                 }
               },
               {
-                "title": "Swerve SysId Steer Mode",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 256.0,
-                "height": 128.0,
-                "type": "Command",
-                "properties": {
-                  "topic": "/SmartDashboard/Swerve SysId Steer Mode",
-                  "period": 0.06,
-                  "show_type": true
-                }
-              },
-              {
                 "title": "Swerve SysId Translation Mode",
                 "x": 0.0,
                 "y": 0.0,
@@ -316,9 +303,22 @@
                 }
               },
               {
-                "title": "Wheel Radius Characterization Command",
+                "title": "Swerve SysId Steer Mode",
                 "x": 0.0,
                 "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Swerve SysId Steer Mode",
+                  "period": 0.06,
+                  "show_type": true
+                }
+              },
+              {
+                "title": "Wheel Radius Characterization Command",
+                "x": 1024.0,
+                "y": 384.0,
                 "width": 256.0,
                 "height": 128.0,
                 "type": "Command",
@@ -340,6 +340,136 @@
                   "period": 0.06,
                   "data_type": "double",
                   "show_submit_button": true
+                }
+              }
+            ]
+          },
+          {
+            "title": "Elevator Characterization",
+            "x": 512.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 512.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Elevator SysId Dynamic Reverse",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Elevator SysId Dynamic Reverse",
+                  "period": 0.06,
+                  "show_type": true
+                }
+              },
+              {
+                "title": "Elevator SysId Dynamic Forward",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Elevator SysId Dynamic Forward",
+                  "period": 0.06,
+                  "show_type": true
+                }
+              },
+              {
+                "title": "Elevator SysId Quasistatic Reverse",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Elevator SysId Quasistatic Reverse",
+                  "period": 0.06,
+                  "show_type": true
+                }
+              },
+              {
+                "title": "Elevator SysId Quasistatic Forward",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Elevator SysId Quasistatic Forward",
+                  "period": 0.06,
+                  "show_type": true
+                }
+              }
+            ]
+          },
+          {
+            "title": "Arm Characterization",
+            "x": 128.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 512.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Arm SysId Dynamic Reverse",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Arm SysId Dynamic Reverse",
+                  "period": 0.06,
+                  "show_type": true
+                }
+              },
+              {
+                "title": "Arm SysId Dynamic Forward",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Arm SysId Dynamic Forward",
+                  "period": 0.06,
+                  "show_type": true
+                }
+              },
+              {
+                "title": "Arm SysId Quasistatic Reverse",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Arm SysId Quasistatic Reverse",
+                  "period": 0.06,
+                  "show_type": true
+                }
+              },
+              {
+                "title": "Arm SysId Quasistatic Forward",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Arm SysId Quasistatic Forward",
+                  "period": 0.06,
+                  "show_type": true
                 }
               }
             ]

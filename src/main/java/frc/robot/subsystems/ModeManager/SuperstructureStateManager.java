@@ -1,5 +1,7 @@
 package frc.robot.subsystems.ModeManager;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
@@ -10,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState.Position;
 import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
+import frc.robot.subsystems.wrist.WristSubsystem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -28,18 +31,18 @@ public class SuperstructureStateManager extends SubsystemBase {
     public class SuperstructureState {
 
         @FunctionalInterface
-        private interface StateChecker {
+        public interface StateChecker {
             boolean isAtTarget(Position position, SuperstructureStateManager stateManager);
         }
 
-        private static final StateChecker FALSE = (p, s) -> false;
-        private static final StateChecker TRUE = (p, s) -> true;
-        private static final StateChecker DEFAULT =
+        public static final StateChecker FALSE = (p, s) -> false;
+        public static final StateChecker TRUE = (p, s) -> true;
+        public static final StateChecker DEFAULT =
                 (p, s) -> {
                     // return (s.internalPosition == p);
-                    double armPosition = s.ArmSubsystem.getArmPosition();
-                    double wristPosition = s.ArmSubsystem.getWristPosition();
-                    double elevatorPosition = s.ElevatorSubsystem.getPosition();
+                    double armPosition = s.armSubsystem.getPosition();
+                    double wristPosition = s.wristSubsystem.getFlippedPosition();
+                    double elevatorPosition = s.elevatorSubsystem.getPosition();
 
                     if ((Math.abs(armPosition - p.armheight) < 0.1)
                             && (Math.abs(wristPosition - p.wristrotation) < 0.1)
@@ -48,6 +51,7 @@ public class SuperstructureStateManager extends SubsystemBase {
 
                     } else return false;
                 };
+        public static final StateChecker AUTO = DEFAULT;
 
         public enum Position {
             Sussy(1, 1, 1, null),
@@ -133,15 +137,27 @@ public class SuperstructureStateManager extends SubsystemBase {
     private enum CoralAlgaeMode {
         LeftCoral,
         RightCoral,
-        Algae;
+        Algae,
+        ArmWrist;
     }
 
     private CoralAlgaeMode coralAlgaeMode = CoralAlgaeMode.LeftCoral;
+
+    private Pose2d lastScoringPose = Pose2d.kZero;
+
+    public void setLastScoringPose(Pose2d pose) {
+        lastScoringPose = pose;
+    }
+
+    public Pose2d getLastScoringPose() {
+        return lastScoringPose;
+    }
 
     public final Trigger LEFT_CORAL = new Trigger(() -> coralAlgaeMode == CoralAlgaeMode.LeftCoral);
     public final Trigger RIGHT_CORAL =
             new Trigger(() -> coralAlgaeMode == CoralAlgaeMode.RightCoral);
     public final Trigger ALGAE = new Trigger(() -> coralAlgaeMode == CoralAlgaeMode.Algae);
+    public final Trigger ARMWRIST = new Trigger(() -> coralAlgaeMode == CoralAlgaeMode.ArmWrist);
 
     public Command setLeftCoralMode() {
         return Commands.runOnce(() -> coralAlgaeMode = CoralAlgaeMode.LeftCoral);
@@ -155,9 +171,14 @@ public class SuperstructureStateManager extends SubsystemBase {
         return Commands.runOnce(() -> coralAlgaeMode = CoralAlgaeMode.Algae);
     }
 
+    public Command setArmWristMode() {
+        return Commands.runOnce(() -> coralAlgaeMode = CoralAlgaeMode.ArmWrist);
+    }
+
     // public List<SuperstructureState.Position> inList = new ArrayList<>();
-    private ElevatorSubsystem ElevatorSubsystem;
-    private ArmSubsystem ArmSubsystem;
+    private ElevatorSubsystem elevatorSubsystem;
+    private ArmSubsystem armSubsystem;
+    private WristSubsystem wristSubsystem;
 
     public void periodic() {
         Logger.recordOutput("Superstructure/Target", targetPostition);
@@ -173,8 +194,8 @@ public class SuperstructureStateManager extends SubsystemBase {
         Logger.recordOutput("Superstructure/LeftCoral", LEFT_CORAL.getAsBoolean());
         Logger.recordOutput("Superstructure/RightCoral", RIGHT_CORAL.getAsBoolean());
 
-        m_elevator.setLength(ElevatorSubsystem.getPosition());
-        m_wrist.setAngle(Math.toDegrees(ArmSubsystem.getArmPosition()) + 180);
+        m_elevator.setLength(elevatorSubsystem.getPosition());
+        m_wrist.setAngle(Math.toDegrees(armSubsystem.getPosition()) + 180);
     }
 
     private void setFinalTarget(SuperstructureState.Position myPosition) {
@@ -208,11 +229,11 @@ public class SuperstructureStateManager extends SubsystemBase {
 
     // private void setCurrentTarget(SuperstructureState.Position myPosition) {
 
-    //     // Set the [ (A) => (A') ] target of the system (initialize movement command)
+    // // Set the [ (A) => (A') ] target of the system (initialize movement command)
     // }
 
     // public Command inList(){
-    //    for()
+    // for()
 
     // }
 
@@ -229,14 +250,15 @@ public class SuperstructureStateManager extends SubsystemBase {
     private SuperstructureState.Position internalPosition = Position.Sussy;
 
     /*
-     * The `internalGoToPosition` command needs to actually command the elevator and the wrist and the arm to go to a position
+     * The `internalGoToPosition` command needs to actually command the elevator and
+     * the wrist and the arm to go to a position
      */
     private Command internalGoToPosition(SuperstructureState.Position myPosition) {
         if (myPosition.realPosition) {
-            return ElevatorSubsystem.setPosition(myPosition.elevatorheight)
-                    .alongWith(
-                            ArmSubsystem.setPosition(
-                                    myPosition.wristrotation, myPosition.armheight));
+            return elevatorSubsystem
+                    .setPosition(myPosition.elevatorheight)
+                    .alongWith(armSubsystem.setPosition(myPosition.armheight))
+                    .alongWith(wristSubsystem.setPosition(myPosition.wristrotation));
         } else {
             return Commands.idle();
         }
@@ -290,7 +312,7 @@ public class SuperstructureStateManager extends SubsystemBase {
                                                 lastPosition = nextPose;
                                             });
                         },
-                        Set.of(ElevatorSubsystem, ArmSubsystem)))
+                        Set.of(elevatorSubsystem, armSubsystem, wristSubsystem)))
                 .repeatedly();
     }
 
@@ -307,13 +329,17 @@ public class SuperstructureStateManager extends SubsystemBase {
                                     .until(() -> nextPose.isAtTarget(this))
                                     .andThen(() -> lastPosition = nextPose);
                         },
-                        Set.of(ElevatorSubsystem, ArmSubsystem)))
+                        Set.of(elevatorSubsystem, armSubsystem, wristSubsystem)))
                 .repeatedly();
     }
 
-    public SuperstructureStateManager(ElevatorSubsystem elevatorheight, ArmSubsystem armSubsystem) {
-        ElevatorSubsystem = elevatorheight;
-        ArmSubsystem = armSubsystem;
+    public SuperstructureStateManager(
+            ElevatorSubsystem elevatorSubsystem,
+            ArmSubsystem armSubsystem,
+            WristSubsystem wristSubsystem) {
+        this.elevatorSubsystem = elevatorSubsystem;
+        this.armSubsystem = armSubsystem;
+        this.wristSubsystem = wristSubsystem;
 
         LoggedMechanism2d mech = new LoggedMechanism2d(3, 6);
 
@@ -328,5 +354,13 @@ public class SuperstructureStateManager extends SubsystemBase {
         root.append(m_elevator);
 
         SmartDashboard.putData("Mech2d", mech);
+
+        Command defaultcom =
+                Commands.either(
+                        Commands.idle(),
+                        moveToPosition(Position.Home).asProxy(),
+                        () -> !RobotState.isAutonomous());
+        defaultcom.addRequirements(this);
+        setDefaultCommand(defaultcom);
     }
 }
