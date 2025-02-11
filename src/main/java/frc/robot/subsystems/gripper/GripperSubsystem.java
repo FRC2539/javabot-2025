@@ -57,4 +57,8 @@ public class GripperSubsystem extends SubsystemBase {
                     piviotIO.setVoltage(voltage);
                 });
     }
+
+    public boolean hasPiece() {
+        return armrollerInputs.sensor;
+    }
 }
