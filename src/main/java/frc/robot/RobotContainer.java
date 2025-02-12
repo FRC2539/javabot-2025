@@ -87,7 +87,6 @@ public class RobotContainer {
     public LightsSubsystem lights;
     public ChuteSubsystem chuteSubsystem;
     public SuperstructureStateManager stateManager;
-    public ClimberSubsystem climberHeadSubsystem;
     public GripperSubsystem gripperSubsystem;
 
     private DoubleSupplier leftJoystickVelocityX;
