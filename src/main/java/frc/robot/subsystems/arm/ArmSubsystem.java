@@ -1,10 +1,12 @@
 package frc.robot.subsystems.arm;
 
+import static edu.wpi.first.units.Units.Volts;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.constants.ArmConstants;
-import frc.robot.constants.WristConstants;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -18,6 +20,18 @@ public class ArmSubsystem extends SubsystemBase {
 
     private double reference = 0;
 
+    private SysIdRoutine armSysIdRoutine =
+            new SysIdRoutine(
+                    new SysIdRoutine.Config(
+                            null,
+                            Volts.of(4),
+                            null,
+                            state ->
+                                    Logger.recordOutput(
+                                            "Elevator/SysIdArm_State", state.toString())),
+                    new SysIdRoutine.Mechanism(
+                            (voltage) -> armPivotIO.setVoltage(voltage.in(Volts)), null, this));
+
     public ArmSubsystem(ArmPivotIO armPivotIO) {
         this.armPivotIO = armPivotIO;
         controller.setTolerance(ArmConstants.ARM_TOLERANCE);
@@ -29,11 +43,19 @@ public class ArmSubsystem extends SubsystemBase {
         Logger.processInputs("RealOutputs/Arm", armPivotInputs);
     }
 
+    public Command runQStaticArmSysId(SysIdRoutine.Direction direction) {
+        return armSysIdRoutine.quasistatic(direction);
+    }
+
+    public Command runDynamicArmSysId(SysIdRoutine.Direction direction) {
+        return armSysIdRoutine.dynamic(direction);
+    }
+
     public Command setVoltage(double voltage) {
         return run(() -> armPivotIO.setVoltage(voltage));
     }
 
-    public Command armPivotUp() {
+    public Command armpivotUp() {
         return setVoltage(12);
     }
 
@@ -50,11 +72,11 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public Command setPosition(double position) {
-        if (position > WristConstants.upperLimit) {
-            position = WristConstants.upperLimit;
+        if (position > ArmConstants.upperLimit) {
+            position = ArmConstants.upperLimit;
         }
-        if (position < WristConstants.lowerLimit) {
-            position = WristConstants.lowerLimit;
+        if (position < ArmConstants.lowerLimit) {
+            position = ArmConstants.lowerLimit;
         }
         double nextPosition = position;
 
