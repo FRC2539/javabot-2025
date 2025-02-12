@@ -104,7 +104,7 @@
             "properties": {
               "topic": "/SmartDashboard/Auto Path",
               "period": 0.06,
-              "field_game": "Crescendo",
+              "field_game": "Reefscape",
               "robot_width": 0.85,
               "robot_length": 0.85,
               "show_other_objects": true,
@@ -400,7 +400,7 @@
             "properties": {
               "topic": "/SmartDashboard/Auto Path",
               "period": 0.06,
-              "field_game": "Crescendo",
+              "field_game": "Reefscape",
               "robot_width": 0.85,
               "robot_length": 0.85,
               "show_other_objects": true,
