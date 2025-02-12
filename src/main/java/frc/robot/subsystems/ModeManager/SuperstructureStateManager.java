@@ -243,6 +243,8 @@ public class SuperstructureStateManager extends SubsystemBase {
         Logger.recordOutput("Superstructure/Algae", ALGAE.getAsBoolean());
         Logger.recordOutput("Superstructure/LeftCoral", LEFT_CORAL.getAsBoolean());
         Logger.recordOutput("Superstructure/RightCoral", RIGHT_CORAL.getAsBoolean());
+        Logger.recordOutput(
+                "Superstructure/AnyCoral", LEFT_CORAL.getAsBoolean() || RIGHT_CORAL.getAsBoolean());
 
         m_elevator.setLength(elevatorSubsystem.getPosition());
         m_wrist.setAngle(Math.toDegrees(armSubsystem.getPosition()) + 180);

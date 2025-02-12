@@ -23,7 +23,7 @@ public interface VisionIO {
         public boolean connected = false;
         public TargetObservation latestTargetObservation =
                 new TargetObservation(
-                        new Rotation2d(), new Rotation2d(), 0, 0); // default values...
+                        new Rotation2d(), new Rotation2d(), 0, 0, 0); // default values...
         public PoseObservation[] poseObservations = new PoseObservation[0];
         public int[] tagIds = new int[0];
     }
@@ -36,9 +36,10 @@ public interface VisionIO {
             // width
             double targetHorizontalExtentPixels,
             // height
-            double targetVerticalExtentPixels) {
-        public TargetObservation(Rotation2d tx, Rotation2d ty) {
-            this(tx, ty, 0, 0);
+            double targetVerticalExtentPixels,
+            double timestamp) {
+        public TargetObservation(Rotation2d tx, Rotation2d ty, double timestamp) {
+            this(tx, ty, 0, 0, timestamp);
         }
 
         public double getTargetHorizontalExtentPixels() {

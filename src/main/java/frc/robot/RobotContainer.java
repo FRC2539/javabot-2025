@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -19,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
+import frc.lib.vision.PinholeModel3D;
 import frc.robot.commands.AlignAndDriveToReef;
 import frc.robot.commands.AlignToPiece;
 import frc.robot.commands.AlignToReef;
@@ -36,6 +38,8 @@ import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.chute.ChuteIONeo550;
 import frc.robot.subsystems.chute.ChuteIOSim;
 import frc.robot.subsystems.chute.ChuteSubsystem;
+import frc.robot.subsystems.climber.ClimberHeadIONeo550;
+import frc.robot.subsystems.climber.ClimberHeadIOSim;
 import frc.robot.subsystems.climber.ClimberIOSim;
 import frc.robot.subsystems.climber.ClimberIOTalonFX;
 import frc.robot.subsystems.climber.ClimberSubsystem;
@@ -84,7 +88,6 @@ public class RobotContainer {
     public LightsSubsystem lights;
     public ChuteSubsystem chuteSubsystem;
     public SuperstructureStateManager stateManager;
-
     public GripperSubsystem gripperSubsystem;
 
     private DoubleSupplier leftJoystickVelocityX;
@@ -111,7 +114,8 @@ public class RobotContainer {
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
             armSubsystem = new ArmSubsystem(new ArmPivotIOTalonFX());
             wristSubsystem = new WristSubsystem(new WristIONeo550());
-            climberSubsystem = new ClimberSubsystem(new ClimberIOTalonFX());
+            climberSubsystem =
+                    new ClimberSubsystem(new ClimberIOTalonFX(), new ClimberHeadIONeo550());
             lights = new LightsSubsystem();
             chuteSubsystem = new ChuteSubsystem(new ChuteIONeo550());
 
@@ -138,7 +142,7 @@ public class RobotContainer {
             armSubsystem = new ArmSubsystem(new ArmPivotIOSim());
             wristSubsystem = new WristSubsystem(new WristIOSim());
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
-            climberSubsystem = new ClimberSubsystem(new ClimberIOSim());
+            climberSubsystem = new ClimberSubsystem(new ClimberIOSim(), new ClimberHeadIOSim());
             lights = new LightsSubsystem();
             chuteSubsystem = new ChuteSubsystem(new ChuteIOSim());
         }
@@ -402,9 +406,14 @@ public class RobotContainer {
         // Climb Bindings
         leftDriveController.getLeftThumb().whileTrue(climberSubsystem.downPosition());
         leftDriveController.getRightThumb().whileTrue(climberSubsystem.upPosition());
+        leftDriveController.getBottomThumb().whileTrue(climberSubsystem.intakeCage());
+
+        // leftDriveController.getBottomThumb().whileTrue(alignToPiece());
 
         // Intake Bindings
-        rightDriveController.getLeftThumb().whileTrue(intakeSubsystem.openAndRun());
+        rightDriveController
+                .getLeftThumb()
+                .whileTrue(intakeSubsystem.openAndRun().alongWith(alignToPiece()));
         rightDriveController.getRightThumb().whileTrue(intakeSubsystem.openAndEject());
 
         CORAL.and(rightDriveController.getBottomThumb())
@@ -553,8 +562,31 @@ public class RobotContainer {
     }
 
     public Command alignToPiece() {
-        Supplier<Pose2d> piecePositionSupplier = () -> new Pose2d(9.2, 4.15, Rotation2d.kZero);
+        Supplier<Pose2d> piecePositionSupplier =
+                () -> {
+                    var lastObservation = vision.getLastTargetObersevation(2);
+                    Pose2d robotPose = drivetrain.getRobotPose();
+                    Translation2d lastPieceTranslation =
+                            PinholeModel3D.getTranslationToTarget(
+                                    new Translation3d(
+                                            1,
+                                            lastObservation.tx().unaryMinus().getTan(),
+                                            lastObservation.ty().getTan()),
+                                    VisionConstants.robotToCamera2,
+                                    0);
+                    Pose2d poseAtTime = robotPose;
+
+                    Pose2d newPiecePose =
+                            poseAtTime.plus(
+                                    new Transform2d(lastPieceTranslation, new Rotation2d()));
+
+                    return newPiecePose;
+                };
         return new AlignToPiece(
-                drivetrain, driverVelocitySupplier, 0, piecePositionSupplier, Rotation2d.kZero);
+                drivetrain,
+                driverVelocitySupplier,
+                .15,
+                piecePositionSupplier,
+                Rotation2d.kCCW_90deg);
     }
 }
