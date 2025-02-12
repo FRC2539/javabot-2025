@@ -8,61 +8,6 @@
           "layouts": [],
           "containers": [
             {
-              "title": "Alerts",
-              "x": 768.0,
-              "y": 128.0,
-              "width": 384.0,
-              "height": 256.0,
-              "type": "Alerts",
-              "properties": {
-                "topic": "/SmartDashboard/Alerts",
-                "period": 0.06
-              }
-            },
-            {
-              "title": "Left Processed",
-              "x": 0.0,
-              "y": 128.0,
-              "width": 384.0,
-              "height": 256.0,
-              "type": "Camera Stream",
-              "properties": {
-                "topic": "/CameraPublisher/limelight-april-processed",
-                "period": 0.06
-              }
-            },
-            {
-              "title": "Right Processed",
-              "x": 384.0,
-              "y": 128.0,
-              "width": 384.0,
-              "height": 256.0,
-              "type": "Camera Stream",
-              "properties": {
-                "topic": "/CameraPublisher/limelight-april-right-processed",
-                "period": 0.06
-              }
-            },
-            {
-              "title": "Robot Position",
-              "x": 1152.0,
-              "y": 128.0,
-              "width": 384.0,
-              "height": 256.0,
-              "type": "Field",
-              "properties": {
-                "topic": "/SmartDashboard/Auto Path",
-                "period": 0.06,
-                "field_game": "Crescendo",
-                "robot_width": 0.85,
-                "robot_length": 0.85,
-                "show_other_objects": true,
-                "show_trajectories": true,
-                "robot_color": 4294198070,
-                "trajectory_color": 4294967295
-              }
-            },
-            {
               "title": "Algae Mode",
               "x": 384.0,
               "y": 0.0,
@@ -74,7 +19,7 @@
                 "period": 0.06,
                 "data_type": "boolean",
                 "true_color": 4278255560,
-                "false_color": 4294906112,
+                "false_color": 4294901760,
                 "true_icon": "None",
                 "false_icon": "None"
               }
@@ -82,9 +27,9 @@
             {
               "title": "MatchTime",
               "x": 0.0,
-              "y": 384.0,
+              "y": 128.0,
               "width": 1536.0,
-              "height": 256.0,
+              "height": 512.0,
               "type": "Match Time",
               "properties": {
                 "topic": "/AdvantageKit/DriverStation/MatchTime",
@@ -124,7 +69,7 @@
                 "period": 0.06,
                 "data_type": "boolean",
                 "true_color": 4283215696,
-                "false_color": 4294198070,
+                "false_color": 4294901760,
                 "true_icon": "None",
                 "false_icon": "None"
               }
@@ -339,7 +284,63 @@
               ]
             }
           ],
-          "containers": []
+          "containers": [
+            {
+              "title": "limelight-april-right-raw",
+              "x": 512.0,
+              "y": 0.0,
+              "width": 256.0,
+              "height": 384.0,
+              "type": "Camera Stream",
+              "properties": {
+                "topic": "/CameraPublisher/limelight-april-right-raw",
+                "period": 0.06
+              }
+            },
+            {
+              "title": "limelight-ml-raw",
+              "x": 768.0,
+              "y": 0.0,
+              "width": 256.0,
+              "height": 384.0,
+              "type": "Camera Stream",
+              "properties": {
+                "topic": "/CameraPublisher/limelight-ml-raw",
+                "period": 0.06
+              }
+            },
+            {
+              "title": "Alerts",
+              "x": 1024.0,
+              "y": 0.0,
+              "width": 512.0,
+              "height": 384.0,
+              "type": "Alerts",
+              "properties": {
+                "topic": "/SmartDashboard/Alerts",
+                "period": 0.06
+              }
+            },
+            {
+              "title": "Sim Field",
+              "x": 512.0,
+              "y": 384.0,
+              "width": 1024.0,
+              "height": 384.0,
+              "type": "Field",
+              "properties": {
+                "topic": "/SmartDashboard/VisionSystemSim-ml/Sim Field",
+                "period": 0.06,
+                "field_game": "Crescendo",
+                "robot_width": 0.85,
+                "robot_length": 0.85,
+                "show_other_objects": true,
+                "show_trajectories": true,
+                "robot_color": 4294198070,
+                "trajectory_color": 4294967295
+              }
+            }
+          ]
         }
       }
     ]
