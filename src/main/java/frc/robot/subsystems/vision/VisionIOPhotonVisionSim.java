@@ -18,7 +18,6 @@ import static frc.robot.constants.VisionConstants.aprilTagLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.Notifier;
-
 import java.util.function.Supplier;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
@@ -48,9 +47,11 @@ public class VisionIOPhotonVisionSim extends VisionIOPhotonVision {
             visionSim = new VisionSystemSim("main");
             visionSim.addAprilTags(aprilTagLayout);
 
-            simThread = new Notifier(() -> {
-                visionSim.update(poseSupplier.get());
-            });
+            simThread =
+                    new Notifier(
+                            () -> {
+                                visionSim.update(poseSupplier.get());
+                            });
             simThread.setName("VisionSimThreadAprilTag");
             simThread.startPeriodic(0.02);
         }

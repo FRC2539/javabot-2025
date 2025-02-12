@@ -40,14 +40,11 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.TunerConstants.TunerSwerveDrivetrain;
-import frc.robot.util.PhoenixUtil;
 import frc.robot.constants.VisionConstants;
-import java.lang.reflect.Array;
+import frc.robot.util.PhoenixUtil;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -269,12 +266,17 @@ public class CommandSwerveDrivetrain implements Subsystem {
         statusSignals.addAll(driveMotorVoltageSignals);
         statusSignals.addAll(turnMotorVoltageSignals);
 
-        PhoenixUtil.tryUntilOk(5, () ->
-            BaseStatusSignal.setUpdateFrequencyForAll(
-                50.0,
-                statusSignals.toArray(new BaseStatusSignal[]{})));
-        
-        PhoenixUtil.tryUntilOk(5, () -> ParentDevice.optimizeBusUtilizationForAll(0, devices.toArray(new ParentDevice[]{})));
+        PhoenixUtil.tryUntilOk(
+                5,
+                () ->
+                        BaseStatusSignal.setUpdateFrequencyForAll(
+                                50.0, statusSignals.toArray(new BaseStatusSignal[] {})));
+
+        PhoenixUtil.tryUntilOk(
+                5,
+                () ->
+                        ParentDevice.optimizeBusUtilizationForAll(
+                                0, devices.toArray(new ParentDevice[] {})));
     }
 
     /**

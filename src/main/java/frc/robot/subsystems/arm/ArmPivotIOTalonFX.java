@@ -7,7 +7,6 @@ import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -53,18 +52,25 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
         currentSignal = armPivotMotor.getStatorCurrent();
 
         // Set update frequency and optimize bus utilization
-        PhoenixUtil.tryUntilOk(5, () -> 
-            BaseStatusSignal.setUpdateFrequencyForAll(50.0, 
-                positionSignal, voltageSignal, velocitySignal, temperatureSignal, currentSignal));
-        
-        PhoenixUtil.tryUntilOk(5, () -> 
-            ParentDevice.optimizeBusUtilizationForAll(0, armPivotMotor));
+        PhoenixUtil.tryUntilOk(
+                5,
+                () ->
+                        BaseStatusSignal.setUpdateFrequencyForAll(
+                                50.0,
+                                positionSignal,
+                                voltageSignal,
+                                velocitySignal,
+                                temperatureSignal,
+                                currentSignal));
+
+        PhoenixUtil.tryUntilOk(
+                5, () -> ParentDevice.optimizeBusUtilizationForAll(0, armPivotMotor));
     }
 
     public void updateInputs(ArmPivotIOInputs inputs) {
         // Refresh all signals at once
         BaseStatusSignal.refreshAll(
-            positionSignal, voltageSignal, velocitySignal, temperatureSignal, currentSignal);
+                positionSignal, voltageSignal, velocitySignal, temperatureSignal, currentSignal);
 
         inputs.position = positionSignal.refresh().getValueAsDouble();
         inputs.voltage = voltageSignal.refresh().getValueAsDouble();

@@ -18,7 +18,6 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.Notifier;
-
 import java.util.function.Supplier;
 import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.PhotonCameraSim;
@@ -52,9 +51,11 @@ public class VisionIOPhotonVisionSimML extends VisionIOPhotonVision {
                                 new Pose3d(5, 5, 0, new Rotation3d(0, 0, 0)),
                                 new TargetModel(.5, 1)), // creates the target in simulation
                     });
-            simThread = new Notifier(() -> {
-                visionSim.update(poseSupplier.get());
-            });
+            simThread =
+                    new Notifier(
+                            () -> {
+                                visionSim.update(poseSupplier.get());
+                            });
             simThread.setName("VisionSimThreadML");
             simThread.startPeriodic(0.02);
         }

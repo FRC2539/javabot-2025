@@ -28,7 +28,6 @@ public class Robot extends LoggedRobot {
 
         DriverStation.silenceJoystickConnectionWarning(true);
 
-
         WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
 
         Logger.recordMetadata("ProjectName", "JavaBot-2025"); // Set a metadata value

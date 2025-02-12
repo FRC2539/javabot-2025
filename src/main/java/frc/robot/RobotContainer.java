@@ -186,7 +186,6 @@ public class RobotContainer {
                             return drivetrain.driveDriverRelative(driverVelocitySupplier.get());
                         }));
 
-
         SmartDashboard.putData(
                 drivetrain
                         .sysIdDynamic(Direction.kForward)
