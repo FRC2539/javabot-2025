@@ -67,14 +67,18 @@ public class Auto {
             previousAlliance = currentAlliance;
 
             previousAuto = currentCommand;
+            
 
+            System.out.println("==========/////");
+            System.out.println(currentCommand.getName());
+            System.out.println("==========/////");
             if(AutoConstants.autoList.get(currentCommand.getName()) != null)
             {
                 Logger.recordOutput("Auto/AutoDescription", AutoConstants.autoList.get(currentCommand.getName()));
             }
             else
             {
-                Logger.recordOutput("Auto/AutoDescription", "No description found. Check if you actually added it to auto constants or not");
+                Logger.recordOutput("Auto/AutoDescription", "404: Description not found. Validate that there is description in AutoConstants.");
             }
 
             
