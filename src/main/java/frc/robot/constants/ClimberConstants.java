@@ -32,4 +32,6 @@ public class ClimberConstants {
     public static final int CLIMBER_HEAD_ID = 0; // or 40? the electrical manual wasn't clear
 
     public static final String CANbus = "CANivore";
+
+    public static final double ClimberHeadCurrent = 30;
 }
