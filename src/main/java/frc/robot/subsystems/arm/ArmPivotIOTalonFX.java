@@ -72,11 +72,11 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
         BaseStatusSignal.refreshAll(
                 positionSignal, voltageSignal, velocitySignal, temperatureSignal, currentSignal);
 
-        inputs.position = positionSignal.refresh().getValueAsDouble();
-        inputs.voltage = voltageSignal.refresh().getValueAsDouble();
-        inputs.velocity = velocitySignal.refresh().getValueAsDouble();
-        inputs.temperature = temperatureSignal.refresh().getValueAsDouble();
-        inputs.current = currentSignal.refresh().getValueAsDouble();
+        inputs.position = positionSignal.getValueAsDouble();
+        inputs.voltage = voltageSignal.getValueAsDouble();
+        inputs.velocity = velocitySignal.getValueAsDouble();
+        inputs.temperature = temperatureSignal.getValueAsDouble();
+        inputs.current = currentSignal.getValueAsDouble();
         inputs.throughboreEncoderPosition = throughboreEncoder.get();
         inputs.throughboreConnected = throughboreEncoder.isConnected();
 
