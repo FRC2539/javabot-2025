@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.net.WebServer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
@@ -25,6 +26,11 @@ public class Robot extends LoggedRobot {
     public Robot() {
         m_robotContainer = new RobotContainer();
 
+        DriverStation.silenceJoystickConnectionWarning(true);
+
+
+        WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
+
         Logger.recordMetadata("ProjectName", "JavaBot-2025"); // Set a metadata value
 
         if (isReal()) {
@@ -39,8 +45,6 @@ public class Robot extends LoggedRobot {
 
         Logger.start(); // Start logging! No more data receivers, replay sources, or metadata
         // values may be added.
-
-        WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
     }
 
     @Override
