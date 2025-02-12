@@ -9,10 +9,10 @@
           "containers": [
             {
               "title": "Alerts",
-              "x": 1024.0,
+              "x": 768.0,
               "y": 128.0,
-              "width": 256.0,
-              "height": 512.0,
+              "width": 384.0,
+              "height": 256.0,
               "type": "Alerts",
               "properties": {
                 "topic": "/SmartDashboard/Alerts",
@@ -21,10 +21,10 @@
             },
             {
               "title": "Left Processed",
-              "x": 256.0,
+              "x": 0.0,
               "y": 128.0,
               "width": 384.0,
-              "height": 384.0,
+              "height": 256.0,
               "type": "Camera Stream",
               "properties": {
                 "topic": "/CameraPublisher/limelight-april-processed",
@@ -33,10 +33,10 @@
             },
             {
               "title": "Right Processed",
-              "x": 640.0,
+              "x": 384.0,
               "y": 128.0,
               "width": 384.0,
-              "height": 384.0,
+              "height": 256.0,
               "type": "Camera Stream",
               "properties": {
                 "topic": "/CameraPublisher/limelight-april-right-processed",
@@ -45,10 +45,10 @@
             },
             {
               "title": "Robot Position",
-              "x": 0.0,
+              "x": 1152.0,
               "y": 128.0,
-              "width": 256.0,
-              "height": 512.0,
+              "width": 384.0,
+              "height": 256.0,
               "type": "Field",
               "properties": {
                 "topic": "/SmartDashboard/Auto Path",
@@ -66,7 +66,7 @@
               "title": "Algae Mode",
               "x": 384.0,
               "y": 0.0,
-              "width": 512.0,
+              "width": 768.0,
               "height": 128.0,
               "type": "Boolean Box",
               "properties": {
@@ -81,9 +81,9 @@
             },
             {
               "title": "MatchTime",
-              "x": 256.0,
-              "y": 512.0,
-              "width": 768.0,
+              "x": 0.0,
+              "y": 384.0,
+              "width": 1536.0,
               "height": 256.0,
               "type": "Match Time",
               "properties": {
@@ -114,7 +114,7 @@
             },
             {
               "title": "RightCoral",
-              "x": 896.0,
+              "x": 1152.0,
               "y": 0.0,
               "width": 384.0,
               "height": 128.0,
@@ -211,7 +211,7 @@
               "title": "Swerve Characterization",
               "x": 0.0,
               "y": 0.0,
-              "width": 384.0,
+              "width": 512.0,
               "height": 512.0,
               "type": "List Layout",
               "properties": {
