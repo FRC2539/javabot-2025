@@ -2,9 +2,11 @@ package frc.robot.subsystems.swerve;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -38,9 +40,12 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.TunerConstants.TunerSwerveDrivetrain;
+import frc.robot.util.PhoenixUtil;
 import frc.robot.constants.VisionConstants;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.littletonrobotics.junction.Logger;
@@ -233,47 +238,43 @@ public class CommandSwerveDrivetrain implements Subsystem {
 
     double lastTimestamp = 0;
 
-    StatusSignal<Current>[] driveMotorStatorCurrentSignals =
-            (StatusSignal<Current>[]) Array.newInstance(StatusSignal.class, 4);
-    StatusSignal<Current>[] driveMotorSupplyCurrentSignals =
-            (StatusSignal<Current>[]) Array.newInstance(StatusSignal.class, 4);
-    StatusSignal<Current>[] turnMotorStatorCurrentsSignals =
-            (StatusSignal<Current>[]) Array.newInstance(StatusSignal.class, 4);
-    StatusSignal<Current>[] turnMotorSupplyCurrentsSignals =
-            (StatusSignal<Current>[]) Array.newInstance(StatusSignal.class, 4);
-    StatusSignal<Voltage>[] driveMotorVoltageSignals =
-            (StatusSignal<Voltage>[]) Array.newInstance(StatusSignal.class, 4);
-    StatusSignal<Voltage>[] turnMotorVoltageSignals =
-            (StatusSignal<Voltage>[]) Array.newInstance(StatusSignal.class, 4);
-    StatusSignal<?>[] statusSignals;
+    List<StatusSignal<Current>> driveMotorStatorCurrentSignals = new ArrayList<>();
+    List<StatusSignal<Current>> driveMotorSupplyCurrentSignals = new ArrayList<>();
+    List<StatusSignal<Current>> turnMotorStatorCurrentsSignals = new ArrayList<>();
+    List<StatusSignal<Current>> turnMotorSupplyCurrentsSignals = new ArrayList<>();
+    List<StatusSignal<Voltage>> driveMotorVoltageSignals = new ArrayList<>();
+    List<StatusSignal<Voltage>> turnMotorVoltageSignals = new ArrayList<>();
+    List<BaseStatusSignal> statusSignals = new ArrayList<>();
 
     private void createSuppliers() {
+        List<ParentDevice> devices = new ArrayList<>();
+
         for (int i = 0; i < 4; i++) {
             var module = m_drivetrain.getModule(i);
-            driveMotorStatorCurrentSignals[i] = module.getDriveMotor().getStatorCurrent();
-            driveMotorSupplyCurrentSignals[i] = module.getDriveMotor().getSupplyCurrent();
-            turnMotorStatorCurrentsSignals[i] = module.getSteerMotor().getStatorCurrent();
-            turnMotorSupplyCurrentsSignals[i] = module.getSteerMotor().getSupplyCurrent();
-            driveMotorVoltageSignals[i] = module.getDriveMotor().getMotorVoltage();
-            turnMotorVoltageSignals[i] = module.getSteerMotor().getMotorVoltage();
+            devices.add(module.getDriveMotor());
+            devices.add(module.getSteerMotor());
+            devices.add(module.getEncoder());
+            driveMotorStatorCurrentSignals.add(module.getDriveMotor().getStatorCurrent());
+            driveMotorSupplyCurrentSignals.add(module.getDriveMotor().getSupplyCurrent());
+            turnMotorStatorCurrentsSignals.add(module.getSteerMotor().getStatorCurrent());
+            turnMotorSupplyCurrentsSignals.add(module.getSteerMotor().getSupplyCurrent());
+            driveMotorVoltageSignals.add(module.getDriveMotor().getMotorVoltage());
+            turnMotorVoltageSignals.add(module.getSteerMotor().getMotorVoltage());
         }
 
-        StatusSignal<?>[] array = new StatusSignal[0];
-        for (StatusSignal<?>[] a :
-                new StatusSignal<?>[][] {
-                    driveMotorStatorCurrentSignals,
-                    driveMotorStatorCurrentSignals,
-                    turnMotorStatorCurrentsSignals,
-                    turnMotorSupplyCurrentsSignals,
-                    driveMotorVoltageSignals,
-                    turnMotorVoltageSignals,
-                }) {
-            array =
-                    Stream.concat(Arrays.stream(array), Arrays.stream(a))
-                            .toArray((i) -> new StatusSignal<?>[i]);
-        }
+        statusSignals.addAll(driveMotorStatorCurrentSignals);
+        statusSignals.addAll(driveMotorSupplyCurrentSignals);
+        statusSignals.addAll(turnMotorStatorCurrentsSignals);
+        statusSignals.addAll(turnMotorSupplyCurrentsSignals);
+        statusSignals.addAll(driveMotorVoltageSignals);
+        statusSignals.addAll(turnMotorVoltageSignals);
 
-        statusSignals = array;
+        PhoenixUtil.tryUntilOk(5, () ->
+            BaseStatusSignal.setUpdateFrequencyForAll(
+                50.0,
+                statusSignals.toArray(new BaseStatusSignal[]{})));
+        
+        PhoenixUtil.tryUntilOk(5, () -> ParentDevice.optimizeBusUtilizationForAll(0, devices.toArray(new ParentDevice[]{})));
     }
 
     /**
@@ -634,15 +635,15 @@ public class CommandSwerveDrivetrain implements Subsystem {
         double[] driveMotorVoltage = new double[4];
         double[] turnMotorVoltage = new double[4];
 
-        StatusSignal.refreshAll(statusSignals);
+        StatusSignal.refreshAll(statusSignals.toArray(new StatusSignal<?>[0]));
 
         for (int i = 0; i < 4; i++) {
-            driveMotorStatorCurrents[i] = driveMotorStatorCurrentSignals[i].getValueAsDouble();
-            driveMotorSupplyCurrents[i] = driveMotorSupplyCurrentSignals[i].getValueAsDouble();
-            turnMotorStatorCurrents[i] = turnMotorStatorCurrentsSignals[i].getValueAsDouble();
-            turnMotorSupplyCurrents[i] = turnMotorSupplyCurrentsSignals[i].getValueAsDouble();
-            driveMotorVoltage[i] = driveMotorVoltageSignals[i].getValueAsDouble();
-            turnMotorVoltage[i] = turnMotorVoltageSignals[i].getValueAsDouble();
+            driveMotorStatorCurrents[i] = driveMotorStatorCurrentSignals.get(i).getValueAsDouble();
+            driveMotorSupplyCurrents[i] = driveMotorSupplyCurrentSignals.get(i).getValueAsDouble();
+            turnMotorStatorCurrents[i] = turnMotorStatorCurrentsSignals.get(i).getValueAsDouble();
+            turnMotorSupplyCurrents[i] = turnMotorSupplyCurrentsSignals.get(i).getValueAsDouble();
+            driveMotorVoltage[i] = driveMotorVoltageSignals.get(i).getValueAsDouble();
+            turnMotorVoltage[i] = turnMotorVoltageSignals.get(i).getValueAsDouble();
         }
 
         Logger.recordOutput("Drive/Modules/DriveStatorCurrents", driveMotorStatorCurrents);
