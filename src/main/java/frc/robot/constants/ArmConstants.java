@@ -4,7 +4,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 
 public class ArmConstants {
 
-    public static final int ARM_PIVOT_MOTOR_ID = 0; // not correct motor ID
+    public static final int ARM_PIVOT_MOTOR_ID = 10; // not correct motor ID
     public static final String ARM_PIVOT_CANBUS = "CANivore";
 
     public static final int ARM_THROUGHBORE_ENCODER_ID = 0;
