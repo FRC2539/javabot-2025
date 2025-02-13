@@ -78,7 +78,7 @@
             "height": 384.0,
             "type": "Camera Stream",
             "properties": {
-              "topic": "/CameraPublisher/limelight-april-processed",
+              "topic": "/CameraPublisher/limelight-april",
               "period": 0.06
             }
           },
@@ -90,7 +90,7 @@
             "height": 384.0,
             "type": "Camera Stream",
             "properties": {
-              "topic": "/CameraPublisher/limelight-april-right-processed",
+              "topic": "/CameraPublisher/limelight-april-right",
               "period": 0.06
             }
           },
@@ -104,7 +104,7 @@
             "properties": {
               "topic": "/SmartDashboard/Auto Path",
               "period": 0.06,
-              "field_game": "Crescendo",
+              "field_game": "Reefscape",
               "robot_width": 0.85,
               "robot_length": 0.85,
               "show_other_objects": true,
@@ -131,7 +131,7 @@
             "properties": {
               "topic": "/SmartDashboard/Auto Path",
               "period": 0.06,
-              "field_game": "Crescendo",
+              "field_game": "Reefscape",
               "robot_width": 0.85,
               "robot_length": 0.85,
               "show_other_objects": true,
@@ -194,7 +194,7 @@
             "properties": {
               "topic": "/SmartDashboard/Auto Path",
               "period": 0.06,
-              "field_game": "Crescendo",
+              "field_game": "Reefscape",
               "robot_width": 0.85,
               "robot_length": 0.85,
               "show_other_objects": true,
