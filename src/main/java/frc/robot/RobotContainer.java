@@ -63,6 +63,7 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSimML;
 import frc.robot.subsystems.wrist.WristIONeo550;
 import frc.robot.subsystems.wrist.WristIOSim;
 import frc.robot.subsystems.wrist.WristSubsystem;
+import frc.robot.util.Elastic;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -462,6 +463,34 @@ public class RobotContainer {
         leftDriveController.getLeftBottomRight().onTrue(intakeSubsystem.zeroflipper());
 
         leftDriveController.getLeftTopLeft().whileTrue(gripperSubsystem.gripperTuneable());
+
+        {
+            var tunableCommand =
+                    Commands.runOnce(
+                                    () -> {
+                                        Elastic.sendNotification(
+                                                new Elastic.Notification(
+                                                        Elastic.Notification.NotificationLevel.INFO,
+                                                        "Scheduled Supestructure Tunable",
+                                                        "YAYYAYYA."));
+                                    })
+                            .andThen(stateManager.moveToTunablePosition());
+
+            tunableCommand.setName("Tunable Superstructure");
+
+            leftDriveController
+                    .getRightTopLeft()
+                    .onTrue(
+                            Commands.runOnce(
+                                    () -> {
+                                        tunableCommand.cancel();
+                                        tunableCommand.schedule();
+                                    }));
+
+            SmartDashboard.putData(tunableCommand);
+
+            SmartDashboard.putData(stateManager);
+        }
 
         leftDriveController.getRightBottomLeft().onTrue(elevatorSubsystem.zeroElevatorCommand());
     }
