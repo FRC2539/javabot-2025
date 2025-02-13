@@ -54,8 +54,7 @@ public class Robot extends LoggedRobot {
 
                 content =
                         content.replaceAll(
-                                "\"/CameraPublisher/([^\"]+)\"",
-                                "\"/CameraPublisher/$1-processed\"");
+                                "\"/CameraPublisher/([^/\"]+)", "\"/CameraPublisher/$1-processed");
                 Path outPath =
                         Paths.get(
                                 Filesystem.getDeployDirectory().getPath(),
