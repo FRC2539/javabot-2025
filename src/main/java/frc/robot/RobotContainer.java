@@ -38,6 +38,8 @@ import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.chute.ChuteIONeo550;
 import frc.robot.subsystems.chute.ChuteIOSim;
 import frc.robot.subsystems.chute.ChuteSubsystem;
+import frc.robot.subsystems.climber.ClimberHeadIONeo550;
+import frc.robot.subsystems.climber.ClimberHeadIOSim;
 import frc.robot.subsystems.climber.ClimberIOSim;
 import frc.robot.subsystems.climber.ClimberIOTalonFX;
 import frc.robot.subsystems.climber.ClimberSubsystem;
@@ -59,6 +61,7 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSimML;
 import frc.robot.subsystems.wrist.WristIONeo550;
 import frc.robot.subsystems.wrist.WristIOSim;
 import frc.robot.subsystems.wrist.WristSubsystem;
+import frc.robot.util.Elastic;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -83,7 +86,6 @@ public class RobotContainer {
     public LightsSubsystem lights;
     public ChuteSubsystem chuteSubsystem;
     public SuperstructureStateManager stateManager;
-
     public GripperSubsystem gripperSubsystem;
 
     private DoubleSupplier leftJoystickVelocityX;
@@ -110,7 +112,8 @@ public class RobotContainer {
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
             armSubsystem = new ArmSubsystem(new ArmPivotIOTalonFX());
             wristSubsystem = new WristSubsystem(new WristIONeo550());
-            climberSubsystem = new ClimberSubsystem(new ClimberIOTalonFX());
+            climberSubsystem =
+                    new ClimberSubsystem(new ClimberIOTalonFX(), new ClimberHeadIONeo550());
             lights = new LightsSubsystem();
             chuteSubsystem = new ChuteSubsystem(new ChuteIONeo550());
 
@@ -137,7 +140,7 @@ public class RobotContainer {
             armSubsystem = new ArmSubsystem(new ArmPivotIOSim());
             wristSubsystem = new WristSubsystem(new WristIOSim());
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
-            climberSubsystem = new ClimberSubsystem(new ClimberIOSim());
+            climberSubsystem = new ClimberSubsystem(new ClimberIOSim(), new ClimberHeadIOSim());
             lights = new LightsSubsystem();
             chuteSubsystem = new ChuteSubsystem(new ChuteIOSim());
         }
@@ -401,6 +404,7 @@ public class RobotContainer {
         // Climb Bindings
         leftDriveController.getLeftThumb().whileTrue(climberSubsystem.downPosition());
         leftDriveController.getRightThumb().whileTrue(climberSubsystem.upPosition());
+        leftDriveController.getBottomThumb().whileTrue(climberSubsystem.intakeCage());
 
         // leftDriveController.getBottomThumb().whileTrue(alignToPiece());
 
@@ -456,6 +460,34 @@ public class RobotContainer {
         leftDriveController.getLeftBottomRight().onTrue(intakeSubsystem.zeroflipper());
 
         leftDriveController.getLeftTopLeft().whileTrue(gripperSubsystem.gripperTuneable());
+
+        {
+            var tunableCommand =
+                    Commands.runOnce(
+                                    () -> {
+                                        Elastic.sendNotification(
+                                                new Elastic.Notification(
+                                                        Elastic.Notification.NotificationLevel.INFO,
+                                                        "Scheduled Supestructure Tunable",
+                                                        "YAYYAYYA."));
+                                    })
+                            .andThen(stateManager.moveToTunablePosition());
+
+            tunableCommand.setName("Tunable Superstructure");
+
+            leftDriveController
+                    .getRightTopLeft()
+                    .onTrue(
+                            Commands.runOnce(
+                                    () -> {
+                                        tunableCommand.cancel();
+                                        tunableCommand.schedule();
+                                    }));
+
+            SmartDashboard.putData(tunableCommand);
+
+            SmartDashboard.putData(stateManager);
+        }
 
         leftDriveController.getRightBottomLeft().onTrue(elevatorSubsystem.zeroElevatorCommand());
     }

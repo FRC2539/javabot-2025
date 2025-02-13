@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -104,6 +105,8 @@ public class CommandSwerveDrivetrain implements Subsystem {
 
     private final FieldOrientedOrbitSwerveRequest m_applyFieldSpeedsOrbit;
     RobotConfig config; // PathPlanner robot configuration
+
+    private Field2d m_field2d = new Field2d();
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation =
@@ -582,6 +585,8 @@ public class CommandSwerveDrivetrain implements Subsystem {
         double[] driveMotorVoltage = new double[4];
         double[] turnMotorVoltage = new double[4];
 
+        m_field2d.setRobotPose(getRobotPose());
+
         for (int i = 0; i < 4; i++) {
             var module = m_drivetrain.getModule(i);
             driveMotorStatorCurrents[i] =
@@ -614,6 +619,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
         Logger.recordOutput("Drive/outdatedPose", m_drivetrain.getState().Pose);
 
         Logger.recordOutput("Drive/currentAction", m_swerveState.label);
+        //      ////Logger.recordOutput("Drive/fieldPose", m_field2d);
 
         Logger.recordOutput("Drive/slippingModule", m_odometry_custom.m_maxSlippingWheelIndex);
 

@@ -12,6 +12,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     private ElevatorIO piviotIO;
     private ElevatorIOInputsAutoLogged elevatorInputs = new ElevatorIOInputsAutoLogged();
 
+    // LoggedNetworkNumber elevatorPosition = new LoggedNetworkNumber("Elevator Position", 0);
+
     private SysIdRoutine elevatorSysIdRoutine =
             new SysIdRoutine(
                     new SysIdRoutine.Config(
@@ -43,6 +45,14 @@ public class ElevatorSubsystem extends SubsystemBase {
     public Command runDynamicElevatorSysId(SysIdRoutine.Direction direction) {
         return elevatorSysIdRoutine.dynamic(direction);
     }
+
+    // public Command elevatorTuneable() {
+    //     return run(
+    //             () -> {
+    //                 double position = elevatorPosition.get();
+    //                 piviotIO.setPosition(position);
+    //             });
+    // }
 
     public Command zeroElevatorCommand() {
         return runOnce(
