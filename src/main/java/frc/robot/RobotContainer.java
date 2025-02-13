@@ -50,9 +50,7 @@ import frc.robot.subsystems.gripper.GripperIOFalcon;
 import frc.robot.subsystems.gripper.GripperIOSim;
 import frc.robot.subsystems.gripper.GripperSubsystem;
 import frc.robot.subsystems.intake.FlipperIOSim;
-import frc.robot.subsystems.intake.FlipperIOTalon;
 import frc.robot.subsystems.intake.IntakeRollerIOSim;
-import frc.robot.subsystems.intake.IntakeRollerTalonFX;
 import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.lights.LightsSubsystem;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
@@ -119,7 +117,7 @@ public class RobotContainer {
             lights = new LightsSubsystem();
             chuteSubsystem = new ChuteSubsystem(new ChuteIONeo550());
 
-            intakeSubsystem = new IntakeSubsystem(new IntakeRollerTalonFX(), new FlipperIOTalon());
+            intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
         } else {
             vision =
                     new Vision(
@@ -411,10 +409,10 @@ public class RobotContainer {
         // leftDriveController.getBottomThumb().whileTrue(alignToPiece());
 
         // Intake Bindings
-        rightDriveController
-                .getLeftThumb()
-                .whileTrue(intakeSubsystem.openAndRun().alongWith(alignToPiece()));
-        rightDriveController.getRightThumb().whileTrue(intakeSubsystem.openAndEject());
+        // rightDriveController
+        //         .getLeftThumb()
+        //         .whileTrue(intakeSubsystem.openAndRun().alongWith(alignToPiece()));
+        // rightDriveController.getRightThumb().whileTrue(intakeSubsystem.openAndEject());
 
         CORAL.and(rightDriveController.getBottomThumb())
                 .whileTrue(gripperSubsystem.intakeSpinCoral());
