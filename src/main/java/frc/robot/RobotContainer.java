@@ -388,7 +388,7 @@ public class RobotContainer {
         ALGAE.and(operatorController.getB()).onTrue(stateManager.moveToPosition(Position.L2Algae));
         ALGAE.and(operatorController.getA()).onTrue(stateManager.moveToPosition(Position.L1Algae));
         ALGAE.and(operatorController.getStart())
-                .onTrue(stateManager.moveToPosition(Position.Icecream));
+                .onTrue(stateManager.moveToPosition(Position.Processor));
         ALGAE.and(operatorController.getDPadDown())
                 .onTrue(stateManager.moveToPosition(Position.Home));
         ALGAE.and(operatorController.getDPadUp())

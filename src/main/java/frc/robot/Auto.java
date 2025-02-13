@@ -233,7 +233,7 @@ public class Auto {
         L2(Position.L2, Position.L2Prep),
         L3(Position.L3, Position.L3Prep),
         L4(Position.L4, Position.L4Prep),
-        Source(Position.Source, Position.SourcePrep);
+        Source(Position.Source, Position.Source);
 
         public Position position;
         public double armMotorSpeed;
