@@ -13,9 +13,11 @@ public class ChuteSubsystem extends SubsystemBase {
     private ChuteIOInputsAutoLogged chuteInputs = new ChuteIOInputsAutoLogged();
     private LoggedNetworkNumber chuteTuneable = new LoggedNetworkNumber("chute tuneable", 0);
 
-    public boolean isUp = false;
+    private boolean isUp = false;
+    public final Trigger UP = new Trigger(() -> isUp);
 
-    public boolean isDown = false;
+    private boolean isDown = false;
+    public final Trigger DOWN = new Trigger(() -> isDown);
 
     private PIDController controller =
             new PIDController(
