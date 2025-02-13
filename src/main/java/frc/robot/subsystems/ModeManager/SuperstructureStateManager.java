@@ -71,8 +71,20 @@ public class SuperstructureStateManager extends SubsystemBase {
             Sussy(1, 1, 1, null),
             None(1, 1, 1, null, TRUE, FALSE),
             Home(1, 0, 1, None),
-            ChuteDown(0, 0, 0, None, (a,s) -> s.chuteSubsystem.DOWN.getAsBoolean(), (a,s) -> s.chuteSubsystem.DOWN.getAsBoolean()),
-            ChuteUp(0, 0, 0, None, (a,s) -> s.chuteSubsystem.UP.getAsBoolean(), (a,s) -> s.chuteSubsystem.UP.getAsBoolean()),
+            ChuteDown(
+                    0,
+                    0,
+                    0,
+                    None,
+                    (a, s) -> s.chuteSubsystem.DOWN.getAsBoolean(),
+                    (a, s) -> s.chuteSubsystem.DOWN.getAsBoolean()),
+            ChuteUp(
+                    0,
+                    0,
+                    0,
+                    None,
+                    (a, s) -> s.chuteSubsystem.UP.getAsBoolean(),
+                    (a, s) -> s.chuteSubsystem.UP.getAsBoolean()),
             ChuteDownNull(0, 0, 0, ChuteDown),
             ChuteUpNull(0, 0, 0, ChuteUp),
             HandoffPrep(1, 0, 1, ChuteDownNull),
@@ -378,7 +390,6 @@ public class SuperstructureStateManager extends SubsystemBase {
 
         Command chuteMover =
                 chuteUp.onlyIf(() -> outList.contains(Position.ChuteUp))
-                        .until(() -> !outList.contains(Position.ChuteUp))
                         .andThen(chuteDown.onlyIf(() -> outList.contains(Position.ChuteDown)));
 
         Command outputCommand =
