@@ -470,10 +470,12 @@ public class RobotContainer {
                                         Elastic.sendNotification(
                                                 new Elastic.Notification(
                                                         Elastic.Notification.NotificationLevel.INFO,
-                                                        "Scheduled COMMAND",
+                                                        "Scheduled Supestructure Tunable",
                                                         "YAYYAYYA."));
                                     })
                             .andThen(stateManager.moveToTunablePosition());
+
+            tunableCommand.setName("Tunable Superstructure");
 
             leftDriveController
                     .getRightTopLeft()
@@ -483,6 +485,10 @@ public class RobotContainer {
                                         tunableCommand.cancel();
                                         tunableCommand.schedule();
                                     }));
+
+            SmartDashboard.putData(tunableCommand);
+
+            SmartDashboard.putData(stateManager);
         }
 
         leftDriveController.getRightBottomLeft().onTrue(elevatorSubsystem.zeroElevatorCommand());

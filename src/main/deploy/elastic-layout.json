@@ -109,6 +109,7 @@
               "robot_length": 0.85,
               "show_other_objects": true,
               "show_trajectories": true,
+              "field_rotation": 0.0,
               "robot_color": 4294198070,
               "trajectory_color": 4294967295
             }
@@ -136,6 +137,7 @@
               "robot_length": 0.85,
               "show_other_objects": true,
               "show_trajectories": true,
+              "field_rotation": 0.0,
               "robot_color": 4294961152,
               "trajectory_color": 4294967295
             }
@@ -199,6 +201,7 @@
               "robot_length": 0.85,
               "show_other_objects": true,
               "show_trajectories": true,
+              "field_rotation": 0.0,
               "robot_color": 4294198070,
               "trajectory_color": 4294967295
             }
@@ -490,6 +493,7 @@
             "properties": {
               "topic": "Superstructure Button Target",
               "period": 0.06,
+              "data_type": "string",
               "show_submit_button": false
             }
           },
@@ -503,6 +507,7 @@
             "properties": {
               "topic": "Superstructure Parent",
               "period": 0.06,
+              "data_type": "string",
               "show_submit_button": false
             }
           },
@@ -587,6 +592,7 @@
             "properties": {
               "topic": "Elevator Height",
               "period": 0.06,
+              "data_type": "double",
               "show_submit_button": false
             }
           },
@@ -602,6 +608,31 @@
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
+            }
+          },
+          {
+            "title": "Tunable Superstructure",
+            "x": 512.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Tunable Superstructure",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "SuperstructureStateManager",
+            "x": 512.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Subsystem",
+            "properties": {
+              "topic": "/SmartDashboard/SuperstructureStateManager",
+              "period": 0.06
             }
           }
         ]
