@@ -57,7 +57,7 @@ public class SuperstructureStateManager extends SubsystemBase {
                     double wristPosition = s.wristSubsystem.getFlippedPosition();
                     double elevatorPosition = s.elevatorSubsystem.getPosition();
 
-                    if ((Math.abs(armPosition - p.armHeight) < 0.1)
+                    if ((Math.abs(armPosition - p.armHeight()) < 0.1)
                             && (Math.abs(wristPosition - p.wristRotation()) < 0.1)
                             && (Math.abs(elevatorPosition - p.elevatorHeight()) < 0.1)) {
                         return true;
@@ -308,9 +308,9 @@ public class SuperstructureStateManager extends SubsystemBase {
     private Command internalGoToPosition(SuperstructureState.Position myPosition) {
         if (myPosition.realPosition) {
             return elevatorSubsystem
-                    .setPosition(myPosition.elevatorHeight)
-                    .alongWith(armSubsystem.setPosition(myPosition.armHeight))
-                    .alongWith(wristSubsystem.setPosition(myPosition.wristRotation));
+                    .setPosition(myPosition.elevatorHeight())
+                    .alongWith(armSubsystem.setPosition(myPosition.armHeight()))
+                    .alongWith(wristSubsystem.setPosition(myPosition.wristRotation()));
         } else {
             return Commands.idle();
         }
