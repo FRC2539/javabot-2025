@@ -328,13 +328,13 @@ public class Auto {
 
     @AutoLogOutput(key = "Auto/Arm In Place")
     private boolean armInPlace() {
-        return SuperstructureState.AUTO.isAtTarget(
+        return SuperstructureState.AUTO.checksOut(
                 targetHeight.position, robotContainer.stateManager);
     }
 
     @AutoLogOutput(key = "Auto/Arm In Prep")
     private boolean armInPrep() {
-        return SuperstructureState.AUTO.isAtTarget(targetHeight.prep, robotContainer.stateManager);
+        return SuperstructureState.AUTO.checksOut(targetHeight.prep, robotContainer.stateManager);
     }
 
     @AutoLogOutput(key = "Auto/Robot In Place")

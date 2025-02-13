@@ -46,7 +46,7 @@ public class SuperstructureStateManager extends SubsystemBase {
 
         @FunctionalInterface
         public interface StateChecker {
-            boolean isAtTarget(Position position, SuperstructureStateManager stateManager);
+            boolean checksOut(Position position, SuperstructureStateManager stateManager);
         }
 
         public static final StateChecker FALSE = (p, s) -> false;
@@ -69,7 +69,7 @@ public class SuperstructureStateManager extends SubsystemBase {
 
         public static enum Position {
             Sussy(1, 1, 1, null),
-            None(1, 1, 1, null, TRUE, false),
+            None(1, 1, 1, null, TRUE, FALSE),
             Home(1, 0, 1, None),
             ChuteDown(0, 0, 0, None),
             ChuteUp(0, 0, 0, None),
@@ -80,7 +80,7 @@ public class SuperstructureStateManager extends SubsystemBase {
             Quick34(4, 2, 1, None),
             Quick23(3, 3, 1, None),
             PointUp(1, 2, 1, None),
-            UpZoneNull(1, 3, 1, PointUp, TRUE, false),
+            UpZoneNull(1, 3, 1, PointUp, TRUE, FALSE),
             L1Prep(2, 2, 1, ChuteDownNull),
             L1(2, 1, 4, L1Prep),
             L2Prep(3, 2, 1, UpZoneNull),
@@ -98,11 +98,11 @@ public class SuperstructureStateManager extends SubsystemBase {
             L4AlgaePrep(5, 2, 1, UpZoneNull),
             L4Algae(5, 1, 1, L4AlgaePrep),
             Source(1, -2, 1, None),
-            AlgaeHome(1,1,1,None),
-            Climb(1,1,1,ChuteDownNull),
-            Processor(1,1,1,ChuteDownNull),
+            AlgaeHome(1, 1, 1, None),
+            Climb(1, 1, 1, ChuteDownNull),
+            Processor(1, 1, 1, ChuteDownNull),
             IcecreamCoral(1, 1, 1, ChuteDownNull),
-            IcecreamAlgae(1,1,1, ChuteDownNull),
+            IcecreamAlgae(1, 1, 1, ChuteDownNull),
             Tunable(0, 0, 0, None, FALSE);
 
             private double elevatorHeight;
@@ -111,7 +111,7 @@ public class SuperstructureStateManager extends SubsystemBase {
             public Position position;
             private Position parent;
             public StateChecker isAtTarget;
-            public boolean realPosition;
+            public StateChecker realPosition;
 
             private Position(
                     double elevatorHeight,
@@ -119,7 +119,7 @@ public class SuperstructureStateManager extends SubsystemBase {
                     double wristRotation,
                     Position parent,
                     StateChecker isAtTarget,
-                    boolean realPosition) {
+                    StateChecker realPosition) {
                 this.armHeight = armHeight;
                 this.elevatorHeight = elevatorHeight;
                 this.position = this;
@@ -135,7 +135,7 @@ public class SuperstructureStateManager extends SubsystemBase {
                     double wristRotation,
                     Position parent,
                     StateChecker isAtTarget) {
-                this(elevatorHeight, armHeight, wristRotation, parent, DEFAULT, true);
+                this(elevatorHeight, armHeight, wristRotation, parent, DEFAULT, TRUE);
             }
 
             private Position(
@@ -147,7 +147,11 @@ public class SuperstructureStateManager extends SubsystemBase {
             }
 
             public boolean isAtTarget(SuperstructureStateManager stateManager) {
-                return isAtTarget.isAtTarget(this, stateManager);
+                return isAtTarget.checksOut(this, stateManager);
+            }
+
+            public boolean isRealPosition(SuperstructureStateManager stateManager) {
+                return realPosition.checksOut(this, stateManager);
             }
 
             // #region Pointer Methods
@@ -328,7 +332,7 @@ public class SuperstructureStateManager extends SubsystemBase {
             chuteCanMove = true;
         }
 
-        if (myPosition.realPosition) {
+        if (myPosition.isRealPosition(this)) {
             return elevatorSubsystem
                     .setPosition(myPosition.elevatorHeight())
                     .alongWith(armSubsystem.setPosition(myPosition.armHeight()))
@@ -455,6 +459,7 @@ public class SuperstructureStateManager extends SubsystemBase {
         this.elevatorSubsystem = elevatorSubsystem;
         this.armSubsystem = armSubsystem;
         this.wristSubsystem = wristSubsystem;
+        this.chuteSubsystem = chuteSubsystem;
 
         LoggedMechanism2d mech = new LoggedMechanism2d(3, 6);
 
