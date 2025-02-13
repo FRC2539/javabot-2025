@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState.Position;
 import frc.robot.subsystems.arm.ArmSubsystem;
+import frc.robot.subsystems.chute.ChuteSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.wrist.WristSubsystem;
 import java.util.ArrayList;
@@ -80,7 +81,11 @@ public class SuperstructureStateManager extends SubsystemBase {
             L4AlgaePrep(5, 2, 1, PreppyNull),
             L4Algae(5, 1, 1, L4AlgaePrep),
             SourcePrep(1, -2, 1, None),
-            Source(0, -2, 1, SourcePrep);
+            Source(0, -2, 1, SourcePrep),
+            ChuteDown(0, 0, 0, None),
+            ChuteUp(0, 0, 0, None),
+            ChuteDownNull(0, 0, 0, ChuteDown),
+            ChuteUpNull(0, 0, 0, ChuteUp);
 
             public double elevatorheight;
             public double armheight;
@@ -145,6 +150,8 @@ public class SuperstructureStateManager extends SubsystemBase {
 
     private Pose2d lastScoringPose = Pose2d.kZero;
 
+    private boolean chuteCanMove = false;
+
     public void setLastScoringPose(Pose2d pose) {
         lastScoringPose = pose;
     }
@@ -179,6 +186,7 @@ public class SuperstructureStateManager extends SubsystemBase {
     private ElevatorSubsystem elevatorSubsystem;
     private ArmSubsystem armSubsystem;
     private WristSubsystem wristSubsystem;
+    private ChuteSubsystem chuteSubsystem;
 
     public void periodic() {
         Logger.recordOutput("Superstructure/Target", targetPostition);
@@ -256,6 +264,16 @@ public class SuperstructureStateManager extends SubsystemBase {
      * the wrist and the arm to go to a position
      */
     private Command internalGoToPosition(SuperstructureState.Position myPosition) {
+        if (myPosition == Position.ChuteDownNull) {
+            chuteCanMove = false;
+        }
+        if (myPosition == Position.ChuteUpNull) {
+            chuteCanMove = false;
+        }
+        if (myPosition == Position.None) {
+            chuteCanMove = true;
+        }
+
         if (myPosition.realPosition) {
             return elevatorSubsystem
                     .setPosition(myPosition.elevatorheight)
@@ -292,8 +310,26 @@ public class SuperstructureStateManager extends SubsystemBase {
                             }
                         });
         Command followOutPath = followOutPath();
+
+        Command chuteUp =
+                Commands.waitUntil(() -> chuteCanMove)
+                        .andThen(chuteSubsystem.moveChuteUp()::schedule);
+        Command chuteDown =
+                Commands.waitUntil(() -> chuteCanMove)
+                        .andThen(chuteSubsystem.moveChuteDown()::schedule);
+
+        Command chuteMover =
+                chuteUp.onlyIf(() -> outList.contains(Position.ChuteUp))
+                        .until(() -> !outList.contains(Position.ChuteUp))
+                        .andThen(chuteDown.onlyIf(() -> outList.contains(Position.ChuteDown)));
+
         Command outputCommand =
-                setFinalTarget.andThen(followInPath).andThen(clearOutPath).andThen(followOutPath);
+                setFinalTarget.andThen(
+                        followInPath
+                                .andThen(clearOutPath)
+                                .andThen(followOutPath)
+                                .alongWith(chuteMover));
+
         outputCommand.addRequirements(this);
         return outputCommand;
     }
@@ -338,7 +374,8 @@ public class SuperstructureStateManager extends SubsystemBase {
     public SuperstructureStateManager(
             ElevatorSubsystem elevatorSubsystem,
             ArmSubsystem armSubsystem,
-            WristSubsystem wristSubsystem) {
+            WristSubsystem wristSubsystem,
+            ChuteSubsystem chuteSubsystem) {
         this.elevatorSubsystem = elevatorSubsystem;
         this.armSubsystem = armSubsystem;
         this.wristSubsystem = wristSubsystem;

@@ -147,7 +147,8 @@ public class RobotContainer {
         }
 
         stateManager =
-                new SuperstructureStateManager(elevatorSubsystem, armSubsystem, wristSubsystem);
+                new SuperstructureStateManager(
+                        elevatorSubsystem, armSubsystem, wristSubsystem, chuteSubsystem);
 
         auto = new Auto(drivetrain, this);
         configureBindings();
