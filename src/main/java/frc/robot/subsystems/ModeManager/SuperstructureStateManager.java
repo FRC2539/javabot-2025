@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState.Position;
 import frc.robot.subsystems.arm.ArmSubsystem;
+import frc.robot.subsystems.chute.ChuteSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.wrist.WristSubsystem;
 import frc.robot.util.Elastic;
@@ -45,7 +46,7 @@ public class SuperstructureStateManager extends SubsystemBase {
 
         @FunctionalInterface
         public interface StateChecker {
-            boolean isAtTarget(Position position, SuperstructureStateManager stateManager);
+            boolean checksOut(Position position, SuperstructureStateManager stateManager);
         }
 
         public static final StateChecker FALSE = (p, s) -> false;
@@ -68,32 +69,50 @@ public class SuperstructureStateManager extends SubsystemBase {
 
         public static enum Position {
             Sussy(1, 1, 1, null),
-            None(1, 1, 1, null, TRUE, false),
+            None(1, 1, 1, null, TRUE, FALSE),
             Home(1, 0, 1, None),
-            Handoff(1, 0, 1, None),
-            Icecream(1, 1, 1, None),
+            ChuteDown(
+                    0,
+                    0,
+                    0,
+                    None,
+                    (a, s) -> s.chuteSubsystem.DOWN.getAsBoolean(),
+                    (a, s) -> s.chuteSubsystem.DOWN.getAsBoolean()),
+            ChuteUp(
+                    0,
+                    0,
+                    0,
+                    None,
+                    (a, s) -> s.chuteSubsystem.UP.getAsBoolean(),
+                    (a, s) -> s.chuteSubsystem.UP.getAsBoolean()),
+            ChuteDownNull(0, 0, 0, ChuteDown),
+            ChuteUpNull(0, 0, 0, ChuteUp),
+            HandoffPrep(1, 0, 1, ChuteDownNull),
+            Handoff(1, 0, 1, HandoffPrep),
             Quick34(4, 2, 1, None),
             Quick23(3, 3, 1, None),
-            Preppy(1, 2, 1, None),
-            PreppyNull(1, 3, 1, Preppy, TRUE, false),
-            L1Prep(2, 2, 1, PreppyNull),
+            PointUp(1, 2, 1, None),
+            UpZoneNull(1, 3, 1, PointUp, TRUE, FALSE),
+            L1Prep(2, 2, 1, ChuteUpNull),
             L1(2, 1, 4, L1Prep),
-            L2Prep(3, 2, 1, PreppyNull),
+            L2Prep(3, 2, 1, UpZoneNull),
             L2(3, 1, 1, L2Prep),
-            L3Prep(4, 2, 1, PreppyNull),
+            L3Prep(4, 2, 1, UpZoneNull),
             L3(4, 1, 1, L3Prep),
-            L4Prep(5, 2, 1, PreppyNull),
+            L4Prep(5, 2, 1, UpZoneNull),
             L4(5, 1, 1, L4Prep),
-            L1AlgaePrep(2, 2, 1, PreppyNull),
-            L1Algae(2, 1, 1, L1AlgaePrep),
-            L2AlgaePrep(3, 2, 1, PreppyNull),
+            L2AlgaePrep(3, 2, 1, UpZoneNull),
             L2Algae(3, 1, 1, L2AlgaePrep),
-            L3AlgaePrep(4, 2, 1, PreppyNull),
+            L3AlgaePrep(4, 2, 1, UpZoneNull),
             L3Algae(4, 1, 1, L3AlgaePrep),
-            L4AlgaePrep(5, 2, 1, PreppyNull),
-            L4Algae(5, 1, 1, L4AlgaePrep),
-            SourcePrep(1, -2, 25, None),
-            Source(0, -2, 1, SourcePrep),
+            NetAlgaePrep(5, 2, 1, UpZoneNull),
+            NetAlgae(5, 1, 1, NetAlgaePrep),
+            Source(1, -2, 1, None),
+            AlgaeHome(1, 1, 1, None),
+            Climb(1, 1, 1, ChuteUpNull),
+            Processor(1, 1, 1, ChuteUpNull),
+            IcecreamCoral(1, 1, 1, ChuteUpNull),
+            IcecreamAlgae(1, 1, 1, ChuteUpNull),
             Tunable(0, 0, 0, None, FALSE);
 
             private double elevatorHeight;
@@ -102,7 +121,7 @@ public class SuperstructureStateManager extends SubsystemBase {
             public Position position;
             private Position parent;
             public StateChecker isAtTarget;
-            public boolean realPosition;
+            public StateChecker realPosition;
 
             private Position(
                     double elevatorHeight,
@@ -110,7 +129,7 @@ public class SuperstructureStateManager extends SubsystemBase {
                     double wristRotation,
                     Position parent,
                     StateChecker isAtTarget,
-                    boolean realPosition) {
+                    StateChecker realPosition) {
                 this.armHeight = armHeight;
                 this.elevatorHeight = elevatorHeight;
                 this.position = this;
@@ -126,7 +145,7 @@ public class SuperstructureStateManager extends SubsystemBase {
                     double wristRotation,
                     Position parent,
                     StateChecker isAtTarget) {
-                this(elevatorHeight, armHeight, wristRotation, parent, DEFAULT, true);
+                this(elevatorHeight, armHeight, wristRotation, parent, DEFAULT, TRUE);
             }
 
             private Position(
@@ -138,7 +157,11 @@ public class SuperstructureStateManager extends SubsystemBase {
             }
 
             public boolean isAtTarget(SuperstructureStateManager stateManager) {
-                return isAtTarget.isAtTarget(this, stateManager);
+                return isAtTarget.checksOut(this, stateManager);
+            }
+
+            public boolean isRealPosition(SuperstructureStateManager stateManager) {
+                return realPosition.checksOut(this, stateManager);
             }
 
             // #region Pointer Methods
@@ -179,8 +202,8 @@ public class SuperstructureStateManager extends SubsystemBase {
         }
     }
 
-    private SuperstructureState.Position targetPostition = SuperstructureState.Position.None;
-    private SuperstructureState.Position lastPosition = SuperstructureState.Position.None;
+    private SuperstructureState.Position targetPostition = SuperstructureState.Position.Home;
+    private SuperstructureState.Position lastPosition = SuperstructureState.Position.Home;
 
     private List<SuperstructureState.Position> outList = new ArrayList<>();
 
@@ -193,7 +216,11 @@ public class SuperstructureStateManager extends SubsystemBase {
 
     private CoralAlgaeMode coralAlgaeMode = CoralAlgaeMode.LeftCoral;
 
+    private SuperstructureState.Position lastRealPosition = Position.Home;
+
     private Pose2d lastScoringPose = Pose2d.kZero;
+
+    private boolean chuteCanMove = false;
 
     public void setLastScoringPose(Pose2d pose) {
         lastScoringPose = pose;
@@ -229,6 +256,7 @@ public class SuperstructureStateManager extends SubsystemBase {
     private ElevatorSubsystem elevatorSubsystem;
     private ArmSubsystem armSubsystem;
     private WristSubsystem wristSubsystem;
+    private ChuteSubsystem chuteSubsystem;
 
     public void periodic() {
         Logger.recordOutput("Superstructure/Target", targetPostition);
@@ -306,17 +334,24 @@ public class SuperstructureStateManager extends SubsystemBase {
      * the wrist and the arm to go to a position
      */
     private Command internalGoToPosition(SuperstructureState.Position myPosition) {
-        if (myPosition.realPosition) {
-            return elevatorSubsystem
-                    .setPosition(myPosition.elevatorHeight())
-                    .alongWith(armSubsystem.setPosition(myPosition.armHeight()))
-                    .alongWith(wristSubsystem.setPosition(myPosition.wristRotation()));
-        } else {
-            return Commands.idle();
+        if (myPosition == Position.ChuteDownNull) {
+            chuteCanMove = false;
         }
-        // return Commands.idle().beforeStarting(() -> internalPosition =
-        // Position.Sussy).withTimeout(1).andThen(() -> internalPosition =
-        // myPosition).andThen(Commands.idle());
+        if (myPosition == Position.ChuteUpNull) {
+            chuteCanMove = false;
+        }
+        if (myPosition == Position.None) {
+            chuteCanMove = true;
+        }
+
+        if (myPosition.isRealPosition(this)) {
+            lastRealPosition = myPosition;
+        }
+
+        return elevatorSubsystem
+                .setPosition(lastRealPosition.elevatorHeight())
+                .alongWith(armSubsystem.setPosition(lastRealPosition.armHeight()))
+                .alongWith(wristSubsystem.setPosition(lastRealPosition.wristRotation()));
     }
 
     public Command moveToPosition(SuperstructureState.Position myPosition) {
@@ -342,8 +377,25 @@ public class SuperstructureStateManager extends SubsystemBase {
                             }
                         });
         Command followOutPath = followOutPath();
+
+        Command chuteUp =
+                Commands.waitUntil(() -> chuteCanMove)
+                        .andThen(chuteSubsystem.moveChuteUp()::schedule);
+        Command chuteDown =
+                Commands.waitUntil(() -> chuteCanMove)
+                        .andThen(chuteSubsystem.moveChuteDown()::schedule);
+
+        Command chuteMover =
+                chuteUp.onlyIf(() -> outList.contains(Position.ChuteUp))
+                        .andThen(chuteDown.onlyIf(() -> outList.contains(Position.ChuteDown)));
+
         Command outputCommand =
-                setFinalTarget.andThen(followInPath).andThen(clearOutPath).andThen(followOutPath);
+                setFinalTarget.andThen(
+                        followInPath
+                                .andThen(clearOutPath)
+                                .andThen(followOutPath)
+                                .alongWith(chuteMover));
+
         outputCommand.addRequirements(this);
         return outputCommand;
     }
@@ -410,10 +462,12 @@ public class SuperstructureStateManager extends SubsystemBase {
     public SuperstructureStateManager(
             ElevatorSubsystem elevatorSubsystem,
             ArmSubsystem armSubsystem,
-            WristSubsystem wristSubsystem) {
+            WristSubsystem wristSubsystem,
+            ChuteSubsystem chuteSubsystem) {
         this.elevatorSubsystem = elevatorSubsystem;
         this.armSubsystem = armSubsystem;
         this.wristSubsystem = wristSubsystem;
+        this.chuteSubsystem = chuteSubsystem;
 
         LoggedMechanism2d mech = new LoggedMechanism2d(3, 6);
 

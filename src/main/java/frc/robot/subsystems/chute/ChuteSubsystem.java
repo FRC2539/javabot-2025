@@ -13,6 +13,12 @@ public class ChuteSubsystem extends SubsystemBase {
     private ChuteIOInputsAutoLogged chuteInputs = new ChuteIOInputsAutoLogged();
     private LoggedNetworkNumber chuteTuneable = new LoggedNetworkNumber("chute tuneable", 0);
 
+    private boolean isUp = false;
+    public final Trigger UP = new Trigger(() -> isUp);
+
+    private boolean isDown = false;
+    public final Trigger DOWN = new Trigger(() -> isDown);
+
     private PIDController controller =
             new PIDController(
                     ChuteConstants.CHUTE_KP, ChuteConstants.CHUTE_KI, ChuteConstants.CHUTE_KD);
@@ -63,11 +69,52 @@ public class ChuteSubsystem extends SubsystemBase {
             new Trigger(() -> chuteInputs.current >= ChuteConstants.ChuteCurrentTrigger);
 
     public Command moveChuteUp() {
-        return setVoltage(12).until(STALLING).andThen(setVoltage(1));
+        setNull();
+        return setVoltage(12)
+                .withTimeout(0.2)
+                .andThen(setVoltage(12).until(STALLING))
+                .andThen(setUp())
+                .andThen(setVoltage(1));
     }
 
     public Command moveChuteDown() {
-        return setVoltage(-12).until(STALLING).andThen(setVoltage(-1));
+        setNull();
+        return setVoltage(-12)
+                .withTimeout(0.2)
+                .andThen(
+                        setVoltage(-12).until(STALLING).andThen(setDown()).andThen(setVoltage(-1)));
+    }
+
+    // public void setUp() {
+    //     isUp = true;
+    //     isDown = false;
+    // }
+
+    // public void setDown() {
+    //     isUp = false;
+    //     isDown = true;
+    // }
+
+    public Command setUp() {
+        return runOnce(
+                () -> {
+                    isUp = true;
+                    isDown = false;
+                });
+    }
+
+    public Command setDown() {
+        return runOnce(
+                () -> {
+                    isUp = false;
+                    isDown = true;
+                });
+    }
+
+    public void setNull() {
+
+        isUp = false;
+        isDown = false;
     }
 
     // private Command followReferenceThrubore() {
@@ -103,4 +150,5 @@ public class ChuteSubsystem extends SubsystemBase {
     //     public boolean isEncoderConnected() {
     //         return wristInputs.throughboreConnected;
     //     }
+
 }
