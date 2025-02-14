@@ -14,7 +14,7 @@ public class ChuteIOSim implements ChuteIO {
         if (position > ChuteConstants.upperLimit && voltage > 0) {
             position = ChuteConstants.upperLimit;
             inputs.current = 30;
-        } else if (position < ChuteConstants.lowerLimit  && voltage < 0) {
+        } else if (position < ChuteConstants.lowerLimit && voltage < 0) {
             position = ChuteConstants.lowerLimit;
             inputs.current = 30;
         } else {

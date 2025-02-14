@@ -349,9 +349,9 @@ public class SuperstructureStateManager extends SubsystemBase {
         }
 
         return elevatorSubsystem
-                    .setPosition(lastRealPosition.elevatorHeight())
-                    .alongWith(armSubsystem.setPosition(lastRealPosition.armHeight()))
-                    .alongWith(wristSubsystem.setPosition(lastRealPosition.wristRotation()));
+                .setPosition(lastRealPosition.elevatorHeight())
+                .alongWith(armSubsystem.setPosition(lastRealPosition.armHeight()))
+                .alongWith(wristSubsystem.setPosition(lastRealPosition.wristRotation()));
     }
 
     public Command moveToPosition(SuperstructureState.Position myPosition) {
