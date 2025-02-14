@@ -10,7 +10,6 @@ public class ChuteIOSim implements ChuteIO {
         position += 0.02 * voltage * 20;
 
         inputs.voltage = voltage;
-        inputs.position = position;
 
         if (position > ChuteConstants.upperLimit && voltage > 0) {
             position = ChuteConstants.upperLimit;
@@ -21,6 +20,7 @@ public class ChuteIOSim implements ChuteIO {
         } else {
             inputs.current = 0;
         }
+        inputs.position = position;
         // inputs.throughboreEncoderPosition = position;
         // inputs.throughboreConnected = true;
     }

@@ -75,7 +75,7 @@ public class ChuteSubsystem extends SubsystemBase {
 
     public Command moveChuteDown() {
         setNull();
-        return setVoltage(-12).withTimeout(0.2).andThen(setVoltage(12).until(STALLING).andThen(setDown()).andThen(setVoltage(-1)));
+        return setVoltage(-12).withTimeout(0.2).andThen(setVoltage(-12).until(STALLING).andThen(setDown()).andThen(setVoltage(-1)));
     }
 
     // public void setUp() {

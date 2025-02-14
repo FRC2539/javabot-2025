@@ -384,10 +384,10 @@ public class RobotContainer {
         CORAL.and(operatorController.getDPadLeft()).onTrue(chuteSubsystem.moveChuteUp());
         CORAL.and(operatorController.getDPadRight()).onTrue(chuteSubsystem.moveChuteDown());
 
-        ALGAE.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.L4Algae));
+        ALGAE.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.NetAlgae));
         ALGAE.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3Algae));
         ALGAE.and(operatorController.getB()).onTrue(stateManager.moveToPosition(Position.L2Algae));
-        ALGAE.and(operatorController.getA()).onTrue(stateManager.moveToPosition(Position.L1Algae));
+        ALGAE.and(operatorController.getA()).onTrue(stateManager.moveToPosition(Position.Processor));
         ALGAE.and(operatorController.getStart())
                 .onTrue(stateManager.moveToPosition(Position.Processor));
         ALGAE.and(operatorController.getDPadDown())
