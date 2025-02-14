@@ -70,12 +70,12 @@ public class ChuteSubsystem extends SubsystemBase {
 
     public Command moveChuteUp() {
         setNull();
-        return setVoltage(12).until(STALLING).andThen(setUp()).andThen(setVoltage(1));
+        return setVoltage(12).withTimeout(0.2).andThen(setVoltage(12).until(STALLING)).andThen(setUp()).andThen(setVoltage(1));
     }
 
     public Command moveChuteDown() {
         setNull();
-        return setVoltage(-12).until(STALLING).andThen(setDown()).andThen(setVoltage(-1));
+        return setVoltage(-12).withTimeout(0.2).andThen(setVoltage(12).until(STALLING).andThen(setDown()).andThen(setVoltage(-1)));
     }
 
     // public void setUp() {
@@ -104,12 +104,10 @@ public class ChuteSubsystem extends SubsystemBase {
                 });
     }
 
-    public Command setNull() {
-        return runOnce(
-                () -> {
+    public void setNull() {
+        
                     isUp = false;
                     isDown = false;
-                });
     }
 
     // private Command followReferenceThrubore() {

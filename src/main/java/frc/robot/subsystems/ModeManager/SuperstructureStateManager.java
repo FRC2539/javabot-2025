@@ -204,8 +204,8 @@ public class SuperstructureStateManager extends SubsystemBase {
         }
     }
 
-    private SuperstructureState.Position targetPostition = SuperstructureState.Position.None;
-    private SuperstructureState.Position lastPosition = SuperstructureState.Position.None;
+    private SuperstructureState.Position targetPostition = SuperstructureState.Position.Home;
+    private SuperstructureState.Position lastPosition = SuperstructureState.Position.Home;
 
     private List<SuperstructureState.Position> outList = new ArrayList<>();
 
@@ -217,6 +217,8 @@ public class SuperstructureStateManager extends SubsystemBase {
     }
 
     private CoralAlgaeMode coralAlgaeMode = CoralAlgaeMode.LeftCoral;
+
+    private SuperstructureState.Position lastRealPosition = Position.Home;
 
     private Pose2d lastScoringPose = Pose2d.kZero;
 
@@ -345,16 +347,13 @@ public class SuperstructureStateManager extends SubsystemBase {
         }
 
         if (myPosition.isRealPosition(this)) {
-            return elevatorSubsystem
-                    .setPosition(myPosition.elevatorHeight())
-                    .alongWith(armSubsystem.setPosition(myPosition.armHeight()))
-                    .alongWith(wristSubsystem.setPosition(myPosition.wristRotation()));
-        } else {
-            return Commands.idle();
+            lastRealPosition = myPosition;
         }
-        // return Commands.idle().beforeStarting(() -> internalPosition =
-        // Position.Sussy).withTimeout(1).andThen(() -> internalPosition =
-        // myPosition).andThen(Commands.idle());
+
+        return elevatorSubsystem
+                    .setPosition(lastRealPosition.elevatorHeight())
+                    .alongWith(armSubsystem.setPosition(lastRealPosition.armHeight()))
+                    .alongWith(wristSubsystem.setPosition(lastRealPosition.wristRotation()));
     }
 
     public Command moveToPosition(SuperstructureState.Position myPosition) {
