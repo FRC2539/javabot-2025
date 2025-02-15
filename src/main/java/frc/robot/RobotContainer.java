@@ -372,6 +372,15 @@ public class RobotContainer {
         CORAL.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3));
         CORAL.and(operatorController.getB()).onTrue(stateManager.moveToPosition(Position.L2));
         CORAL.and(operatorController.getA()).onTrue(stateManager.moveToPosition(Position.L1));
+
+        bindPlaceSeq(CORAL, operatorController.getY(), Position.L4Prep, Position.L4);
+
+        bindPlaceSeq(CORAL, operatorController.getX(), Position.L3Prep, Position.L3);
+
+        bindPlaceSeq(CORAL, operatorController.getB(), Position.L2Prep, Position.L2);
+
+        bindPlaceSeq(CORAL, operatorController.getA(), Position.L1Prep, Position.L1);
+
         CORAL.and(operatorController.getStart())
                 .onTrue(stateManager.moveToPosition(Position.Source));
 
@@ -492,6 +501,15 @@ public class RobotContainer {
         }
 
         leftDriveController.getRightBottomLeft().onTrue(elevatorSubsystem.zeroElevatorCommand());
+    }
+
+    private void bindPlaceSeq(Trigger mode, Trigger button, Position prep, Position end) {
+        mode.and(button)
+                .onTrue(
+                        stateManager
+                                .moveToPosition(prep)
+                                .until(button.negate())
+                                .andThen(stateManager.moveToPosition(end)));
     }
 
     private double deadband(double value, double deadband) {
