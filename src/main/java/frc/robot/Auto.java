@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.constants.AligningConstants;
+import frc.robot.constants.AutoConstants;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState;
@@ -66,6 +67,16 @@ public class Auto {
             previousAlliance = currentAlliance;
 
             previousAuto = currentCommand;
+
+            if (AutoConstants.autoList.get(currentCommand.getName()) != null) {
+                Logger.recordOutput(
+                        "Auto/AutoDescription",
+                        AutoConstants.autoList.get(currentCommand.getName()));
+            } else {
+                Logger.recordOutput(
+                        "Auto/AutoDescription",
+                        "404: Description not found. Validate that there is description in AutoConstants.");
+            }
 
             Command command = previousAuto;
             Optional<Alliance> alliance = DriverStation.getAlliance();
@@ -222,7 +233,7 @@ public class Auto {
         L2(Position.L2, Position.L2Prep),
         L3(Position.L3, Position.L3Prep),
         L4(Position.L4, Position.L4Prep),
-        Source(Position.Source, Position.SourcePrep);
+        Source(Position.Source, Position.Source);
 
         public Position position;
         public double armMotorSpeed;
@@ -317,13 +328,13 @@ public class Auto {
 
     @AutoLogOutput(key = "Auto/Arm In Place")
     private boolean armInPlace() {
-        return SuperstructureState.AUTO.isAtTarget(
+        return SuperstructureState.AUTO.checksOut(
                 targetHeight.position, robotContainer.stateManager);
     }
 
     @AutoLogOutput(key = "Auto/Arm In Prep")
     private boolean armInPrep() {
-        return SuperstructureState.AUTO.isAtTarget(targetHeight.prep, robotContainer.stateManager);
+        return SuperstructureState.AUTO.checksOut(targetHeight.prep, robotContainer.stateManager);
     }
 
     @AutoLogOutput(key = "Auto/Robot In Place")

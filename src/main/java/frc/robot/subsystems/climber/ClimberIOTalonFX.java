@@ -19,7 +19,8 @@ import frc.robot.util.PhoenixUtil;
 
 public class ClimberIOTalonFX implements ClimberIO {
     // TBD: Hardcode IDs or add support to make changeable in method
-    private final TalonFX climbermotor = new TalonFX(ClimberConstants.id, ClimberConstants.CANbus);
+    private final TalonFX climbermotor =
+            new TalonFX(ClimberConstants.CLIMBER_ID, ClimberConstants.CANbus);
     private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0);
 
     // Status signals for efficient updates

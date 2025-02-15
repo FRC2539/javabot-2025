@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -19,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
+import frc.lib.vision.PinholeModel3D;
 import frc.robot.commands.AlignAndDriveToReef;
 import frc.robot.commands.AlignToPiece;
 import frc.robot.commands.AlignToReef;
@@ -36,6 +38,8 @@ import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.chute.ChuteIONeo550;
 import frc.robot.subsystems.chute.ChuteIOSim;
 import frc.robot.subsystems.chute.ChuteSubsystem;
+import frc.robot.subsystems.climber.ClimberHeadIONeo550;
+import frc.robot.subsystems.climber.ClimberHeadIOSim;
 import frc.robot.subsystems.climber.ClimberIOSim;
 import frc.robot.subsystems.climber.ClimberIOTalonFX;
 import frc.robot.subsystems.climber.ClimberSubsystem;
@@ -46,9 +50,7 @@ import frc.robot.subsystems.gripper.GripperIOFalcon;
 import frc.robot.subsystems.gripper.GripperIOSim;
 import frc.robot.subsystems.gripper.GripperSubsystem;
 import frc.robot.subsystems.intake.FlipperIOSim;
-import frc.robot.subsystems.intake.FlipperIOTalon;
 import frc.robot.subsystems.intake.IntakeRollerIOSim;
-import frc.robot.subsystems.intake.IntakeRollerTalonFX;
 import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.lights.LightsSubsystem;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
@@ -59,6 +61,7 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSimML;
 import frc.robot.subsystems.wrist.WristIONeo550;
 import frc.robot.subsystems.wrist.WristIOSim;
 import frc.robot.subsystems.wrist.WristSubsystem;
+import frc.robot.util.Elastic;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -83,7 +86,6 @@ public class RobotContainer {
     public LightsSubsystem lights;
     public ChuteSubsystem chuteSubsystem;
     public SuperstructureStateManager stateManager;
-
     public GripperSubsystem gripperSubsystem;
 
     private DoubleSupplier leftJoystickVelocityX;
@@ -110,11 +112,12 @@ public class RobotContainer {
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
             armSubsystem = new ArmSubsystem(new ArmPivotIOTalonFX());
             wristSubsystem = new WristSubsystem(new WristIONeo550());
-            climberSubsystem = new ClimberSubsystem(new ClimberIOTalonFX());
+            climberSubsystem =
+                    new ClimberSubsystem(new ClimberIOTalonFX(), new ClimberHeadIONeo550());
             lights = new LightsSubsystem();
             chuteSubsystem = new ChuteSubsystem(new ChuteIONeo550());
 
-            intakeSubsystem = new IntakeSubsystem(new IntakeRollerTalonFX(), new FlipperIOTalon());
+            intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
         } else {
             vision =
                     new Vision(
@@ -137,13 +140,14 @@ public class RobotContainer {
             armSubsystem = new ArmSubsystem(new ArmPivotIOSim());
             wristSubsystem = new WristSubsystem(new WristIOSim());
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
-            climberSubsystem = new ClimberSubsystem(new ClimberIOSim());
+            climberSubsystem = new ClimberSubsystem(new ClimberIOSim(), new ClimberHeadIOSim());
             lights = new LightsSubsystem();
             chuteSubsystem = new ChuteSubsystem(new ChuteIOSim());
         }
 
         stateManager =
-                new SuperstructureStateManager(elevatorSubsystem, armSubsystem, wristSubsystem);
+                new SuperstructureStateManager(
+                        elevatorSubsystem, armSubsystem, wristSubsystem, chuteSubsystem);
 
         auto = new Auto(drivetrain, this);
         configureBindings();
@@ -295,12 +299,13 @@ public class RobotContainer {
         CORAL.and(operatorController.getDPadLeft()).onTrue(chuteSubsystem.moveChuteUp());
         CORAL.and(operatorController.getDPadRight()).onTrue(chuteSubsystem.moveChuteDown());
 
-        ALGAE.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.L4Algae));
+        ALGAE.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.NetAlgae));
         ALGAE.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3Algae));
         ALGAE.and(operatorController.getB()).onTrue(stateManager.moveToPosition(Position.L2Algae));
-        ALGAE.and(operatorController.getA()).onTrue(stateManager.moveToPosition(Position.L1Algae));
+        ALGAE.and(operatorController.getA())
+                .onTrue(stateManager.moveToPosition(Position.Processor));
         ALGAE.and(operatorController.getStart())
-                .onTrue(stateManager.moveToPosition(Position.Icecream));
+                .onTrue(stateManager.moveToPosition(Position.Processor));
         ALGAE.and(operatorController.getDPadDown())
                 .onTrue(stateManager.moveToPosition(Position.Home));
         ALGAE.and(operatorController.getDPadUp())
@@ -315,10 +320,15 @@ public class RobotContainer {
         // Climb Bindings
         leftDriveController.getLeftThumb().whileTrue(climberSubsystem.downPosition());
         leftDriveController.getRightThumb().whileTrue(climberSubsystem.upPosition());
+        leftDriveController.getBottomThumb().whileTrue(climberSubsystem.intakeCage());
+
+        // leftDriveController.getBottomThumb().whileTrue(alignToPiece());
 
         // Intake Bindings
-        rightDriveController.getLeftThumb().whileTrue(intakeSubsystem.openAndRun());
-        rightDriveController.getRightThumb().whileTrue(intakeSubsystem.openAndEject());
+        // rightDriveController
+        //         .getLeftThumb()
+        //         .whileTrue(intakeSubsystem.openAndRun().alongWith(alignToPiece()));
+        // rightDriveController.getRightThumb().whileTrue(intakeSubsystem.openAndEject());
 
         CORAL.and(rightDriveController.getBottomThumb())
                 .whileTrue(gripperSubsystem.intakeSpinCoral());
@@ -366,6 +376,34 @@ public class RobotContainer {
         leftDriveController.getLeftBottomRight().onTrue(intakeSubsystem.zeroflipper());
 
         leftDriveController.getLeftTopLeft().whileTrue(gripperSubsystem.gripperTuneable());
+
+        {
+            var tunableCommand =
+                    Commands.runOnce(
+                                    () -> {
+                                        Elastic.sendNotification(
+                                                new Elastic.Notification(
+                                                        Elastic.Notification.NotificationLevel.INFO,
+                                                        "Scheduled Supestructure Tunable",
+                                                        "YAYYAYYA."));
+                                    })
+                            .andThen(stateManager.moveToTunablePosition());
+
+            tunableCommand.setName("Tunable Superstructure");
+
+            leftDriveController
+                    .getRightTopLeft()
+                    .onTrue(
+                            Commands.runOnce(
+                                    () -> {
+                                        tunableCommand.cancel();
+                                        tunableCommand.schedule();
+                                    }));
+
+            SmartDashboard.putData(tunableCommand);
+
+            SmartDashboard.putData(stateManager);
+        }
 
         leftDriveController.getRightBottomLeft().onTrue(elevatorSubsystem.zeroElevatorCommand());
     }
@@ -444,8 +482,31 @@ public class RobotContainer {
     }
 
     public Command alignToPiece() {
-        Supplier<Pose2d> piecePositionSupplier = () -> new Pose2d(9.2, 4.15, Rotation2d.kZero);
+        Supplier<Pose2d> piecePositionSupplier =
+                () -> {
+                    var lastObservation = vision.getLastTargetObersevation(2);
+                    Pose2d robotPose = drivetrain.getRobotPose();
+                    Translation2d lastPieceTranslation =
+                            PinholeModel3D.getTranslationToTarget(
+                                    new Translation3d(
+                                            1,
+                                            lastObservation.tx().unaryMinus().getTan(),
+                                            lastObservation.ty().getTan()),
+                                    VisionConstants.robotToCamera2,
+                                    0);
+                    Pose2d poseAtTime = robotPose;
+
+                    Pose2d newPiecePose =
+                            poseAtTime.plus(
+                                    new Transform2d(lastPieceTranslation, new Rotation2d()));
+
+                    return newPiecePose;
+                };
         return new AlignToPiece(
-                drivetrain, driverVelocitySupplier, 0, piecePositionSupplier, Rotation2d.kZero);
+                drivetrain,
+                driverVelocitySupplier,
+                .15,
+                piecePositionSupplier,
+                Rotation2d.kCCW_90deg);
     }
 }

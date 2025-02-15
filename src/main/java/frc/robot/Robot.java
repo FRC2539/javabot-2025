@@ -13,6 +13,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.util.Elastic;
 import frc.robot.util.Elastic.Notification;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
@@ -40,6 +45,25 @@ public class Robot extends LoggedRobot {
         } else {
             setUseTiming(true); // Run as fast as possible
             Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
+
+            try {
+                Path path =
+                        Paths.get(Filesystem.getDeployDirectory().getPath(), "elastic-layout.json");
+                Charset charset = StandardCharsets.UTF_8;
+
+                String content = new String(Files.readAllBytes(path), charset);
+
+                content =
+                        content.replaceAll(
+                                "\"/CameraPublisher/([^/\"]+)", "\"/CameraPublisher/$1-processed");
+                Path outPath =
+                        Paths.get(
+                                Filesystem.getDeployDirectory().getPath(),
+                                "elastic-layout-sim.json");
+                Files.write(outPath, content.getBytes(charset));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         Logger.start(); // Start logging! No more data receivers, replay sources, or metadata
