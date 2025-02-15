@@ -165,7 +165,7 @@ public class CustomOdometry {
             double translationStds;
             double rotationStds;
 
-            if (SLIP_DETECTION && slipping && !multiWheelSlipping ) {
+            if (SLIP_DETECTION && slipping && !multiWheelSlipping) {
                 poseChange =
                         m_kinematics_custom.toTwist2d(
                                 maxWheelErrorIndex,
