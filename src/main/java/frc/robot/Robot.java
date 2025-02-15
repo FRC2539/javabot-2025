@@ -4,7 +4,9 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.net.WebServer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
@@ -12,6 +14,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.util.Elastic;
 import frc.robot.util.Elastic.Notification;
+import java.lang.management.CompilationMXBean;
+import java.lang.management.ManagementFactory;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -27,8 +31,16 @@ public class Robot extends LoggedRobot {
 
     private final RobotContainer m_robotContainer;
 
+    private final CompilationMXBean compMXBean;
+
     public Robot() {
         m_robotContainer = new RobotContainer();
+
+        compMXBean = ManagementFactory.getCompilationMXBean();
+
+        DriverStation.silenceJoystickConnectionWarning(true);
+
+        WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
 
         Logger.recordMetadata("ProjectName", "JavaBot-2025"); // Set a metadata value
 
@@ -63,14 +75,17 @@ public class Robot extends LoggedRobot {
 
         Logger.start(); // Start logging! No more data receivers, replay sources, or metadata
         // values may be added.
-
-        WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
+        PathfindingCommand.warmupCommand();
     }
 
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
         m_robotContainer.auto.logAutoInformation();
+
+        if (compMXBean != null) {
+            Logger.recordOutput("LoggedRobot/CompilationMS", compMXBean.getTotalCompilationTime());
+        }
     }
 
     @Override

@@ -60,6 +60,9 @@ public class CustomOdometry {
         // 0.0);
     }
 
+    private static final boolean SLIP_DETECTION = false;
+
+    @SuppressWarnings("unused")
     public void odometryFunction(SwerveDrivetrain.SwerveDriveState state) {
         try {
             double start = Timer.getTimestamp();
@@ -121,7 +124,7 @@ public class CustomOdometry {
 
             boolean multiWheelSlipping = false;
 
-            if (slipping) {
+            if (slipping && SLIP_DETECTION) {
                 xVelocity = 0;
                 yVelocity = 0;
                 for (int i = 0; i < 3; i++) {
@@ -162,7 +165,7 @@ public class CustomOdometry {
             double translationStds;
             double rotationStds;
 
-            if (slipping & !multiWheelSlipping) {
+            if (SLIP_DETECTION && slipping && !multiWheelSlipping) {
                 poseChange =
                         m_kinematics_custom.toTwist2d(
                                 maxWheelErrorIndex,

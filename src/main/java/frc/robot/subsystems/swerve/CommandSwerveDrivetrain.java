@@ -2,8 +2,11 @@ package frc.robot.subsystems.swerve;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -24,6 +27,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
@@ -37,6 +42,9 @@ import frc.robot.Robot;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.TunerConstants.TunerSwerveDrivetrain;
 import frc.robot.constants.VisionConstants;
+import frc.robot.util.PhoenixUtil;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -91,7 +99,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
                     .withDriveRequestType(DriveRequestType.Velocity)
                     .withSteerRequestType(SteerRequestType.MotionMagicExpo);
 
-    private final SwerveRequest.ApplyFieldSpeeds m_applyDriverSpeeds =
+    public final SwerveRequest.ApplyFieldSpeeds m_applyDriverSpeeds =
             new SwerveRequest.ApplyFieldSpeeds()
                     .withDriveRequestType(DriveRequestType.Velocity)
                     .withSteerRequestType(SteerRequestType.MotionMagicExpo)
@@ -169,7 +177,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
                             this));
 
     /* The SysId routine to test */
-    private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
+    private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineRotation;
 
     /* The Setpoint Generator */
     private SwerveSetpointGenerator setpointGenerator;
@@ -230,6 +238,50 @@ public class CommandSwerveDrivetrain implements Subsystem {
 
     double lastTimestamp = 0;
 
+    List<StatusSignal<Current>> driveMotorStatorCurrentSignals = new ArrayList<>();
+    List<StatusSignal<Current>> driveMotorSupplyCurrentSignals = new ArrayList<>();
+    List<StatusSignal<Current>> turnMotorStatorCurrentsSignals = new ArrayList<>();
+    List<StatusSignal<Current>> turnMotorSupplyCurrentsSignals = new ArrayList<>();
+    List<StatusSignal<Voltage>> driveMotorVoltageSignals = new ArrayList<>();
+    List<StatusSignal<Voltage>> turnMotorVoltageSignals = new ArrayList<>();
+    List<BaseStatusSignal> statusSignals = new ArrayList<>();
+    BaseStatusSignal[] statusSignalsArray;
+
+    private void createSuppliers() {
+        List<ParentDevice> devices = new ArrayList<>();
+
+        for (int i = 0; i < 4; i++) {
+            var module = m_drivetrain.getModule(i);
+            devices.add(module.getDriveMotor());
+            devices.add(module.getSteerMotor());
+            devices.add(module.getEncoder());
+            driveMotorStatorCurrentSignals.add(module.getDriveMotor().getStatorCurrent());
+            driveMotorSupplyCurrentSignals.add(module.getDriveMotor().getSupplyCurrent());
+            turnMotorStatorCurrentsSignals.add(module.getSteerMotor().getStatorCurrent());
+            turnMotorSupplyCurrentsSignals.add(module.getSteerMotor().getSupplyCurrent());
+            driveMotorVoltageSignals.add(module.getDriveMotor().getMotorVoltage());
+            turnMotorVoltageSignals.add(module.getSteerMotor().getMotorVoltage());
+        }
+
+        statusSignals.addAll(driveMotorStatorCurrentSignals);
+        statusSignals.addAll(driveMotorSupplyCurrentSignals);
+        statusSignals.addAll(turnMotorStatorCurrentsSignals);
+        statusSignals.addAll(turnMotorSupplyCurrentsSignals);
+        statusSignals.addAll(driveMotorVoltageSignals);
+        statusSignals.addAll(turnMotorVoltageSignals);
+
+        statusSignalsArray = statusSignals.toArray(new BaseStatusSignal[] {});
+
+        PhoenixUtil.tryUntilOk(
+                5, () -> BaseStatusSignal.setUpdateFrequencyForAll(50.0, statusSignalsArray));
+
+        PhoenixUtil.tryUntilOk(
+                5,
+                () ->
+                        ParentDevice.optimizeBusUtilizationForAll(
+                                0, devices.toArray(new ParentDevice[] {})));
+    }
+
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
      *
@@ -255,6 +307,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
                     m_drivetrain.resetPose(m_odometry_custom.m_currentPose);
                 });
         m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
+        createSuppliers();
 
         m_swerveState = SwerveState.DRIVER_RELATIVE;
     }
@@ -288,6 +341,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
                 });
 
         m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
+        createSuppliers();
 
         m_swerveState = SwerveState.DRIVER_RELATIVE;
     }
@@ -333,6 +387,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
                 });
 
         m_applyFieldSpeedsOrbit = generateSwerveSetpointConfig();
+        createSuppliers();
 
         m_swerveState = SwerveState.DRIVER_RELATIVE;
     }
@@ -585,22 +640,16 @@ public class CommandSwerveDrivetrain implements Subsystem {
         double[] driveMotorVoltage = new double[4];
         double[] turnMotorVoltage = new double[4];
 
+        StatusSignal.refreshAll(statusSignalsArray);
         m_field2d.setRobotPose(getRobotPose());
 
         for (int i = 0; i < 4; i++) {
-            var module = m_drivetrain.getModule(i);
-            driveMotorStatorCurrents[i] =
-                    module.getDriveMotor().getStatorCurrent().refresh().getValueAsDouble();
-            driveMotorSupplyCurrents[i] =
-                    module.getDriveMotor().getSupplyCurrent().refresh().getValueAsDouble();
-            turnMotorStatorCurrents[i] =
-                    module.getSteerMotor().getStatorCurrent().refresh().getValueAsDouble();
-            turnMotorSupplyCurrents[i] =
-                    module.getSteerMotor().getSupplyCurrent().refresh().getValueAsDouble();
-            driveMotorVoltage[i] =
-                    module.getDriveMotor().getMotorVoltage().refresh().getValueAsDouble();
-            turnMotorVoltage[i] =
-                    module.getSteerMotor().getMotorVoltage().refresh().getValueAsDouble();
+            driveMotorStatorCurrents[i] = driveMotorStatorCurrentSignals.get(i).getValueAsDouble();
+            driveMotorSupplyCurrents[i] = driveMotorSupplyCurrentSignals.get(i).getValueAsDouble();
+            turnMotorStatorCurrents[i] = turnMotorStatorCurrentsSignals.get(i).getValueAsDouble();
+            turnMotorSupplyCurrents[i] = turnMotorSupplyCurrentsSignals.get(i).getValueAsDouble();
+            driveMotorVoltage[i] = driveMotorVoltageSignals.get(i).getValueAsDouble();
+            turnMotorVoltage[i] = turnMotorVoltageSignals.get(i).getValueAsDouble();
         }
 
         Logger.recordOutput("Drive/Modules/DriveStatorCurrents", driveMotorStatorCurrents);

@@ -29,7 +29,7 @@ public class LightsSubsystem extends SubsystemBase {
     private static final CANdle candle;
 
     static {
-        if (RobotBase.isReal()) {
+        if (false && RobotBase.isReal()) {
             candle = new CANdle(LightsConstants.CANDLE_PORT);
         } else {
             candle = null;

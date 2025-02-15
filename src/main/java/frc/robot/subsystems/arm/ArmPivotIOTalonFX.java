@@ -1,11 +1,20 @@
 package frc.robot.subsystems.arm;
 
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Temperature;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import frc.robot.constants.ArmConstants;
+import frc.robot.util.PhoenixUtil;
 
 public class ArmPivotIOTalonFX implements ArmPivotIO {
     private final TalonFX armPivotMotor =
@@ -20,28 +29,54 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
 
     private double lastVoltage = 0;
 
+    // Status signals for efficient updates
+    private final StatusSignal<Angle> positionSignal;
+    private final StatusSignal<Voltage> voltageSignal;
+    private final StatusSignal<AngularVelocity> velocitySignal;
+    private final StatusSignal<Temperature> temperatureSignal;
+    private final StatusSignal<Current> currentSignal;
+
     public ArmPivotIOTalonFX() {
         armPivotMotor.setPosition(0);
 
-        // motionMagicVoltage.Slot = 0;
-
         TalonFXConfigurator talonConfig = armPivotMotor.getConfigurator();
-
-        // SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = new SoftwareLimitSwitchConfigs();
-
         talonConfig.apply(
                 new TalonFXConfiguration().withCurrentLimits(ArmConstants.currentLimitConfigs));
-
         armPivotMotor.setNeutralMode(NeutralModeValue.Brake);
+
+        // Initialize status signals
+        positionSignal = armPivotMotor.getPosition();
+        voltageSignal = armPivotMotor.getMotorVoltage();
+        velocitySignal = armPivotMotor.getVelocity();
+        temperatureSignal = armPivotMotor.getDeviceTemp();
+        currentSignal = armPivotMotor.getStatorCurrent();
+
+        // Set update frequency and optimize bus utilization
+        PhoenixUtil.tryUntilOk(
+                5,
+                () ->
+                        BaseStatusSignal.setUpdateFrequencyForAll(
+                                50.0,
+                                positionSignal,
+                                voltageSignal,
+                                velocitySignal,
+                                temperatureSignal,
+                                currentSignal));
+
+        PhoenixUtil.tryUntilOk(
+                5, () -> ParentDevice.optimizeBusUtilizationForAll(0, armPivotMotor));
     }
 
     public void updateInputs(ArmPivotIOInputs inputs) {
+        // Refresh all signals at once
+        BaseStatusSignal.refreshAll(
+                positionSignal, voltageSignal, velocitySignal, temperatureSignal, currentSignal);
 
-        inputs.position = armPivotMotor.getPosition().getValueAsDouble();
-        inputs.voltage = armPivotMotor.getMotorVoltage().getValueAsDouble();
-        inputs.velocity = armPivotMotor.getVelocity().getValueAsDouble();
-        inputs.temperature = armPivotMotor.getDeviceTemp().getValueAsDouble();
-        inputs.current = armPivotMotor.getStatorCurrent().getValueAsDouble();
+        inputs.position = positionSignal.getValueAsDouble();
+        inputs.voltage = voltageSignal.getValueAsDouble();
+        inputs.velocity = velocitySignal.getValueAsDouble();
+        inputs.temperature = temperatureSignal.getValueAsDouble();
+        inputs.current = currentSignal.getValueAsDouble();
         inputs.throughboreEncoderPosition = throughboreEncoder.get();
         inputs.throughboreConnected = throughboreEncoder.isConnected();
 

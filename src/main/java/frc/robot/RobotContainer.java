@@ -190,76 +190,6 @@ public class RobotContainer {
                             return drivetrain.driveDriverRelative(driverVelocitySupplier.get());
                         }));
 
-        // drive.withVelocityX(-leftDriveController.getYAxis().get() *
-        // GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive forward with negative Y
-        // (forward)
-        // .withVelocityY(-leftDriveController.getXAxis().get() *
-        // GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive left with negative X (left)
-        // .withRotationalRate(-rightDriveController.getXAxis().get() *
-        // GlobalConstants.MAX_ROTATIONAL_SPEED) // Drive counterclockwise with negative
-        // X (left)
-
-        // operatorController.getA().whileTrue(drivetrain.applyRequest(() -> brake));
-        // operatorController.getA().onTrue(new alignToTargetX(drivetrain, vision, 10,
-        // 0));
-
-        // operatorController
-        // .getA()
-        // .onTrue(
-        // new AlignToAngle(
-        // drivetrain,
-        // new Rotation2d(),
-        // true,
-        // leftJoystickVelocityX,
-        // leftJoystickVelocityY)
-        // .andThen(
-        // new alignToTargetX(
-        // drivetrain, vision, 10, 0,
-        // leftJoystickVelocityX)));
-
-        // operatorController.getA().toggleOnTrue(alignToReef(9, 0));
-        // leftDriveController.getBottomThumb().whileTrue(alignToReef(9, 0));
-        // leftDriveController.getRightThumb().whileTrue(alignToReef(9, 0.4));
-        // leftDriveController.getLeftThumb().whileTrue(alignToReef(9, -0.4));
-        // leftDriveController.getBottomThumb().whileTrue(alignAndDriveToReef(19, 0));
-        // operatorController
-        // .getB()
-        // .whileTrue(
-        // drivetrain.applyRequest(
-        // () ->
-        // point.withModuleDirection(
-        // new Rotation2d(
-        // -operatorController.getLeftYAxis().get(),
-        // -operatorController
-        // .getLeftXAxis()
-        // .get()))));
-
-        // leftDriveController
-        // .getTrigger()
-        // .whileTrue(
-        // new WheelRadiusCharacterization(
-        // WheelRadiusCharacterization.Direction.CLOCKWISE, drivetrain));
-
-        // Run SysId routines when holding back/start and X/Y.
-        // Note that each routine should be run exactly once in a single log.
-
-        // operatorController
-        // .getBack()
-        // .and(operatorController.getY())
-        // .whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        // operatorController
-        // .getBack()
-        // .and(operatorController.getX())
-        // .whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        // operatorController
-        // .getStart()
-        // .and(operatorController.getY())
-        // .whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        // operatorController
-        // .getStart()
-        // .and(operatorController.getX())
-        // .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-
         SmartDashboard.putData(
                 drivetrain
                         .sysIdDynamic(Direction.kForward)
@@ -325,25 +255,7 @@ public class RobotContainer {
                         .withName("Arm SysId Quasistatic Reverse"));
 
         SmartDashboard.putData(armSubsystem);
-        // operatorController
-        // operatorController.getA().onTrue(stateManager.moveToPosition(Position.L4));
-        // operatorController.getB().onTrue(stateManager.moveToPosition(Position.L3));
-        // operatorController.getX().onTrue(stateManager.moveToPosition(Position.Source));
-        // operatorController.getY().onTrue(stateManager.moveToPosition(Position.Home));
 
-        // reset the field-centric heading on left bumper press
-        // operatorController
-        // .getLeftBumper()
-        // .onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-        // operatorController
-        // .getRightBumper()
-        // .onTrue(drivetrain.runOnce(() -> drivetrain.resetPose(Pose2d.kZero)));
-
-        // Operator Mode Setting
-        operatorController.getLeftBumper().onTrue(stateManager.setLeftCoralMode());
-        operatorController.getRightBumper().onTrue(stateManager.setRightCoralMode());
-        operatorController.getRightTrigger().onTrue(stateManager.setAlgaeMode());
-        leftDriveController.getRightTopRight().onTrue(stateManager.setArmWristMode());
         operatorController
                 .getLeftJoystick()
                 .toggleOnTrue(
@@ -360,6 +272,11 @@ public class RobotContainer {
                                                 LightsSubsystem.purple, 1)))); // L2 tation Lights
 
         // Coral Mode Bindings
+        operatorController.getLeftBumper().onTrue(stateManager.setLeftCoralMode());
+        operatorController.getRightBumper().onTrue(stateManager.setRightCoralMode());
+        operatorController.getRightTrigger().onTrue(stateManager.setAlgaeMode());
+        leftDriveController.getRightTopRight().onTrue(stateManager.setArmWristMode());
+
         final Trigger CORAL = stateManager.LEFT_CORAL.or(stateManager.RIGHT_CORAL);
         final Trigger ALGAE = stateManager.ALGAE;
         final Trigger ARMWRIST = stateManager.ARMWRIST;
@@ -399,9 +316,6 @@ public class RobotContainer {
                 .onTrue(stateManager.moveToPosition(Position.Quick23));
 
         operatorController.getBack().onTrue(wristSubsystem.flipWristPosition());
-
-        // Driver Align Bindings, for a different/later day
-        // CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(9, 0));
 
         // Climb Bindings
         leftDriveController.getLeftThumb().whileTrue(climberSubsystem.downPosition());
