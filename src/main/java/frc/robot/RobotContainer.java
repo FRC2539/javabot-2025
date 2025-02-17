@@ -34,6 +34,7 @@ import frc.robot.subsystems.ModeManager.SuperstructureStateManager;
 import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState.Position;
 import frc.robot.subsystems.arm.ArmPivotIOSim;
 import frc.robot.subsystems.arm.ArmSubsystem;
+import frc.robot.subsystems.chute.ChuteIONeo550;
 import frc.robot.subsystems.chute.ChuteIOSim;
 import frc.robot.subsystems.chute.ChuteSubsystem;
 import frc.robot.subsystems.climber.ClimberHeadIOSim;
@@ -106,7 +107,7 @@ public class RobotContainer {
             //             VisionConstants.camera2Name,
             //             () -> drivetrain.getRobotPose().getRotation()));
             gripperSubsystem =
-                    new GripperSubsystem(new GripperIOFalcon()); // new GripperIOFalcon());
+                    new GripperSubsystem(new GripperIOSim()); // new GripperIOFalcon());
             elevatorSubsystem =
                     new ElevatorSubsystem(new ElevatorIOSim()); // new ElevatorIOTalonFX());
             armSubsystem = new ArmSubsystem(new ArmPivotIOSim());
@@ -117,7 +118,7 @@ public class RobotContainer {
                             new ClimberHeadIOSim()); // new ClimberIOTalonFX(), new
             // ClimberHeadIONeo550());
             lights = new LightsSubsystem();
-            chuteSubsystem = new ChuteSubsystem(new ChuteIOSim()); // new ChuteIONeo550());
+            chuteSubsystem = new ChuteSubsystem(new ChuteIONeo550()); // new ChuteIONeo550());
 
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
         } else {
@@ -461,11 +462,14 @@ public class RobotContainer {
                 .getLeftTopLeft()
                 .onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric()));
 
-        leftDriveController.getLeftBottomLeft().whileTrue(wristSubsystem.tunablePose());
-        leftDriveController.getLeftTopRight().whileTrue(wristSubsystem.tuneableVoltage());
+        // leftDriveController.getLeftBottomLeft().whileTrue(wristSubsystem.tunablePose());
+        // leftDriveController.getLeftTopRight().whileTrue(wristSubsystem.tuneableVoltage());
 
         // leftDriveController.getLeftBottomLeft().whileTrue(intakeSubsystem.rollerTuneable());
         // leftDriveController.getLeftTopRight().whileTrue(intakeSubsystem.flipperTuneable());
+
+        leftDriveController.getLeftBottomLeft().whileTrue(chuteSubsystem.moveChuteUp());
+        leftDriveController.getLeftTopRight().whileTrue(chuteSubsystem.moveChuteDown());
 
         leftDriveController.getLeftBottomRight().onTrue(intakeSubsystem.zeroflipper());
 
