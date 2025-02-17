@@ -70,7 +70,7 @@ public class SuperstructureStateManager extends SubsystemBase {
         public static enum Position {
             Sussy(1, 1, 1, null),
             None(1, 1, 1, null, TRUE, FALSE),
-            Home(1, 0, 1, None),
+            Home(50, 0, 0, None),
             ChuteDown(
                     0,
                     0,
@@ -113,7 +113,7 @@ public class SuperstructureStateManager extends SubsystemBase {
             Processor(1, 1, 1, ChuteUpNull),
             IcecreamCoral(1, 1, 1, ChuteUpNull),
             IcecreamAlgae(1, 1, 1, ChuteUpNull),
-            Tunable(0, 0, 0, None, FALSE);
+            Tunable(50, 0, 0, None, FALSE);
 
             private double elevatorHeight;
             private double armHeight;

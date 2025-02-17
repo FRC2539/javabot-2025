@@ -4,10 +4,10 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 
 public class ArmConstants {
 
-    public static final int ARM_PIVOT_MOTOR_ID = 10; // not correct motor ID
-    public static final String ARM_PIVOT_CANBUS = "CANivore";
+    public static final int ARM_PIVOT_MOTOR_ID = 10;
+    public static final String ARM_PIVOT_CANBUS = "rio";
 
-    public static final int ARM_THROUGHBORE_ENCODER_ID = 0;
+    public static final int ARM_THROUGHBORE_ENCODER_ID = 1;
 
     //     public static final Slot0Configs slot0Configs =
     //             new Slot0Configs()
@@ -27,13 +27,12 @@ public class ArmConstants {
     //                     .withMotionMagicJerk(4);
 
     public static final CurrentLimitsConfigs currentLimitConfigs = new CurrentLimitsConfigs();
-
-    public static final double ARM_KP = 5;
+    public static final double ARM_KP = 3.5;
     public static final double ARM_KD = 0;
-    public static final double ARM_KI = 0;
+    public static final double ARM_KI = 0.25;
 
     public static final double ARM_TOLERANCE = 0.01;
 
-    public static final double upperLimit = 100;
-    public static final double lowerLimit = 0;
+    public static final double upperLimit = 2.05;
+    public static final double lowerLimit = -0.6;
 }

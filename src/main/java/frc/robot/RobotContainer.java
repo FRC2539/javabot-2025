@@ -33,18 +33,13 @@ import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.ModeManager.SuperstructureStateManager;
 import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState.Position;
 import frc.robot.subsystems.arm.ArmPivotIOSim;
-import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
 import frc.robot.subsystems.arm.ArmSubsystem;
-import frc.robot.subsystems.chute.ChuteIONeo550;
 import frc.robot.subsystems.chute.ChuteIOSim;
 import frc.robot.subsystems.chute.ChuteSubsystem;
-import frc.robot.subsystems.climber.ClimberHeadIONeo550;
 import frc.robot.subsystems.climber.ClimberHeadIOSim;
 import frc.robot.subsystems.climber.ClimberIOSim;
-import frc.robot.subsystems.climber.ClimberIOTalonFX;
 import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
-import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.gripper.GripperIOFalcon;
 import frc.robot.subsystems.gripper.GripperIOSim;
@@ -54,11 +49,10 @@ import frc.robot.subsystems.intake.IntakeRollerIOSim;
 import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.lights.LightsSubsystem;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
+import frc.robot.subsystems.vision.DummyPhotonCamera;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSimML;
-import frc.robot.subsystems.wrist.WristIONeo550;
 import frc.robot.subsystems.wrist.WristIOSim;
 import frc.robot.subsystems.wrist.WristSubsystem;
 import frc.robot.util.Elastic;
@@ -99,23 +93,31 @@ public class RobotContainer {
             vision =
                     new Vision(
                             drivetrain::addVisionMeasurement,
-                            new VisionIOLimelight(
-                                    VisionConstants.camera0Name,
-                                    () -> drivetrain.getRobotPose().getRotation()),
-                            new VisionIOLimelight(
-                                    VisionConstants.camera1Name,
-                                    () -> drivetrain.getRobotPose().getRotation()),
-                            new VisionIOLimelight(
-                                    VisionConstants.camera2Name,
-                                    () -> drivetrain.getRobotPose().getRotation()));
-            gripperSubsystem = new GripperSubsystem(new GripperIOFalcon());
-            elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOTalonFX());
-            armSubsystem = new ArmSubsystem(new ArmPivotIOTalonFX());
-            wristSubsystem = new WristSubsystem(new WristIONeo550());
+                            new DummyPhotonCamera(),
+                            new DummyPhotonCamera(),
+                            new DummyPhotonCamera());
+            //     new VisionIOLimelight(
+            //             VisionConstants.camera0Name,
+            //             () -> drivetrain.getRobotPose().getRotation()),
+            //     new VisionIOLimelight(
+            //             VisionConstants.camera1Name,
+            //             () -> drivetrain.getRobotPose().getRotation()),
+            //     new VisionIOLimelight(
+            //             VisionConstants.camera2Name,
+            //             () -> drivetrain.getRobotPose().getRotation()));
+            gripperSubsystem =
+                    new GripperSubsystem(new GripperIOFalcon()); // new GripperIOFalcon());
+            elevatorSubsystem =
+                    new ElevatorSubsystem(new ElevatorIOSim()); // new ElevatorIOTalonFX());
+            armSubsystem = new ArmSubsystem(new ArmPivotIOSim());
+            wristSubsystem = new WristSubsystem(new WristIOSim()); // new WristIONeo550());
             climberSubsystem =
-                    new ClimberSubsystem(new ClimberIOTalonFX(), new ClimberHeadIONeo550());
+                    new ClimberSubsystem(
+                            new ClimberIOSim(),
+                            new ClimberHeadIOSim()); // new ClimberIOTalonFX(), new
+            // ClimberHeadIONeo550());
             lights = new LightsSubsystem();
-            chuteSubsystem = new ChuteSubsystem(new ChuteIONeo550());
+            chuteSubsystem = new ChuteSubsystem(new ChuteIOSim()); // new ChuteIONeo550());
 
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
         } else {
@@ -180,6 +182,7 @@ public class RobotContainer {
                                 leftJoystickVelocityY.getAsDouble(),
                                 rightJoystickVelocityTheta.getAsDouble());
 
+        /*
         drivetrain.setDefaultCommand(
                 // Drivetrain will execute this command periodically
 
@@ -189,6 +192,7 @@ public class RobotContainer {
                             // driverDesiredSpeeds);
                             return drivetrain.driveDriverRelative(driverVelocitySupplier.get());
                         }));
+                        */
 
         // drive.withVelocityX(-leftDriveController.getYAxis().get() *
         // GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive forward with negative Y
@@ -417,12 +421,13 @@ public class RobotContainer {
         // rightDriveController.getRightThumb().whileTrue(intakeSubsystem.openAndEject());
 
         CORAL.and(rightDriveController.getBottomThumb())
-                .whileTrue(gripperSubsystem.intakeSpinCoral());
+                .whileTrue(gripperSubsystem.intakeSpinCoral().until(gripperSubsystem.HAS_PIECE));
         CORAL.and(rightDriveController.getTrigger()).whileTrue(gripperSubsystem.ejectSpinCoral());
 
         ALGAE.and(rightDriveController.getBottomThumb())
-                .whileTrue(gripperSubsystem.intakeSpinAlgae());
+                .onTrue(gripperSubsystem.intakeSpinAlgae());
         ALGAE.and(rightDriveController.getTrigger()).whileTrue(gripperSubsystem.ejectSpinAlgae());
+
 
         leftDriveController
                 .getTrigger()
@@ -456,13 +461,15 @@ public class RobotContainer {
                 .getLeftTopLeft()
                 .onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric()));
 
-        leftDriveController.getLeftBottomLeft().whileTrue(intakeSubsystem.rollerTuneable());
-        leftDriveController.getLeftTopRight().whileTrue(intakeSubsystem.flipperTuneable());
+        leftDriveController.getLeftBottomLeft().whileTrue(wristSubsystem.tunablePose());
+        leftDriveController.getLeftTopRight().whileTrue(wristSubsystem.tuneableVoltage());
+
+        // leftDriveController.getLeftBottomLeft().whileTrue(intakeSubsystem.rollerTuneable());
+        // leftDriveController.getLeftTopRight().whileTrue(intakeSubsystem.flipperTuneable());
 
         leftDriveController.getLeftBottomRight().onTrue(intakeSubsystem.zeroflipper());
 
         leftDriveController.getLeftTopLeft().whileTrue(gripperSubsystem.gripperTuneable());
-
         {
             var tunableCommand =
                     Commands.runOnce(

@@ -38,7 +38,7 @@ public class WristIONeo550 implements WristIO {
         inputs.voltage = wristMotor.getBusVoltage() * wristMotor.getAppliedOutput();
         inputs.current = wristMotor.getOutputCurrent();
         inputs.temperature = wristMotor.getMotorTemperature();
-        inputs.throughboreEncoderPosition = throughboreEncoder.get();
+        inputs.throughboreEncoderPosition = throughboreEncoder.get() - 4.22;
         inputs.throughboreConnected = throughboreEncoder.isConnected();
 
         if (inputs.temperature > 60) {

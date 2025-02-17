@@ -33,15 +33,15 @@ public class WristSubsystem extends SubsystemBase {
     }
 
     public Command turnWristRight() {
-        return setVoltage(12);
+        return setVoltage(1);
     }
 
     public Command turnWristLeft() {
-        return setVoltage(-12);
+        return setVoltage(-1);
     }
 
     public Command tuneableVoltage() {
-        return run(() -> setVoltage(wristTuneable.get()));
+        return run(() -> wristIO.setVoltage(wristTuneable.get()));
     }
 
     public Command tunablePose() {
