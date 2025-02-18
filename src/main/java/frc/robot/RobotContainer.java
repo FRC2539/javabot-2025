@@ -9,6 +9,8 @@ import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -253,6 +255,7 @@ public class RobotContainer {
         operatorController.getRightTrigger().onTrue(stateManager.setAlgaeMode());
         operatorController.getLeftJoystick().toggleOnTrue(Commands.idle()); // L3 Rainbow
         operatorController.getLeftTrigger().whileTrue(Commands.idle()); // L2 Station Lights
+        
 
         // Coral Mode Bindings
         final Trigger CORAL = stateManager.LEFT_CORAL.or(stateManager.RIGHT_CORAL);
@@ -292,10 +295,12 @@ public class RobotContainer {
         leftDriveController.getLeftThumb().whileTrue(climberSubsystem.downPosition());
         leftDriveController.getRightThumb().whileTrue(climberSubsystem.upPosition());
 
-        // Intake Bindings
-        rightDriveController.getLeftThumb().whileTrue(intakeSubsystem.intake());
-        rightDriveController.getRightThumb().whileTrue(intakeSubsystem.eject());
+        // // Intake Bindings
+        // rightDriveController.getLeftThumb().whileTrue(intakeSubsystem.intake());
+        // rightDriveController.getRightThumb().whileTrue(intakeSubsystem.eject());
 
+        rightDriveController.getRightThumb().whileTrue(alignToProcessor());
+        
         CORAL.and(rightDriveController.getBottomThumb())
                 .whileTrue(gripperSubsystem.intakeSpinCoral());
         CORAL.and(rightDriveController.getTrigger()).whileTrue(gripperSubsystem.ejectSpinCoral());
@@ -362,7 +367,7 @@ public class RobotContainer {
                 leftJoystickVelocityY,
                 offset,
                 alignmentPose,
-                Rotation2d.kPi); // Skibidi
+                Rotation2d.kPi); 
     }
 
     public Command alignAndDriveToReef(int tag, double offset) {
@@ -378,5 +383,14 @@ public class RobotContainer {
 
     public boolean getVerticality() {
         return vision.isCoralVertical(0);
+    }
+
+    public Command alignToProcessor(){
+       // getAlignmentcolor 3 = r
+        //set a trigger based on the thumbpad 
+        //
+        return Commands.either(alignToReef(3, 0), alignToReef(16, 0), () -> {
+                return DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
+        });
     }
 }
