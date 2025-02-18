@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.constants.ChuteConstants;
-
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
@@ -15,12 +14,10 @@ public class ChuteSubsystem extends SubsystemBase {
     private ChuteIOInputsAutoLogged chuteInputs = new ChuteIOInputsAutoLogged();
     private LoggedNetworkNumber chuteTuneable = new LoggedNetworkNumber("chute tuneable", 0);
 
-    @AutoLogOutput
-    private boolean isUp = false;
+    @AutoLogOutput private boolean isUp = false;
     public final Trigger UP = new Trigger(() -> isUp);
 
-    @AutoLogOutput
-    private boolean isDown = false;
+    @AutoLogOutput private boolean isDown = false;
     public final Trigger DOWN = new Trigger(() -> isDown);
 
     private PIDController controller =
@@ -86,7 +83,10 @@ public class ChuteSubsystem extends SubsystemBase {
         return setVoltage(1.5)
                 .withTimeout(0.05)
                 .andThen(
-                        setVoltage(1.5).until(STALLING).andThen(setDown()).andThen(setVoltage(0.5)));
+                        setVoltage(1.5)
+                                .until(STALLING)
+                                .andThen(setDown())
+                                .andThen(setVoltage(0.5)));
     }
 
     // public void setUp() {

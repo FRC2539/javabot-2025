@@ -3,7 +3,6 @@ package frc.robot.subsystems.gripper;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -67,6 +66,7 @@ public class GripperSubsystem extends SubsystemBase {
     }
 
     private boolean hasAlgae = false;
+
     public void setHasAlgae(boolean hasAlgae) {
         hasAlgae = true;
     }
