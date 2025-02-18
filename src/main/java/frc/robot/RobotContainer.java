@@ -33,6 +33,7 @@ import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.ModeManager.SuperstructureStateManager;
 import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState.Position;
 import frc.robot.subsystems.arm.ArmPivotIOSim;
+import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
 import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.chute.ChuteIONeo550;
 import frc.robot.subsystems.chute.ChuteIOSim;
@@ -41,6 +42,7 @@ import frc.robot.subsystems.climber.ClimberHeadIOSim;
 import frc.robot.subsystems.climber.ClimberIOSim;
 import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
+import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.gripper.GripperIOFalcon;
 import frc.robot.subsystems.gripper.GripperIOSim;
@@ -54,6 +56,7 @@ import frc.robot.subsystems.vision.DummyPhotonCamera;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSimML;
+import frc.robot.subsystems.wrist.WristIONeo550;
 import frc.robot.subsystems.wrist.WristIOSim;
 import frc.robot.subsystems.wrist.WristSubsystem;
 import frc.robot.util.Elastic;
@@ -109,16 +112,16 @@ public class RobotContainer {
             gripperSubsystem =
                     new GripperSubsystem(new GripperIOSim()); // new GripperIOFalcon());
             elevatorSubsystem =
-                    new ElevatorSubsystem(new ElevatorIOSim()); // new ElevatorIOTalonFX());
-            armSubsystem = new ArmSubsystem(new ArmPivotIOSim());
-            wristSubsystem = new WristSubsystem(new WristIOSim()); // new WristIONeo550());
+                    new ElevatorSubsystem(new ElevatorIOTalonFX()); // new ElevatorIOTalonFX());
+            armSubsystem = new ArmSubsystem(new ArmPivotIOTalonFX());
+            wristSubsystem = new WristSubsystem(new WristIONeo550()); // new WristIONeo550());
             climberSubsystem =
                     new ClimberSubsystem(
                             new ClimberIOSim(),
                             new ClimberHeadIOSim()); // new ClimberIOTalonFX(), new
             // ClimberHeadIONeo550());
             lights = new LightsSubsystem();
-            chuteSubsystem = new ChuteSubsystem(new ChuteIONeo550()); // new ChuteIONeo550());
+            chuteSubsystem = new ChuteSubsystem(new ChuteIOSim()); // new ChuteIONeo550());
 
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
         } else {

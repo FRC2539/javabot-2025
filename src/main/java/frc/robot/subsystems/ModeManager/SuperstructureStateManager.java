@@ -58,11 +58,18 @@ public class SuperstructureStateManager extends SubsystemBase {
                     double wristPosition = s.wristSubsystem.getFlippedPosition();
                     double elevatorPosition = s.elevatorSubsystem.getPosition();
 
-                    if ((Math.abs(armPosition - p.armHeight()) < 0.1)
-                            && (Math.abs(wristPosition - p.wristRotation()) < 0.1)
-                            && (Math.abs(elevatorPosition - p.elevatorHeight()) < 0.1)) {
+                    boolean armAtPosition = Math.abs(armPosition - p.armHeight()) < 0.1;
+                    boolean wristAtPosition = Math.abs(wristPosition - p.wristRotation()) < 0.1;
+                    boolean elevatorAtPosition = Math.abs(elevatorPosition - p.elevatorHeight()) < 0.1;
+                    Logger.recordOutput("/Superstructure/ArmAtPosition", armAtPosition);
+                    Logger.recordOutput("/Superstructure/ArmPositionSetpoint", p.armHeight());
+                    Logger.recordOutput("/Superstructure/ArmPosition", armPosition);
+                    Logger.recordOutput("/Superstructure/ArmPositionError", armPosition - p.armHeight());
+                    Logger.recordOutput("/Superstructure/WristAtPosition", wristAtPosition);
+                    Logger.recordOutput("/Superstructure/ElevatorAtPosition", elevatorAtPosition);
+                    if (armAtPosition && wristAtPosition && elevatorAtPosition) {
                         return true;
-
+                        
                     } else return false;
                 };
         public static final StateChecker AUTO = DEFAULT;
@@ -70,7 +77,7 @@ public class SuperstructureStateManager extends SubsystemBase {
         public static enum Position {
             Sussy(1, 1, 1, null),
             None(1, 1, 1, null, TRUE, FALSE),
-            Home(50, 0, 0, None),
+            Home(150, 0, -1.58, None),
             ChuteDown(
                     0,
                     0,
@@ -91,7 +98,7 @@ public class SuperstructureStateManager extends SubsystemBase {
             Handoff(1, 0, 1, HandoffPrep),
             Quick34(4, 2, 1, None),
             Quick23(3, 3, 1, None),
-            PointUp(1, 2, 1, None),
+            PointUp(150, 2.05, -1.58, None),
             UpZoneNull(1, 3, 1, PointUp, TRUE, FALSE),
             L1Prep(2, 2, 1, ChuteUpNull),
             L1(2, 1, 4, L1Prep),
@@ -99,8 +106,8 @@ public class SuperstructureStateManager extends SubsystemBase {
             L2(3, 1, 1, L2Prep),
             L3Prep(4, 2, 1, UpZoneNull),
             L3(4, 1, 1, L3Prep),
-            L4Prep(5, 2, 1, UpZoneNull),
-            L4(5, 1, 1, L4Prep),
+            L4Prep(298.5, 2.0, 1.58, UpZoneNull),
+            L4(298.5, 2.05, 1.58, L4Prep),
             L2AlgaePrep(3, 2, 1, UpZoneNull),
             L2Algae(3, 1, 1, L2AlgaePrep),
             L3AlgaePrep(4, 2, 1, UpZoneNull),
@@ -113,7 +120,7 @@ public class SuperstructureStateManager extends SubsystemBase {
             Processor(1, 1, 1, ChuteUpNull),
             IcecreamCoral(1, 1, 1, ChuteUpNull),
             IcecreamAlgae(1, 1, 1, ChuteUpNull),
-            Tunable(50, 0, 0, None, FALSE);
+            Tunable(50, 0, -1.58, None, FALSE);
 
             private double elevatorHeight;
             private double armHeight;
@@ -167,7 +174,7 @@ public class SuperstructureStateManager extends SubsystemBase {
             // #region Pointer Methods
             public double elevatorHeight() {
                 if (this == Position.Tunable) {
-                    elevatorHeight =
+                    return
                             SuperstructureState.elevatorHeightLogged
                                     .get(); // ref: tunable variable armHeight
                 }
@@ -176,7 +183,7 @@ public class SuperstructureStateManager extends SubsystemBase {
 
             public double armHeight() {
                 if (this == Position.Tunable) {
-                    armHeight =
+                    return
                             SuperstructureState.armHeightLogged
                                     .get(); // ref: tunable variable armHeight
                 }
@@ -185,7 +192,7 @@ public class SuperstructureStateManager extends SubsystemBase {
 
             public double wristRotation() {
                 if (this == Position.Tunable) {
-                    wristRotation = SuperstructureState.wristRotationLogged.get();
+                    return SuperstructureState.wristRotationLogged.get();
                     // ref: tunable variable wristRotation
                 }
                 return wristRotation;
@@ -193,7 +200,7 @@ public class SuperstructureStateManager extends SubsystemBase {
 
             public Position parent() {
                 if (this == Position.Tunable) {
-                    parent = Position.valueOf(parentLogged.get()); // ref: tunable variable parent
+                    return Position.valueOf(parentLogged.get()); // ref: tunable variable parent
                 }
                 return parent;
             }

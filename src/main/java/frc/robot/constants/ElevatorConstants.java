@@ -12,7 +12,7 @@ public class ElevatorConstants {
                     .withKD(0)
                     .withKG(0)
                     .withKI(0)
-                    .withKP(0)
+                    .withKP(2)
                     .withKS(0)
                     .withKV(0)
                     .withGravityType(GravityTypeValue.Elevator_Static);
