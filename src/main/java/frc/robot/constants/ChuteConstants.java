@@ -15,7 +15,7 @@ public class ChuteConstants {
 
     public static final double ChuteCurrent = 40;
 
-    public static final double upperLimit = 100;
+    public static final double upperLimit = 10;
     public static final double lowerLimit = 0;
 
     public static final double ChuteCurrentTrigger = 15;

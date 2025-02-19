@@ -37,13 +37,13 @@ public class SuperstructureStateManager extends SubsystemBase {
 
     public static class SuperstructureState {
         private static LoggedNetworkNumber elevatorHeightLogged =
-                new LoggedNetworkNumber("Elevator Height", 0);
+                new LoggedNetworkNumber("Elevator Height", 165);
         private static LoggedNetworkNumber armHeightLogged =
                 new LoggedNetworkNumber("Arm Height", 0);
         private static LoggedNetworkNumber wristRotationLogged =
-                new LoggedNetworkNumber("Wrist Rotation", 0);
+                new LoggedNetworkNumber("Wrist Rotation", 1.58);
         private static LoggedNetworkString parentLogged =
-                new LoggedNetworkString("Superstructure Parent", "None");
+                new LoggedNetworkString("Superstructure Parent", "CenterZoneNull");
         private static LoggedNetworkString buttonTargetLogged =
                 new LoggedNetworkString("Superstructure Button Target", "Tunable");
 
@@ -109,53 +109,67 @@ public class SuperstructureStateManager extends SubsystemBase {
         // Wrist positions should be 1.58 unless the arm angle is positive. Then they can be whatever.
         public static enum Position {
             Sussy(1, 1, 1, null),
-            None(1, 1, 1, null, TRUE, FALSE),
-            Home(165, 0, 1.58, None),
+            CenterZoneNull(1, 1, 1, null, TRUE, FALSE),
+            Home(165, 0, 1.58, CenterZoneNull),
+            ChuteDownPre(
+                    165,
+                    0,
+                    1.58,
+                    CenterZoneNull,
+                    (a, s, e) -> s.chuteSubsystem.DOWN.getAsBoolean() || DEFAULT.checksOut(a,s,e),
+                    (a, s, e) -> !s.chuteSubsystem.DOWN.getAsBoolean()),
             ChuteDown(
                     165,
                     0,
                     1.58,
-                    None,
+                    ChuteDownPre,
                     (a, s, e) -> s.chuteSubsystem.DOWN.getAsBoolean(),
                     (a, s, e) -> !s.chuteSubsystem.DOWN.getAsBoolean()),
+            ChuteDownNull(0, 0, 0, ChuteDown, TRUE, FALSE),
+            ChuteUpPre(
+                        165,
+                        0,
+                        1.58,
+                        CenterZoneNull,
+                        (a, s, e) -> s.chuteSubsystem.UP.getAsBoolean() || DEFAULT.checksOut(a,s,e),
+                        (a, s, e) -> !s.chuteSubsystem.UP.getAsBoolean()),
             ChuteUp(
                     165,
                     0,
                     1.58,
-                    None,
+                    ChuteUpPre,
                     (a, s, e) -> s.chuteSubsystem.UP.getAsBoolean(),
                     (a, s, e) -> !s.chuteSubsystem.UP.getAsBoolean()),
-            ChuteDownNull(0, 0, 0, ChuteDown, TRUE, FALSE),
             ChuteUpNull(0, 0, 0, ChuteUp, TRUE, FALSE),
             HandoffPrep(165, -0.5, 1.58, ChuteDownNull),
             Handoff(140, -0.5, 1.58, HandoffPrep),
-            Quick34(4, 2, 1, None),
-            Quick23(3, 3, 1, None),
-            PointUp(165, 2.05, 1.58, None),
-            UpZoneNull(1, 3, 1, PointUp, TRUE, FALSE),
-            L1Prep(2, 2, 1, ChuteUpNull),
-            L1(2, 1, 4, L1Prep),
-            L2Prep(3, 2, 1, UpZoneNull),
-            L2(3, 1, 1, L2Prep),
-            L3Prep(4, 2, 1, UpZoneNull),
-            L3(4, 1, 1, L3Prep),
+            PointUp(165, 2.05, 1.58, CenterZoneNull),
+            UpZoneNull(0, 0, 0, PointUp, TRUE, FALSE),
+            L1Prep(298.5, 2.05, -1.58, ChuteUpNull),
+            L1(298.5, 2.05, -1.58, L1Prep),
+            L2Prep(298.5, 2.05, -1.58, UpZoneNull),
+            L2(298.5, 2.05, -1.58, L2Prep),
+            L3Prep(298.5, 2.05, -1.58, UpZoneNull),
+            L3(298.5, 2.05, -1.58, L3Prep),
             L4Prep(298.5, 2.05, -1.58, UpZoneNull),
             L4(298.5, 2.05, -1.58, L4Prep),
-            L2AlgaePrep(3, 2, 1, UpZoneNull),
-            L2Algae(3, 1, 1, L2AlgaePrep),
-            L3AlgaePrep(4, 2, 1, UpZoneNull),
-            L3Algae(4, 1, 1, L3AlgaePrep),
-            NetAlgaePrep(5, 2, 1, UpZoneNull),
-            NetAlgae(5, 1, 1, NetAlgaePrep),
-            Source(1, -2, 1, None),
-            AlgaeHome(1, 1, 1, None),
-            Climb(1, 1, 1, ChuteUpNull),
-            Processor(1, 1, 1, ChuteUpNull),
-            IcecreamCoral(1, 1, 1, ChuteUpNull),
-            IcecreamAlgae(1, 1, 1, ChuteUpNull),
+            Quick34(298.5, 2.05, -1.58, UpZoneNull),
+            Quick23(298.5, 2.05, -1.58, UpZoneNull),
+            L2AlgaePrep(298.5, 2.05, -1.58, UpZoneNull),
+            L2Algae(298.5, 2.05, -1.58, L2AlgaePrep),
+            L3AlgaePrep(298.5, 2.05, -1.58, UpZoneNull),
+            L3Algae(298.5, 2.05, -1.58, L3AlgaePrep),
+            NetAlgaePrep(298.5, 2.05, -1.58, UpZoneNull),
+            NetAlgae(298.5, 2.05, -1.58, NetAlgaePrep),
+            Source(165, 2.05, 0, PointUp),
+            AlgaeHome(165, 0, 1.58, CenterZoneNull),
+            Climb(165, 0, 1.58, ChuteUpNull),
+            Processor(165, 0, 1.58, ChuteUpNull),
+            IcecreamCoral(165, 0, 1.58, ChuteUpNull),
+            IcecreamAlgae(165, 0, 1.58, ChuteUpNull),
             StartPrep(140, 0, -1.58, ChuteUpNull),
             Start(0, 0, -1.58, StartPrep),
-            Tunable(50, 0, 1.58, None, FALSE);
+            Tunable(165, 0, 1.58, CenterZoneNull, FALSE);
 
             private double elevatorHeight;
             private double armHeight;
@@ -265,6 +279,7 @@ public class SuperstructureStateManager extends SubsystemBase {
 
     private Pose2d lastScoringPose = Pose2d.kZero;
 
+    @AutoLogOutput
     private boolean chuteCanMove = false;
 
     public void setLastScoringPose(Pose2d pose) {
@@ -333,7 +348,7 @@ public class SuperstructureStateManager extends SubsystemBase {
         for (int i = 0; i < 20; i++) {
             // SuperstructureState head = SuperstructureState.posDictionary.get(myPosition);
             outList.add(0, myPosition);
-            if (myPosition == SuperstructureState.Position.None) {
+            if (myPosition == SuperstructureState.Position.CenterZoneNull) {
                 found = true;
                 break;
             }
@@ -385,7 +400,7 @@ public class SuperstructureStateManager extends SubsystemBase {
         if (myPosition == Position.ChuteUpNull) {
             chuteCanMove = false;
         }
-        if (myPosition == Position.None) {
+        if (lastPosition.parent() == Position.CenterZoneNull && lastPosition.isRealPosition(this)) {
             chuteCanMove = true;
         }
 
@@ -493,7 +508,7 @@ public class SuperstructureStateManager extends SubsystemBase {
                             SuperstructureState.Position nextPose =
                                     getChilderNodeInBranch(lastPosition, targetPostition).parent();
                             if (nextPose == null) {
-                                return internalGoToPosition(Position.None);
+                                return internalGoToPosition(Position.CenterZoneNull);
                             }
                             return internalGoToPosition(nextPose)
                                     .beforeStarting(() -> updateTarget(nextPose))
