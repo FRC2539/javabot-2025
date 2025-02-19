@@ -35,6 +35,7 @@ import frc.robot.subsystems.ModeManager.SuperstructureStateManager.Superstructur
 import frc.robot.subsystems.arm.ArmPivotIOSim;
 import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
 import frc.robot.subsystems.arm.ArmSubsystem;
+import frc.robot.subsystems.chute.ChuteIONeo550;
 import frc.robot.subsystems.chute.ChuteIOSim;
 import frc.robot.subsystems.chute.ChuteSubsystem;
 import frc.robot.subsystems.climber.ClimberHeadIOSim;
@@ -120,7 +121,7 @@ public class RobotContainer {
                             new ClimberHeadIOSim()); // new ClimberIOTalonFX(), new
             // ClimberHeadIONeo550());
             lights = new LightsSubsystem();
-            chuteSubsystem = new ChuteSubsystem(new ChuteIOSim()); // new ChuteIONeo550());
+            chuteSubsystem = new ChuteSubsystem(new ChuteIONeo550()); // new ChuteIONeo550());
 
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
         } else {
@@ -377,7 +378,7 @@ public class RobotContainer {
         ARMWRIST.and(operatorController.getX()).whileTrue(wristSubsystem.turnWristLeft());
         ARMWRIST.and(operatorController.getB()).whileTrue(wristSubsystem.turnWristRight());
 
-        CORAL.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.L4));
+        CORAL.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.L4Prep)).onFalse(stateManager.moveToPosition(Position.L4));
         CORAL.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3));
         CORAL.and(operatorController.getB()).onTrue(stateManager.moveToPosition(Position.L2));
         CORAL.and(operatorController.getA()).onTrue(stateManager.moveToPosition(Position.L1));
@@ -387,7 +388,7 @@ public class RobotContainer {
         CORAL.and(operatorController.getDPadDown())
                 .onTrue(stateManager.moveToPosition(Position.Home));
         CORAL.and(operatorController.getDPadUp())
-                .onTrue(stateManager.moveToPosition(Position.Handoff));
+                .onTrue(stateManager.moveToPosition(Position.HandoffPrep)).onFalse(stateManager.moveToPosition(Position.Handoff));
         CORAL.and(operatorController.getDPadLeft()).onTrue(chuteSubsystem.moveChuteUp());
         CORAL.and(operatorController.getDPadRight()).onTrue(chuteSubsystem.moveChuteDown());
 
@@ -458,6 +459,7 @@ public class RobotContainer {
         // Technical Bindings
 
         leftDriveController.getLeftBottomMiddle().onTrue(climberSubsystem.zeroClimberCommand());
+        rightDriveController.getLeftBottomMiddle().onTrue(stateManager.moveToPosition(Position.Start));
         leftDriveController.getLeftTopMiddle().whileTrue(climberSubsystem.climberTuneable());
 
         rightDriveController

@@ -43,7 +43,7 @@ public class GripperSubsystem extends SubsystemBase {
     }
 
     public Command ejectSpinCoral() {
-        return setVoltage(-3);
+        return setVoltage(-1);
     }
 
     public Command intakeSpinAlgae() {
