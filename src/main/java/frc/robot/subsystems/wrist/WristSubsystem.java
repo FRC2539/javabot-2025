@@ -5,9 +5,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.WristConstants;
-
 import java.util.function.DoubleSupplier;
-
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
@@ -116,9 +114,9 @@ public class WristSubsystem extends SubsystemBase {
         return wristInputs.throughboreConnected;
     }
 
-
     public DoubleSupplier elevatorHeight = () -> 0;
     public DoubleSupplier armHeight = () -> -1;
+
     @AutoLogOutput
     private boolean isSafeToMove() {
         return elevatorHeight.getAsDouble() > 139 || armHeight.getAsDouble() > 0.5;

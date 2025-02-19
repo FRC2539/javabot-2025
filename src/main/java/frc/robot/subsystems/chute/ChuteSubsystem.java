@@ -77,20 +77,27 @@ public class ChuteSubsystem extends SubsystemBase {
                 .withTimeout(0.05)
                 .andThen(setVoltage(-4).until(STALLING))
                 .andThen(setUp())
-                .andThen(setVoltage(-1)).beforeStarting(() -> {
-                    isDown = false;
-                    lastSetDown = false;
-                });
+                .andThen(setVoltage(-1))
+                .beforeStarting(
+                        () -> {
+                            isDown = false;
+                            lastSetDown = false;
+                        });
     }
 
     public Command moveChuteDown() {
         return (setVoltage(1.5)
-                .withTimeout(0.05)
-                .andThen(
-                        setVoltage(1.5)
-                                .until(STALLING)
-                                .andThen(setDown())
-                                .andThen(setVoltage(0.5)))).beforeStarting(() -> {isUp = false; lastSetDown = true;});
+                        .withTimeout(0.05)
+                        .andThen(
+                                setVoltage(1.5)
+                                        .until(STALLING)
+                                        .andThen(setDown())
+                                        .andThen(setVoltage(0.5))))
+                .beforeStarting(
+                        () -> {
+                            isUp = false;
+                            lastSetDown = true;
+                        });
     }
 
     // public void setUp() {

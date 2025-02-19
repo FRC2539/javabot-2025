@@ -108,7 +108,8 @@ public class RobotContainer {
             //     new VisionIOLimelight(
             //             VisionConstants.camera2Name,
             //             () -> drivetrain.getRobotPose().getRotation()));
-            gripperSubsystem = new GripperSubsystem(new GripperIOFalcon()); // new GripperIOFalcon());
+            gripperSubsystem =
+                    new GripperSubsystem(new GripperIOFalcon()); // new GripperIOFalcon());
             elevatorSubsystem =
                     new ElevatorSubsystem(new ElevatorIOTalonFX()); // new ElevatorIOTalonFX());
             armSubsystem = new ArmSubsystem(new ArmPivotIOTalonFX());
@@ -188,7 +189,6 @@ public class RobotContainer {
                                 leftJoystickVelocityY.getAsDouble(),
                                 rightJoystickVelocityTheta.getAsDouble());
 
-        
         drivetrain.setDefaultCommand(
                 // Drivetrain will execute this command periodically
 
@@ -198,7 +198,6 @@ public class RobotContainer {
                             // driverDesiredSpeeds);
                             return drivetrain.driveDriverRelative(driverVelocitySupplier.get());
                         }));
-                        
 
         // drive.withVelocityX(-leftDriveController.getYAxis().get() *
         // GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive forward with negative Y

@@ -19,7 +19,6 @@ import frc.robot.util.Elastic;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
@@ -104,9 +103,11 @@ public class SuperstructureStateManager extends SubsystemBase {
                 };
         public static final StateChecker AUTO = DEFAULT;
 
-        // Any positions going lower than elevator 160 need to have Chute Up as a parent eventually. (The handoff is the exception).
+        // Any positions going lower than elevator 160 need to have Chute Up as a parent eventually.
+        // (The handoff is the exception).
         // No arm positions should be negative unless they are for the handoff.
-        // Wrist positions should be 1.58 unless the arm angle is positive. Then they can be whatever.
+        // Wrist positions should be 1.58 unless the arm angle is positive. Then they can be
+        // whatever.
         public static enum Position {
             Sussy(1, 1, 1, null),
             CenterZoneNull(1, 1, 1, null, TRUE, FALSE),
@@ -116,7 +117,7 @@ public class SuperstructureStateManager extends SubsystemBase {
                     0,
                     1.58,
                     CenterZoneNull,
-                    (a, s, e) -> s.chuteSubsystem.DOWN.getAsBoolean() || DEFAULT.checksOut(a,s,e),
+                    (a, s, e) -> s.chuteSubsystem.DOWN.getAsBoolean() || DEFAULT.checksOut(a, s, e),
                     (a, s, e) -> !s.chuteSubsystem.DOWN.getAsBoolean()),
             ChuteDown(
                     165,
@@ -127,12 +128,12 @@ public class SuperstructureStateManager extends SubsystemBase {
                     (a, s, e) -> !s.chuteSubsystem.DOWN.getAsBoolean()),
             ChuteDownNull(0, 0, 0, ChuteDown, TRUE, FALSE),
             ChuteUpPre(
-                        165,
-                        0,
-                        1.58,
-                        CenterZoneNull,
-                        (a, s, e) -> s.chuteSubsystem.UP.getAsBoolean() || DEFAULT.checksOut(a,s,e),
-                        (a, s, e) -> !s.chuteSubsystem.UP.getAsBoolean()),
+                    165,
+                    0,
+                    1.58,
+                    CenterZoneNull,
+                    (a, s, e) -> s.chuteSubsystem.UP.getAsBoolean() || DEFAULT.checksOut(a, s, e),
+                    (a, s, e) -> !s.chuteSubsystem.UP.getAsBoolean()),
             ChuteUp(
                     165,
                     0,
@@ -279,8 +280,7 @@ public class SuperstructureStateManager extends SubsystemBase {
 
     private Pose2d lastScoringPose = Pose2d.kZero;
 
-    @AutoLogOutput
-    private boolean chuteCanMove = false;
+    @AutoLogOutput private boolean chuteCanMove = false;
 
     public void setLastScoringPose(Pose2d pose) {
         lastScoringPose = pose;
