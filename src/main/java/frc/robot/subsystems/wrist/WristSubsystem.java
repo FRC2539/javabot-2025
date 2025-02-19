@@ -5,6 +5,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.WristConstants;
+
+import java.util.function.DoubleSupplier;
+
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -30,6 +34,10 @@ public class WristSubsystem extends SubsystemBase {
     public void periodic() {
         wristIO.updateInputs(wristInputs);
         Logger.processInputs("RealOutputs/Wrist", wristInputs);
+
+        if (!isSafeToMove()) {
+            wristIO.setVoltage(0);
+        }
     }
 
     public Command turnWristRight() {
@@ -41,7 +49,7 @@ public class WristSubsystem extends SubsystemBase {
     }
 
     public Command tuneableVoltage() {
-        return run(() -> wristIO.setVoltage(wristTuneable.get()));
+        return run(() -> setVoltageSave(wristTuneable.get()));
     }
 
     public Command tunablePose() {
@@ -49,7 +57,7 @@ public class WristSubsystem extends SubsystemBase {
     }
 
     public Command setVoltage(double voltage) {
-        return run(() -> wristIO.setVoltage(voltage));
+        return run(() -> setVoltageSave(voltage));
     }
 
     public Command setPosition(double position) {
@@ -86,7 +94,7 @@ public class WristSubsystem extends SubsystemBase {
                     } else {
                         voltage = Math.min(12.0, Math.max(-12.0, voltage)); // Clamp voltage
                     }
-                    wristIO.setVoltage(voltage);
+                    setVoltageSave(voltage);
                 });
     }
 
@@ -106,5 +114,22 @@ public class WristSubsystem extends SubsystemBase {
 
     public boolean isEncoderConnected() {
         return wristInputs.throughboreConnected;
+    }
+
+
+    public DoubleSupplier elevatorHeight = () -> 0;
+    public DoubleSupplier armHeight = () -> -1;
+    @AutoLogOutput
+    private boolean isSafeToMove() {
+        return elevatorHeight.getAsDouble() > 139 || armHeight.getAsDouble() > 0.5;
+    }
+
+    private void setVoltageSave(double voltage) {
+        if (isSafeToMove()) {
+            wristIO.setVoltage(voltage);
+        }
+        // if (
+        //     wristIO.setVoltage(voltage);
+        // )
     }
 }

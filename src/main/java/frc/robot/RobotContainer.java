@@ -43,6 +43,7 @@ import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
+import frc.robot.subsystems.gripper.GripperIOFalcon;
 import frc.robot.subsystems.gripper.GripperIOSim;
 import frc.robot.subsystems.gripper.GripperSubsystem;
 import frc.robot.subsystems.intake.FlipperIOSim;
@@ -107,7 +108,7 @@ public class RobotContainer {
             //     new VisionIOLimelight(
             //             VisionConstants.camera2Name,
             //             () -> drivetrain.getRobotPose().getRotation()));
-            gripperSubsystem = new GripperSubsystem(new GripperIOSim()); // new GripperIOFalcon());
+            gripperSubsystem = new GripperSubsystem(new GripperIOFalcon()); // new GripperIOFalcon());
             elevatorSubsystem =
                     new ElevatorSubsystem(new ElevatorIOTalonFX()); // new ElevatorIOTalonFX());
             armSubsystem = new ArmSubsystem(new ArmPivotIOTalonFX());
@@ -153,6 +154,10 @@ public class RobotContainer {
                         elevatorSubsystem, armSubsystem, wristSubsystem, chuteSubsystem);
 
         auto = new Auto(drivetrain, this);
+
+        wristSubsystem.elevatorHeight = () -> elevatorSubsystem.getPosition();
+        wristSubsystem.armHeight = () -> armSubsystem.getPosition();
+
         configureBindings();
         // Establish the "Trajectory Field" Field2d into the dashboard
     }
@@ -183,7 +188,7 @@ public class RobotContainer {
                                 leftJoystickVelocityY.getAsDouble(),
                                 rightJoystickVelocityTheta.getAsDouble());
 
-        /*
+        
         drivetrain.setDefaultCommand(
                 // Drivetrain will execute this command periodically
 
@@ -193,7 +198,7 @@ public class RobotContainer {
                             // driverDesiredSpeeds);
                             return drivetrain.driveDriverRelative(driverVelocitySupplier.get());
                         }));
-                        */
+                        
 
         // drive.withVelocityX(-leftDriveController.getYAxis().get() *
         // GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive forward with negative Y

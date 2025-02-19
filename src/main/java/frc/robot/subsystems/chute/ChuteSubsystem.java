@@ -15,10 +15,10 @@ public class ChuteSubsystem extends SubsystemBase {
     private LoggedNetworkNumber chuteTuneable = new LoggedNetworkNumber("chute tuneable", 0);
 
     @AutoLogOutput private boolean isUp = false;
-    public final Trigger UP = new Trigger(() -> isUp);
+    public final Trigger UP = new Trigger(() -> true);
 
     @AutoLogOutput private boolean isDown = false;
-    public final Trigger DOWN = new Trigger(() -> isDown);
+    public final Trigger DOWN = new Trigger(() -> true);
 
     private PIDController controller =
             new PIDController(
@@ -32,7 +32,7 @@ public class ChuteSubsystem extends SubsystemBase {
     public ChuteSubsystem(ChuteIO chuteIO) {
         controller.setTolerance(ChuteConstants.CHUTE_TOLERANCE);
         this.chuteIO = chuteIO;
-        setDefaultCommand(setVoltage(0));
+        setDefaultCommand(moveChuteUp());
     }
 
     public void periodic() {
@@ -70,23 +70,21 @@ public class ChuteSubsystem extends SubsystemBase {
             new Trigger(() -> chuteInputs.current >= ChuteConstants.ChuteCurrentTrigger);
 
     public Command moveChuteUp() {
-        setNull();
         return setVoltage(-4)
                 .withTimeout(0.05)
                 .andThen(setVoltage(-4).until(STALLING))
                 .andThen(setUp())
-                .andThen(setVoltage(-1));
+                .andThen(setVoltage(-1)).beforeStarting(() -> isDown = false);
     }
 
     public Command moveChuteDown() {
-        setNull();
-        return setVoltage(1.5)
+        return (setVoltage(1.5)
                 .withTimeout(0.05)
                 .andThen(
                         setVoltage(1.5)
                                 .until(STALLING)
                                 .andThen(setDown())
-                                .andThen(setVoltage(0.5)));
+                                .andThen(setVoltage(0.5)))).beforeStarting(() -> isUp = false);
     }
 
     // public void setUp() {
@@ -113,12 +111,6 @@ public class ChuteSubsystem extends SubsystemBase {
                     isUp = false;
                     isDown = true;
                 });
-    }
-
-    public void setNull() {
-
-        isUp = false;
-        isDown = false;
     }
 
     // private Command followReferenceThrubore() {

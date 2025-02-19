@@ -19,6 +19,8 @@ import frc.robot.util.Elastic;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
@@ -41,7 +43,7 @@ public class SuperstructureStateManager extends SubsystemBase {
         private static LoggedNetworkNumber wristRotationLogged =
                 new LoggedNetworkNumber("Wrist Rotation", 0);
         private static LoggedNetworkString parentLogged =
-                new LoggedNetworkString("Superstructure Parent", "Home");
+                new LoggedNetworkString("Superstructure Parent", "None");
         private static LoggedNetworkString buttonTargetLogged =
                 new LoggedNetworkString("Superstructure Button Target", "Tunable");
 
@@ -67,7 +69,7 @@ public class SuperstructureStateManager extends SubsystemBase {
                     boolean armAtPosition = Math.abs(armPosition - p.armHeight()) < 0.1;
                     boolean wristAtPosition = Math.abs(wristPosition - p.wristRotation()) < 0.1;
                     boolean elevatorAtPosition =
-                            Math.abs(elevatorPosition - p.elevatorHeight()) < 0.1;
+                            Math.abs(elevatorPosition - p.elevatorHeight()) < 1.5;
                     if (e) {
                         Logger.recordOutput("/Superstructure/Arm/ArmAtPosition", armAtPosition);
                         Logger.recordOutput("/Superstructure/Arm/Setpoint", p.armHeight());
@@ -102,31 +104,34 @@ public class SuperstructureStateManager extends SubsystemBase {
                 };
         public static final StateChecker AUTO = DEFAULT;
 
+        // Any positions going lower than elevator 160 need to have Chute Up as a parent eventually. (The handoff is the exception).
+        // No arm positions should be negative unless they are for the handoff.
+        // Wrist positions should be 1.58 unless the arm angle is positive. Then they can be whatever.
         public static enum Position {
             Sussy(1, 1, 1, null),
             None(1, 1, 1, null, TRUE, FALSE),
-            Home(150, 0, -1.58, None),
+            Home(165, 0, 1.58, None),
             ChuteDown(
+                    165,
                     0,
-                    0,
-                    0,
+                    1.58,
                     None,
                     (a, s, e) -> s.chuteSubsystem.DOWN.getAsBoolean(),
-                    (a, s, e) -> s.chuteSubsystem.DOWN.getAsBoolean()),
+                    (a, s, e) -> !s.chuteSubsystem.DOWN.getAsBoolean()),
             ChuteUp(
+                    165,
                     0,
-                    0,
-                    0,
+                    1.58,
                     None,
                     (a, s, e) -> s.chuteSubsystem.UP.getAsBoolean(),
-                    (a, s, e) -> s.chuteSubsystem.UP.getAsBoolean()),
-            ChuteDownNull(0, 0, 0, ChuteDown),
-            ChuteUpNull(0, 0, 0, ChuteUp),
-            HandoffPrep(1, 0, 1, ChuteDownNull),
-            Handoff(1, 0, 1, HandoffPrep),
+                    (a, s, e) -> !s.chuteSubsystem.UP.getAsBoolean()),
+            ChuteDownNull(0, 0, 0, ChuteDown, TRUE, FALSE),
+            ChuteUpNull(0, 0, 0, ChuteUp, TRUE, FALSE),
+            HandoffPrep(165, -0.5, 1.58, ChuteDownNull),
+            Handoff(140, -0.5, 1.58, HandoffPrep),
             Quick34(4, 2, 1, None),
             Quick23(3, 3, 1, None),
-            PointUp(150, 2.05, -1.58, None),
+            PointUp(165, 2.05, 1.58, None),
             UpZoneNull(1, 3, 1, PointUp, TRUE, FALSE),
             L1Prep(2, 2, 1, ChuteUpNull),
             L1(2, 1, 4, L1Prep),
@@ -134,8 +139,8 @@ public class SuperstructureStateManager extends SubsystemBase {
             L2(3, 1, 1, L2Prep),
             L3Prep(4, 2, 1, UpZoneNull),
             L3(4, 1, 1, L3Prep),
-            L4Prep(298.5, 2.05, 1.58, UpZoneNull),
-            L4(298.5, 2.05, 1.58, L4Prep),
+            L4Prep(298.5, 2.05, -1.58, UpZoneNull),
+            L4(298.5, 2.05, -1.58, L4Prep),
             L2AlgaePrep(3, 2, 1, UpZoneNull),
             L2Algae(3, 1, 1, L2AlgaePrep),
             L3AlgaePrep(4, 2, 1, UpZoneNull),
@@ -148,7 +153,9 @@ public class SuperstructureStateManager extends SubsystemBase {
             Processor(1, 1, 1, ChuteUpNull),
             IcecreamCoral(1, 1, 1, ChuteUpNull),
             IcecreamAlgae(1, 1, 1, ChuteUpNull),
-            Tunable(50, 0, -1.58, None, FALSE);
+            StartPrep(140, 0, -1.58, ChuteUpNull),
+            Start(0, 0, -1.58, StartPrep),
+            Tunable(50, 0, 1.58, None, FALSE);
 
             private double elevatorHeight;
             private double armHeight;
@@ -192,7 +199,7 @@ public class SuperstructureStateManager extends SubsystemBase {
             }
 
             public boolean isAtTarget(SuperstructureStateManager stateManager) {
-                return isAtTarget.checksOut(this, stateManager, true);
+                return isAtTarget.checksOut(this, stateManager);
             }
 
             public boolean isRealPosition(SuperstructureStateManager stateManager) {
@@ -235,8 +242,13 @@ public class SuperstructureStateManager extends SubsystemBase {
         }
     }
 
-    private SuperstructureState.Position targetPostition = SuperstructureState.Position.Home;
-    private SuperstructureState.Position lastPosition = SuperstructureState.Position.Home;
+    @AutoLogOutput
+    public boolean isAtTargetAllegedly() {
+        return SuperstructureState.DEFAULT.checksOut(targetPostition, this, true);
+    }
+
+    private SuperstructureState.Position targetPostition = SuperstructureState.Position.Start;
+    private SuperstructureState.Position lastPosition = SuperstructureState.Position.Start;
 
     private List<SuperstructureState.Position> outList = new ArrayList<>();
 
