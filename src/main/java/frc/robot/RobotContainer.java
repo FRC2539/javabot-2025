@@ -102,7 +102,6 @@ public class RobotContainer {
 
     private InternalButton normalRelease;
 
-
     public RobotContainer() {
         if (Robot.isReal()) {
             vision =
@@ -198,7 +197,7 @@ public class RobotContainer {
                             // driverDesiredSpeeds);
                             return drivetrain.driveDriverRelative(driverVelocitySupplier.get());
                         }));
-        
+
         DRIVER_TRIGGER = rightDriveController.getTrigger();
 
         USING_AUTO_ALIGN = new Trigger(() -> false);
@@ -206,9 +205,6 @@ public class RobotContainer {
         AUTO_ALIGNED = new Trigger(() -> false);
 
         AUTO_DRIVER_TRIGGER = (USING_AUTO_ALIGN.negate().or(AUTO_ALIGNED)).and(DRIVER_TRIGGER);
-
-
-
 
         // drive.withVelocityX(-leftDriveController.getYAxis().get() *
         // GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive forward with negative Y
@@ -538,8 +534,9 @@ public class RobotContainer {
                                                                                 gripperSubsystem
                                                                                         .ejectSpinCoral()))
                                                         .until(AUTO_DRIVER_TRIGGER.negate())))
-                                .repeatedly().beforeStarting(() -> normalRelease.setPressed(false)).finallyDo(() -> normalRelease.setPressed(true))
-                );
+                                .repeatedly()
+                                .beforeStarting(() -> normalRelease.setPressed(false))
+                                .finallyDo(() -> normalRelease.setPressed(true)));
     }
 
     private double deadband(double value, double deadband) {
