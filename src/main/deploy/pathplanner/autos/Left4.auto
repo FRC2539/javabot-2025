@@ -13,12 +13,6 @@
         {
           "type": "named",
           "data": {
-            "name": "height L4"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
             "name": "placenoalign"
           }
         },
@@ -32,12 +26,6 @@
           "type": "path",
           "data": {
             "pathName": "LCS-K"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "height L4"
           }
         },
         {
