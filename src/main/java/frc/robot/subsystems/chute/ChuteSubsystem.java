@@ -2,9 +2,11 @@ package frc.robot.subsystems.chute;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.constants.ChuteConstants;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -13,10 +15,10 @@ public class ChuteSubsystem extends SubsystemBase {
     private ChuteIOInputsAutoLogged chuteInputs = new ChuteIOInputsAutoLogged();
     private LoggedNetworkNumber chuteTuneable = new LoggedNetworkNumber("chute tuneable", 0);
 
-    private boolean isUp = false;
+    @AutoLogOutput private boolean isUp = false;
     public final Trigger UP = new Trigger(() -> isUp);
 
-    private boolean isDown = false;
+    @AutoLogOutput private boolean isDown = false;
     public final Trigger DOWN = new Trigger(() -> isDown);
 
     private PIDController controller =
@@ -31,7 +33,7 @@ public class ChuteSubsystem extends SubsystemBase {
     public ChuteSubsystem(ChuteIO chuteIO) {
         controller.setTolerance(ChuteConstants.CHUTE_TOLERANCE);
         this.chuteIO = chuteIO;
-        setDefaultCommand(setVoltage(0));
+        setDefaultCommand(Commands.either(moveChuteDown(), moveChuteUp(), () -> lastSetDown));
     }
 
     public void periodic() {
@@ -68,21 +70,34 @@ public class ChuteSubsystem extends SubsystemBase {
     public final Trigger STALLING =
             new Trigger(() -> chuteInputs.current >= ChuteConstants.ChuteCurrentTrigger);
 
+    private boolean lastSetDown = false;
+
     public Command moveChuteUp() {
-        setNull();
-        return setVoltage(12)
-                .withTimeout(0.2)
-                .andThen(setVoltage(12).until(STALLING))
+        return setVoltage(-4)
+                .withTimeout(0.05)
+                .andThen(setVoltage(-4).until(STALLING))
                 .andThen(setUp())
-                .andThen(setVoltage(1));
+                .andThen(setVoltage(-1))
+                .beforeStarting(
+                        () -> {
+                            isDown = false;
+                            lastSetDown = false;
+                        });
     }
 
     public Command moveChuteDown() {
-        setNull();
-        return setVoltage(-12)
-                .withTimeout(0.2)
-                .andThen(
-                        setVoltage(-12).until(STALLING).andThen(setDown()).andThen(setVoltage(-1)));
+        return (setVoltage(1.5)
+                        .withTimeout(0.05)
+                        .andThen(
+                                setVoltage(1.5)
+                                        .until(STALLING)
+                                        .andThen(setDown())
+                                        .andThen(setVoltage(0.5))))
+                .beforeStarting(
+                        () -> {
+                            isUp = false;
+                            lastSetDown = true;
+                        });
     }
 
     // public void setUp() {
@@ -109,12 +124,6 @@ public class ChuteSubsystem extends SubsystemBase {
                     isUp = false;
                     isDown = true;
                 });
-    }
-
-    public void setNull() {
-
-        isUp = false;
-        isDown = false;
     }
 
     // private Command followReferenceThrubore() {

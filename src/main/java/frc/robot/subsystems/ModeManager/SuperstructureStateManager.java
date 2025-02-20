@@ -2,6 +2,7 @@ package frc.robot.subsystems.ModeManager;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.RobotState;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
@@ -18,6 +19,7 @@ import frc.robot.util.Elastic;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
@@ -34,86 +36,141 @@ public class SuperstructureStateManager extends SubsystemBase {
 
     public static class SuperstructureState {
         private static LoggedNetworkNumber elevatorHeightLogged =
-                new LoggedNetworkNumber("Elevator Height", 0);
+                new LoggedNetworkNumber("Elevator Height", 165);
         private static LoggedNetworkNumber armHeightLogged =
                 new LoggedNetworkNumber("Arm Height", 0);
         private static LoggedNetworkNumber wristRotationLogged =
-                new LoggedNetworkNumber("Wrist Rotation", 0);
+                new LoggedNetworkNumber("Wrist Rotation", 1.58);
         private static LoggedNetworkString parentLogged =
-                new LoggedNetworkString("Superstructure Parent", "Home");
+                new LoggedNetworkString("Superstructure Parent", "CenterZoneNull");
         private static LoggedNetworkString buttonTargetLogged =
                 new LoggedNetworkString("Superstructure Button Target", "Tunable");
 
         @FunctionalInterface
         public interface StateChecker {
-            boolean checksOut(Position position, SuperstructureStateManager stateManager);
+            boolean checksOut(
+                    Position position, SuperstructureStateManager stateManager, boolean logExtra);
+
+            default boolean checksOut(Position position, SuperstructureStateManager stateManager) {
+                return checksOut(position, stateManager, false);
+            }
         }
 
-        public static final StateChecker FALSE = (p, s) -> false;
-        public static final StateChecker TRUE = (p, s) -> true;
+        public static final StateChecker FALSE = (p, s, e) -> false;
+        public static final StateChecker TRUE = (p, s, e) -> true;
         public static final StateChecker DEFAULT =
-                (p, s) -> {
+                (p, s, e) -> {
                     // return (s.internalPosition == p);
                     double armPosition = s.armSubsystem.getPosition();
                     double wristPosition = s.wristSubsystem.getFlippedPosition();
                     double elevatorPosition = s.elevatorSubsystem.getPosition();
 
-                    if ((Math.abs(armPosition - p.armHeight()) < 0.1)
-                            && (Math.abs(wristPosition - p.wristRotation()) < 0.1)
-                            && (Math.abs(elevatorPosition - p.elevatorHeight()) < 0.1)) {
+                    boolean armAtPosition = Math.abs(armPosition - p.armHeight()) < 0.1;
+                    boolean wristAtPosition = Math.abs(wristPosition - p.wristRotation()) < 0.1;
+                    boolean elevatorAtPosition =
+                            Math.abs(elevatorPosition - p.elevatorHeight()) < 1.5;
+                    if (e) {
+                        Logger.recordOutput("/Superstructure/Arm/ArmAtPosition", armAtPosition);
+                        Logger.recordOutput("/Superstructure/Arm/Setpoint", p.armHeight());
+                        Logger.recordOutput("/Superstructure/Arm/Position", armPosition);
+                        Logger.recordOutput(
+                                "/Superstructure/Arm/Error", armPosition - p.armHeight());
+
+                        Logger.recordOutput(
+                                "/Superstructure/Wrist/WristAtPosition", wristAtPosition);
+                        Logger.recordOutput("/Superstructure/Wrist/Setpoint", p.wristRotation());
+                        Logger.recordOutput("/Superstructure/Wrist/Position", wristPosition);
+                        Logger.recordOutput(
+                                "/Superstructure/Wrist/Error", wristPosition - p.wristRotation());
+
+                        Logger.recordOutput(
+                                "/Superstructure/Elevator/ElevatorAtPosition", elevatorAtPosition);
+                        Logger.recordOutput(
+                                "/Superstructure/Elevator/Setpoint", p.elevatorHeight());
+                        Logger.recordOutput("/Superstructure/Elevator/Position", elevatorPosition);
+                        Logger.recordOutput(
+                                "/Superstructure/Elevator/Error",
+                                elevatorPosition - p.elevatorHeight());
+
+                        Logger.recordOutput("/Superstructure/Checker", "DEFAULT");
+
+                        Logger.recordOutput("Superstructure/Heartbeat", Timer.getTimestamp());
+                    }
+                    if (armAtPosition && wristAtPosition && elevatorAtPosition) {
                         return true;
 
                     } else return false;
                 };
         public static final StateChecker AUTO = DEFAULT;
 
+        // Any positions going lower than elevator 160 need to have Chute Up as a parent eventually.
+        // (The handoff is the exception).
+        // No arm positions should be negative unless they are for the handoff.
+        // Wrist positions should be 1.58 unless the arm angle is positive. Then they can be
+        // whatever.
         public static enum Position {
             Sussy(1, 1, 1, null),
-            None(1, 1, 1, null, TRUE, FALSE),
-            Home(1, 0, 1, None),
+            CenterZoneNull(1, 1, 1, null, TRUE, FALSE),
+            Home(165, 0, 1.58, CenterZoneNull),
+            ChuteDownPre(
+                    165,
+                    0,
+                    1.58,
+                    CenterZoneNull,
+                    (a, s, e) -> s.chuteSubsystem.DOWN.getAsBoolean() || DEFAULT.checksOut(a, s, e),
+                    (a, s, e) -> !s.chuteSubsystem.DOWN.getAsBoolean()),
             ChuteDown(
+                    165,
                     0,
+                    1.58,
+                    ChuteDownPre,
+                    (a, s, e) -> s.chuteSubsystem.DOWN.getAsBoolean(),
+                    (a, s, e) -> !s.chuteSubsystem.DOWN.getAsBoolean()),
+            ChuteDownNull(0, 0, 0, ChuteDown, TRUE, FALSE),
+            ChuteUpPre(
+                    165,
                     0,
-                    0,
-                    None,
-                    (a, s) -> s.chuteSubsystem.DOWN.getAsBoolean(),
-                    (a, s) -> s.chuteSubsystem.DOWN.getAsBoolean()),
+                    1.58,
+                    CenterZoneNull,
+                    (a, s, e) -> s.chuteSubsystem.UP.getAsBoolean() || DEFAULT.checksOut(a, s, e),
+                    (a, s, e) -> !s.chuteSubsystem.UP.getAsBoolean()),
             ChuteUp(
+                    165,
                     0,
-                    0,
-                    0,
-                    None,
-                    (a, s) -> s.chuteSubsystem.UP.getAsBoolean(),
-                    (a, s) -> s.chuteSubsystem.UP.getAsBoolean()),
-            ChuteDownNull(0, 0, 0, ChuteDown),
-            ChuteUpNull(0, 0, 0, ChuteUp),
-            HandoffPrep(1, 0, 1, ChuteDownNull),
-            Handoff(1, 0, 1, HandoffPrep),
-            Quick34(4, 2, 1, None),
-            Quick23(3, 3, 1, None),
-            PointUp(1, 2, 1, None),
-            UpZoneNull(1, 3, 1, PointUp, TRUE, FALSE),
-            L1Prep(2, 2, 1, ChuteUpNull),
-            L1(2, 1, 4, L1Prep),
-            L2Prep(3, 2, 1, UpZoneNull),
-            L2(3, 1, 1, L2Prep),
-            L3Prep(4, 2, 1, UpZoneNull),
-            L3(4, 1, 1, L3Prep),
-            L4Prep(5, 2, 1, UpZoneNull),
-            L4(5, 1, 1, L4Prep),
-            L2AlgaePrep(3, 2, 1, UpZoneNull),
-            L2Algae(3, 1, 1, L2AlgaePrep),
-            L3AlgaePrep(4, 2, 1, UpZoneNull),
-            L3Algae(4, 1, 1, L3AlgaePrep),
-            NetAlgaePrep(5, 2, 1, UpZoneNull),
-            NetAlgae(5, 1, 1, NetAlgaePrep),
-            Source(1, -2, 1, None),
-            AlgaeHome(1, 1, 1, None),
-            Climb(1, 1, 1, ChuteUpNull),
-            Processor(1, 1, 1, ChuteUpNull),
-            IcecreamCoral(1, 1, 1, ChuteUpNull),
-            IcecreamAlgae(1, 1, 1, ChuteUpNull),
-            Tunable(0, 0, 0, None, FALSE);
+                    1.58,
+                    ChuteUpPre,
+                    (a, s, e) -> s.chuteSubsystem.UP.getAsBoolean(),
+                    (a, s, e) -> !s.chuteSubsystem.UP.getAsBoolean()),
+            ChuteUpNull(0, 0, 0, ChuteUp, TRUE, FALSE),
+            HandoffPrep(165, -0.5, 1.58, ChuteDownNull),
+            Handoff(132, -0.5, 1.58, HandoffPrep),
+            PointUp(165, 2.05, 1.58, CenterZoneNull),
+            UpZoneNull(0, 0, 0, PointUp, TRUE, FALSE),
+            L1Prep(298.5, 2.05, -1.58, ChuteUpNull),
+            L1(298.5, 2.05, -1.58, L1Prep),
+            L2Prep(298.5, 2.05, -1.58, UpZoneNull),
+            L2(298.5, 2.05, -1.58, L2Prep),
+            L3Prep(298.5, 2.05, -1.58, UpZoneNull),
+            L3(298.5, 2.05, -1.58, L3Prep),
+            L4Prep(298.5, 2.15, -1.58, UpZoneNull),
+            L4(298.5, 1.7, -1.58, L4Prep),
+            Quick34(298.5, 2.05, -1.58, UpZoneNull),
+            Quick23(298.5, 2.05, -1.58, UpZoneNull),
+            L2AlgaePrep(298.5, 2.05, -1.58, UpZoneNull),
+            L2Algae(298.5, 2.05, -1.58, L2AlgaePrep),
+            L3AlgaePrep(298.5, 2.05, -1.58, UpZoneNull),
+            L3Algae(298.5, 2.05, -1.58, L3AlgaePrep),
+            NetAlgaePrep(298.5, 2.05, -1.58, UpZoneNull),
+            NetAlgae(298.5, 2.05, -1.58, NetAlgaePrep),
+            Source(165, 2.05, 0, PointUp),
+            AlgaeHome(165, 0, 1.58, CenterZoneNull),
+            Climb(165, 0, 1.58, ChuteUpNull),
+            Processor(165, 0, 1.58, ChuteUpNull),
+            IcecreamCoral(165, 0, 1.58, ChuteUpNull),
+            IcecreamAlgae(165, 0, 1.58, ChuteUpNull),
+            StartPrep(140, 0, -1.58, ChuteUpNull),
+            Start(0, 0, -1.58, StartPrep),
+            Tunable(165, 0, 1.58, CenterZoneNull, FALSE);
 
             private double elevatorHeight;
             private double armHeight;
@@ -167,25 +224,23 @@ public class SuperstructureStateManager extends SubsystemBase {
             // #region Pointer Methods
             public double elevatorHeight() {
                 if (this == Position.Tunable) {
-                    elevatorHeight =
-                            SuperstructureState.elevatorHeightLogged
-                                    .get(); // ref: tunable variable armHeight
+                    return SuperstructureState.elevatorHeightLogged
+                            .get(); // ref: tunable variable armHeight
                 }
                 return elevatorHeight;
             }
 
             public double armHeight() {
                 if (this == Position.Tunable) {
-                    armHeight =
-                            SuperstructureState.armHeightLogged
-                                    .get(); // ref: tunable variable armHeight
+                    return SuperstructureState.armHeightLogged
+                            .get(); // ref: tunable variable armHeight
                 }
                 return armHeight;
             }
 
             public double wristRotation() {
                 if (this == Position.Tunable) {
-                    wristRotation = SuperstructureState.wristRotationLogged.get();
+                    return SuperstructureState.wristRotationLogged.get();
                     // ref: tunable variable wristRotation
                 }
                 return wristRotation;
@@ -193,7 +248,7 @@ public class SuperstructureStateManager extends SubsystemBase {
 
             public Position parent() {
                 if (this == Position.Tunable) {
-                    parent = Position.valueOf(parentLogged.get()); // ref: tunable variable parent
+                    return Position.valueOf(parentLogged.get()); // ref: tunable variable parent
                 }
                 return parent;
             }
@@ -202,8 +257,13 @@ public class SuperstructureStateManager extends SubsystemBase {
         }
     }
 
-    private SuperstructureState.Position targetPostition = SuperstructureState.Position.Home;
-    private SuperstructureState.Position lastPosition = SuperstructureState.Position.Home;
+    @AutoLogOutput
+    public boolean isAtTargetAllegedly() {
+        return SuperstructureState.DEFAULT.checksOut(targetPostition, this, true);
+    }
+
+    private SuperstructureState.Position targetPostition = SuperstructureState.Position.Start;
+    private SuperstructureState.Position lastPosition = SuperstructureState.Position.Start;
 
     private List<SuperstructureState.Position> outList = new ArrayList<>();
 
@@ -220,7 +280,7 @@ public class SuperstructureStateManager extends SubsystemBase {
 
     private Pose2d lastScoringPose = Pose2d.kZero;
 
-    private boolean chuteCanMove = false;
+    @AutoLogOutput private boolean chuteCanMove = false;
 
     public void setLastScoringPose(Pose2d pose) {
         lastScoringPose = pose;
@@ -288,7 +348,7 @@ public class SuperstructureStateManager extends SubsystemBase {
         for (int i = 0; i < 20; i++) {
             // SuperstructureState head = SuperstructureState.posDictionary.get(myPosition);
             outList.add(0, myPosition);
-            if (myPosition == SuperstructureState.Position.None) {
+            if (myPosition == SuperstructureState.Position.CenterZoneNull) {
                 found = true;
                 break;
             }
@@ -340,7 +400,7 @@ public class SuperstructureStateManager extends SubsystemBase {
         if (myPosition == Position.ChuteUpNull) {
             chuteCanMove = false;
         }
-        if (myPosition == Position.None) {
+        if (lastPosition.parent() == Position.CenterZoneNull && lastPosition.isRealPosition(this)) {
             chuteCanMove = true;
         }
 
@@ -448,7 +508,7 @@ public class SuperstructureStateManager extends SubsystemBase {
                             SuperstructureState.Position nextPose =
                                     getChilderNodeInBranch(lastPosition, targetPostition).parent();
                             if (nextPose == null) {
-                                return internalGoToPosition(Position.None);
+                                return internalGoToPosition(Position.CenterZoneNull);
                             }
                             return internalGoToPosition(nextPose)
                                     .beforeStarting(() -> updateTarget(nextPose))

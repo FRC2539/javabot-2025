@@ -12,7 +12,7 @@ public class ElevatorConstants {
                     .withKD(0)
                     .withKG(0)
                     .withKI(0)
-                    .withKP(0)
+                    .withKP(2)
                     .withKS(0)
                     .withKV(0)
                     .withGravityType(GravityTypeValue.Elevator_Static);
@@ -32,5 +32,5 @@ public class ElevatorConstants {
     public static final CurrentLimitsConfigs currentLimit = new CurrentLimitsConfigs();
 
     public static final double lowerLimit = 0;
-    public static final double upperLimit = 100;
+    public static final double upperLimit = 298.5;
 }
