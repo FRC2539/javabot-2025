@@ -16,6 +16,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.InternalButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.controller.LogitechController;
@@ -93,6 +94,14 @@ public class RobotContainer {
     private DoubleSupplier rightJoystickVelocityTheta;
 
     private Supplier<ChassisSpeeds> driverVelocitySupplier;
+
+    private Trigger DRIVER_TRIGGER;
+    private Trigger AUTO_ALIGNED;
+    private Trigger USING_AUTO_ALIGN;
+    private Trigger AUTO_DRIVER_TRIGGER;
+
+    private InternalButton normalRelease;
+
 
     public RobotContainer() {
         if (Robot.isReal()) {
@@ -189,6 +198,17 @@ public class RobotContainer {
                             // driverDesiredSpeeds);
                             return drivetrain.driveDriverRelative(driverVelocitySupplier.get());
                         }));
+        
+        DRIVER_TRIGGER = rightDriveController.getTrigger();
+
+        USING_AUTO_ALIGN = new Trigger(() -> false);
+
+        AUTO_ALIGNED = new Trigger(() -> false);
+
+        AUTO_DRIVER_TRIGGER = (USING_AUTO_ALIGN.negate().or(AUTO_ALIGNED)).and(DRIVER_TRIGGER);
+
+
+
 
         // drive.withVelocityX(-leftDriveController.getYAxis().get() *
         // GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive forward with negative Y
@@ -373,13 +393,13 @@ public class RobotContainer {
         CORAL.and(operatorController.getB()).onTrue(stateManager.moveToPosition(Position.L2));
         CORAL.and(operatorController.getA()).onTrue(stateManager.moveToPosition(Position.L1));
 
-        bindPlaceSeq(CORAL, operatorController.getY(), Position.L4Prep, Position.L4);
+        bindPlaceSeq(operatorController.getY(), Position.L4Prep, Position.L4, 0.1);
 
-        bindPlaceSeq(CORAL, operatorController.getX(), Position.L3Prep, Position.L3);
+        bindPlaceSeq(operatorController.getX(), Position.L3Prep, Position.L3, 0.1);
 
-        bindPlaceSeq(CORAL, operatorController.getB(), Position.L2Prep, Position.L2);
+        bindPlaceSeq(operatorController.getB(), Position.L2Prep, Position.L2, 0.1);
 
-        bindPlaceSeq(CORAL, operatorController.getA(), Position.L1Prep, Position.L1);
+        bindPlaceSeq(operatorController.getA(), Position.L1Prep, Position.L1, 0.1);
 
         CORAL.and(operatorController.getStart())
                 .onTrue(stateManager.moveToPosition(Position.Source));
@@ -427,7 +447,7 @@ public class RobotContainer {
 
         CORAL.and(rightDriveController.getBottomThumb())
                 .whileTrue(gripperSubsystem.intakeSpinCoral());
-        CORAL.and(rightDriveController.getTrigger()).whileTrue(gripperSubsystem.ejectSpinCoral());
+        CORAL.and(DRIVER_TRIGGER.and(normalRelease)).whileTrue(gripperSubsystem.ejectSpinCoral());
 
         ALGAE.and(rightDriveController.getBottomThumb())
                 .whileTrue(gripperSubsystem.intakeSpinAlgae());
@@ -503,13 +523,23 @@ public class RobotContainer {
         leftDriveController.getRightBottomLeft().onTrue(elevatorSubsystem.zeroElevatorCommand());
     }
 
-    private void bindPlaceSeq(Trigger mode, Trigger button, Position prep, Position end) {
-        mode.and(button)
+    private void bindPlaceSeq(Trigger button, Position prep, Position end, double timeout) {
+        (button)
                 .onTrue(
-                        stateManager
-                                .moveToPosition(prep)
-                                .until(button.negate())
-                                .andThen(stateManager.moveToPosition(end)));
+                        (stateManager
+                                        .moveToPosition(prep)
+                                        .until(AUTO_DRIVER_TRIGGER)
+                                        .andThen(
+                                                stateManager
+                                                        .moveToPosition(end)
+                                                        .alongWith(
+                                                                Commands.waitSeconds(timeout)
+                                                                        .andThen(
+                                                                                gripperSubsystem
+                                                                                        .ejectSpinCoral()))
+                                                        .until(AUTO_DRIVER_TRIGGER.negate())))
+                                .repeatedly().beforeStarting(() -> normalRelease.setPressed(false)).finallyDo(() -> normalRelease.setPressed(true))
+                );
     }
 
     private double deadband(double value, double deadband) {
