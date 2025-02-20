@@ -233,7 +233,8 @@ public class Auto {
         L2(Position.L2, Position.L2Prep),
         L3(Position.L3, Position.L3Prep),
         L4(Position.L4, Position.L4Prep),
-        Source(Position.Source, Position.Source);
+        Source(Position.Source, Position.Source),
+        Handoff(Position.HandoffPrep, Position.HandoffPrep);
 
         public Position position;
         public double armMotorSpeed;
@@ -251,6 +252,12 @@ public class Auto {
     public void configureBindings() {
         NamedCommands.registerCommand(
                 "wait", Commands.waitUntil(() -> armInPlace() && robotInPlace()));
+
+        NamedCommands.registerCommand(
+                    "wait arm", Commands.waitUntil(() -> armInPlace()));
+
+        NamedCommands.registerCommand(
+                        "wait pose", Commands.waitUntil(() -> armInPlace()));
 
         Command alignCommand =
                 Commands.defer(
@@ -284,9 +291,14 @@ public class Auto {
                 robotContainer.gripperSubsystem.ejectSpinCoral().withTimeout(placeTimeout);
         NamedCommands.registerCommand("score", scoreCommand.asProxy());
 
-        Command intakeCommand = robotContainer.intakeSubsystem.intake();
+        Command intakeCommand = robotContainer.gripperSubsystem.intakeSpinCoral().until(() -> robotContainer.gripperSubsystem.hasPiece()); // TODO: TIMEOUT 
         NamedCommands.registerCommand("intake", intakeCommand.asProxy());
 
+        NamedCommands.registerCommand("placenoalign", Commands.race(armCommand.asProxy(), 
+        Commands.sequence(Commands.waitUntil(() -> armInPlace()), scoreCommand.asProxy())));
+
+
+        
         // spotless:off
         Command placeCommand =
                 prepArmCommand.asProxy()

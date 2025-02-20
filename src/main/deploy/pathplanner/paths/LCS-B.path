@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.0,
-        "y": 0.0
+        "x": 1.545596590909091,
+        "y": 6.836988636363635
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.9673213526060513,
-        "y": 0.0
+        "x": 1.7448868011642042,
+        "y": 6.534880919615796
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "LCS"
     },
     {
       "anchor": {
-        "x": 1.0,
-        "y": 0.0
+        "x": 3.1809375,
+        "y": 3.8754261363636364
       },
       "prevControl": {
-        "x": -0.27527965608765825,
-        "y": 1.561767148845488e-16
+        "x": 3.001448863636364,
+        "y": 4.503636363636364
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "B"
     }
   ],
   "rotationTargets": [],
@@ -45,10 +45,10 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "LCS-Reef",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -55.0
   },
   "useDefaultConstraints": true
 }

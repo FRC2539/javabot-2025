@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.3722130667010144,
-        "y": 5.573373042480681
+        "x": 3.9686931818181814,
+        "y": 2.7885227272727264
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.3722130667010144,
-        "y": 5.573373042480681
+        "x": 3.5399147727272733,
+        "y": 2.3497727272727276
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "D"
     },
     {
       "anchor": {
-        "x": 8.28970984956188,
-        "y": 5.573373042480681
+        "x": 1.8248011363636363,
+        "y": 0.9736931818181813
       },
       "prevControl": {
-        "x": 7.289709849561881,
-        "y": 5.573373042480681
+        "x": 2.512840909090909,
+        "y": 1.442357954545454
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "RCS"
     }
   ],
   "rotationTargets": [],
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.5,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 5.0,
+    "maxAcceleration": 4.5,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 54.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Reef-RCS",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 59.99999999999999
   },
   "useDefaultConstraints": true
 }

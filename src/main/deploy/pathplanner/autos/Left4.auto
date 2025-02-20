@@ -1,0 +1,91 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LStart-J"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "height L4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "placenoalign"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "J-LCS"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LCS-K"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "height L4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "placenoalign"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "K-LCS"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LCS-L"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "placenoalign"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L-LCS"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LCS-A"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "placenoalign"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

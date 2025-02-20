@@ -1,0 +1,105 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 1.545596590909091,
+        "y": 6.836988636363635
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.6716760756489928,
+        "y": 6.52798671224065
+      },
+      "isLocked": false,
+      "linkedName": "LCS"
+    },
+    {
+      "anchor": {
+        "x": 3.200880681818182,
+        "y": 4.194517045454545
+      },
+      "prevControl": {
+        "x": 2.233636363636364,
+        "y": 4.104772727272727
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "A"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "sequential",
+        "data": {
+          "commands": [
+            {
+              "type": "parallel",
+              "data": {
+                "commands": [
+                  {
+                    "type": "named",
+                    "data": {
+                      "name": "intake"
+                    }
+                  },
+                  {
+                    "type": "named",
+                    "data": {
+                      "name": "arm"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "parallel",
+              "data": {
+                "commands": [
+                  {
+                    "type": "named",
+                    "data": {
+                      "name": "height L4"
+                    }
+                  },
+                  {
+                    "type": "named",
+                    "data": {
+                      "name": "armprep"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 5.0,
+    "maxAcceleration": 4.5,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "reversed": false,
+  "folder": "LCS-Reef",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -55.0
+  },
+  "useDefaultConstraints": true
+}
