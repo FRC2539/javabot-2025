@@ -32,5 +32,5 @@ public class ElevatorConstants {
     public static final CurrentLimitsConfigs currentLimit = new CurrentLimitsConfigs();
 
     public static final double lowerLimit = 0;
-    public static final double upperLimit = 298.5;
+    public static final double upperLimit = 297;
 }

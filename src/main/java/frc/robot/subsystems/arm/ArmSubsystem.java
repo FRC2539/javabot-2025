@@ -21,7 +21,7 @@ public class ArmSubsystem extends SubsystemBase {
                     ArmConstants.ARM_KP,
                     ArmConstants.ARM_KI,
                     ArmConstants.ARM_KD,
-                    new TrapezoidProfile.Constraints(3, 4.5));
+                    new TrapezoidProfile.Constraints(3, 4.5)); // try 6 and 6
 
     private double reference = 0;
 
