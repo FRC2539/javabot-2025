@@ -38,8 +38,8 @@ import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.chute.ChuteIONeo550;
 import frc.robot.subsystems.chute.ChuteIOSim;
 import frc.robot.subsystems.chute.ChuteSubsystem;
-import frc.robot.subsystems.climber.ClimberHeadIOSim;
-import frc.robot.subsystems.climber.ClimberIOSim;
+import frc.robot.subsystems.climber.ClimberHeadIONeo550;
+import frc.robot.subsystems.climber.ClimberIOTalonFX;
 import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
@@ -117,8 +117,8 @@ public class RobotContainer {
             wristSubsystem = new WristSubsystem(new WristIONeo550()); // new WristIONeo550());
             climberSubsystem =
                     new ClimberSubsystem(
-                            new ClimberIOSim(),
-                            new ClimberHeadIOSim()); // new ClimberIOTalonFX(), new
+                            new ClimberIOTalonFX(),
+                            new ClimberHeadIONeo550()); // new ClimberIOTalonFX(), new
             // ClimberHeadIONeo550());
             lights = new LightsSubsystem();
             chuteSubsystem = new ChuteSubsystem(new ChuteIONeo550()); // new ChuteIONeo550());
@@ -146,7 +146,8 @@ public class RobotContainer {
             armSubsystem = new ArmSubsystem(new ArmPivotIOSim());
             wristSubsystem = new WristSubsystem(new WristIOSim());
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
-            climberSubsystem = new ClimberSubsystem(new ClimberIOSim(), new ClimberHeadIOSim());
+            climberSubsystem =
+                    new ClimberSubsystem(new ClimberIOTalonFX(), new ClimberHeadIONeo550());
             lights = new LightsSubsystem();
             chuteSubsystem = new ChuteSubsystem(new ChuteIOSim());
         }
@@ -381,8 +382,12 @@ public class RobotContainer {
         CORAL.and(operatorController.getY())
                 .onTrue(stateManager.moveToPosition(Position.L4Prep))
                 .onFalse(stateManager.moveToPosition(Position.L4));
-        CORAL.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3));
-        CORAL.and(operatorController.getB()).onTrue(stateManager.moveToPosition(Position.L2));
+        CORAL.and(operatorController.getX())
+                .onTrue(stateManager.moveToPosition(Position.L3Prep))
+                .onFalse(stateManager.moveToPosition(Position.L3));
+        CORAL.and(operatorController.getB())
+                .onTrue(stateManager.moveToPosition(Position.L2Prep))
+                .onFalse(stateManager.moveToPosition(Position.L2));
         CORAL.and(operatorController.getA()).onTrue(stateManager.moveToPosition(Position.L1));
         CORAL.and(operatorController.getStart())
                 .onTrue(stateManager.moveToPosition(Position.Source));
@@ -395,15 +400,15 @@ public class RobotContainer {
         CORAL.and(operatorController.getDPadLeft()).onTrue(chuteSubsystem.moveChuteUp());
         CORAL.and(operatorController.getDPadRight()).onTrue(chuteSubsystem.moveChuteDown());
 
-        ALGAE.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.NetAlgae));
+        // ALGAE.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.NetAlgae));
         ALGAE.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3Algae));
         ALGAE.and(operatorController.getB()).onTrue(stateManager.moveToPosition(Position.L2Algae));
         ALGAE.and(operatorController.getA())
                 .onTrue(stateManager.moveToPosition(Position.Processor));
         ALGAE.and(operatorController.getStart())
-                .onTrue(stateManager.moveToPosition(Position.Processor));
+                .onTrue(stateManager.moveToPosition(Position.GroundAlgae));
         ALGAE.and(operatorController.getDPadDown())
-                .onTrue(stateManager.moveToPosition(Position.Home));
+                .onTrue(stateManager.moveToPosition(Position.AlgaeHome));
         ALGAE.and(operatorController.getDPadUp())
                 .onTrue(stateManager.moveToPosition(Position.Handoff));
         ALGAE.and(operatorController.getDPadLeft())
@@ -411,14 +416,14 @@ public class RobotContainer {
         ALGAE.and(operatorController.getDPadRight())
                 .onTrue(stateManager.moveToPosition(Position.Quick23));
 
-        operatorController.getBack().onTrue(wristSubsystem.flipWristPosition());
+        // operatorController.getBack().onTrue(wristSubsystem.flipWristPosition());
 
         // Driver Align Bindings, for a different/later day
         // CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(9, 0));
 
         // Climb Bindings
-        leftDriveController.getLeftThumb().whileTrue(climberSubsystem.downPosition());
-        leftDriveController.getRightThumb().whileTrue(climberSubsystem.upPosition());
+        leftDriveController.getLeftThumb().whileTrue(climberSubsystem.moveClimberDownVoltage());
+        leftDriveController.getRightThumb().whileTrue(climberSubsystem.moveClimberUpVoltage());
         leftDriveController.getBottomThumb().whileTrue(climberSubsystem.intakeCage());
 
         // leftDriveController.getBottomThumb().whileTrue(alignToPiece());
@@ -511,7 +516,7 @@ public class RobotContainer {
             SmartDashboard.putData(stateManager);
         }
 
-        leftDriveController.getRightBottomLeft().onTrue(elevatorSubsystem.zeroElevatorCommand());
+        // leftDriveController.getRightBottomLeft().onTrue(elevatorSubsystem.zeroElevatorCommand());
     }
 
     private double deadband(double value, double deadband) {

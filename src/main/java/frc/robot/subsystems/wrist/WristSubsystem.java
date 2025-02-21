@@ -2,7 +2,6 @@ package frc.robot.subsystems.wrist;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.WristConstants;
 import java.util.function.DoubleSupplier;
@@ -73,12 +72,12 @@ public class WristSubsystem extends SubsystemBase {
                 .andThen(followReferenceThrubore());
     }
 
-    public Command flipWristPosition() {
-        return Commands.runOnce(
-                () -> {
-                    isWristFlipped = !isWristFlipped;
-                });
-    }
+    // public Command flipWristPosition() {
+    //     return Commands.runOnce(
+    //             () -> {
+    //                 isWristFlipped = !isWristFlipped;
+    //             });
+    // }
 
     private Command followReferenceThrubore() {
         return run(

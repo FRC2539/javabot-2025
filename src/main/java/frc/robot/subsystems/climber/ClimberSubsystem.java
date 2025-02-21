@@ -106,6 +106,7 @@ public class ClimberSubsystem extends SubsystemBase {
         return run(
                 () -> {
                     climberIO.setVoltage(0);
+                    climberHeadIO.setVoltage(0);
                 });
     }
 
@@ -120,14 +121,14 @@ public class ClimberSubsystem extends SubsystemBase {
     public Command intakeCage() {
         return run(
                 () -> {
-                    climberHeadIO.setVoltage(12);
+                    climberHeadIO.setVoltage(-12);
                 });
     }
 
     public Command ejectCage() {
         return run(
                 () -> {
-                    climberHeadIO.setVoltage(-12); // +- is a guess
+                    climberHeadIO.setVoltage(12); // +- is a guess
                 });
     }
 }
