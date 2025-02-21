@@ -31,7 +31,9 @@ public class ClimberConstants {
 
     public static final int CLIMBER_HEAD_ID = 40;
 
-    public static final String CANbus = "CANivore";
+    public static final String canbus = "rio";
+
+    public static final String WinchCanbus = "CANivore";
 
     public static final double ClimberHeadCurrent = 30;
 }
