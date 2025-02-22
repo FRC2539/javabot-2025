@@ -54,6 +54,10 @@ public class GripperSubsystem extends SubsystemBase {
         return setVoltage(-12);
     }
 
+    public Command slowEjectSpinAlgae() {
+        return setVoltage(-3);
+    }
+
     public Command setVoltage(double voltage) {
         return run(
                 () -> {

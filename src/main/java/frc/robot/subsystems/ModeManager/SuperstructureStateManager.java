@@ -127,26 +127,31 @@ public class SuperstructureStateManager extends SubsystemBase {
                     (a, s, e) -> s.chuteSubsystem.DOWN.getAsBoolean(),
                     (a, s, e) -> !s.chuteSubsystem.DOWN.getAsBoolean()),
             ChuteDownNull(0, 0, 0, ChuteDown, TRUE, FALSE),
+            HandoffPrep(165, -0.5, 1.58, ChuteDownNull),
+            Handoff(132, -0.5, 1.58, HandoffPrep),
+            PointUp(165, 2.15, 1.58, CenterZoneNull),
+            // (a, s, e) -> {
+            //     boolean armChecksOut = s.armSubsystem.getPosition() > 1.0;
+            //     boolean wristAtPosition = Math.abs(s.wristSubsystem.getFlippedPosition() -
+            // a.wristRotation()) < 0.1;
+            //     return armChecksOut && wristAtPosition;
+            // }, TRUE),
+            UpZoneNull(0, 0, 0, PointUp, TRUE, FALSE),
             ChuteUpPre(
                     165,
-                    0,
-                    1.58,
-                    CenterZoneNull,
+                    2.15,
+                    -1.58,
+                    UpZoneNull,
                     (a, s, e) -> s.chuteSubsystem.UP.getAsBoolean() || DEFAULT.checksOut(a, s, e),
                     (a, s, e) -> !s.chuteSubsystem.UP.getAsBoolean()),
             ChuteUp(
                     165,
-                    0,
-                    1.58,
+                    2.15,
+                    -1.58,
                     ChuteUpPre,
                     (a, s, e) -> s.chuteSubsystem.UP.getAsBoolean(),
                     (a, s, e) -> !s.chuteSubsystem.UP.getAsBoolean()),
             ChuteUpNull(0, 0, 0, ChuteUp, TRUE, FALSE),
-            HandoffPrep(165, -0.5, 1.58, ChuteDownNull),
-            Handoff(132, -0.5, 1.58, HandoffPrep),
-            PointUp(165, 2.15, 1.58, CenterZoneNull),
-            AlgaePointUp(165, 2.15, -1.58, ChuteUpNull),
-            UpZoneNull(0, 0, 0, PointUp, TRUE, FALSE),
             // L1Prep(297, 2.15, -1.58, ChuteUpNull),
             L1(130, 0.9, 0, UpZoneNull),
             L2Prep(120, 2.15, -1.58, UpZoneNull),
@@ -164,16 +169,17 @@ public class SuperstructureStateManager extends SubsystemBase {
             // NetAlgaePrep(297, 2.15, -1.58, UpZoneNull),
             // NetAlgae(297, 2.15, -1.58, NetAlgaePrep),
             Source(130, 2.15, 0, PointUp),
-            AlgaeHome(100, 2.15, -1.58, AlgaePointUp),
+            AlgaeHome(100, 2.15, -1.58, ChuteUpNull),
             AlgaeHomeNull(0.0, 0.0, 0.0, AlgaeHome, TRUE, FALSE),
-            Climb(165, 0, 1.58, ChuteUpNull),
+            // Climb(165, 0, 1.58, ChuteUpNull),
             Processor(65, 1.58, -1.58, AlgaeHomeNull),
 
             // IcecreamCoral(165, 0, 1.58, AlgaeHome),
             // IcecreamAlgae(165, 0, 1.58, AlgaeHome),
             GroundAlgaePrep(65, 1.58, 1.58, AlgaeHomeNull),
             GroundAlgae(20, 1.58, 1.58, GroundAlgaePrep),
-            StartPrep(140, 0, -1.58, ChuteUpNull),
+            StartPrepPrep(165, 2.15, 1.58, ChuteUpNull),
+            StartPrep(140, 0, -1.58, StartPrepPrep),
             Start(0, 0, -1.58, StartPrep),
             Tunable(165, 0, 1.58, CenterZoneNull, FALSE);
 
@@ -270,6 +276,8 @@ public class SuperstructureStateManager extends SubsystemBase {
     private SuperstructureState.Position targetPostition = SuperstructureState.Position.Start;
     private SuperstructureState.Position lastPosition = SuperstructureState.Position.Start;
 
+    private SuperstructureState.Position trueFinalTarget = SuperstructureState.Position.Start;
+
     private List<SuperstructureState.Position> outList = new ArrayList<>();
 
     private enum CoralAlgaeMode {
@@ -300,6 +308,8 @@ public class SuperstructureStateManager extends SubsystemBase {
             new Trigger(() -> coralAlgaeMode == CoralAlgaeMode.RightCoral);
     public final Trigger ALGAE = new Trigger(() -> coralAlgaeMode == CoralAlgaeMode.Algae);
     public final Trigger ARMWRIST = new Trigger(() -> coralAlgaeMode == CoralAlgaeMode.ArmWrist);
+
+    public final Trigger PROCESSOR = new Trigger(() -> trueFinalTarget == Position.Processor);
 
     public Command setLeftCoralMode() {
         return Commands.runOnce(() -> coralAlgaeMode = CoralAlgaeMode.LeftCoral);
@@ -344,6 +354,8 @@ public class SuperstructureStateManager extends SubsystemBase {
     }
 
     private void setFinalTarget(SuperstructureState.Position myPosition) {
+        trueFinalTarget = myPosition;
+
         outList.clear();
         // Set the [ (A') => (C') ] target of the system (initialize pathing command)
         boolean found = false;
@@ -405,7 +417,9 @@ public class SuperstructureStateManager extends SubsystemBase {
         if (myPosition == Position.ChuteUpNull) {
             chuteCanMove = false;
         }
-        if (lastPosition.parent() == Position.CenterZoneNull && lastPosition.isRealPosition(this)) {
+        if ((lastPosition.parent() == Position.CenterZoneNull && lastPosition.isRealPosition(this))
+                || (lastPosition.parent() == Position.UpZoneNull
+                        && lastPosition.isRealPosition(this))) {
             chuteCanMove = true;
         }
 
