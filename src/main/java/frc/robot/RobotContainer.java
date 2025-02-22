@@ -12,9 +12,9 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -59,7 +59,6 @@ import frc.robot.subsystems.vision.DummyPhotonCamera;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSimML;
-import frc.robot.util.Elastic;
 import frc.robot.subsystems.wrist.WristIONeo550;
 import frc.robot.subsystems.wrist.WristIOSim;
 import frc.robot.subsystems.wrist.WristSubsystem;
@@ -622,7 +621,7 @@ public class RobotContainer {
                 leftJoystickVelocityY,
                 0,
                 alignmentPose,
-                Rotation2d.kPi); 
+                Rotation2d.kPi);
     }
 
     // Automatically chooses closest tag
@@ -692,12 +691,15 @@ public class RobotContainer {
                 Rotation2d.kCCW_90deg);
     }
 
-    public Command alignToProcessor(){
-       // getAlignmentcolor 3 = r
-        //set a trigger based on the thumbpad 
+    public Command alignToProcessor() {
+        // getAlignmentcolor 3 = r
+        // set a trigger based on the thumbpad
         //
-        return Commands.either(alignToReef(3, 0), alignToReef(16, 0), () -> {
-                return DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
-        });
+        return Commands.either(
+                alignToReef(3, 0),
+                alignToReef(16, 0),
+                () -> {
+                    return DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
+                });
     }
 }
