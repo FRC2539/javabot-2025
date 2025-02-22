@@ -93,12 +93,12 @@ public class RobotContainer {
 
     private Supplier<ChassisSpeeds> driverVelocitySupplier;
 
-    private Trigger DRIVER_TRIGGER;
+    private Trigger DROP_TRIGGER;
     private Trigger AUTO_ALIGNED;
     private Trigger USING_AUTO_ALIGN;
     private Trigger AUTO_DRIVER_TRIGGER;
 
-    private InternalButton normalRelease;
+    private InternalButton normalRelease = new InternalButton();
 
     public RobotContainer() {
         if (Robot.isReal()) {
@@ -209,13 +209,16 @@ public class RobotContainer {
                             return drivetrain.driveDriverRelative(driverVelocitySupplier.get());
                         }));
 
-        DRIVER_TRIGGER = rightDriveController.getTrigger();
+        DROP_TRIGGER = leftDriveController.getTrigger();
+
+        final Trigger EJECT_TRIGGER = rightDriveController.getTrigger();
+        final Trigger ALIGN_TRIGGER = rightDriveController.getBottomThumb();
 
         USING_AUTO_ALIGN = new Trigger(() -> false);
 
         AUTO_ALIGNED = new Trigger(() -> false);
 
-        AUTO_DRIVER_TRIGGER = (USING_AUTO_ALIGN.negate().or(AUTO_ALIGNED)).and(DRIVER_TRIGGER);
+        AUTO_DRIVER_TRIGGER = (USING_AUTO_ALIGN.negate().or(AUTO_ALIGNED)).and(DROP_TRIGGER);
 
         // drive.withVelocityX(-leftDriveController.getYAxis().get() *
         // GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive forward with negative Y
@@ -396,24 +399,24 @@ public class RobotContainer {
         ARMWRIST.and(operatorController.getX()).whileTrue(wristSubsystem.turnWristLeft());
         ARMWRIST.and(operatorController.getB()).whileTrue(wristSubsystem.turnWristRight());
 
-        CORAL.and(operatorController.getY())
-                .onTrue(stateManager.moveToPosition(Position.L4Prep))
-                .onFalse(stateManager.moveToPosition(Position.L4));
-        CORAL.and(operatorController.getX())
-                .onTrue(stateManager.moveToPosition(Position.L3Prep))
-                .onFalse(stateManager.moveToPosition(Position.L3));
-        CORAL.and(operatorController.getB())
-                .onTrue(stateManager.moveToPosition(Position.L2Prep))
-                .onFalse(stateManager.moveToPosition(Position.L2));
-        CORAL.and(operatorController.getA()).onTrue(stateManager.moveToPosition(Position.L1));
+        // CORAL.and(operatorController.getY())
+        //         .onTrue(stateManager.moveToPosition(Position.L4Prep))
+        //         .onFalse(stateManager.moveToPosition(Position.L4));
+        // CORAL.and(operatorController.getX())
+        //         .onTrue(stateManager.moveToPosition(Position.L3Prep))
+        //         .onFalse(stateManager.moveToPosition(Position.L3));
+        // CORAL.and(operatorController.getB())
+        //         .onTrue(stateManager.moveToPosition(Position.L2Prep))
+        //         .onFalse(stateManager.moveToPosition(Position.L2));
+        // CORAL.and(operatorController.getA()).onTrue(stateManager.moveToPosition(Position.L1));
 
-        operatorController.getLeftTrigger().onTrue(stateManager.moveToPosition(Position.Start));
+        operatorController.getLeftTrigger().onTrue(stateManager.moveToPosition(Position.Climb));
 
-        bindPlaceSeq(operatorController.getY(), Position.L4Prep, Position.L4, 0.1);
+        bindPlaceSeq(CORAL.and(operatorController.getY()), Position.L4Prep, Position.L4, 0.1);
 
-        bindPlaceSeq(operatorController.getX(), Position.L3Prep, Position.L3, 0.1);
+        bindPlaceSeq(CORAL.and(operatorController.getX()), Position.L3Prep, Position.L3, 0.1);
 
-        bindPlaceSeq(operatorController.getB(), Position.L2Prep, Position.L2, 0.1);
+        bindPlaceSeq(CORAL.and(operatorController.getB()), Position.L2Prep, Position.L2, 0.1);
 
         operatorController.getA().onTrue(stateManager.moveToPosition(Position.L1));
 
@@ -423,8 +426,10 @@ public class RobotContainer {
         CORAL.and(operatorController.getDPadDown())
                 .onTrue(stateManager.moveToPosition(Position.Home));
         CORAL.and(operatorController.getDPadUp())
-                .onTrue(stateManager.moveToPosition(Position.HandoffPrep))
-                .onFalse(stateManager.moveToPosition(Position.Handoff));
+                .onFalse(stateManager.moveToPosition(Position.HandoffPrep))
+                .onTrue(stateManager.moveToPosition(Position.Handoff));
+        CORAL.and(operatorController.getDPadUp()).whileTrue(gripperSubsystem.intakeSpinCoral());
+
         CORAL.and(operatorController.getDPadLeft()).onTrue(chuteSubsystem.moveChuteUp());
         CORAL.and(operatorController.getDPadRight()).onTrue(chuteSubsystem.moveChuteDown());
 
@@ -437,8 +442,8 @@ public class RobotContainer {
                 .onTrue(stateManager.moveToPosition(Position.GroundAlgae));
         ALGAE.and(operatorController.getDPadDown())
                 .onTrue(stateManager.moveToPosition(Position.AlgaeHome));
-        ALGAE.and(operatorController.getDPadUp())
-                .onTrue(stateManager.moveToPosition(Position.Handoff));
+        // ALGAE.and(operatorController.getDPadUp())
+        //         .onTrue(stateManager.moveToPosition(Position.Handoff));
         ALGAE.and(operatorController.getDPadLeft())
                 .onTrue(stateManager.moveToPosition(Position.Quick34));
         ALGAE.and(operatorController.getDPadRight())
@@ -471,14 +476,13 @@ public class RobotContainer {
                                                 .andThen(
                                                         Commands.waitUntil(
                                                                 gripperSubsystem.HAS_PIECE))));
-        CORAL.and(rightDriveController.getRightThumb())
-                .whileTrue(gripperSubsystem.ejectSpinCoral());
+        CORAL.and(EJECT_TRIGGER).whileTrue(gripperSubsystem.ejectSpinCoral());
 
         ALGAE.and(rightDriveController.getLeftThumb()).onTrue(gripperSubsystem.intakeSpinAlgae());
-        ALGAE.and(rightDriveController.getRightThumb())
+        ALGAE.and(EJECT_TRIGGER)
                 .and(stateManager.PROCESSOR)
                 .whileTrue(gripperSubsystem.slowEjectSpinAlgae());
-        ALGAE.and(rightDriveController.getRightThumb())
+        ALGAE.and(EJECT_TRIGGER)
                 .and(stateManager.PROCESSOR.negate())
                 .whileTrue(gripperSubsystem.ejectSpinAlgae());
 
@@ -492,19 +496,18 @@ public class RobotContainer {
 
         stateManager
                 .LEFT_CORAL
-                .and(leftDriveController.getTrigger())
+                .and(ALIGN_TRIGGER)
                 .whileTrue(alignToReef(AligningConstants.leftOffset));
 
         stateManager
                 .ALGAE
-                .and(leftDriveController.getTrigger())
+                .and(ALIGN_TRIGGER)
                 .whileTrue(alignToReef(AligningConstants.centerOffset));
 
         stateManager
                 .RIGHT_CORAL
-                .and(leftDriveController.getTrigger())
+                .and(ALIGN_TRIGGER)
                 .whileTrue(alignToReef(AligningConstants.rightOffset));
-
         // Technical Bindings
 
         leftDriveController.getLeftBottomMiddle().onTrue(climberSubsystem.zeroClimberCommand());
