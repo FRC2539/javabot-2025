@@ -257,7 +257,7 @@ public class Auto {
                     "wait arm", Commands.waitUntil(() -> armInPlace()));
 
         NamedCommands.registerCommand(
-                        "wait pose", Commands.waitUntil(() -> armInPlace()));
+                        "wait pose", Commands.waitUntil(() -> robotInPlace()));
 
         Command alignCommand =
                 Commands.defer(
@@ -299,7 +299,7 @@ public class Auto {
 
 
         
-        // spotless:off
+        //spotless:off
         Command placeCommand =
                 prepArmCommand.asProxy()
                 .until(() -> robotInPlace()) // Wait until arm and align are in position
@@ -311,7 +311,11 @@ public class Auto {
                     .deadlineFor(armCommand.asProxy())
                 )
                 .deadlineFor(alignCommand);
+
+
         NamedCommands.registerCommand("place", placeCommand);
+
+
         // spotless:on
 
         // #region Auto create locations and heights
