@@ -563,19 +563,25 @@ public class RobotContainer {
     private void bindPlaceSeq(Trigger button, Position prep, Position end, double timeout) {
         (button)
                 .onTrue(
-                        stateManager
-                                .moveToPosition(prep)
-                                .until(AUTO_DRIVER_TRIGGER)
-                                .andThen(stateManager.moveToPosition(end)));
-        //                         .alongWith(
-        //                                 Commands.waitSeconds(timeout)
-        //                                         .andThen(
-        //                                                 gripperSubsystem
-        //                                                         .ejectSpinCoral()))
-        //                         .until(AUTO_DRIVER_TRIGGER.negate())))
-        // .repeatedly()
-        // .beforeStarting(() -> normalRelease.setPressed(false))
-        // .finallyDo(() -> normalRelease.setPressed(true)));
+                        (stateManager
+                                        .moveToPosition(prep)
+                                        .until(AUTO_DRIVER_TRIGGER)
+                                        .andThen(
+                                                stateManager
+                                                        .moveToPosition(end)
+                                                        //                         .alongWith(
+                                                        //
+                                                        // Commands.waitSeconds(timeout)
+                                                        //
+                                                        // .andThen(
+                                                        //
+                                                        //       gripperSubsystem
+                                                        //
+                                                        //               .ejectSpinCoral()))
+                                                        .until(AUTO_DRIVER_TRIGGER.negate())))
+                                .repeatedly()
+                                .beforeStarting(() -> normalRelease.setPressed(false))
+                                .finallyDo(() -> normalRelease.setPressed(true)));
     }
 
     private double deadband(double value, double deadband) {
