@@ -36,7 +36,7 @@ public class SuperstructureStateManager extends SubsystemBase {
 
     public static class SuperstructureState {
         private static LoggedNetworkNumber elevatorHeightLogged =
-                new LoggedNetworkNumber("Elevator Height", 165);
+                new LoggedNetworkNumber("Elevator Height", 170);
         private static LoggedNetworkNumber armHeightLogged =
                 new LoggedNetworkNumber("Arm Height", 0);
         private static LoggedNetworkNumber wristRotationLogged =
@@ -111,25 +111,25 @@ public class SuperstructureStateManager extends SubsystemBase {
         public static enum Position {
             Sussy(1, 1, 1, null),
             CenterZoneNull(1, 1, 1, null, TRUE, FALSE),
-            Home(165, 0, 1.58, CenterZoneNull),
+            Home(170, 0, 1.58, CenterZoneNull),
             ChuteDownPre(
-                    165,
+                    170,
                     0,
                     1.58,
                     CenterZoneNull,
                     (a, s, e) -> s.chuteSubsystem.DOWN.getAsBoolean() || DEFAULT.checksOut(a, s, e),
                     (a, s, e) -> !s.chuteSubsystem.DOWN.getAsBoolean()),
             ChuteDown(
-                    165,
+                    170,
                     0,
                     1.58,
                     ChuteDownPre,
                     (a, s, e) -> s.chuteSubsystem.DOWN.getAsBoolean(),
                     (a, s, e) -> !s.chuteSubsystem.DOWN.getAsBoolean()),
             ChuteDownNull(0, 0, 0, ChuteDown, TRUE, FALSE),
-            HandoffPrep(165, -0.5, 1.58, ChuteDownNull),
+            HandoffPrep(170, -0.5, 1.58, ChuteDownNull),
             Handoff(132, -0.5, 1.58, HandoffPrep),
-            PointUp(165, 2.15, 1.58, CenterZoneNull),
+            PointUp(170, 2.15, 1.58, CenterZoneNull),
             // (a, s, e) -> {
             //     boolean armChecksOut = s.armSubsystem.getPosition() > 1.0;
             //     boolean wristAtPosition = Math.abs(s.wristSubsystem.getFlippedPosition() -
@@ -138,14 +138,14 @@ public class SuperstructureStateManager extends SubsystemBase {
             // }, TRUE),
             UpZoneNull(0, 0, 0, PointUp, TRUE, FALSE),
             ChuteUpPre(
-                    165,
+                    170,
                     2.15,
                     -1.58,
                     UpZoneNull,
                     (a, s, e) -> s.chuteSubsystem.UP.getAsBoolean() || DEFAULT.checksOut(a, s, e),
                     (a, s, e) -> !s.chuteSubsystem.UP.getAsBoolean()),
             ChuteUp(
-                    165,
+                    170,
                     2.15,
                     -1.58,
                     ChuteUpPre,
@@ -171,17 +171,18 @@ public class SuperstructureStateManager extends SubsystemBase {
             Source(130, 2.15, 0, PointUp),
             AlgaeHome(100, 2.15, -1.58, ChuteUpNull),
             AlgaeHomeNull(0.0, 0.0, 0.0, AlgaeHome, TRUE, FALSE),
-            // Climb(165, 0, 1.58, ChuteUpNull),
+            // Climb(170, 0, 1.58, ChuteUpNull),
             Processor(65, 1.58, -1.58, AlgaeHomeNull),
 
-            // IcecreamCoral(165, 0, 1.58, AlgaeHome),
-            // IcecreamAlgae(165, 0, 1.58, AlgaeHome),
+            // IcecreamCoral(170, 0, 1.58, AlgaeHome),
+            // IcecreamAlgae(170, 0, 1.58, AlgaeHome),
             GroundAlgaePrep(65, 1.58, 1.58, AlgaeHomeNull),
             GroundAlgae(20, 1.58, 1.58, GroundAlgaePrep),
-            StartPrepPrep(165, 2.15, 1.58, ChuteUpNull),
+            StartPrepPrepPrep(170, 2.15, 1.58, ChuteUpNull),
+            StartPrepPrep(140, 0, 1.58, StartPrepPrepPrep),
             StartPrep(140, 0, -1.58, StartPrepPrep),
             Start(0, 0, -1.58, StartPrep),
-            Tunable(165, 0, 1.58, CenterZoneNull, FALSE);
+            Tunable(170, 0, 1.58, CenterZoneNull, FALSE);
 
             private double elevatorHeight;
             private double armHeight;

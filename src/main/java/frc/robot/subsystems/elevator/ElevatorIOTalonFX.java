@@ -3,8 +3,8 @@ package frc.robot.subsystems.elevator;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 // import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.constants.ElevatorConstants;
@@ -17,7 +17,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     //         new TalonFX(
     //                 ElevatorConstants.elevatorFollowerId,
     // ElevatorConstants.elevatorFollowerCanbus);
-    private final PositionVoltage motionMagicVoltage = new PositionVoltage(0);
+    private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0);
 
     public ElevatorIOTalonFX() {
         elevatorLeader.setPosition(0);
