@@ -16,6 +16,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.InternalButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.controller.LogitechController;
@@ -91,6 +92,13 @@ public class RobotContainer {
     private DoubleSupplier rightJoystickVelocityTheta;
 
     private Supplier<ChassisSpeeds> driverVelocitySupplier;
+
+    private Trigger DROP_TRIGGER;
+    private Trigger AUTO_ALIGNED;
+    private Trigger USING_AUTO_ALIGN;
+    private Trigger AUTO_DRIVER_TRIGGER;
+
+    private InternalButton normalRelease = new InternalButton();
 
     public RobotContainer() {
         if (Robot.isReal()) {
@@ -200,6 +208,17 @@ public class RobotContainer {
                             // driverDesiredSpeeds);
                             return drivetrain.driveDriverRelative(driverVelocitySupplier.get());
                         }));
+
+        DROP_TRIGGER = leftDriveController.getTrigger();
+
+        final Trigger EJECT_TRIGGER = rightDriveController.getTrigger();
+        final Trigger ALIGN_TRIGGER = rightDriveController.getBottomThumb();
+
+        USING_AUTO_ALIGN = new Trigger(() -> false);
+
+        AUTO_ALIGNED = new Trigger(() -> false);
+
+        AUTO_DRIVER_TRIGGER = (USING_AUTO_ALIGN.negate().or(AUTO_ALIGNED)).and(DROP_TRIGGER);
 
         // drive.withVelocityX(-leftDriveController.getYAxis().get() *
         // GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive forward with negative Y
@@ -354,6 +373,7 @@ public class RobotContainer {
         operatorController.getLeftBumper().onTrue(stateManager.setLeftCoralMode());
         operatorController.getRightBumper().onTrue(stateManager.setRightCoralMode());
         operatorController.getRightTrigger().onTrue(stateManager.setAlgaeMode());
+
         leftDriveController.getRightTopRight().onTrue(stateManager.setArmWristMode());
         operatorController
                 .getLeftJoystick()
@@ -363,7 +383,7 @@ public class RobotContainer {
                                         LightsSubsystem.LEDSegment.MainStrip.setRainbowAnimation(
                                                 1)))); // L3 Rainbow
         operatorController
-                .getLeftTrigger()
+                .getRightJoystick()
                 .whileTrue(
                         Commands.runOnce(
                                 (() ->
@@ -379,24 +399,37 @@ public class RobotContainer {
         ARMWRIST.and(operatorController.getX()).whileTrue(wristSubsystem.turnWristLeft());
         ARMWRIST.and(operatorController.getB()).whileTrue(wristSubsystem.turnWristRight());
 
-        CORAL.and(operatorController.getY())
-                .onTrue(stateManager.moveToPosition(Position.L4Prep))
-                .onFalse(stateManager.moveToPosition(Position.L4));
-        CORAL.and(operatorController.getX())
-                .onTrue(stateManager.moveToPosition(Position.L3Prep))
-                .onFalse(stateManager.moveToPosition(Position.L3));
-        CORAL.and(operatorController.getB())
-                .onTrue(stateManager.moveToPosition(Position.L2Prep))
-                .onFalse(stateManager.moveToPosition(Position.L2));
-        CORAL.and(operatorController.getA()).onTrue(stateManager.moveToPosition(Position.L1));
+        // CORAL.and(operatorController.getY())
+        //         .onTrue(stateManager.moveToPosition(Position.L4Prep))
+        //         .onFalse(stateManager.moveToPosition(Position.L4));
+        // CORAL.and(operatorController.getX())
+        //         .onTrue(stateManager.moveToPosition(Position.L3Prep))
+        //         .onFalse(stateManager.moveToPosition(Position.L3));
+        // CORAL.and(operatorController.getB())
+        //         .onTrue(stateManager.moveToPosition(Position.L2Prep))
+        //         .onFalse(stateManager.moveToPosition(Position.L2));
+        // CORAL.and(operatorController.getA()).onTrue(stateManager.moveToPosition(Position.L1));
+
+        operatorController.getLeftTrigger().onTrue(stateManager.moveToPosition(Position.Climb));
+
+        bindPlaceSeq(CORAL.and(operatorController.getY()), Position.L4Prep, Position.L4, 0.1);
+
+        bindPlaceSeq(CORAL.and(operatorController.getX()), Position.L3Prep, Position.L3, 0.1);
+
+        bindPlaceSeq(CORAL.and(operatorController.getB()), Position.L2Prep, Position.L2, 0.1);
+
+        operatorController.getA().onTrue(stateManager.moveToPosition(Position.L1));
+
         CORAL.and(operatorController.getStart())
                 .onTrue(stateManager.moveToPosition(Position.Source));
 
         CORAL.and(operatorController.getDPadDown())
                 .onTrue(stateManager.moveToPosition(Position.Home));
         CORAL.and(operatorController.getDPadUp())
-                .onTrue(stateManager.moveToPosition(Position.HandoffPrep))
-                .onFalse(stateManager.moveToPosition(Position.Handoff));
+                .onFalse(stateManager.moveToPosition(Position.HandoffPrep))
+                .onTrue(stateManager.moveToPosition(Position.Handoff));
+        CORAL.and(operatorController.getDPadUp()).whileTrue(gripperSubsystem.intakeSpinCoral());
+
         CORAL.and(operatorController.getDPadLeft()).onTrue(chuteSubsystem.moveChuteUp());
         CORAL.and(operatorController.getDPadRight()).onTrue(chuteSubsystem.moveChuteDown());
 
@@ -409,8 +442,8 @@ public class RobotContainer {
                 .onTrue(stateManager.moveToPosition(Position.GroundAlgae));
         ALGAE.and(operatorController.getDPadDown())
                 .onTrue(stateManager.moveToPosition(Position.AlgaeHome));
-        ALGAE.and(operatorController.getDPadUp())
-                .onTrue(stateManager.moveToPosition(Position.Handoff));
+        // ALGAE.and(operatorController.getDPadUp())
+        //         .onTrue(stateManager.moveToPosition(Position.Handoff));
         ALGAE.and(operatorController.getDPadLeft())
                 .onTrue(stateManager.moveToPosition(Position.Quick34));
         ALGAE.and(operatorController.getDPadRight())
@@ -434,7 +467,7 @@ public class RobotContainer {
         //         .whileTrue(intakeSubsystem.openAndRun().alongWith(alignToPiece()));
         // rightDriveController.getRightThumb().whileTrue(intakeSubsystem.openAndEject());
 
-        CORAL.and(rightDriveController.getBottomThumb())
+        CORAL.and(rightDriveController.getLeftThumb())
                 .whileTrue(
                         gripperSubsystem
                                 .intakeSpinCoral()
@@ -443,13 +476,13 @@ public class RobotContainer {
                                                 .andThen(
                                                         Commands.waitUntil(
                                                                 gripperSubsystem.HAS_PIECE))));
-        CORAL.and(rightDriveController.getTrigger()).whileTrue(gripperSubsystem.ejectSpinCoral());
+        CORAL.and(EJECT_TRIGGER).whileTrue(gripperSubsystem.ejectSpinCoral());
 
-        ALGAE.and(rightDriveController.getBottomThumb()).onTrue(gripperSubsystem.intakeSpinAlgae());
-        ALGAE.and(rightDriveController.getTrigger())
+        ALGAE.and(rightDriveController.getLeftThumb()).onTrue(gripperSubsystem.intakeSpinAlgae());
+        ALGAE.and(EJECT_TRIGGER)
                 .and(stateManager.PROCESSOR)
                 .whileTrue(gripperSubsystem.slowEjectSpinAlgae());
-        ALGAE.and(rightDriveController.getTrigger())
+        ALGAE.and(EJECT_TRIGGER)
                 .and(stateManager.PROCESSOR.negate())
                 .whileTrue(gripperSubsystem.ejectSpinAlgae());
 
@@ -463,19 +496,18 @@ public class RobotContainer {
 
         stateManager
                 .LEFT_CORAL
-                .and(leftDriveController.getTrigger())
+                .and(ALIGN_TRIGGER)
                 .whileTrue(alignToReef(AligningConstants.leftOffset));
 
         stateManager
                 .ALGAE
-                .and(leftDriveController.getTrigger())
+                .and(ALIGN_TRIGGER)
                 .whileTrue(alignToReef(AligningConstants.centerOffset));
 
         stateManager
                 .RIGHT_CORAL
-                .and(leftDriveController.getTrigger())
+                .and(ALIGN_TRIGGER)
                 .whileTrue(alignToReef(AligningConstants.rightOffset));
-
         // Technical Bindings
 
         leftDriveController.getLeftBottomMiddle().onTrue(climberSubsystem.zeroClimberCommand());
@@ -529,6 +561,30 @@ public class RobotContainer {
         }
 
         // leftDriveController.getRightBottomLeft().onTrue(elevatorSubsystem.zeroElevatorCommand());
+    }
+
+    private void bindPlaceSeq(Trigger button, Position prep, Position end, double timeout) {
+        (button)
+                .onTrue(
+                        (stateManager
+                                        .moveToPosition(prep)
+                                        .until(AUTO_DRIVER_TRIGGER)
+                                        .andThen(
+                                                stateManager
+                                                        .moveToPosition(end)
+                                                        //                         .alongWith(
+                                                        //
+                                                        // Commands.waitSeconds(timeout)
+                                                        //
+                                                        // .andThen(
+                                                        //
+                                                        //       gripperSubsystem
+                                                        //
+                                                        //               .ejectSpinCoral()))
+                                                        .until(AUTO_DRIVER_TRIGGER.negate())))
+                                .repeatedly()
+                                .beforeStarting(() -> normalRelease.setPressed(false))
+                                .finallyDo(() -> normalRelease.setPressed(true)));
     }
 
     private double deadband(double value, double deadband) {

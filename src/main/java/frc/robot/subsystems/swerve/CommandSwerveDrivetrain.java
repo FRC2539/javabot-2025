@@ -559,8 +559,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
                 "Drive/setpointChassisSpeeds",
                 m_applyFieldSpeedsOrbit.getPreviousSetpoint().robotRelativeSpeeds());
 
-        ChassisSpeeds speedsPreview =
-                m_applyFieldSpeedsOrbit.getPreviousSetpoint().robotRelativeSpeeds();
+        ChassisSpeeds speedsPreview = getChassisSpeeds();
 
         double currentSpeed =
                 Math.hypot(speedsPreview.vxMetersPerSecond, speedsPreview.vyMetersPerSecond);

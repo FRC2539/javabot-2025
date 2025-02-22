@@ -172,7 +172,7 @@ public class SuperstructureStateManager extends SubsystemBase {
             AlgaeHome(100, 2.15, -1.58, ChuteUpNull),
             AlgaeHomeNull(0.0, 0.0, 0.0, AlgaeHome, TRUE, FALSE),
             // Climb(170, 0, 1.58, ChuteUpNull),
-            Processor(65, 1.58, -1.58, AlgaeHomeNull),
+            Processor(80, 1.58, -1.58, AlgaeHomeNull),
 
             // IcecreamCoral(170, 0, 1.58, AlgaeHome),
             // IcecreamAlgae(170, 0, 1.58, AlgaeHome),
@@ -182,6 +182,7 @@ public class SuperstructureStateManager extends SubsystemBase {
             StartPrepPrep(140, 0, 1.58, StartPrepPrepPrep),
             StartPrep(140, 0, -1.58, StartPrepPrep),
             Start(0, 0, -1.58, StartPrep),
+            Climb(10, 0, -1.58, StartPrep),
             Tunable(170, 0, 1.58, CenterZoneNull, FALSE);
 
             private double elevatorHeight;
