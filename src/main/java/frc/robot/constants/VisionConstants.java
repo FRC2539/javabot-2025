@@ -6,6 +6,8 @@
 // version 3 as published by the Free Software Foundation or
 // available in the root directory of this project.
 //
+// germanic revolution 1848
+
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
@@ -26,9 +28,9 @@ public class VisionConstants {
             AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
     // Camera names, must match names configured on coprocessor
-    public static String camera0Name = "limelight-april";
-    public static String camera1Name = "limelight-april-right";
-    public static String camera2Name = "limelight-ml";
+    public static String camera0Name = "limelight-left";
+    public static String camera1Name = "limelight-right";
+    public static String camera2Name = "limelight-intake";
     //     public static String camera1Name = "camera_1";
 
     // Robot to camera transforms
@@ -38,7 +40,7 @@ public class VisionConstants {
     public static Transform3d robotToCamera1 =
             new Transform3d(0.331, -0.0381, 0.33, new Rotation3d(0.0, -0.0, 0.0));
     public static Transform3d robotToCamera2 =
-            new Transform3d(0.331, -0.0381, 0.33, new Rotation3d(0.0, -0.0, 0.0));
+            new Transform3d(-0.1178, 0.3937, 0.4699, new Rotation3d(0.0, -0.0, Math.PI / 2));
 
     // Basic filtering thresholds
     public static double maxAmbiguity = 0.3;

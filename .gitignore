@@ -184,3 +184,6 @@ ctre_sim/
 # clangd
 /.cache
 compile_commands.json
+
+# Auto generated simulation dashboard
+src/main/deploy/elastic-layout-sim.json

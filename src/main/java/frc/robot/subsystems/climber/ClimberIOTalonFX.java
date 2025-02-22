@@ -10,7 +10,8 @@ import frc.robot.constants.ClimberConstants;
 
 public class ClimberIOTalonFX implements ClimberIO {
     // TBD: Hardcode IDs or add support to make changeable in method
-    private final TalonFX climbermotor = new TalonFX(ClimberConstants.id, ClimberConstants.CANbus);
+    private final TalonFX climbermotor =
+            new TalonFX(ClimberConstants.CLIMBER_ID, ClimberConstants.WinchCanbus);
     private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0);
 
     public ClimberIOTalonFX() {
@@ -22,10 +23,10 @@ public class ClimberIOTalonFX implements ClimberIO {
 
         SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs =
                 new SoftwareLimitSwitchConfigs()
-                        .withForwardSoftLimitEnable(true)
+                        .withForwardSoftLimitEnable(false)
                         .withForwardSoftLimitThreshold(ClimberConstants.upperLimit)
                         .withReverseSoftLimitThreshold(ClimberConstants.lowerLimit)
-                        .withReverseSoftLimitEnable(true);
+                        .withReverseSoftLimitEnable(false);
 
         talonConfig.apply(
                 new TalonFXConfiguration()

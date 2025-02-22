@@ -28,12 +28,15 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.TunerConstants.TunerSwerveDrivetrain;
+import frc.robot.constants.VisionConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -103,6 +106,8 @@ public class CommandSwerveDrivetrain implements Subsystem {
     private final FieldOrientedOrbitSwerveRequest m_applyFieldSpeedsOrbit;
     RobotConfig config; // PathPlanner robot configuration
 
+    private Field2d m_field2d = new Field2d();
+
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation =
             new SysIdRoutine(
@@ -170,10 +175,45 @@ public class CommandSwerveDrivetrain implements Subsystem {
     private SwerveSetpointGenerator setpointGenerator;
     private SwerveSetpoint previousSetpoint;
 
-    public void setUpPathPlanner() {}
-
     public Pose2d getRobotPose() {
         return getState().Pose;
+    }
+
+    public Pose2d findNearestAprilTagPose() {
+        // TODO: filter out opposing side tags and non-reef tags
+        Pose2d currentPose = getRobotPose();
+        Pose2d nearestAprilTagPose = null;
+        double nearestDistance = Double.MAX_VALUE;
+
+        Pose2d[] aprilTagPoses = new Pose2d[6];
+
+        if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
+            for (int i = 0; i < 6; i++) {
+                aprilTagPoses[i] =
+                        VisionConstants.aprilTagLayout
+                                .getTagPose(GlobalConstants.redReefTagIDs[i])
+                                .get()
+                                .toPose2d();
+            }
+        } else {
+            for (int i = 0; i < 6; i++) {
+                aprilTagPoses[i] =
+                        VisionConstants.aprilTagLayout
+                                .getTagPose(GlobalConstants.blueReefTagIDs[i])
+                                .get()
+                                .toPose2d();
+            }
+        }
+
+        for (Pose2d tagPose : aprilTagPoses) {
+            double distance = currentPose.getTranslation().getDistance(tagPose.getTranslation());
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestAprilTagPose = tagPose;
+            }
+        }
+
+        return nearestAprilTagPose;
     }
 
     public Rotation2d getOperatorForwardDirection() {
@@ -451,7 +491,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
      * @return Command to run
      */
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutineToApply.quasistatic(direction);
+        return defer(() -> m_sysIdRoutineToApply.quasistatic(direction));
     }
 
     /**
@@ -462,7 +502,19 @@ public class CommandSwerveDrivetrain implements Subsystem {
      * @return Command to run
      */
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutineToApply.dynamic(direction);
+        return defer(() -> m_sysIdRoutineToApply.dynamic(direction));
+    }
+
+    public Command sysIdTranslationMode() {
+        return Commands.runOnce(() -> m_sysIdRoutineToApply = m_sysIdRoutineTranslation);
+    }
+
+    public Command sysIdSteerMode() {
+        return Commands.runOnce(() -> m_sysIdRoutineToApply = m_sysIdRoutineSteer);
+    }
+
+    public Command sysIdRotationMode() {
+        return Commands.runOnce(() -> m_sysIdRoutineToApply = m_sysIdRoutineRotation);
     }
 
     private double lastSpeed = 0;
@@ -507,8 +559,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
                 "Drive/setpointChassisSpeeds",
                 m_applyFieldSpeedsOrbit.getPreviousSetpoint().robotRelativeSpeeds());
 
-        ChassisSpeeds speedsPreview =
-                m_applyFieldSpeedsOrbit.getPreviousSetpoint().robotRelativeSpeeds();
+        ChassisSpeeds speedsPreview = getChassisSpeeds();
 
         double currentSpeed =
                 Math.hypot(speedsPreview.vxMetersPerSecond, speedsPreview.vyMetersPerSecond);
@@ -532,6 +583,8 @@ public class CommandSwerveDrivetrain implements Subsystem {
 
         double[] driveMotorVoltage = new double[4];
         double[] turnMotorVoltage = new double[4];
+
+        m_field2d.setRobotPose(getRobotPose());
 
         for (int i = 0; i < 4; i++) {
             var module = m_drivetrain.getModule(i);
@@ -565,6 +618,7 @@ public class CommandSwerveDrivetrain implements Subsystem {
         Logger.recordOutput("Drive/outdatedPose", m_drivetrain.getState().Pose);
 
         Logger.recordOutput("Drive/currentAction", m_swerveState.label);
+        //      ////Logger.recordOutput("Drive/fieldPose", m_field2d);
 
         Logger.recordOutput("Drive/slippingModule", m_odometry_custom.m_maxSlippingWheelIndex);
 
