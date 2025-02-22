@@ -5,15 +5,15 @@
     "data": {
       "commands": [
         {
-          "type": "named",
-          "data": {
-            "name": "height L4"
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "LStart-J"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "height L4"
           }
         },
         {
@@ -48,15 +48,15 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "height L4"
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "LCS-L"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "height L4"
           }
         },
         {
