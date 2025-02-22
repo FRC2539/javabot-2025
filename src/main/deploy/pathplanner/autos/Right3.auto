@@ -7,13 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "source to ab"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "location B"
+            "pathName": "RStart-E"
           }
         },
         {
@@ -31,25 +25,55 @@
         {
           "type": "path",
           "data": {
-            "pathName": "ab to bc"
+            "pathName": "E-RCS"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RCS-D"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "location C"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "height L2"
+            "name": "height L4"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "place"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "D-RCS"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RCS-C"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "height L4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "place"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "C-RCS"
           }
         }
       ]

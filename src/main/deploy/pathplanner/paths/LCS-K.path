@@ -58,6 +58,12 @@
                   }
                 ]
               }
+            },
+            {
+              "type": "named",
+              "data": {
+                "name": "location K"
+              }
             }
           ]
         }

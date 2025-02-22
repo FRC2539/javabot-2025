@@ -5,34 +5,15 @@
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": "LStart-J"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "height L4"
           }
         },
         {
-          "type": "race",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "align"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "wait pose"
-                }
-              }
-            ]
+            "pathName": "LStart-J"
           }
         },
         {
@@ -50,6 +31,30 @@
         {
           "type": "path",
           "data": {
+            "pathName": "LCS-K"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "height L4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "place"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "K-LCS"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
             "pathName": "LCS-L"
           }
         },
@@ -60,28 +65,15 @@
           }
         },
         {
-          "type": "race",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "align"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "wait pose"
-                }
-              }
-            ]
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "place"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L-LCS"
           }
         }
       ]

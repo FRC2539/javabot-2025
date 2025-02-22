@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.8290909090909087,
-        "y": 2.489375
-      },
-      "prevControl": null,
-      "nextControl": {
-        "x": 3.4003125000000005,
-        "y": 2.050625000000001
-      },
-      "isLocked": false,
-      "linkedName": "D"
-    },
-    {
-      "anchor": {
         "x": 1.8248011363636363,
         "y": 0.9736931818181813
       },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.180609600909788,
+        "y": 1.3224604575718972
+      },
+      "isLocked": false,
+      "linkedName": "RCS"
+    },
+    {
+      "anchor": {
+        "x": 3.5598579545454543,
+        "y": 2.71872159090909
+      },
       "prevControl": {
-        "x": 2.512840909090909,
-        "y": 1.442357954545454
+        "x": 3.2736459589095848,
+        "y": 2.4679886587730784
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "RCS"
+      "linkedName": "C"
     }
   ],
   "rotationTargets": [],
@@ -33,23 +33,36 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "height Handoff",
+      "name": "",
       "waypointRelativePos": 0,
       "endWaypointRelativePos": null,
       "command": {
-        "type": "parallel",
+        "type": "sequential",
         "data": {
           "commands": [
             {
-              "type": "named",
+              "type": "race",
               "data": {
-                "name": "height Handoff"
+                "commands": [
+                  {
+                    "type": "named",
+                    "data": {
+                      "name": "intake"
+                    }
+                  },
+                  {
+                    "type": "named",
+                    "data": {
+                      "name": "arm"
+                    }
+                  }
+                ]
               }
             },
             {
               "type": "named",
               "data": {
-                "name": "preparm"
+                "name": "location C"
               }
             }
           ]
@@ -67,13 +80,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 54.0
+    "rotation": 59.99999999999999
   },
   "reversed": false,
-  "folder": "Reef-RCS",
+  "folder": "RCS-Reef",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 59.99999999999999
+    "rotation": 54.0
   },
   "useDefaultConstraints": true
 }

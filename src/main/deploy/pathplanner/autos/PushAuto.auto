@@ -7,13 +7,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": null
+            "pathName": "pushStart-pushEnd"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "pushEnd-H"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "height L4"
+            "name": "height L1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "score"
           }
         }
       ]
