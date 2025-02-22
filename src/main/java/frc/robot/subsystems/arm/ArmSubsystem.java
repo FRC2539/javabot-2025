@@ -2,7 +2,8 @@ package frc.robot.subsystems.arm;
 
 import static edu.wpi.first.units.Units.Volts;
 
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -13,10 +14,14 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 public class ArmSubsystem extends SubsystemBase {
     private ArmPivotIO armPivotIO;
     public ArmPivotIOInputsAutoLogged armPivotInputs = new ArmPivotIOInputsAutoLogged();
-    public LoggedNetworkNumber armTuneables = new LoggedNetworkNumber("arm tuneable", 9);
+    public LoggedNetworkNumber armTuneables = new LoggedNetworkNumber("arm tuneable", 0);
 
-    private PIDController controller =
-            new PIDController(ArmConstants.ARM_KP, ArmConstants.ARM_KI, ArmConstants.ARM_KD);
+    private ProfiledPIDController controller =
+            new ProfiledPIDController(
+                    ArmConstants.ARM_KP,
+                    ArmConstants.ARM_KI,
+                    ArmConstants.ARM_KD,
+                    new TrapezoidProfile.Constraints(3, 4.5)); // try 6 and 6
 
     private double reference = 0;
 
@@ -64,7 +69,7 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public Command tuneableVoltage() {
-        return run(() -> setVoltage(armTuneables.get()));
+        return run(() -> armPivotIO.setVoltage(armTuneables.get()));
     }
 
     public Command tunablePose() {
@@ -97,12 +102,23 @@ public class ArmSubsystem extends SubsystemBase {
                     double voltage =
                             controller.calculate(
                                     armPivotInputs.throughboreEncoderPosition, reference);
-                    if (controller.atSetpoint()) {
+                    TrapezoidProfile.State state = controller.getSetpoint();
+                    voltage += state.velocity * 1.0 / 0.5;
+                    voltage += Math.sin(state.position) * 0.2;
+                    if (voltage > 0) {
+                        voltage += 0.2;
+                    } else {
+                        voltage -= 0.2;
+                    }
+                    if (controller.atGoal()) {
                         voltage = 0;
                     } else {
                         voltage = Math.min(12.0, Math.max(-12.0, voltage)); // Clamp voltage
                     }
                     armPivotIO.setVoltage(voltage);
+                    Logger.recordOutput("Arm/setpoint", state.position);
+                    Logger.recordOutput("Arm/setpoint velocity", state.velocity);
+                    Logger.recordOutput("Arm/reference", reference);
                 });
     }
 

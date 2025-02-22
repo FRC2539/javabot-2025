@@ -2,6 +2,7 @@ package frc.robot.subsystems.gripper;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -10,6 +11,8 @@ public class GripperSubsystem extends SubsystemBase {
     private GripperIO piviotIO;
 
     private GripperIOInputsAutoLogged armrollerInputs = new GripperIOInputsAutoLogged();
+
+    public final Trigger HAS_PIECE = new Trigger(this::hasPiece);
 
     // NetworkTableInstance nInstance = NetworkTableInstance.getDefault();
     // NetworkTable table = nInstance.getTable("SmartDashboard");
@@ -40,7 +43,7 @@ public class GripperSubsystem extends SubsystemBase {
     }
 
     public Command ejectSpinCoral() {
-        return setVoltage(-12);
+        return setVoltage(-1);
     }
 
     public Command intakeSpinAlgae() {
@@ -49,6 +52,10 @@ public class GripperSubsystem extends SubsystemBase {
 
     public Command ejectSpinAlgae() {
         return setVoltage(-12);
+    }
+
+    public Command slowEjectSpinAlgae() {
+        return setVoltage(-3);
     }
 
     public Command setVoltage(double voltage) {
@@ -60,5 +67,11 @@ public class GripperSubsystem extends SubsystemBase {
 
     public boolean hasPiece() {
         return armrollerInputs.sensor;
+    }
+
+    private boolean hasAlgae = false;
+
+    public void setHasAlgae(boolean hasAlgae) {
+        hasAlgae = true;
     }
 }

@@ -12,16 +12,16 @@ public class ElevatorConstants {
                     .withKD(0)
                     .withKG(0)
                     .withKI(0)
-                    .withKP(0)
+                    .withKP(2)
                     .withKS(0)
                     .withKV(0)
                     .withGravityType(GravityTypeValue.Elevator_Static);
     ;
     public static final MotionMagicConfigs motionMagicConfigs =
             new MotionMagicConfigs()
-                    .withMotionMagicAcceleration(4) // these are guesses, come back here
-                    .withMotionMagicCruiseVelocity(4) // also guess
-                    .withMotionMagicJerk(4);
+                    .withMotionMagicAcceleration(190 / .3) // these are guesses, come back here
+                    .withMotionMagicCruiseVelocity(190) // also guess
+                    .withMotionMagicJerk(0);
 
     public static final int elevatorLeaderId = 9;
 
@@ -32,5 +32,5 @@ public class ElevatorConstants {
     public static final CurrentLimitsConfigs currentLimit = new CurrentLimitsConfigs();
 
     public static final double lowerLimit = 0;
-    public static final double upperLimit = 100;
+    public static final double upperLimit = 297;
 }

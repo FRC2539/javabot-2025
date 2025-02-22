@@ -19,7 +19,7 @@ import java.util.function.BooleanSupplier;
 
 public class LightsSubsystem extends SubsystemBase {
     public static final class LightsConstants {
-        public static final int CANDLE_PORT = 12;
+        public static final int CANDLE_PORT = 13;
 
         public static final int SENSOR_PORT = 0;
     }
@@ -28,8 +28,10 @@ public class LightsSubsystem extends SubsystemBase {
 
     private static final CANdle candle;
 
+    private static final boolean isReal = false;
+
     static {
-        if (RobotBase.isReal()) {
+        if (RobotBase.isReal() && false) {
             candle = new CANdle(LightsConstants.CANDLE_PORT);
         } else {
             candle = null;

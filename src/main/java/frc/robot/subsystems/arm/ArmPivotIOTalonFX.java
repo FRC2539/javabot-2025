@@ -1,8 +1,10 @@
 package frc.robot.subsystems.arm;
 
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import frc.robot.constants.ArmConstants;
@@ -30,7 +32,11 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
         // SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs = new SoftwareLimitSwitchConfigs();
 
         talonConfig.apply(
-                new TalonFXConfiguration().withCurrentLimits(ArmConstants.currentLimitConfigs));
+                new TalonFXConfiguration()
+                        .withCurrentLimits(ArmConstants.currentLimitConfigs)
+                        .withMotorOutput(
+                                new MotorOutputConfigs()
+                                        .withInverted(InvertedValue.Clockwise_Positive)));
 
         armPivotMotor.setNeutralMode(NeutralModeValue.Brake);
     }
@@ -42,7 +48,7 @@ public class ArmPivotIOTalonFX implements ArmPivotIO {
         inputs.velocity = armPivotMotor.getVelocity().getValueAsDouble();
         inputs.temperature = armPivotMotor.getDeviceTemp().getValueAsDouble();
         inputs.current = armPivotMotor.getStatorCurrent().getValueAsDouble();
-        inputs.throughboreEncoderPosition = throughboreEncoder.get();
+        inputs.throughboreEncoderPosition = (throughboreEncoder.get() * -1 + 2 * Math.PI) - 3.065;
         inputs.throughboreConnected = throughboreEncoder.isConnected();
 
         if (inputs.throughboreEncoderPosition >= ArmConstants.upperLimit && lastVoltage > 0) {

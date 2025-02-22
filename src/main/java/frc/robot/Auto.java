@@ -229,7 +229,7 @@ public class Auto {
 
     public enum ArmHeight {
         Home(Position.Home, Position.Home),
-        L1(Position.L1, Position.L1Prep),
+        L1(Position.L1, Position.L1),
         L2(Position.L2, Position.L2Prep),
         L3(Position.L3, Position.L3Prep),
         L4(Position.L4, Position.L4Prep),

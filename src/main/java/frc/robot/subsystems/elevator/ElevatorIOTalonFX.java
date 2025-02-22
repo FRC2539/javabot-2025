@@ -1,9 +1,10 @@
 package frc.robot.subsystems.elevator;
 
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-// import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+// import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.constants.ElevatorConstants;
@@ -28,14 +29,17 @@ public class ElevatorIOTalonFX implements ElevatorIO {
                         .withForwardSoftLimitEnable(true)
                         .withForwardSoftLimitThreshold(ElevatorConstants.upperLimit)
                         .withReverseSoftLimitEnable(true)
-                        .withForwardSoftLimitThreshold(ElevatorConstants.lowerLimit);
+                        .withReverseSoftLimitThreshold(ElevatorConstants.lowerLimit);
+
+        FeedbackConfigs feedbackConfigs = new FeedbackConfigs().withSensorToMechanismRatio(0.56250);
 
         TalonFXConfiguration config =
                 new TalonFXConfiguration()
                         .withSoftwareLimitSwitch(softwareLimitSwitchConfigs)
                         .withSlot0(ElevatorConstants.slot0Configs)
                         .withMotionMagic(ElevatorConstants.motionMagicConfigs)
-                        .withCurrentLimits(ElevatorConstants.currentLimit);
+                        .withCurrentLimits(ElevatorConstants.currentLimit)
+                        .withFeedback(feedbackConfigs);
 
         elevatorLeader.getConfigurator().apply(config);
         // elevatorFollower.getConfigurator().apply(config);
