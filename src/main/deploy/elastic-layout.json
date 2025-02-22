@@ -162,8 +162,9 @@
             "height": 384.0,
             "type": "Camera Stream",
             "properties": {
-              "topic": "/CameraPublisher/limelight-april",
-              "period": 0.06
+              "topic": "/CameraPublisher/limelight-left",
+              "period": 0.06,
+              "rotation_turns": 0
             }
           },
           {
@@ -174,9 +175,8 @@
             "height": 128.0,
             "type": "Boolean Box",
             "properties": {
-              "topic": "/CameraPublisher/limelight-april/connected",
+              "topic": "/CameraPublisher/limelight-left/connected",
               "period": 0.06,
-              "data_type": "boolean",
               "true_color": 4283215696,
               "false_color": 4294198070,
               "true_icon": "None",
@@ -191,8 +191,9 @@
             "height": 384.0,
             "type": "Camera Stream",
             "properties": {
-              "topic": "/CameraPublisher/limelight-april-right",
-              "period": 0.06
+              "topic": "/CameraPublisher/limelight-right",
+              "period": 0.06,
+              "rotation_turns": 0
             }
           },
           {
@@ -203,9 +204,8 @@
             "height": 128.0,
             "type": "Boolean Box",
             "properties": {
-              "topic": "/CameraPublisher/limelight-april-right/connected",
+              "topic": "/CameraPublisher/limelight-right/connected",
               "period": 0.06,
-              "data_type": "boolean",
               "true_color": 4283215696,
               "false_color": 4294198070,
               "true_icon": "None",

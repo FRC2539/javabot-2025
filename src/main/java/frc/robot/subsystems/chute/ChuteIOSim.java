@@ -7,7 +7,7 @@ public class ChuteIOSim implements ChuteIO {
     private double voltage = 0;
 
     public void updateInputs(ChuteIOInputs inputs) {
-        position += 0.02 * voltage * 20;
+        position += 0.02 * (voltage + 0.5) * 20;
 
         inputs.voltage = voltage;
 

@@ -17,4 +17,6 @@ public interface WristIO {
     }
 
     public void setVoltage(double voltage);
+
+    public void setPositionControl(double reference);
 }

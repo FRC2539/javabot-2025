@@ -2,9 +2,10 @@ package frc.robot.subsystems.wrist;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.WristConstants;
+import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -30,18 +31,22 @@ public class WristSubsystem extends SubsystemBase {
     public void periodic() {
         wristIO.updateInputs(wristInputs);
         Logger.processInputs("RealOutputs/Wrist", wristInputs);
+
+        if (!isSafeToMove()) {
+            wristIO.setVoltage(0);
+        }
     }
 
     public Command turnWristRight() {
-        return setVoltage(12);
+        return setVoltage(1);
     }
 
     public Command turnWristLeft() {
-        return setVoltage(-12);
+        return setVoltage(-1);
     }
 
     public Command tuneableVoltage() {
-        return run(() -> setVoltage(wristTuneable.get()));
+        return run(() -> setVoltageSave(wristTuneable.get()));
     }
 
     public Command tunablePose() {
@@ -49,7 +54,7 @@ public class WristSubsystem extends SubsystemBase {
     }
 
     public Command setVoltage(double voltage) {
-        return run(() -> wristIO.setVoltage(voltage));
+        return run(() -> setVoltageSave(voltage));
     }
 
     public Command setPosition(double position) {
@@ -67,12 +72,12 @@ public class WristSubsystem extends SubsystemBase {
                 .andThen(followReferenceThrubore());
     }
 
-    public Command flipWristPosition() {
-        return Commands.runOnce(
-                () -> {
-                    isWristFlipped = !isWristFlipped;
-                });
-    }
+    // public Command flipWristPosition() {
+    //     return Commands.runOnce(
+    //             () -> {
+    //                 isWristFlipped = !isWristFlipped;
+    //             });
+    // }
 
     private Command followReferenceThrubore() {
         return run(
@@ -83,10 +88,11 @@ public class WristSubsystem extends SubsystemBase {
                                     isWristFlipped ? -reference : reference);
                     if (controller.atSetpoint()) {
                         voltage = 0;
+                        setVoltageSave(voltage);
                     } else {
-                        voltage = Math.min(12.0, Math.max(-12.0, voltage)); // Clamp voltage
+                        voltage = Math.min(12.0, Math.max(-12.0, voltage));
+                        setPositionSave(isWristFlipped ? -reference : reference); // Clamp voltage
                     }
-                    wristIO.setVoltage(voltage);
                 });
     }
 
@@ -106,5 +112,35 @@ public class WristSubsystem extends SubsystemBase {
 
     public boolean isEncoderConnected() {
         return wristInputs.throughboreConnected;
+    }
+
+    public DoubleSupplier elevatorHeight = () -> 0;
+    public DoubleSupplier armHeight = () -> -1;
+
+    @AutoLogOutput
+    private boolean isSafeToMove() {
+        return elevatorHeight.getAsDouble() > 139 || armHeight.getAsDouble() > 0.5;
+    }
+
+    private void setVoltageSave(double voltage) {
+        if (isSafeToMove()) {
+            wristIO.setVoltage(voltage);
+        } else {
+            wristIO.setVoltage(0);
+        }
+        // if (
+        //     wristIO.setVoltage(voltage);
+        // )
+    }
+
+    private void setPositionSave(double referenceInternal) {
+        if (isSafeToMove()) {
+            wristIO.setPositionControl(referenceInternal);
+        } else {
+            wristIO.setVoltage(0);
+        }
+        // if (
+        //     wristIO.setVoltage(voltage);
+        // )
     }
 }
