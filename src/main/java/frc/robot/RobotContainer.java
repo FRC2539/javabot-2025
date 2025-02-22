@@ -435,11 +435,23 @@ public class RobotContainer {
         // rightDriveController.getRightThumb().whileTrue(intakeSubsystem.openAndEject());
 
         CORAL.and(rightDriveController.getBottomThumb())
-                .whileTrue(gripperSubsystem.intakeSpinCoral().until(gripperSubsystem.HAS_PIECE));
+                .whileTrue(
+                        gripperSubsystem
+                                .intakeSpinCoral()
+                                .withDeadline(
+                                        Commands.waitSeconds(0.2)
+                                                .andThen(
+                                                        Commands.waitUntil(
+                                                                gripperSubsystem.HAS_PIECE))));
         CORAL.and(rightDriveController.getTrigger()).whileTrue(gripperSubsystem.ejectSpinCoral());
 
         ALGAE.and(rightDriveController.getBottomThumb()).onTrue(gripperSubsystem.intakeSpinAlgae());
-        ALGAE.and(rightDriveController.getTrigger()).whileTrue(gripperSubsystem.ejectSpinAlgae());
+        ALGAE.and(rightDriveController.getTrigger())
+                .and(stateManager.PROCESSOR)
+                .whileTrue(gripperSubsystem.slowEjectSpinAlgae());
+        ALGAE.and(rightDriveController.getTrigger())
+                .and(stateManager.PROCESSOR.negate())
+                .whileTrue(gripperSubsystem.ejectSpinAlgae());
 
         leftDriveController
                 .getTrigger()

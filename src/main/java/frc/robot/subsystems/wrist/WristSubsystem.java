@@ -88,10 +88,11 @@ public class WristSubsystem extends SubsystemBase {
                                     isWristFlipped ? -reference : reference);
                     if (controller.atSetpoint()) {
                         voltage = 0;
+                        setVoltageSave(voltage);
                     } else {
-                        voltage = Math.min(12.0, Math.max(-12.0, voltage)); // Clamp voltage
+                        voltage = Math.min(12.0, Math.max(-12.0, voltage));
+                        setPositionSave(isWristFlipped ? -reference : reference); // Clamp voltage
                     }
-                    setVoltageSave(voltage);
                 });
     }
 
@@ -124,6 +125,19 @@ public class WristSubsystem extends SubsystemBase {
     private void setVoltageSave(double voltage) {
         if (isSafeToMove()) {
             wristIO.setVoltage(voltage);
+        } else {
+            wristIO.setVoltage(0);
+        }
+        // if (
+        //     wristIO.setVoltage(voltage);
+        // )
+    }
+
+    private void setPositionSave(double referenceInternal) {
+        if (isSafeToMove()) {
+            wristIO.setPositionControl(referenceInternal);
+        } else {
+            wristIO.setVoltage(0);
         }
         // if (
         //     wristIO.setVoltage(voltage);

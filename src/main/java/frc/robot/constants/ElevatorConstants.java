@@ -19,9 +19,9 @@ public class ElevatorConstants {
     ;
     public static final MotionMagicConfigs motionMagicConfigs =
             new MotionMagicConfigs()
-                    .withMotionMagicAcceleration(4) // these are guesses, come back here
-                    .withMotionMagicCruiseVelocity(4) // also guess
-                    .withMotionMagicJerk(4);
+                    .withMotionMagicAcceleration(190 / .3) // these are guesses, come back here
+                    .withMotionMagicCruiseVelocity(190) // also guess
+                    .withMotionMagicJerk(0);
 
     public static final int elevatorLeaderId = 9;
 

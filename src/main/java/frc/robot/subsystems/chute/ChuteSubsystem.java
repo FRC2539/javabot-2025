@@ -92,7 +92,7 @@ public class ChuteSubsystem extends SubsystemBase {
                                 setVoltage(1.5)
                                         .until(STALLING)
                                         .andThen(setDown())
-                                        .andThen(setVoltage(0.5))))
+                                        .andThen(setVoltage(0.0))))
                 .beforeStarting(
                         () -> {
                             isUp = false;

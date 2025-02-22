@@ -1,5 +1,6 @@
 package frc.robot.subsystems.wrist;
 
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel;
@@ -18,27 +19,44 @@ public class WristIONeo550 implements WristIO {
             new DutyCycleEncoder(WristConstants.WRIST_THROUGHBORE_ENCODER_ID, 2 * Math.PI, 0);
 
     public WristIONeo550() {
-        wristMotor.getEncoder().setPosition(0);
-
         SparkBaseConfig config =
                 new SparkMaxConfig()
                         .smartCurrentLimit((int) WristConstants.WristCurrent)
                         .secondaryCurrentLimit(WristConstants.WristCurrent)
                         .idleMode(IdleMode.kBrake);
+
+        config.encoder.positionConversionFactor(Math.PI / 76.1);
+
+        config.closedLoop
+                .p(WristConstants.WRIST_KP / 12)
+                .i(WristConstants.WRIST_KI / 12)
+                .d(WristConstants.WRIST_KD / 12);
+
+        config.softLimit
+                .forwardSoftLimit(WristConstants.upperLimit)
+                .forwardSoftLimitEnabled(true)
+                .reverseSoftLimit(WristConstants.lowerLimit)
+                .reverseSoftLimitEnabled(true);
+
         wristMotor.configure(
                 config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+
+        wristMotor.getEncoder().setPosition(-Math.PI / 2);
     }
 
     private boolean shutdown = false;
 
     private double lastVoltage = 0;
 
+    private boolean usingVoltage = true;
+
     public void updateInputs(WristIOInputs inputs) {
-        inputs.position = wristMotor.getEncoder().getPosition();
         inputs.voltage = wristMotor.getBusVoltage() * wristMotor.getAppliedOutput();
         inputs.current = wristMotor.getOutputCurrent();
         inputs.temperature = wristMotor.getMotorTemperature();
         inputs.throughboreEncoderPosition = throughboreEncoder.get() - 4.22;
+        wristMotor.getEncoder().setPosition(inputs.throughboreEncoderPosition);
+        inputs.position = wristMotor.getEncoder().getPosition();
         inputs.throughboreConnected = throughboreEncoder.isConnected();
 
         if (inputs.temperature > 60) {
@@ -49,23 +67,37 @@ public class WristIONeo550 implements WristIO {
 
         inputs.shutdown = shutdown;
 
-        if (inputs.throughboreEncoderPosition >= WristConstants.upperLimit && lastVoltage > 0) {
+        if (inputs.throughboreEncoderPosition >= WristConstants.upperLimit
+                && (inputs.voltage > 0 || lastVoltage > 0)) {
             lastVoltage = 0;
+            usingVoltage = true;
         }
-        if (inputs.throughboreEncoderPosition <= WristConstants.lowerLimit && lastVoltage < 0) {
+        if (inputs.throughboreEncoderPosition <= WristConstants.lowerLimit
+                && (inputs.voltage < 0 || lastVoltage < 0)) {
             lastVoltage = 0;
+            usingVoltage = true;
         }
         if (!inputs.throughboreConnected) {
             lastVoltage = 0;
+            usingVoltage = true;
         }
         if (shutdown) {
             lastVoltage = 0;
+            usingVoltage = true;
         }
 
-        wristMotor.setVoltage(lastVoltage);
+        if (usingVoltage) {
+            wristMotor.setVoltage(lastVoltage);
+        }
     }
 
     public void setVoltage(double voltage) {
         lastVoltage = voltage;
+        usingVoltage = true;
+    }
+
+    public void setPositionControl(double reference) {
+        wristMotor.getClosedLoopController().setReference(reference, ControlType.kPosition);
+        usingVoltage = false;
     }
 }
