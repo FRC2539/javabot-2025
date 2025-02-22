@@ -109,7 +109,7 @@ public class SuperstructureStateManager extends SubsystemBase {
             NetAlgae(5, 1, 1, NetAlgaePrep),
             Source(1, -2, 1, None),
             AlgaeHome(1, 1, 1, None),
-            Climb(1, 1, 1, ChuteUpNull),
+            Climb(0, 0, 1.58, ChuteUpNull),
             Processor(1, 1, 1, ChuteUpNull),
             IcecreamCoral(1, 1, 1, ChuteUpNull),
             IcecreamAlgae(1, 1, 1, ChuteUpNull),

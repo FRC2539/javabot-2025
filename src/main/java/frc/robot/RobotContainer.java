@@ -359,6 +359,7 @@ public class RobotContainer {
         operatorController.getLeftBumper().onTrue(stateManager.setLeftCoralMode());
         operatorController.getRightBumper().onTrue(stateManager.setRightCoralMode());
         operatorController.getRightTrigger().onTrue(stateManager.setAlgaeMode());
+
         leftDriveController.getRightTopRight().onTrue(stateManager.setArmWristMode());
         operatorController
                 .getLeftJoystick()
@@ -368,7 +369,7 @@ public class RobotContainer {
                                         LightsSubsystem.LEDSegment.MainStrip.setRainbowAnimation(
                                                 1)))); // L3 Rainbow
         operatorController
-                .getLeftTrigger()
+                .getRightJoystick()
                 .whileTrue(
                         Commands.runOnce(
                                 (() ->
@@ -388,6 +389,8 @@ public class RobotContainer {
         CORAL.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3));
         CORAL.and(operatorController.getB()).onTrue(stateManager.moveToPosition(Position.L2));
         CORAL.and(operatorController.getA()).onTrue(stateManager.moveToPosition(Position.L1));
+
+        operatorController.getLeftTrigger().onTrue(stateManager.moveToPosition(Position.Climb));
 
         bindPlaceSeq(operatorController.getY(), Position.L4Prep, Position.L4, 0.1);
 
@@ -441,9 +444,12 @@ public class RobotContainer {
         //         .whileTrue(intakeSubsystem.openAndRun().alongWith(alignToPiece()));
         // rightDriveController.getRightThumb().whileTrue(intakeSubsystem.openAndEject());
 
-        CORAL.and(rightDriveController.getBottomThumb())
+        CORAL.and(rightDriveController.getLeftThumb())
                 .whileTrue(gripperSubsystem.intakeSpinCoral());
-        CORAL.and(DRIVER_TRIGGER.and(normalRelease)).whileTrue(gripperSubsystem.ejectSpinCoral());
+        CORAL.and(rightDriveController.getRightThumb())
+                .whileTrue(
+                        gripperSubsystem
+                                .ejectSpinCoral()); // and(normalRelease)).whileTrue(gripperSubsystem.ejectSpinCoral());
 
         ALGAE.and(rightDriveController.getBottomThumb())
                 .whileTrue(gripperSubsystem.intakeSpinAlgae());
@@ -522,21 +528,19 @@ public class RobotContainer {
     private void bindPlaceSeq(Trigger button, Position prep, Position end, double timeout) {
         (button)
                 .onTrue(
-                        (stateManager
-                                        .moveToPosition(prep)
-                                        .until(AUTO_DRIVER_TRIGGER)
-                                        .andThen(
-                                                stateManager
-                                                        .moveToPosition(end)
-                                                        .alongWith(
-                                                                Commands.waitSeconds(timeout)
-                                                                        .andThen(
-                                                                                gripperSubsystem
-                                                                                        .ejectSpinCoral()))
-                                                        .until(AUTO_DRIVER_TRIGGER.negate())))
-                                .repeatedly()
-                                .beforeStarting(() -> normalRelease.setPressed(false))
-                                .finallyDo(() -> normalRelease.setPressed(true)));
+                        stateManager
+                                .moveToPosition(prep)
+                                .until(AUTO_DRIVER_TRIGGER)
+                                .andThen(stateManager.moveToPosition(end)));
+        //                         .alongWith(
+        //                                 Commands.waitSeconds(timeout)
+        //                                         .andThen(
+        //                                                 gripperSubsystem
+        //                                                         .ejectSpinCoral()))
+        //                         .until(AUTO_DRIVER_TRIGGER.negate())))
+        // .repeatedly()
+        // .beforeStarting(() -> normalRelease.setPressed(false))
+        // .finallyDo(() -> normalRelease.setPressed(true)));
     }
 
     private double deadband(double value, double deadband) {
