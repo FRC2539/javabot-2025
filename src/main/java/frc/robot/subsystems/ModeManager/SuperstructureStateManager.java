@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.FasterRepeatCommand;
 import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState.Position;
 import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.chute.ChuteSubsystem;
@@ -19,6 +20,7 @@ import frc.robot.util.Elastic;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
@@ -406,6 +408,15 @@ public class SuperstructureStateManager extends SubsystemBase {
         return higherPose;
     }
 
+    private SuperstructureState.Position getParenterNodeInBranch(
+            SuperstructureState.Position nodeA, SuperstructureState.Position nodeB) {
+        var lowerPose = nodeA;
+        if (nodeA.parent() == nodeB) {
+            lowerPose = nodeB;
+        }
+        return lowerPose;
+    }
+
     private SuperstructureState.Position internalPosition = Position.Sussy;
 
     /*
@@ -435,15 +446,23 @@ public class SuperstructureStateManager extends SubsystemBase {
                 .alongWith(wristSubsystem.setPosition(lastRealPosition.wristRotation()));
     }
 
+    private static Command unlessUntil(Command command, BooleanSupplier condition) {
+        return command.until(condition).unless(condition);
+    }
+
     public Command moveToPosition(SuperstructureState.Position myPosition) {
         Command setFinalTarget = Commands.runOnce(() -> setFinalTarget(myPosition));
         Command followInPath =
-                followInPath()
-                        .until(
+                unlessUntil(
+                        followInPath(
                                 () -> {
                                     return outList.contains(lastPosition)
                                             && outList.contains(targetPostition);
-                                });
+                                }),
+                        () -> {
+                            return outList.contains(lastPosition)
+                                    && outList.contains(targetPostition);
+                        });
 
         Command clearOutPath =
                 Commands.runOnce(
@@ -457,13 +476,29 @@ public class SuperstructureStateManager extends SubsystemBase {
                                 }
                             }
                         });
-        Command followOutPath = followOutPath();
+
+        Command clearOutPath2 =
+                Commands.runOnce(
+                        () -> {
+                            var childerPose = getChilderNodeInBranch(lastPosition, targetPostition);
+
+                            for (int i = 0; i < 20; i++) {
+                                if (outList.contains(childerPose)
+                                        && outList.get(0) != childerPose) {
+                                    outList.remove(0);
+                                }
+                            }
+                        });
+
+        Command followOutPath = followOutPath(() -> false);
+
+        Command followOutPath2 = followOutPath(() -> false);
 
         Command chuteUp =
-                Commands.waitUntil(() -> chuteCanMove)
+                unlessUntil(Commands.idle(), () -> chuteCanMove)
                         .andThen(chuteSubsystem.moveChuteUp()::schedule);
         Command chuteDown =
-                Commands.waitUntil(() -> chuteCanMove)
+                unlessUntil(Commands.idle(), () -> chuteCanMove)
                         .andThen(chuteSubsystem.moveChuteDown()::schedule);
 
         Command chuteMover =
@@ -471,11 +506,15 @@ public class SuperstructureStateManager extends SubsystemBase {
                         .andThen(chuteDown.onlyIf(() -> outList.contains(Position.ChuteDown)));
 
         Command outputCommand =
-                setFinalTarget.andThen(
-                        followInPath
-                                .andThen(clearOutPath)
-                                .andThen(followOutPath)
-                                .alongWith(chuteMover));
+                setFinalTarget.alongWith(
+                        Commands.either(
+                                clearOutPath.alongWith(followOutPath),
+                                followInPath.andThen(clearOutPath2.alongWith(followOutPath2)),
+                                () -> {
+                                    return outList.contains(lastPosition)
+                                            && outList.contains(targetPostition);
+                                }),
+                        chuteMover);
 
         outputCommand.addRequirements(this);
         return outputCommand;
@@ -503,41 +542,54 @@ public class SuperstructureStateManager extends SubsystemBase {
                 Set.of());
     }
 
-    private Command followOutPath() {
-        return (Commands.defer(
+    private Command followOutPath(BooleanSupplier finisher) {
+        return new FasterRepeatCommand(
+                Commands.defer(
                         () -> {
                             SuperstructureState.Position nextPose = outList.remove(0);
                             if (outList.size() == 0) {
-                                return internalGoToPosition(nextPose)
-                                        .beforeStarting(() -> updateTarget(nextPose));
+                                return Commands.runOnce(() -> updateTarget(nextPose))
+                                        .alongWith(internalGoToPosition(nextPose));
                             }
-                            return internalGoToPosition(nextPose)
-                                    .beforeStarting(() -> updateTarget(nextPose))
-                                    .until(() -> nextPose.isAtTarget(this))
-                                    .andThen(
-                                            () -> {
-                                                lastPosition = nextPose;
-                                            });
+                            return runOnce(() -> updateTarget(nextPose))
+                                    .alongWith(
+                                            unlessUntil(
+                                                    internalGoToPosition(nextPose),
+                                                    () -> {
+                                                        boolean atPose = nextPose.isAtTarget(this);
+                                                        if (atPose) {
+                                                            lastPosition = nextPose;
+                                                        }
+                                                        return atPose;
+                                                    }));
                         },
-                        Set.of(elevatorSubsystem, armSubsystem, wristSubsystem)))
-                .repeatedly();
+                        Set.of(elevatorSubsystem, armSubsystem, wristSubsystem)),
+                finisher);
     }
 
-    private Command followInPath() {
-        return (Commands.defer(
+    private Command followInPath(BooleanSupplier finisher) {
+        return new FasterRepeatCommand(
+                Commands.defer(
                         () -> {
                             SuperstructureState.Position nextPose =
                                     getChilderNodeInBranch(lastPosition, targetPostition).parent();
                             if (nextPose == null) {
                                 return internalGoToPosition(Position.CenterZoneNull);
                             }
-                            return internalGoToPosition(nextPose)
-                                    .beforeStarting(() -> updateTarget(nextPose))
-                                    .until(() -> nextPose.isAtTarget(this))
-                                    .andThen(() -> lastPosition = nextPose);
+                            return runOnce(() -> updateTarget(nextPose))
+                                    .alongWith(
+                                            unlessUntil(
+                                                    internalGoToPosition(nextPose),
+                                                    () -> {
+                                                        boolean atPose = nextPose.isAtTarget(this);
+                                                        if (atPose) {
+                                                            lastPosition = nextPose;
+                                                        }
+                                                        return atPose;
+                                                    }));
                         },
-                        Set.of(elevatorSubsystem, armSubsystem, wristSubsystem)))
-                .repeatedly();
+                        Set.of(elevatorSubsystem, armSubsystem, wristSubsystem)),
+                finisher);
     }
 
     public SuperstructureStateManager(
