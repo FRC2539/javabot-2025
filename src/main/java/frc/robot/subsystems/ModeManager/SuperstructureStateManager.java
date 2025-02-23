@@ -127,8 +127,8 @@ public class SuperstructureStateManager extends SubsystemBase {
                     (a, s, e) -> s.chuteSubsystem.DOWN.getAsBoolean(),
                     (a, s, e) -> !s.chuteSubsystem.DOWN.getAsBoolean()),
             ChuteDownNull(0, 0, 0, ChuteDown, TRUE, FALSE),
-            HandoffPrep(170, -0.5, 1.58, ChuteDownNull),
-            Handoff(132, -0.5, 1.58, HandoffPrep),
+            HandoffPrep(165, -0.5, 1.58, ChuteDownNull),
+            Handoff(130, -0.5, 1.58, HandoffPrep),
             PointUp(170, 2.15, 1.58, CenterZoneNull),
             // (a, s, e) -> {
             //     boolean armChecksOut = s.armSubsystem.getPosition() > 1.0;
@@ -153,12 +153,12 @@ public class SuperstructureStateManager extends SubsystemBase {
                     (a, s, e) -> !s.chuteSubsystem.UP.getAsBoolean()),
             ChuteUpNull(0, 0, 0, ChuteUp, TRUE, FALSE),
             // L1Prep(297, 2.15, -1.58, ChuteUpNull),
-            L1(130, 0.9, 0, UpZoneNull),
+            L1(130, 1.1, 0, UpZoneNull),
             L2Prep(120, 2.15, -1.58, UpZoneNull),
             L2(90, 2.15, -1.58, L2Prep),
             L3Prep(190, 2.15, -1.58, UpZoneNull),
             L3(170, 2.15, -1.58, L3Prep),
-            L4Prep(297, 2.15, -1.58, UpZoneNull),
+            L4Prep(297, 2.2, -1.58, UpZoneNull),
             L4(297, 1.7, -1.58, L4Prep),
             Quick34(250, 0.7, 0, UpZoneNull),
             Quick23(150, 0.7, 0, UpZoneNull),
@@ -172,14 +172,14 @@ public class SuperstructureStateManager extends SubsystemBase {
             AlgaeHome(100, 2.15, -1.58, ChuteUpNull),
             AlgaeHomeNull(0.0, 0.0, 0.0, AlgaeHome, TRUE, FALSE),
             // Climb(170, 0, 1.58, ChuteUpNull),
-            Processor(80, 1.58, -1.58, AlgaeHomeNull),
+            Processor(70, 1.58, -1.58, AlgaeHomeNull),
 
             // IcecreamCoral(170, 0, 1.58, AlgaeHome),
             // IcecreamAlgae(170, 0, 1.58, AlgaeHome),
             GroundAlgaePrep(65, 1.58, 1.58, AlgaeHomeNull),
             GroundAlgae(20, 1.58, 1.58, GroundAlgaePrep),
             StartPrepPrepPrep(170, 2.15, 1.58, ChuteUpNull),
-            StartPrepPrep(140, 0, 1.58, StartPrepPrepPrep),
+            StartPrepPrep(140, 0,  1.58, StartPrepPrepPrep),
             StartPrep(140, 0, -1.58, StartPrepPrep),
             Start(0, 0, -1.58, StartPrep),
             Climb(10, 0, -1.58, StartPrep),
@@ -294,6 +294,7 @@ public class SuperstructureStateManager extends SubsystemBase {
     private SuperstructureState.Position lastRealPosition = Position.Home;
 
     private Pose2d lastScoringPose = Pose2d.kZero;
+    private double lastScoringOffset = 0;
 
     @AutoLogOutput private boolean chuteCanMove = false;
 
@@ -305,6 +306,14 @@ public class SuperstructureStateManager extends SubsystemBase {
         return lastScoringPose;
     }
 
+    public void setLastScoringOffset(double offset) {
+        lastScoringOffset = offset;
+    }
+
+    public double getLastScoringOffset() {
+        return lastScoringOffset;
+    }
+
     public final Trigger LEFT_CORAL = new Trigger(() -> coralAlgaeMode == CoralAlgaeMode.LeftCoral);
     public final Trigger RIGHT_CORAL =
             new Trigger(() -> coralAlgaeMode == CoralAlgaeMode.RightCoral);
@@ -312,6 +321,10 @@ public class SuperstructureStateManager extends SubsystemBase {
     public final Trigger ARMWRIST = new Trigger(() -> coralAlgaeMode == CoralAlgaeMode.ArmWrist);
 
     public final Trigger PROCESSOR = new Trigger(() -> trueFinalTarget == Position.Processor);
+
+    public final Trigger STATION_HANDOFF = new Trigger(() -> trueFinalTarget == Position.Handoff || trueFinalTarget == Position.HandoffPrep);
+
+    public final Trigger STATION_GRIPPER = new Trigger(() -> trueFinalTarget == Position.Source);
 
     public Command setLeftCoralMode() {
         return Commands.runOnce(() -> coralAlgaeMode = CoralAlgaeMode.LeftCoral);

@@ -57,6 +57,7 @@ import frc.robot.subsystems.lights.LightsSubsystem;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.DummyPhotonCamera;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSimML;
 import frc.robot.subsystems.wrist.WristIONeo550;
@@ -107,18 +108,16 @@ public class RobotContainer {
             vision =
                     new Vision(
                             drivetrain::addVisionMeasurement,
-                            new DummyPhotonCamera(),
-                            new DummyPhotonCamera(),
-                            new DummyPhotonCamera());
-            //     new VisionIOLimelight(
-            //             VisionConstants.camera0Name,
-            //             () -> drivetrain.getRobotPose().getRotation()),
-            //     new VisionIOLimelight(
-            //             VisionConstants.camera1Name,
-            //             () -> drivetrain.getRobotPose().getRotation()),
-            //     new VisionIOLimelight(
-            //             VisionConstants.camera2Name,
-            //             () -> drivetrain.getRobotPose().getRotation()));
+                        //     new DummyPhotonCamera(),
+                        //     new DummyPhotonCamera(),
+                        //     new DummyPhotonCamera());
+                new VisionIOLimelight(
+                        VisionConstants.camera0Name,
+                        () -> drivetrain.getRobotPose().getRotation()),
+                new VisionIOLimelight(
+                        VisionConstants.camera1Name,
+                        () -> drivetrain.getRobotPose().getRotation()),
+                new DummyPhotonCamera());
             gripperSubsystem =
                     new GripperSubsystem(new GripperIOFalcon()); // new GripperIOFalcon());
             elevatorSubsystem =
@@ -215,10 +214,18 @@ public class RobotContainer {
 
         final Trigger EJECT_TRIGGER = rightDriveController.getTrigger();
         final Trigger ALIGN_TRIGGER = rightDriveController.getBottomThumb();
+        final Trigger NORMAL_ALIGN = (stateManager.STATION_GRIPPER.or(stateManager.STATION_HANDOFF).or(stateManager.PROCESSOR)).negate();
 
-        USING_AUTO_ALIGN = new Trigger(() -> false);
+        USING_AUTO_ALIGN = new Trigger(ALIGN_TRIGGER);
 
-        AUTO_ALIGNED = new Trigger(() -> false);
+        AUTO_ALIGNED =
+                new Trigger(
+                        () -> {
+                            return Auto.robotInPlace(
+                                    drivetrain.getRobotPose(),
+                                    stateManager.getLastScoringPose(),
+                                    stateManager.getLastScoringOffset());
+                        });
 
         AUTO_DRIVER_TRIGGER = (USING_AUTO_ALIGN.negate().or(AUTO_ALIGNED)).and(DROP_TRIGGER);
 
@@ -376,21 +383,34 @@ public class RobotContainer {
         operatorController.getRightBumper().onTrue(stateManager.setRightCoralMode());
         operatorController.getRightTrigger().onTrue(stateManager.setAlgaeMode());
 
-        leftDriveController.getRightTopRight().onTrue(stateManager.setArmWristMode());
-        operatorController
-                .getLeftJoystick()
-                .toggleOnTrue(
-                        Commands.runOnce(
-                                (() ->
-                                        LightsSubsystem.LEDSegment.MainStrip.setRainbowAnimation(
-                                                1)))); // L3 Rainbow
-        operatorController
-                .getRightJoystick()
-                .whileTrue(
-                        Commands.runOnce(
+        Trigger LEFT_JOYSTICK_BUMP =
+                new Trigger(
+                        () ->
+                                Math.hypot(
+                                                operatorController.getLeftXAxis().get(),
+                                                operatorController.getLeftYAxis().get())
+                                        > 0.3);
+
+        LEFT_JOYSTICK_BUMP.toggleOnTrue(
+                lights.runEnd(
                                 (() ->
                                         LightsSubsystem.LEDSegment.MainStrip.setStrobeAnimation(
-                                                LightsSubsystem.purple, 1)))); // L2 tation Lights
+                                                LightsSubsystem.purple, 1)),
+                                () -> {})
+                        .withTimeout(5)); // L2 tation Lights
+
+        Trigger RIGHT_JOYSTICK_BUMP =
+                new Trigger(
+                        () ->
+                                Math.hypot(
+                                                operatorController.getRightXAxis().get(),
+                                                operatorController.getRightYAxis().get())
+                                        > 0.3);
+
+        RIGHT_JOYSTICK_BUMP.toggleOnTrue(
+                lights.runEnd(
+                        (() -> LightsSubsystem.LEDSegment.MainStrip.setRainbowAnimation(1)),
+                        () -> {})); // L3 Rainbow
 
         // Coral Mode Bindings
         final Trigger CORAL = stateManager.LEFT_CORAL.or(stateManager.RIGHT_CORAL);
@@ -469,6 +489,8 @@ public class RobotContainer {
         //         .whileTrue(intakeSubsystem.openAndRun().alongWith(alignToPiece()));
         // rightDriveController.getRightThumb().whileTrue(intakeSubsystem.openAndEject());
 
+        lights.setAlgaeModeSupplier(gripperSubsystem.HAS_PIECE);
+
         CORAL.and(rightDriveController.getLeftThumb())
                 .whileTrue(
                         gripperSubsystem
@@ -488,28 +510,63 @@ public class RobotContainer {
                 .and(stateManager.PROCESSOR.negate())
                 .whileTrue(gripperSubsystem.ejectSpinAlgae());
 
-        leftDriveController
-                .getTrigger()
-                .onTrue(
-                        Commands.runOnce(
-                                () ->
-                                        stateManager.setLastScoringPose(
-                                                drivetrain.findNearestAprilTagPose())));
+        ALIGN_TRIGGER.and(NORMAL_ALIGN).onTrue(
+                Commands.runOnce(
+                        () ->
+                                stateManager.setLastScoringPose(
+                                        drivetrain.findNearestAprilTagPose())));
 
         stateManager
                 .LEFT_CORAL
-                .and(ALIGN_TRIGGER)
+                .and(ALIGN_TRIGGER.and(NORMAL_ALIGN))
                 .whileTrue(alignToReef(AligningConstants.leftOffset));
 
         stateManager
                 .ALGAE
-                .and(ALIGN_TRIGGER)
+                .and(ALIGN_TRIGGER.and(NORMAL_ALIGN))
                 .whileTrue(alignToReef(AligningConstants.centerOffset));
 
         stateManager
                 .RIGHT_CORAL
-                .and(ALIGN_TRIGGER)
+                .and(ALIGN_TRIGGER.and(NORMAL_ALIGN))
                 .whileTrue(alignToReef(AligningConstants.rightOffset));
+
+
+        // stateManager
+        //         .ALGAE
+        //         .and(ALIGN_TRIGGER.and(stateManager.PROCESSOR))
+        //         .whileTrue(alignToProcessor());
+
+        // stateManager
+        //         .LEFT_CORAL
+        //         .and(ALIGN_TRIGGER.and(stateManager.STATION_GRIPPER))
+        //         .whileTrue(alignToStation(0.6, Rotation2d.kZero));
+
+        // stateManager
+        //         .ALGAE
+        //         .and(ALIGN_TRIGGER.and(stateManager.STATION_GRIPPER))
+        //         .whileTrue(alignToStation(0.0, Rotation2d.kZero));
+
+        // stateManager
+        //         .RIGHT_CORAL
+        //         .and(ALIGN_TRIGGER.and(stateManager.STATION_GRIPPER))
+        //         .whileTrue(alignToStation(-0.6, Rotation2d.kZero));
+
+        // stateManager
+        //         .LEFT_CORAL
+        //         .and(ALIGN_TRIGGER.and(stateManager.STATION_HANDOFF))
+        //         .whileTrue(alignToStation(0.6, Rotation2d.k180deg));
+
+        // stateManager
+        //         .ALGAE
+        //         .and(ALIGN_TRIGGER.and(stateManager.STATION_HANDOFF))
+        //         .whileTrue(alignToStation(0.0, Rotation2d.k180deg));
+
+        // stateManager
+        //         .RIGHT_CORAL
+        //         .and(ALIGN_TRIGGER.and(stateManager.STATION_HANDOFF))
+        //         .whileTrue(alignToStation(-0.6, Rotation2d.k180deg));
+        
         // Technical Bindings
 
         leftDriveController.getLeftBottomMiddle().onTrue(climberSubsystem.zeroClimberCommand());
@@ -570,7 +627,7 @@ public class RobotContainer {
                 .onTrue(
                         (stateManager
                                         .moveToPosition(prep)
-                                        .until(AUTO_DRIVER_TRIGGER)
+                                        .until(DROP_TRIGGER)
                                         .andThen(
                                                 stateManager
                                                         .moveToPosition(end)
@@ -583,7 +640,7 @@ public class RobotContainer {
                                                         //       gripperSubsystem
                                                         //
                                                         //               .ejectSpinCoral()))
-                                                        .until(AUTO_DRIVER_TRIGGER.negate())))
+                                                        .until(DROP_TRIGGER.negate())))
                                 .repeatedly()
                                 .beforeStarting(() -> normalRelease.setPressed(false))
                                 .finallyDo(() -> normalRelease.setPressed(true)));
@@ -605,7 +662,7 @@ public class RobotContainer {
         return auto.getAuto();
     }
 
-    public Command alignToReef(int tag, double offset) {
+    public Command alignToReef(int tag, double offset, Rotation2d rotOffset) {
         Pose2d alignmentPose =
                 VisionConstants.aprilTagLayout
                         .getTagPose(tag)
@@ -614,7 +671,7 @@ public class RobotContainer {
                         .plus(
                                 new Transform2d(
                                         new Translation2d(Units.feetToMeters(3) / 2, offset),
-                                        new Rotation2d()));
+                                        rotOffset));
         return new AlignToReef(
                 drivetrain,
                 leftJoystickVelocityX,
@@ -624,29 +681,35 @@ public class RobotContainer {
                 Rotation2d.kPi);
     }
 
+    public Command alignToReef(int tag, double offset) {
+        return alignToReef(tag, offset, Rotation2d.kZero);
+    }
+
     // Automatically chooses closest tag
     public Command alignToReef(double offset) {
         return Commands.defer(
-                () -> {
-                    Pose2d alignmentPose =
-                            stateManager
-                                    .getLastScoringPose()
-                                    .plus(
-                                            new Transform2d(
-                                                    new Translation2d(
-                                                            Units.feetToMeters(3) / 2, offset),
-                                                    new Rotation2d()));
-                    //         return new AlignAndDriveToReef(drivetrain, 0, alignmentPose,
-                    // Rotation2d.kPi);
-                    return new AlignToReef(
-                            drivetrain,
-                            leftJoystickVelocityX,
-                            leftJoystickVelocityY,
-                            0,
-                            alignmentPose,
-                            Rotation2d.kPi);
-                },
-                Set.of(drivetrain));
+                        () -> {
+                            Pose2d alignmentPose =
+                                    stateManager
+                                            .getLastScoringPose()
+                                            .plus(
+                                                    new Transform2d(
+                                                            new Translation2d(
+                                                                    Units.feetToMeters(3) / 2,
+                                                                    offset),
+                                                            new Rotation2d()));
+                            //         return new AlignAndDriveToReef(drivetrain, 0, alignmentPose,
+                            // Rotation2d.kPi);
+                            return new AlignToReef(
+                                    drivetrain,
+                                    leftJoystickVelocityX,
+                                    leftJoystickVelocityY,
+                                    0,
+                                    alignmentPose,
+                                    Rotation2d.kPi);
+                        },
+                        Set.of(drivetrain))
+                .beforeStarting(() -> stateManager.setLastScoringOffset(offset));
     }
 
     public Command alignAndDriveToReef(int tag, double offset) {
@@ -701,5 +764,31 @@ public class RobotContainer {
                 () -> {
                     return DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
                 });
+    }
+
+    public Command alignToStation(double offset, Rotation2d rotOffset) {
+        // getAlignmentcolor 3 = r
+        // set a trigger based on the thumbpad
+        //
+        return 
+                Commands.defer(() -> {
+                        int closestTag = 0;
+                        Pose2d currentPose = drivetrain.getRobotPose();
+                        if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
+                                if (currentPose.getY() > 4.026) {
+                                        closestTag = 2;
+                                } else {
+                                        closestTag = 1;
+                                }
+                        } else {
+                                if (currentPose.getY() > 4.026) {
+                                        closestTag = 13;
+                                } else {
+                                        closestTag = 12;
+                                }
+                        }
+                        return alignToReef(closestTag, offset, rotOffset);
+                }, Set.of(drivetrain));
+                
     }
 }

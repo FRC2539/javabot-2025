@@ -48,7 +48,7 @@ public class AlignToReef extends Command {
         yController.setSetpoint(offset);
         thetaController.enableContinuousInput(0, 2 * Math.PI);
         thetaController.setTolerance(Units.degreesToRadians(0.5));
-        yController.setTolerance(Units.inchesToMeters(0.4));
+        yController.setTolerance(Units.inchesToMeters(0.2));
     }
 
     @Override
