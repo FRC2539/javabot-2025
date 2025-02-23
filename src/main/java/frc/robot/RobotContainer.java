@@ -515,27 +515,25 @@ public class RobotContainer {
                 .and(stateManager.PROCESSOR.negate())
                 .whileTrue(gripperSubsystem.ejectSpinAlgae());
 
-        ALIGN_TRIGGER
-                .and(NORMAL_ALIGN)
-                .onTrue(
-                        Commands.runOnce(
-                                () ->
-                                        stateManager.setLastScoringPose(
-                                                drivetrain.findNearestAprilTagPose())));
+        ALIGN_TRIGGER.onTrue(
+                Commands.runOnce(
+                        () ->
+                                stateManager.setLastScoringPose(
+                                        drivetrain.findNearestAprilTagPose())));
 
         stateManager
                 .LEFT_CORAL
-                .and(ALIGN_TRIGGER.and(NORMAL_ALIGN))
+                .and(ALIGN_TRIGGER)
                 .whileTrue(alignToReef(AligningConstants.leftOffset));
 
         stateManager
                 .ALGAE
-                .and(ALIGN_TRIGGER.and(NORMAL_ALIGN))
+                .and(ALIGN_TRIGGER)
                 .whileTrue(alignToReef(AligningConstants.centerOffset));
 
         stateManager
                 .RIGHT_CORAL
-                .and(ALIGN_TRIGGER.and(NORMAL_ALIGN))
+                .and(ALIGN_TRIGGER)
                 .whileTrue(alignToReef(AligningConstants.rightOffset));
 
         // stateManager
