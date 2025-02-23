@@ -8,7 +8,7 @@ public class AligningConstants {
     public static final double Ki = 0.0;
     public static final double Kd = 0.0;
 
-    public static final double leftOffset = -0.18;
-    public static final double rightOffset = 0.2;
-    public static final double centerOffset = 0;
+    public static final double leftOffset = -0.18 + 0.08;
+    public static final double rightOffset = 0.2 + 0.03;
+    public static final double centerOffset = 0 + 0.05;
 }

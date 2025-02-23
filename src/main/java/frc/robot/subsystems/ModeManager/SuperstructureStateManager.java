@@ -129,15 +129,28 @@ public class SuperstructureStateManager extends SubsystemBase {
                     (a, s, e) -> s.chuteSubsystem.DOWN.getAsBoolean(),
                     (a, s, e) -> !s.chuteSubsystem.DOWN.getAsBoolean()),
             ChuteDownNull(0, 0, 0, ChuteDown, TRUE, FALSE),
-            HandoffPrep(165, -0.5, 1.58, ChuteDownNull),
-            Handoff(130, -0.5, 1.58, HandoffPrep),
-            PointUp(170, 2.15, 1.58, CenterZoneNull),
-            // (a, s, e) -> {
-            //     boolean armChecksOut = s.armSubsystem.getPosition() > 1.0;
+            HandoffPrep(165, -0.45, 1.58, ChuteDownNull),
+            Handoff(130, -0.45, 1.58, HandoffPrep),
+            PointUpPrep(170, 0.5, 1.58, Home,
+            (a, s, e) -> {
+                // boolean armChecksOut = s.armSubsystem.getPosition() > 0.5;
+                boolean wristAtPosition = Math.abs(s.wristSubsystem.getFlippedPosition() -
+            a.wristRotation()) < 0.1;
+                boolean elevatorAtPosition =
+                            s.elevatorSubsystem.getPosition() > 165;
+                return elevatorAtPosition && wristAtPosition;
+                // return armChecksOut && wristAtPosition && elevatorAtPosition;
+            }, TRUE),
+            PointUp(170, 2.15, 1.58, PointUpPrep,
+            (a, s, e) -> {
+                boolean armChecksOut = s.armSubsystem.getPosition() > 0.5;
             //     boolean wristAtPosition = Math.abs(s.wristSubsystem.getFlippedPosition() -
             // a.wristRotation()) < 0.1;
-            //     return armChecksOut && wristAtPosition;
-            // }, TRUE),
+            //     boolean elevatorAtPosition =
+            //                 Math.abs(s.elevatorSubsystem.getPosition() - a.elevatorHeight()) < 1.5;
+            return armChecksOut;
+                // return armChecksOut; && wristAtPosition && elevatorAtPosition;
+            }, TRUE),
             UpZoneNull(0, 0, 0, PointUp, TRUE, FALSE),
             ChuteUpPre(
                     170,
@@ -156,10 +169,10 @@ public class SuperstructureStateManager extends SubsystemBase {
             ChuteUpNull(0, 0, 0, ChuteUp, TRUE, FALSE),
             // L1Prep(297, 2.15, -1.58, ChuteUpNull),
             L1(130, 1.1, 0, UpZoneNull),
-            L2Prep(120, 2.15, -1.58, UpZoneNull),
-            L2(90, 2.15, -1.58, L2Prep),
-            L3Prep(190, 2.15, -1.58, UpZoneNull),
-            L3(170, 2.15, -1.58, L3Prep),
+            L2Prep(120, 2.2, -1.58, UpZoneNull),
+            L2(90, 2.2, -1.58, L2Prep),
+            L3Prep(190, 2.2, -1.58, UpZoneNull),
+            L3(160, 2.2, -1.58, L3Prep),
             L4Prep(297, 2.2, -1.58, UpZoneNull),
             L4(297, 1.7, -1.58, L4Prep),
             Quick34(250, 0.7, 0, UpZoneNull),

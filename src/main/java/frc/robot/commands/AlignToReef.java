@@ -10,6 +10,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import java.util.function.DoubleSupplier;
 
+import org.littletonrobotics.junction.Logger;
+
 public class AlignToReef extends Command {
     private CommandSwerveDrivetrain drivetrain;
 
@@ -43,6 +45,8 @@ public class AlignToReef extends Command {
         // Camera id
         // tagId
         // Rotation to face the tag
+        Logger.recordOutput("/AutoAlign/Pose", targetPose);
+        Logger.recordOutput("/AutoAlign/Offset", offset);
 
         thetaController.setSetpoint(rotationOffset.getRadians());
         yController.setSetpoint(offset);
