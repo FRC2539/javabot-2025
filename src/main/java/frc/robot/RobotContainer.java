@@ -108,15 +108,15 @@ public class RobotContainer {
                             new DummyPhotonCamera(),
                             new DummyPhotonCamera(),
                             new DummyPhotonCamera());
-            //     new VisionIOLimelight(
-            //             VisionConstants.camera0Name,
-            //             () -> drivetrain.getRobotPose().getRotation()),
-            //     new VisionIOLimelight(
-            //             VisionConstants.camera1Name,
-            //             () -> drivetrain.getRobotPose().getRotation()),
-            //     new VisionIOLimelight(
-            //             VisionConstants.camera2Name,
-            //             () -> drivetrain.getRobotPose().getRotation()));
+                new VisionIOLimelight(
+                        VisionConstants.camera0Name,
+                        () -> drivetrain.getRobotPose().getRotation()),
+                new VisionIOLimelight(
+                        VisionConstants.camera1Name,
+                        () -> drivetrain.getRobotPose().getRotation()),
+                new VisionIOLimelight(
+                        VisionConstants.camera2Name,
+                        () -> drivetrain.getRobotPose().getRotation()));
             gripperSubsystem =
                     new GripperSubsystem(new GripperIOFalcon()); // new GripperIOFalcon());
             elevatorSubsystem =

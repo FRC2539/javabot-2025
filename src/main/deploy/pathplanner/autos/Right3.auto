@@ -19,61 +19,7 @@
         {
           "type": "named",
           "data": {
-            "name": "place"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "E-RCS"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "RCS-D"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "height L4"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "place"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "D-RCS"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "RCS-C"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "height L4"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "place"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "C-RCS"
+            "name": "align"
           }
         }
       ]
