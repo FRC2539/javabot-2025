@@ -253,13 +253,11 @@ public class Auto {
         NamedCommands.registerCommand(
                 "wait", Commands.waitUntil(() -> armInPlace() && robotInPlace()));
 
-        NamedCommands.registerCommand(
-                    "wait arm", Commands.waitUntil(() -> armInPlace()));
+        NamedCommands.registerCommand("wait arm", Commands.waitUntil(() -> armInPlace()));
 
-        NamedCommands.registerCommand(
-                        "wait pose", Commands.waitUntil(() -> robotInPlace()));
+        NamedCommands.registerCommand("wait pose", Commands.waitUntil(() -> robotInPlace()));
 
-        Command alignCommand = 
+        Command alignCommand =
                 Commands.defer(
                         () ->
                                 robotContainer.alignAndDriveToReef(
@@ -291,15 +289,21 @@ public class Auto {
                 robotContainer.gripperSubsystem.ejectSpinCoral().withTimeout(placeTimeout);
         NamedCommands.registerCommand("score", scoreCommand.asProxy());
 
-        Command intakeCommand = robotContainer.gripperSubsystem.intakeSpinCoral().until(() -> robotContainer.gripperSubsystem.hasPiece()); // TODO: TIMEOUT 
+        Command intakeCommand =
+                robotContainer
+                        .gripperSubsystem
+                        .intakeSpinCoral()
+                        .until(() -> robotContainer.gripperSubsystem.hasPiece()); // TODO: TIMEOUT
         NamedCommands.registerCommand("intake", intakeCommand.asProxy());
 
-        NamedCommands.registerCommand("placenoalign", Commands.race(armCommand.asProxy(), 
-        Commands.sequence(Commands.waitUntil(() -> armInPlace()), scoreCommand.asProxy())));
+        NamedCommands.registerCommand(
+                "placenoalign",
+                Commands.race(
+                        armCommand.asProxy(),
+                        Commands.sequence(
+                                Commands.waitUntil(() -> armInPlace()), scoreCommand.asProxy())));
 
-
-        
-        //spotless:off
+        // spotless:off
         Command placeCommand =
                 prepArmCommand.asProxy()
                 .until(() -> robotInPlace()) // Wait until arm and align are in position
