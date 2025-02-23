@@ -358,4 +358,17 @@ public class Auto {
                 && ((Math.abs(relativePos.getRotation().getRadians()) % Math.PI)
                         < Units.degreesToRadians(2));
     }
+
+    public static boolean robotInPlace(Pose2d robotPose, Pose2d pose, double offset) {
+        Pose2d alignmentPose =
+                pose.plus(
+                        new Transform2d(
+                                new Translation2d(Units.feetToMeters(3) / 2, offset),
+                                Rotation2d.k180deg));
+        Pose2d offsetPose = robotPose.relativeTo(alignmentPose);
+        return (offsetPose.getX() > -Units.inchesToMeters(0.7))
+                && (Math.abs(offsetPose.getY()) < Units.inchesToMeters(0.7))
+                && ((Math.abs(offsetPose.getRotation().getRadians()) % (2 * Math.PI))
+                        < Units.degreesToRadians(2));
+    }
 }

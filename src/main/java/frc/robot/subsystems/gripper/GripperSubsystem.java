@@ -1,6 +1,7 @@
 package frc.robot.subsystems.gripper;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.Logger;
@@ -22,7 +23,7 @@ public class GripperSubsystem extends SubsystemBase {
 
     public GripperSubsystem(GripperIO armrollerIO) {
         this.piviotIO = armrollerIO;
-        setDefaultCommand(setVoltage(0));
+        setDefaultCommand(Commands.either(holdCoral(), setVoltage(0), HAS_PIECE));
     }
 
     public void periodic() {
@@ -40,6 +41,10 @@ public class GripperSubsystem extends SubsystemBase {
 
     public Command intakeSpinCoral() {
         return setVoltage(12);
+    }
+
+    public Command holdCoral() {
+        return setVoltage(0.25);
     }
 
     public Command ejectSpinCoral() {

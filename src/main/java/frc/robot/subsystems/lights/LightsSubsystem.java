@@ -12,6 +12,7 @@ import com.ctre.phoenix.led.LarsonAnimation.BounceMode;
 import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.SingleFadeAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -24,15 +25,15 @@ public class LightsSubsystem extends SubsystemBase {
         public static final int SENSOR_PORT = 0;
     }
 
-    private BooleanSupplier hasPiece = () -> false;
+    private BooleanSupplier algaeMode = () -> false;
 
     private static final CANdle candle;
 
-    private static final boolean isReal = false;
+    private static final boolean isReal = true;
 
     static {
-        if (RobotBase.isReal() && false) {
-            candle = new CANdle(LightsConstants.CANDLE_PORT);
+        if (RobotBase.isReal() && isReal) {
+            candle = new CANdle(LightsConstants.CANDLE_PORT, "CANivore");
         } else {
             candle = null;
         }
@@ -73,25 +74,30 @@ public class LightsSubsystem extends SubsystemBase {
     }
 
     public Command defaultCommand() {
-        return run(
-                () -> {
+        return run(() -> {
                     LEDSegment.BatteryIndicator.fullClear();
                     LEDSegment.DriverstationIndicator.fullClear();
                     LEDSegment.ExtraAIndicator.fullClear();
                     LEDSegment.ExtraBIndicator.fullClear();
                     LEDSegment.PivotEncoderIndicator.fullClear();
 
-                    if (hasPiece.getAsBoolean()) {
-                        LightsSubsystem.LEDSegment.MainStrip.setStrobeAnimation(
-                                LightsSubsystem.white, 0.3);
+                    if (DriverStation.isEnabled()) {
+                        if (algaeMode.getAsBoolean()) {
+                            LightsSubsystem.LEDSegment.MainStrip.setStrobeAnimation(
+                                    LightsSubsystem.white, 0.3);
+                        } else {
+                            LEDSegment.MainStrip.setColor(orange);
+                        }
                     } else {
-                        LEDSegment.MainStrip.setColor(orange);
+
+                        LEDSegment.MainStrip.setFadeAnimation(orange, 0.2);
                     }
-                });
+                })
+                .ignoringDisable(true);
     }
 
-    public void setHasPieceSupplier(BooleanSupplier hasPiece) {
-        this.hasPiece = hasPiece;
+    public void setAlgaeModeSupplier(BooleanSupplier algaeMode) {
+        this.algaeMode = algaeMode;
     }
 
     public Command clearSegmentCommand(LEDSegment segment) {
