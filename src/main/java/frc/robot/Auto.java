@@ -234,7 +234,7 @@ public class Auto {
         L3(Position.L3, Position.L3Prep),
         L4(Position.L4, Position.L4Prep),
         Source(Position.Source, Position.Source),
-        Handoff(Position.HandoffPrep, Position.HandoffPrep);
+        Handoff(Position.Handoff, Position.HandoffPrep);
 
         public Position position;
         public double armMotorSpeed;
@@ -254,6 +254,8 @@ public class Auto {
                 "wait", Commands.waitUntil(() -> armInPlace() && robotInPlace()));
 
         NamedCommands.registerCommand("wait arm", Commands.waitUntil(() -> armInPlace()));
+
+        NamedCommands.registerCommand("wait prep", Commands.waitUntil(() -> armInPrep()));
 
         NamedCommands.registerCommand("wait pose", Commands.waitUntil(() -> robotInPlace()));
 
@@ -293,7 +295,10 @@ public class Auto {
                 robotContainer
                         .gripperSubsystem
                         .intakeSpinCoral()
-                        .until(() -> robotContainer.gripperSubsystem.hasPiece()); // TODO: TIMEOUT
+                        .withDeadline(
+                                Commands.waitUntil(() -> robotContainer.gripperSubsystem.hasPiece())
+                                        .andThen(Commands.waitSeconds(0.75))
+                                        .withTimeout(5)); // TODO: TIMEOUT
         NamedCommands.registerCommand("intake", intakeCommand.asProxy());
 
         NamedCommands.registerCommand(
@@ -308,11 +313,11 @@ public class Auto {
                 prepArmCommand.asProxy()
                 .until(() -> robotInPlace()) // Wait until arm and align are in position
                 .andThen(
-                    (
-                        Commands.waitUntil(() -> armInPlace())
+                    Commands.waitSeconds(1).andThen((
+                        Commands.waitSeconds(0.5).andThen(Commands.waitUntil(() -> armInPlace()))
                         .andThen(scoreCommand.asProxy())
                     )
-                    .deadlineFor(armCommand.asProxy())
+                    .deadlineFor(armCommand.asProxy()))
                 )
                 .deadlineFor(alignCommand);
 
@@ -367,7 +372,8 @@ public class Auto {
                         .plus(
                                 new Transform2d(
                                         new Translation2d(
-                                                Units.feetToMeters(3) / 2, targetLocation.offset),
+                                                AligningConstants.reefDistance,
+                                                targetLocation.offset),
                                         Rotation2d.k180deg));
         Logger.recordOutput("Auto/Physical Target Pose", alignmentPose);
         Pose2d currentPose = robotContainer.drivetrain.getRobotPose();
@@ -376,19 +382,6 @@ public class Auto {
         return (Math.abs(relativePos.getX()) < Units.inchesToMeters(0.7))
                 && (Math.abs(relativePos.getY()) < Units.inchesToMeters(0.7))
                 && ((Math.abs(relativePos.getRotation().getRadians()) % Math.PI)
-                        < Units.degreesToRadians(2));
-    }
-
-    public static boolean robotInPlace(Pose2d robotPose, Pose2d pose, double offset) {
-        Pose2d alignmentPose =
-                pose.plus(
-                        new Transform2d(
-                                new Translation2d(Units.feetToMeters(3) / 2, offset),
-                                Rotation2d.k180deg));
-        Pose2d offsetPose = robotPose.relativeTo(alignmentPose);
-        return (offsetPose.getX() > -Units.inchesToMeters(0.7))
-                && (Math.abs(offsetPose.getY()) < Units.inchesToMeters(0.7))
-                && ((Math.abs(offsetPose.getRotation().getRadians()) % (2 * Math.PI))
                         < Units.degreesToRadians(2));
     }
 }

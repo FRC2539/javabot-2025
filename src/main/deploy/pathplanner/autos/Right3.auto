@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "height L3"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "RStart-E"
@@ -13,7 +19,26 @@
         {
           "type": "named",
           "data": {
-            "name": "height L4"
+            "name": "height L3"
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "wait prep"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "preparm"
+                }
+              }
+            ]
           }
         },
         {
@@ -43,7 +68,26 @@
         {
           "type": "named",
           "data": {
-            "name": "height L4"
+            "name": "height L3"
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "wait prep"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "preparm"
+                }
+              }
+            ]
           }
         },
         {
@@ -73,7 +117,26 @@
         {
           "type": "named",
           "data": {
-            "name": "height L4"
+            "name": "height L3"
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "wait prep"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "preparm"
+                }
+              }
+            ]
           }
         },
         {

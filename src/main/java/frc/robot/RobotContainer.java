@@ -12,7 +12,6 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -223,7 +222,7 @@ public class RobotContainer {
         AUTO_ALIGNED =
                 new Trigger(
                         () -> {
-                            return Auto.robotInPlace(
+                            return AligningConstants.robotInPlace(
                                     drivetrain.getRobotPose(),
                                     stateManager.getLastScoringPose(),
                                     stateManager.getLastScoringOffset());
@@ -473,7 +472,12 @@ public class RobotContainer {
         ALGAE.and(operatorController.getDPadRight())
                 .onTrue(stateManager.moveToPosition(Position.Quick23));
 
-        // operatorController.getBack().onTrue(wristSubsystem.flipWristPosition());
+        operatorController
+                .getBack()
+                .whileTrue(
+                        stateManager
+                                .moveToPosition(Position.HandoffSus)
+                                .alongWith(gripperSubsystem.intakeSpinCoral()));
 
         // Driver Align Bindings, for a different/later day
         // CORAL.and(leftDriveController.getTrigger()).whileTrue(alignToReef(9, 0));
@@ -671,7 +675,7 @@ public class RobotContainer {
                         .toPose2d()
                         .plus(
                                 new Transform2d(
-                                        new Translation2d(Units.feetToMeters(3) / 2, offset),
+                                        new Translation2d(AligningConstants.reefDistance, offset),
                                         rotOffset));
         return new AlignToReef(
                 drivetrain,
@@ -696,7 +700,7 @@ public class RobotContainer {
                                             .plus(
                                                     new Transform2d(
                                                             new Translation2d(
-                                                                    Units.feetToMeters(3) / 2,
+                                                                    AligningConstants.reefDistance,
                                                                     offset),
                                                             new Rotation2d()));
                             //         return new AlignAndDriveToReef(drivetrain, 0, alignmentPose,
@@ -721,7 +725,7 @@ public class RobotContainer {
                         .toPose2d()
                         .plus(
                                 new Transform2d(
-                                        new Translation2d(Units.feetToMeters(3) / 2, offset),
+                                        new Translation2d(AligningConstants.reefDistance, offset),
                                         new Rotation2d()));
         return new AlignAndDriveToReef(drivetrain, 0, alignmentPose, Rotation2d.kPi);
     }

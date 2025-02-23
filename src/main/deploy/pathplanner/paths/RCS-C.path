@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.8248011363636363,
-        "y": 0.9736931818181813
+        "x": 1.1148565573770493,
+        "y": 0.7523565573770474
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.180609600909788,
-        "y": 1.3224604575718972
+        "x": 1.4706650219232016,
+        "y": 1.1011238331307638
       },
       "isLocked": false,
       "linkedName": "RCS"
@@ -41,6 +41,12 @@
         "data": {
           "commands": [
             {
+              "type": "named",
+              "data": {
+                "name": "location C"
+              }
+            },
+            {
               "type": "race",
               "data": {
                 "commands": [
@@ -62,7 +68,13 @@
             {
               "type": "named",
               "data": {
-                "name": "location C"
+                "name": "height L3"
+              }
+            },
+            {
+              "type": "named",
+              "data": {
+                "name": "preparm"
               }
             }
           ]
@@ -71,7 +83,7 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 1.5,
+    "maxVelocity": 5.2,
     "maxAcceleration": 8.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -86,7 +98,7 @@
   "folder": "RCS-Reef",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 54.0
+    "rotation": 48.5
   },
   "useDefaultConstraints": true
 }
