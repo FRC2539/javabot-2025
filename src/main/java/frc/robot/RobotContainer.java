@@ -55,6 +55,7 @@ import frc.robot.subsystems.lights.LightsSubsystem;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.DummyPhotonCamera;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSimML;
 import frc.robot.subsystems.wrist.WristIONeo550;
@@ -104,19 +105,16 @@ public class RobotContainer {
         if (Robot.isReal()) {
             vision =
                     new Vision(
-                            drivetrain::addVisionMeasurement,
-                            new DummyPhotonCamera(),
-                            new DummyPhotonCamera(),
-                            new DummyPhotonCamera());
-            //     new VisionIOLimelight(
-            //             VisionConstants.camera0Name,
-            //             () -> drivetrain.getRobotPose().getRotation()),
-            //     new VisionIOLimelight(
-            //             VisionConstants.camera1Name,
-            //             () -> drivetrain.getRobotPose().getRotation()),
-            //     new VisionIOLimelight(
-            //             VisionConstants.camera2Name,
-            //             () -> drivetrain.getRobotPose().getRotation()));
+                            drivetrain::addVisionMeasurement,   
+                new VisionIOLimelight(
+                        VisionConstants.camera0Name,
+                        () -> drivetrain.getRobotPose().getRotation()),
+                new VisionIOLimelight(
+                        VisionConstants.camera1Name,
+                        () -> drivetrain.getRobotPose().getRotation()),
+                new VisionIOLimelight(
+                        VisionConstants.camera2Name,
+                        () -> drivetrain.getRobotPose().getRotation()));
             gripperSubsystem =
                     new GripperSubsystem(new GripperIOFalcon()); // new GripperIOFalcon());
             elevatorSubsystem =

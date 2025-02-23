@@ -13,7 +13,7 @@
     "Reef-RCS"
   ],
   "autoFolders": [],
-  "defaultMaxVel": 5.0,
+  "defaultMaxVel": 1.5,
   "defaultMaxAccel": 8.0,
   "defaultMaxAngVel": 540.0,
   "defaultMaxAngAccel": 720.0,
