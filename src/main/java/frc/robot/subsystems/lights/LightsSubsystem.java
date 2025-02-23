@@ -12,7 +12,6 @@ import com.ctre.phoenix.led.LarsonAnimation.BounceMode;
 import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.SingleFadeAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -75,27 +74,26 @@ public class LightsSubsystem extends SubsystemBase {
     }
 
     public Command defaultCommand() {
-        return run(
-                () -> {
+        return run(() -> {
                     LEDSegment.BatteryIndicator.fullClear();
                     LEDSegment.DriverstationIndicator.fullClear();
                     LEDSegment.ExtraAIndicator.fullClear();
                     LEDSegment.ExtraBIndicator.fullClear();
                     LEDSegment.PivotEncoderIndicator.fullClear();
 
-                    
-                        if (DriverStation.isEnabled()) {
-                    if (algaeMode.getAsBoolean()) {
-                        LightsSubsystem.LEDSegment.MainStrip.setStrobeAnimation(
-                                LightsSubsystem.white, 0.3);
-                    } else {
-                        LEDSegment.MainStrip.setColor(orange);
-                    }
+                    if (DriverStation.isEnabled()) {
+                        if (algaeMode.getAsBoolean()) {
+                            LightsSubsystem.LEDSegment.MainStrip.setStrobeAnimation(
+                                    LightsSubsystem.white, 0.3);
                         } else {
-                            
-                            LEDSegment.MainStrip.setFadeAnimation(orange, 0.2);
+                            LEDSegment.MainStrip.setColor(orange);
                         }
-                }).ignoringDisable(true);
+                    } else {
+
+                        LEDSegment.MainStrip.setFadeAnimation(orange, 0.2);
+                    }
+                })
+                .ignoringDisable(true);
     }
 
     public void setAlgaeModeSupplier(BooleanSupplier algaeMode) {

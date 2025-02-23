@@ -108,16 +108,16 @@ public class RobotContainer {
             vision =
                     new Vision(
                             drivetrain::addVisionMeasurement,
-                        //     new DummyPhotonCamera(),
-                        //     new DummyPhotonCamera(),
-                        //     new DummyPhotonCamera());
-                new VisionIOLimelight(
-                        VisionConstants.camera0Name,
-                        () -> drivetrain.getRobotPose().getRotation()),
-                new VisionIOLimelight(
-                        VisionConstants.camera1Name,
-                        () -> drivetrain.getRobotPose().getRotation()),
-                new DummyPhotonCamera());
+                            //     new DummyPhotonCamera(),
+                            //     new DummyPhotonCamera(),
+                            //     new DummyPhotonCamera());
+                            new VisionIOLimelight(
+                                    VisionConstants.camera0Name,
+                                    () -> drivetrain.getRobotPose().getRotation()),
+                            new VisionIOLimelight(
+                                    VisionConstants.camera1Name,
+                                    () -> drivetrain.getRobotPose().getRotation()),
+                            new DummyPhotonCamera());
             gripperSubsystem =
                     new GripperSubsystem(new GripperIOFalcon()); // new GripperIOFalcon());
             elevatorSubsystem =
@@ -214,7 +214,12 @@ public class RobotContainer {
 
         final Trigger EJECT_TRIGGER = rightDriveController.getTrigger();
         final Trigger ALIGN_TRIGGER = rightDriveController.getBottomThumb();
-        final Trigger NORMAL_ALIGN = (stateManager.STATION_GRIPPER.or(stateManager.STATION_HANDOFF).or(stateManager.PROCESSOR)).negate();
+        final Trigger NORMAL_ALIGN =
+                (stateManager
+                                .STATION_GRIPPER
+                                .or(stateManager.STATION_HANDOFF)
+                                .or(stateManager.PROCESSOR))
+                        .negate();
 
         USING_AUTO_ALIGN = new Trigger(ALIGN_TRIGGER);
 
@@ -510,11 +515,13 @@ public class RobotContainer {
                 .and(stateManager.PROCESSOR.negate())
                 .whileTrue(gripperSubsystem.ejectSpinAlgae());
 
-        ALIGN_TRIGGER.and(NORMAL_ALIGN).onTrue(
-                Commands.runOnce(
-                        () ->
-                                stateManager.setLastScoringPose(
-                                        drivetrain.findNearestAprilTagPose())));
+        ALIGN_TRIGGER
+                .and(NORMAL_ALIGN)
+                .onTrue(
+                        Commands.runOnce(
+                                () ->
+                                        stateManager.setLastScoringPose(
+                                                drivetrain.findNearestAprilTagPose())));
 
         stateManager
                 .LEFT_CORAL
@@ -530,7 +537,6 @@ public class RobotContainer {
                 .RIGHT_CORAL
                 .and(ALIGN_TRIGGER.and(NORMAL_ALIGN))
                 .whileTrue(alignToReef(AligningConstants.rightOffset));
-
 
         // stateManager
         //         .ALGAE
@@ -566,7 +572,7 @@ public class RobotContainer {
         //         .RIGHT_CORAL
         //         .and(ALIGN_TRIGGER.and(stateManager.STATION_HANDOFF))
         //         .whileTrue(alignToStation(-0.6, Rotation2d.k180deg));
-        
+
         // Technical Bindings
 
         leftDriveController.getLeftBottomMiddle().onTrue(climberSubsystem.zeroClimberCommand());
@@ -770,25 +776,25 @@ public class RobotContainer {
         // getAlignmentcolor 3 = r
         // set a trigger based on the thumbpad
         //
-        return 
-                Commands.defer(() -> {
-                        int closestTag = 0;
-                        Pose2d currentPose = drivetrain.getRobotPose();
-                        if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
-                                if (currentPose.getY() > 4.026) {
-                                        closestTag = 2;
-                                } else {
-                                        closestTag = 1;
-                                }
+        return Commands.defer(
+                () -> {
+                    int closestTag = 0;
+                    Pose2d currentPose = drivetrain.getRobotPose();
+                    if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
+                        if (currentPose.getY() > 4.026) {
+                            closestTag = 2;
                         } else {
-                                if (currentPose.getY() > 4.026) {
-                                        closestTag = 13;
-                                } else {
-                                        closestTag = 12;
-                                }
+                            closestTag = 1;
                         }
-                        return alignToReef(closestTag, offset, rotOffset);
-                }, Set.of(drivetrain));
-                
+                    } else {
+                        if (currentPose.getY() > 4.026) {
+                            closestTag = 13;
+                        } else {
+                            closestTag = 12;
+                        }
+                    }
+                    return alignToReef(closestTag, offset, rotOffset);
+                },
+                Set.of(drivetrain));
     }
 }

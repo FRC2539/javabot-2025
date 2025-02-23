@@ -131,26 +131,38 @@ public class SuperstructureStateManager extends SubsystemBase {
             ChuteDownNull(0, 0, 0, ChuteDown, TRUE, FALSE),
             HandoffPrep(165, -0.45, 1.58, ChuteDownNull),
             Handoff(130, -0.45, 1.58, HandoffPrep),
-            PointUpPrep(170, 0.5, 1.58, Home,
-            (a, s, e) -> {
-                // boolean armChecksOut = s.armSubsystem.getPosition() > 0.5;
-                boolean wristAtPosition = Math.abs(s.wristSubsystem.getFlippedPosition() -
-            a.wristRotation()) < 0.1;
-                boolean elevatorAtPosition =
-                            s.elevatorSubsystem.getPosition() > 165;
-                return elevatorAtPosition && wristAtPosition;
-                // return armChecksOut && wristAtPosition && elevatorAtPosition;
-            }, TRUE),
-            PointUp(170, 2.15, 1.58, PointUpPrep,
-            (a, s, e) -> {
-                boolean armChecksOut = s.armSubsystem.getPosition() > 0.5;
-            //     boolean wristAtPosition = Math.abs(s.wristSubsystem.getFlippedPosition() -
-            // a.wristRotation()) < 0.1;
-            //     boolean elevatorAtPosition =
-            //                 Math.abs(s.elevatorSubsystem.getPosition() - a.elevatorHeight()) < 1.5;
-            return armChecksOut;
-                // return armChecksOut; && wristAtPosition && elevatorAtPosition;
-            }, TRUE),
+            PointUpPrep(
+                    170,
+                    0.5,
+                    1.58,
+                    Home,
+                    (a, s, e) -> {
+                        // boolean armChecksOut = s.armSubsystem.getPosition() > 0.5;
+                        boolean wristAtPosition =
+                                Math.abs(s.wristSubsystem.getFlippedPosition() - a.wristRotation())
+                                        < 0.1;
+                        boolean elevatorAtPosition = s.elevatorSubsystem.getPosition() > 165;
+                        return elevatorAtPosition && wristAtPosition;
+                        // return armChecksOut && wristAtPosition && elevatorAtPosition;
+                    },
+                    TRUE),
+            PointUp(
+                    170,
+                    2.15,
+                    1.58,
+                    PointUpPrep,
+                    (a, s, e) -> {
+                        boolean armChecksOut = s.armSubsystem.getPosition() > 0.5;
+                        //     boolean wristAtPosition =
+                        // Math.abs(s.wristSubsystem.getFlippedPosition() -
+                        // a.wristRotation()) < 0.1;
+                        //     boolean elevatorAtPosition =
+                        //                 Math.abs(s.elevatorSubsystem.getPosition() -
+                        // a.elevatorHeight()) < 1.5;
+                        return armChecksOut;
+                        // return armChecksOut; && wristAtPosition && elevatorAtPosition;
+                    },
+                    TRUE),
             UpZoneNull(0, 0, 0, PointUp, TRUE, FALSE),
             ChuteUpPre(
                     170,
@@ -194,7 +206,7 @@ public class SuperstructureStateManager extends SubsystemBase {
             GroundAlgaePrep(65, 1.58, 1.58, AlgaeHomeNull),
             GroundAlgae(20, 1.58, 1.58, GroundAlgaePrep),
             StartPrepPrepPrep(170, 2.15, 1.58, ChuteUpNull),
-            StartPrepPrep(140, 0,  1.58, StartPrepPrepPrep),
+            StartPrepPrep(140, 0, 1.58, StartPrepPrepPrep),
             StartPrep(140, 0, -1.58, StartPrepPrep),
             Start(0, 0, -1.58, StartPrep),
             Climb(10, 0, -1.58, StartPrep),
@@ -337,7 +349,11 @@ public class SuperstructureStateManager extends SubsystemBase {
 
     public final Trigger PROCESSOR = new Trigger(() -> trueFinalTarget == Position.Processor);
 
-    public final Trigger STATION_HANDOFF = new Trigger(() -> trueFinalTarget == Position.Handoff || trueFinalTarget == Position.HandoffPrep);
+    public final Trigger STATION_HANDOFF =
+            new Trigger(
+                    () ->
+                            trueFinalTarget == Position.Handoff
+                                    || trueFinalTarget == Position.HandoffPrep);
 
     public final Trigger STATION_GRIPPER = new Trigger(() -> trueFinalTarget == Position.Source);
 

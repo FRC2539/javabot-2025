@@ -43,7 +43,7 @@ public class GripperSubsystem extends SubsystemBase {
         return setVoltage(12);
     }
 
-    public Command holdCoral() { 
+    public Command holdCoral() {
         return setVoltage(0.25);
     }
 
