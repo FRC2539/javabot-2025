@@ -259,7 +259,7 @@ public class Auto {
         NamedCommands.registerCommand(
                         "wait pose", Commands.waitUntil(() -> robotInPlace()));
 
-        Command alignCommand =
+        Command alignCommand = 
                 Commands.defer(
                         () ->
                                 robotContainer.alignAndDriveToReef(
