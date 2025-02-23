@@ -266,7 +266,6 @@ public class Auto {
                         Set.of(
                                 robotContainer.armSubsystem,
                                 robotContainer.elevatorSubsystem,
-                                robotContainer.wristSubsystem,
                                 robotContainer.stateManager));
         NamedCommands.registerCommand("arm", armCommand.asProxy());
 
@@ -276,12 +275,11 @@ public class Auto {
                         Set.of(
                                 robotContainer.armSubsystem,
                                 robotContainer.elevatorSubsystem,
-                                robotContainer.wristSubsystem,
                                 robotContainer.stateManager));
         NamedCommands.registerCommand("preparm", prepArmCommand.asProxy());
 
         Command scoreCommand =
-                robotContainer.gripperSubsystem.ejectSpinCoral().withTimeout(placeTimeout);
+                robotContainer.gripperSubsystem.ejectReverse(12).withTimeout(placeTimeout);
         NamedCommands.registerCommand("score", scoreCommand.asProxy());
 
         Command intakeCommand = robotContainer.intakeSubsystem.intake();

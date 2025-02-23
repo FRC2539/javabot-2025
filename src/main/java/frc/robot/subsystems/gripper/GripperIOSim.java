@@ -9,12 +9,16 @@ public class GripperIOSim implements GripperIO {
             new LoggedNetworkBoolean("Gripper Sensor Sim", true);
 
     public void updateInputs(GripperIOInputs inputs) {
-        inputs.voltage = voltage;
-        inputs.speed = speed;
-        inputs.sensor = gripperGPSensor.get();
+        inputs.voltageLeft = voltage;
+        inputs.speedLeft = speed;
+        inputs.sensorLeft = gripperGPSensor.get();
     }
 
     public void setVoltage(double voltage) {
         this.voltage = voltage;
     }
+
+    public void setVoltageLeft(double voltage) {}
+
+    public void setVoltageRight(double voltage) {}
 }

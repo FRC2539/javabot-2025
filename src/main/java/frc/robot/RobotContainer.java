@@ -38,16 +38,13 @@ import frc.robot.subsystems.ModeManager.SuperstructureStateManager.Superstructur
 import frc.robot.subsystems.arm.ArmPivotIOSim;
 import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
 import frc.robot.subsystems.arm.ArmSubsystem;
-import frc.robot.subsystems.chute.ChuteIONeo550;
-import frc.robot.subsystems.chute.ChuteIOSim;
-import frc.robot.subsystems.chute.ChuteSubsystem;
 import frc.robot.subsystems.climber.ClimberHeadIONeo550;
 import frc.robot.subsystems.climber.ClimberIOTalonFX;
 import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
-import frc.robot.subsystems.gripper.GripperIOFalcon;
+import frc.robot.subsystems.gripper.GripperIONeo550;
 import frc.robot.subsystems.gripper.GripperIOSim;
 import frc.robot.subsystems.gripper.GripperSubsystem;
 import frc.robot.subsystems.intake.FlipperIOSim;
@@ -60,9 +57,6 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSimML;
-import frc.robot.subsystems.wrist.WristIONeo550;
-import frc.robot.subsystems.wrist.WristIOSim;
-import frc.robot.subsystems.wrist.WristSubsystem;
 import frc.robot.util.Elastic;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
@@ -83,10 +77,10 @@ public class RobotContainer {
     public ElevatorSubsystem elevatorSubsystem;
     public ClimberSubsystem climberSubsystem;
     public ArmSubsystem armSubsystem;
-    public WristSubsystem wristSubsystem;
+
     public Vision vision;
     public LightsSubsystem lights;
-    public ChuteSubsystem chuteSubsystem;
+
     public SuperstructureStateManager stateManager;
     public GripperSubsystem gripperSubsystem;
 
@@ -118,19 +112,18 @@ public class RobotContainer {
                                     VisionConstants.camera1Name,
                                     () -> drivetrain.getRobotPose().getRotation()),
                             new DummyPhotonCamera());
-            gripperSubsystem =
-                    new GripperSubsystem(new GripperIOFalcon()); // new GripperIOFalcon());
             elevatorSubsystem =
                     new ElevatorSubsystem(new ElevatorIOTalonFX()); // new ElevatorIOTalonFX());
             armSubsystem = new ArmSubsystem(new ArmPivotIOTalonFX());
-            wristSubsystem = new WristSubsystem(new WristIONeo550()); // new WristIONeo550());
+
+            gripperSubsystem = new GripperSubsystem(new GripperIONeo550());
+
             climberSubsystem =
                     new ClimberSubsystem(
                             new ClimberIOTalonFX(),
                             new ClimberHeadIONeo550()); // new ClimberIOTalonFX(), new
             // ClimberHeadIONeo550());
             lights = new LightsSubsystem();
-            chuteSubsystem = new ChuteSubsystem(new ChuteIONeo550()); // new ChuteIONeo550());
 
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
         } else {
@@ -153,22 +146,15 @@ public class RobotContainer {
             gripperSubsystem = new GripperSubsystem(new GripperIOSim());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSim());
             armSubsystem = new ArmSubsystem(new ArmPivotIOSim());
-            wristSubsystem = new WristSubsystem(new WristIOSim());
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
             climberSubsystem =
                     new ClimberSubsystem(new ClimberIOTalonFX(), new ClimberHeadIONeo550());
             lights = new LightsSubsystem();
-            chuteSubsystem = new ChuteSubsystem(new ChuteIOSim());
         }
 
-        stateManager =
-                new SuperstructureStateManager(
-                        elevatorSubsystem, armSubsystem, wristSubsystem, chuteSubsystem);
+        stateManager = new SuperstructureStateManager(elevatorSubsystem, armSubsystem);
 
         auto = new Auto(drivetrain, this);
-
-        wristSubsystem.elevatorHeight = () -> elevatorSubsystem.getPosition();
-        wristSubsystem.armHeight = () -> armSubsystem.getPosition();
 
         configureBindings();
         // Establish the "Trajectory Field" Field2d into the dashboard
@@ -215,11 +201,7 @@ public class RobotContainer {
         final Trigger EJECT_TRIGGER = rightDriveController.getTrigger();
         final Trigger ALIGN_TRIGGER = rightDriveController.getBottomThumb();
         final Trigger NORMAL_ALIGN =
-                (stateManager
-                                .STATION_GRIPPER
-                                .or(stateManager.STATION_HANDOFF)
-                                .or(stateManager.PROCESSOR))
-                        .negate();
+                (stateManager.STATION_GRIPPER.or(stateManager.PROCESSOR)).negate();
 
         USING_AUTO_ALIGN = new Trigger(ALIGN_TRIGGER);
 
@@ -423,8 +405,6 @@ public class RobotContainer {
         final Trigger ARMWRIST = stateManager.ARMWRIST;
         ARMWRIST.and(operatorController.getY()).whileTrue(armSubsystem.armpivotUp());
         ARMWRIST.and(operatorController.getA()).whileTrue(armSubsystem.armpivotDown());
-        ARMWRIST.and(operatorController.getX()).whileTrue(wristSubsystem.turnWristLeft());
-        ARMWRIST.and(operatorController.getB()).whileTrue(wristSubsystem.turnWristRight());
 
         // CORAL.and(operatorController.getY())
         //         .onTrue(stateManager.moveToPosition(Position.L4Prep))
@@ -452,23 +432,13 @@ public class RobotContainer {
 
         CORAL.and(operatorController.getDPadDown())
                 .onTrue(stateManager.moveToPosition(Position.Home));
-        CORAL.and(operatorController.getDPadUp())
-                .onFalse(stateManager.moveToPosition(Position.HandoffPrep))
-                .onTrue(stateManager.moveToPosition(Position.Handoff));
-        CORAL.and(operatorController.getDPadUp()).whileTrue(gripperSubsystem.intakeSpinCoral());
-
-        CORAL.and(operatorController.getDPadLeft()).onTrue(chuteSubsystem.moveChuteUp());
-        CORAL.and(operatorController.getDPadRight()).onTrue(chuteSubsystem.moveChuteDown());
+        CORAL.and(operatorController.getDPadUp()).whileTrue(gripperSubsystem.injectForward(12));
 
         // ALGAE.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.NetAlgae));
         ALGAE.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3Algae));
         ALGAE.and(operatorController.getB()).onTrue(stateManager.moveToPosition(Position.L2Algae));
         ALGAE.and(operatorController.getA())
                 .onTrue(stateManager.moveToPosition(Position.Processor));
-        ALGAE.and(operatorController.getStart())
-                .onTrue(stateManager.moveToPosition(Position.GroundAlgae));
-        ALGAE.and(operatorController.getDPadDown())
-                .onTrue(stateManager.moveToPosition(Position.AlgaeHome));
         // ALGAE.and(operatorController.getDPadUp())
         //         .onTrue(stateManager.moveToPosition(Position.Handoff));
         ALGAE.and(operatorController.getDPadLeft())
@@ -499,21 +469,21 @@ public class RobotContainer {
         CORAL.and(rightDriveController.getLeftThumb())
                 .whileTrue(
                         gripperSubsystem
-                                .intakeSpinCoral()
+                                .injectForward(12)
                                 .withDeadline(
                                         Commands.waitSeconds(0.2)
                                                 .andThen(
                                                         Commands.waitUntil(
                                                                 gripperSubsystem.HAS_PIECE))));
-        CORAL.and(EJECT_TRIGGER).whileTrue(gripperSubsystem.ejectSpinCoral());
+        CORAL.and(EJECT_TRIGGER).whileTrue(gripperSubsystem.ejectReverse(12));
 
-        ALGAE.and(rightDriveController.getLeftThumb()).onTrue(gripperSubsystem.intakeSpinAlgae());
+        ALGAE.and(rightDriveController.getLeftThumb()).onTrue(gripperSubsystem.injectForward(12));
         ALGAE.and(EJECT_TRIGGER)
                 .and(stateManager.PROCESSOR)
-                .whileTrue(gripperSubsystem.slowEjectSpinAlgae());
+                .whileTrue(gripperSubsystem.ejectReverse(6)); // slower i think
         ALGAE.and(EJECT_TRIGGER)
                 .and(stateManager.PROCESSOR.negate())
-                .whileTrue(gripperSubsystem.ejectSpinAlgae());
+                .whileTrue(gripperSubsystem.ejectReverse(6)); // slower i think
 
         ALIGN_TRIGGER.onTrue(
                 Commands.runOnce(
@@ -588,9 +558,6 @@ public class RobotContainer {
 
         // leftDriveController.getLeftBottomLeft().whileTrue(intakeSubsystem.rollerTuneable());
         // leftDriveController.getLeftTopRight().whileTrue(intakeSubsystem.flipperTuneable());
-
-        leftDriveController.getLeftBottomLeft().whileTrue(chuteSubsystem.moveChuteUp());
-        leftDriveController.getLeftTopRight().whileTrue(chuteSubsystem.moveChuteDown());
 
         leftDriveController.getLeftBottomRight().onTrue(intakeSubsystem.zeroflipper());
 
