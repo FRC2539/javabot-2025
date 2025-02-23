@@ -29,6 +29,12 @@
           }
         },
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "RCS-D"
@@ -53,6 +59,12 @@
           }
         },
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "RCS-C"
@@ -68,12 +80,6 @@
           "type": "named",
           "data": {
             "name": "place"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "C-RCS"
           }
         }
       ]

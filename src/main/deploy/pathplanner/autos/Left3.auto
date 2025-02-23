@@ -29,6 +29,12 @@
           }
         },
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "LCS-K"
@@ -53,6 +59,12 @@
           }
         },
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "LCS-L"
@@ -68,12 +80,6 @@
           "type": "named",
           "data": {
             "name": "place"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "L-LCS"
           }
         }
       ]
