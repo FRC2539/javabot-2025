@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 13.978,
-        "y": 5.422496749024708
+        "x": 3.5598579545454543,
+        "y": 2.71872159090909
       },
       "prevControl": null,
       "nextControl": {
-        "x": 15.821846999144302,
-        "y": 5.225778445369686
+        "x": 3.217040663308801,
+        "y": 2.362630667264994
       },
       "isLocked": false,
-      "linkedName": "Red Reef CD"
+      "linkedName": "C"
     },
     {
       "anchor": {
-        "x": 16.216089743589745,
-        "y": 6.966346153846153
+        "x": 1.1148565573770493,
+        "y": 0.7523565573770474
       },
       "prevControl": {
-        "x": 15.522569813923187,
-        "y": 6.416928142732595
+        "x": 2.5507656482861405,
+        "y": 1.4703111028315923
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Red Source Right"
+      "linkedName": "RCS"
     }
   ],
   "rotationTargets": [],
@@ -33,22 +33,28 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "location C",
+      "name": "height Handoff",
       "waypointRelativePos": 0,
       "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
-      "name": "height L4",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
-      "name": "place",
-      "waypointRelativePos": 1.0,
-      "endWaypointRelativePos": null,
-      "command": null
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "height Handoff"
+              }
+            },
+            {
+              "type": "named",
+              "data": {
+                "name": "preparm"
+              }
+            }
+          ]
+        }
+      }
     }
   ],
   "globalConstraints": {
@@ -61,13 +67,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 54.381510160748206
+    "rotation": 48.5
   },
   "reversed": false,
-  "folder": "AutoTest",
+  "folder": "Reef-RCS",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -122.10625595511773
+    "rotation": 59.99999999999999
   },
   "useDefaultConstraints": true
 }

@@ -3,22 +3,29 @@
   "robotLength": 0.914,
   "holonomicMode": true,
   "pathFolders": [
-    "AutoTest"
+    "AutoTest",
+    "LCS-Reef",
+    "LStart-Reef",
+    "misc",
+    "RCS-Reef",
+    "RStart-Reef",
+    "Reef-LCS",
+    "Reef-RCS"
   ],
   "autoFolders": [],
-  "defaultMaxVel": 4.5,
-  "defaultMaxAccel": 3.0,
+  "defaultMaxVel": 5.2,
+  "defaultMaxAccel": 8.0,
   "defaultMaxAngVel": 540.0,
   "defaultMaxAngAccel": 720.0,
   "defaultNominalVoltage": 12.0,
-  "robotMass": 68.0389,
-  "robotMOI": 11.61,
+  "robotMass": 64.0,
+  "robotMOI": 11.9,
   "robotTrackwidth": 0.508,
   "driveWheelRadius": 0.0508,
-  "driveGearing": 5.142857,
-  "maxDriveSpeed": 6.21,
+  "driveGearing": 5.143,
+  "maxDriveSpeed": 5.75,
   "driveMotorType": "krakenX60FOC",
-  "driveCurrentLimit": 85.0,
+  "driveCurrentLimit": 102.0,
   "wheelCOF": 1.0,
   "flModuleX": 0.2921,
   "flModuleY": 0.292,
@@ -30,5 +37,9 @@
   "brModuleY": -0.2921,
   "bumperOffsetX": 0.0,
   "bumperOffsetY": 0.0,
-  "robotFeatures": []
+  "robotFeatures": [
+    "{\"name\":\"Rectangle\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":0.3,\"y\":0.0},\"size\":{\"width\":0.2,\"length\":0.2},\"borderRadius\":0.05,\"strokeWidth\":0.02,\"filled\":false}}",
+    "{\"name\":\"Rectangle\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":-0.3,\"y\":0.0},\"size\":{\"width\":0.4,\"length\":0.2},\"borderRadius\":0.05,\"strokeWidth\":0.02,\"filled\":false}}",
+    "{\"name\":\"Rectangle\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":0.0,\"y\":-0.3},\"size\":{\"width\":0.2,\"length\":0.05},\"borderRadius\":0.05,\"strokeWidth\":0.02,\"filled\":false}}"
+  ]
 }

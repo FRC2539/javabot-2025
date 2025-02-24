@@ -5,7 +5,7 @@ public class ArmPivotIOSim implements ArmPivotIO {
     private double voltage = 0;
 
     public void updateInputs(ArmPivotIOInputs inputs) {
-        position += 0.02 * voltage * 0.5;
+        position += 0.02 * voltage * 0.6;
 
         inputs.position = position;
         inputs.throughboreEncoderPosition = position;

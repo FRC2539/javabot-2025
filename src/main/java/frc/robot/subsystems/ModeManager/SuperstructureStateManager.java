@@ -1,7 +1,6 @@
 package frc.robot.subsystems.ModeManager;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
@@ -130,7 +129,8 @@ public class SuperstructureStateManager extends SubsystemBase {
                     (a, s, e) -> !s.chuteSubsystem.DOWN.getAsBoolean()),
             ChuteDownNull(0, 0, 0, ChuteDown, TRUE, FALSE),
             HandoffPrep(165, -0.45, 1.58, ChuteDownNull),
-            Handoff(130, -0.45, 1.58, HandoffPrep),
+            HandoffSus(160, -0.55, 0.0, HandoffPrep),
+            Handoff(133, -0.45, 1.58, HandoffPrep),
             PointUpPrep(
                     170,
                     0.5,
@@ -190,9 +190,9 @@ public class SuperstructureStateManager extends SubsystemBase {
             Quick34(250, 0.7, 0, UpZoneNull),
             Quick23(150, 0.7, 0, UpZoneNull),
             // L2AlgaePrep(297, 2.15, -1.58, UpZoneNull),
-            L2Algae(170, 1.2, -1.58, UpZoneNull),
+            L2Algae(90, 2.2, -1.58, UpZoneNull),
             // L3AlgaePrep(297, 2.15, -1.58, UpZoneNull),
-            L3Algae(250, 1.2, -1.58, UpZoneNull),
+            L3Algae(170, 2.2, -1.58, UpZoneNull),
             // NetAlgaePrep(297, 2.15, -1.58, UpZoneNull),
             // NetAlgae(297, 2.15, -1.58, NetAlgaePrep),
             Source(130, 2.15, 0, PointUp),
@@ -205,8 +205,8 @@ public class SuperstructureStateManager extends SubsystemBase {
             // IcecreamAlgae(170, 0, 1.58, AlgaeHome),
             GroundAlgaePrep(65, 1.58, 1.58, AlgaeHomeNull),
             GroundAlgae(20, 1.58, 1.58, GroundAlgaePrep),
-            StartPrepPrepPrep(170, 2.15, 1.58, ChuteUpNull),
-            StartPrepPrep(140, 0, 1.58, StartPrepPrepPrep),
+            StartPrepPrepPrep(170, 0.65, -1.58, ChuteUpNull),
+            StartPrepPrep(140, 0, -1.58, StartPrepPrepPrep),
             StartPrep(140, 0, -1.58, StartPrepPrep),
             Start(0, 0, -1.58, StartPrep),
             Climb(10, 0, -1.58, StartPrep),
@@ -659,10 +659,10 @@ public class SuperstructureStateManager extends SubsystemBase {
         SmartDashboard.putData("Mech2d", mech);
 
         Command defaultcom =
-                Commands.either(
-                        Commands.idle(),
-                        moveToPosition(Position.Home).asProxy(),
-                        () -> !RobotState.isAutonomous());
+                // Commands.either(
+                Commands.idle();
+        // moveToPosition(Position.Home).asProxy(),
+        // () -> !RobotState.isAutonomous());
         defaultcom.addRequirements(this);
         setDefaultCommand(defaultcom);
     }

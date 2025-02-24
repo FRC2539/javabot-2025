@@ -5,15 +5,39 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "height L4"
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "source to ab"
+            "pathName": "LStart-J"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "location B"
+            "name": "place"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "J-LCS"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LCS-K"
           }
         },
         {
@@ -31,19 +55,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "ab to bc"
+            "pathName": "K-LCS"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LCS-L"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "location C"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "height L2"
+            "name": "height L4"
           }
         },
         {

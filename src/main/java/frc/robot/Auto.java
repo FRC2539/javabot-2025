@@ -233,7 +233,8 @@ public class Auto {
         L2(Position.L2, Position.L2Prep),
         L3(Position.L3, Position.L3Prep),
         L4(Position.L4, Position.L4Prep),
-        Source(Position.Source, Position.Source);
+        Source(Position.Source, Position.Source),
+        Handoff(Position.Handoff, Position.HandoffPrep);
 
         public Position position;
         public double armMotorSpeed;
@@ -251,6 +252,12 @@ public class Auto {
     public void configureBindings() {
         NamedCommands.registerCommand(
                 "wait", Commands.waitUntil(() -> armInPlace() && robotInPlace()));
+
+        NamedCommands.registerCommand("wait arm", Commands.waitUntil(() -> armInPlace()));
+
+        NamedCommands.registerCommand("wait prep", Commands.waitUntil(() -> armInPrep()));
+
+        NamedCommands.registerCommand("wait pose", Commands.waitUntil(() -> robotInPlace()));
 
         Command alignCommand =
                 Commands.defer(
@@ -284,22 +291,40 @@ public class Auto {
                 robotContainer.gripperSubsystem.ejectSpinCoral().withTimeout(placeTimeout);
         NamedCommands.registerCommand("score", scoreCommand.asProxy());
 
-        Command intakeCommand = robotContainer.intakeSubsystem.intake();
+        Command intakeCommand =
+                robotContainer
+                        .gripperSubsystem
+                        .intakeSpinCoral()
+                        .withDeadline(
+                                Commands.waitUntil(() -> robotContainer.gripperSubsystem.hasPiece())
+                                        .andThen(Commands.waitSeconds(0.75))
+                                        .withTimeout(5)); // TODO: TIMEOUT
         NamedCommands.registerCommand("intake", intakeCommand.asProxy());
+
+        NamedCommands.registerCommand(
+                "placenoalign",
+                Commands.race(
+                        armCommand.asProxy(),
+                        Commands.sequence(
+                                Commands.waitUntil(() -> armInPlace()), scoreCommand.asProxy())));
 
         // spotless:off
         Command placeCommand =
                 prepArmCommand.asProxy()
                 .until(() -> robotInPlace()) // Wait until arm and align are in position
                 .andThen(
-                    (
-                        Commands.waitUntil(() -> armInPlace())
+                    Commands.waitSeconds(1).andThen((
+                        Commands.waitSeconds(0.5).andThen(Commands.waitUntil(() -> armInPlace()))
                         .andThen(scoreCommand.asProxy())
                     )
-                    .deadlineFor(armCommand.asProxy())
+                    .deadlineFor(armCommand.asProxy()))
                 )
                 .deadlineFor(alignCommand);
+
+
         NamedCommands.registerCommand("place", placeCommand);
+
+
         // spotless:on
 
         // #region Auto create locations and heights
@@ -347,7 +372,8 @@ public class Auto {
                         .plus(
                                 new Transform2d(
                                         new Translation2d(
-                                                Units.feetToMeters(3) / 2, targetLocation.offset),
+                                                AligningConstants.reefDistance,
+                                                targetLocation.offset),
                                         Rotation2d.k180deg));
         Logger.recordOutput("Auto/Physical Target Pose", alignmentPose);
         Pose2d currentPose = robotContainer.drivetrain.getRobotPose();
@@ -356,19 +382,6 @@ public class Auto {
         return (Math.abs(relativePos.getX()) < Units.inchesToMeters(0.7))
                 && (Math.abs(relativePos.getY()) < Units.inchesToMeters(0.7))
                 && ((Math.abs(relativePos.getRotation().getRadians()) % Math.PI)
-                        < Units.degreesToRadians(2));
-    }
-
-    public static boolean robotInPlace(Pose2d robotPose, Pose2d pose, double offset) {
-        Pose2d alignmentPose =
-                pose.plus(
-                        new Transform2d(
-                                new Translation2d(Units.feetToMeters(3) / 2, offset),
-                                Rotation2d.k180deg));
-        Pose2d offsetPose = robotPose.relativeTo(alignmentPose);
-        return (offsetPose.getX() > -Units.inchesToMeters(0.7))
-                && (Math.abs(offsetPose.getY()) < Units.inchesToMeters(0.7))
-                && ((Math.abs(offsetPose.getRotation().getRadians()) % (2 * Math.PI))
                         < Units.degreesToRadians(2));
     }
 }

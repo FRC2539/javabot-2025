@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.0,
-        "y": 0.0
+        "x": 7.139659090909091,
+        "y": 0.5149999999999989
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.9673213526060513,
-        "y": 0.0
+        "x": 6.780681818181818,
+        "y": 0.9437784090909088
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "RStart"
     },
     {
       "anchor": {
-        "x": 1.0,
-        "y": 0.0
+        "x": 5.434517045454545,
+        "y": 2.6987784090909086
       },
       "prevControl": {
-        "x": -0.27527965608765825,
-        "y": 1.561767148845488e-16
+        "x": 5.207455432735299,
+        "y": 2.895571103265361
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "F"
     }
   ],
   "rotationTargets": [],
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.5,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 5.2,
+    "maxAcceleration": 8.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 119.99999999999999
   },
   "reversed": false,
-  "folder": null,
+  "folder": "RStart-Reef",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 13.978,
-        "y": 5.422496749024708
+        "x": 7.438806818186804,
+        "y": 5.560624999995014
       },
       "prevControl": null,
       "nextControl": {
-        "x": 15.821846999144302,
-        "y": 5.225778445369686
+        "x": 7.853252089318251,
+        "y": 5.824631312690614
       },
       "isLocked": false,
-      "linkedName": "Red Reef CD"
+      "linkedName": "pushEnd"
     },
     {
       "anchor": {
-        "x": 16.216089743589745,
-        "y": 6.966346153846153
+        "x": 6.092642045454545,
+        "y": 4.2244318181818175
       },
       "prevControl": {
-        "x": 15.522569813923187,
-        "y": 6.416928142732595
+        "x": 6.096356070139283,
+        "y": 4.474404228700741
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Red Source Right"
+      "linkedName": "H"
     }
   ],
   "rotationTargets": [],
@@ -33,22 +33,15 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "location C",
+      "name": "location H",
       "waypointRelativePos": 0,
       "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
-      "name": "height L4",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
-      "name": "place",
-      "waypointRelativePos": 1.0,
-      "endWaypointRelativePos": null,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "location H"
+        }
+      }
     }
   ],
   "globalConstraints": {
@@ -61,13 +54,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 54.381510160748206
+    "rotation": 180.0
   },
   "reversed": false,
-  "folder": "AutoTest",
+  "folder": "misc",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -122.10625595511773
+    "rotation": 111.0375110254219
   },
   "useDefaultConstraints": true
 }

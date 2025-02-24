@@ -5,15 +5,16 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "Half-Field Sprint"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "height L4"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "RStart-E"
+                }
+              }
+            ]
           }
         }
       ]
