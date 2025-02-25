@@ -18,6 +18,8 @@ public class ElevatorIOSim implements ElevatorIO {
 
         inputs.position = position;
         inputs.voltage = voltage;
+
+        
     }
 
     public void setVoltage(double voltage) {

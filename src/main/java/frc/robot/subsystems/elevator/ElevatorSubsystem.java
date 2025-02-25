@@ -3,6 +3,7 @@ package frc.robot.subsystems.elevator;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.Logger;
@@ -77,10 +78,13 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public Command setPosition(double position) {
-        return run(
-                () -> {
-                    piviotIO.setPosition(position);
-                });
+        // return run(
+        //         () -> {
+        //             piviotIO.setPosition(position);
+        //         }, );
+        return Commands.runOnce(() -> {
+            piviotIO.setPosition(position);
+        }, this);
     }
 
     public double getPosition() {
