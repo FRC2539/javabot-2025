@@ -52,7 +52,8 @@
 //         this.robotContainer = robotContainer;
 //         setUpPathPlanner(drivetrain);
 //         configureBindings();
-//         autoChooser = new LoggedDashboardChooser<>("Auto Routine", AutoBuilder.buildAutoChooser());
+//         autoChooser = new LoggedDashboardChooser<>("Auto Routine",
+// AutoBuilder.buildAutoChooser());
 //         SmartDashboard.putData("Auto Path", m_trajectoryField);
 //     }
 
@@ -73,7 +74,8 @@
 //             } else {
 //                 Logger.recordOutput(
 //                         "Auto/AutoDescription",
-//                         "404: Description not found. Validate that there is description in AutoConstants.");
+//                         "404: Description not found. Validate that there is description in
+// AutoConstants.");
 //             }
 
 //             Command command = previousAuto;
@@ -96,10 +98,13 @@
 
 //                     // A list of all paths contained in this auto
 //                     List<Pose2d> poses =
-//                             new ArrayList<>(); // This will be a list of all points during the auto
+//                             new ArrayList<>(); // This will be a list of all points during the
+// auto
 
-//                     for (var path : trajectories) { // For each path assigned, split into segments
-//                         for (var point : path.getStates()) { // For each segment, split into points
+//                     for (var path : trajectories) { // For each path assigned, split into
+// segments
+//                         for (var point : path.getStates()) { // For each segment, split into
+// points
 //                             poses.add(point.pose);
 //                         }
 //                     }
@@ -119,7 +124,8 @@
 //                     Pose2d startingPose = trajectories[0].getInitialPose();
 //                     Pose2d endingPose = trajectories[trajectories.length - 1].getEndState().pose;
 
-//                     m_trajectoryField.getObject("start_and_end").setPoses(startingPose, endingPose);
+//                     m_trajectoryField.getObject("start_and_end").setPoses(startingPose,
+// endingPose);
 
 //                     System.out.println("Pathplanner auto successfully shared.");
 
@@ -151,7 +157,8 @@
 //                 drivetrain::resetPose,
 //                 drivetrain::getChassisSpeeds,
 //                 (speeds, feedforwards) ->
-//                         drivetrain.setControl(drivetrain.driveRobotRelative(speeds, feedforwards)),
+//                         drivetrain.setControl(drivetrain.driveRobotRelative(speeds,
+// feedforwards)),
 //                 new PPHolonomicDriveController( // PPHolonomicController is the built in path
 //                         // following controller for holonomic drive trains
 //                         new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
@@ -321,7 +328,8 @@
 
 //     @AutoLogOutput(key = "Auto/Arm In Prep")
 //     private boolean armInPrep() {
-//         return SuperstructureState.AUTO.checksOut(targetHeight.prep, robotContainer.stateManager);
+//         return SuperstructureState.AUTO.checksOut(targetHeight.prep,
+// robotContainer.stateManager);
 //     }
 
 //     @AutoLogOutput(key = "Auto/Robot In Place")
@@ -334,7 +342,8 @@
 //                         .plus(
 //                                 new Transform2d(
 //                                         new Translation2d(
-//                                                 Units.feetToMeters(3) / 2, targetLocation.offset),
+//                                                 Units.feetToMeters(3) / 2,
+// targetLocation.offset),
 //                                         Rotation2d.k180deg));
 //         Logger.recordOutput("Auto/Physical Target Pose", alignmentPose);
 //         Pose2d currentPose = robotContainer.drivetrain.getRobotPose();

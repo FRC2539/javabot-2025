@@ -10,11 +10,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -23,12 +20,9 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.controller.LogitechController;
 import frc.lib.controller.ThrustmasterJoystick;
-import frc.lib.vision.PinholeModel3D;
 import frc.robot.commands.AlignAndDriveToReef;
-import frc.robot.commands.AlignToPiece;
 import frc.robot.commands.AlignToReef;
 import frc.robot.commands.WheelRadiusCharacterization;
-import frc.robot.constants.AligningConstants;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
@@ -58,7 +52,6 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSimML;
-import frc.robot.util.Elastic;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -73,7 +66,7 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    //public Auto auto; // #146: Pass in RobotContainer
+    // public Auto auto; // #146: Pass in RobotContainer
     public IntakeSubsystem intakeSubsystem;
     public ElevatorSubsystem elevatorSubsystem;
     public ClimberSubsystem climberSubsystem;
@@ -200,15 +193,13 @@ public class RobotContainer {
         DROP_TRIGGER = leftDriveController.getTrigger();
 
         final Trigger EJECT_TRIGGER = rightDriveController.getTrigger();
-        //final Trigger ALIGN_TRIGGER = rightDriveController.getBottomThumb();
+        // final Trigger ALIGN_TRIGGER = rightDriveController.getBottomThumb();
         // final Trigger NORMAL_ALIGN =
         //         (stateManager.STATION_GRIPPER.or(stateManager.PROCESSOR)).negate();
 
-        //USING_AUTO_ALIGN = new Trigger(ALIGN_TRIGGER);
+        // USING_AUTO_ALIGN = new Trigger(ALIGN_TRIGGER);
 
-        
-
-        //AUTO_DRIVER_TRIGGER = (USING_AUTO_ALIGN.negate().or(AUTO_ALIGNED)).and(DROP_TRIGGER);
+        // AUTO_DRIVER_TRIGGER = (USING_AUTO_ALIGN.negate().or(AUTO_ALIGNED)).and(DROP_TRIGGER);
 
         // drive.withVelocityX(-leftDriveController.getYAxis().get() *
         // GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive forward with negative Y
@@ -360,9 +351,23 @@ public class RobotContainer {
         // .onTrue(drivetrain.runOnce(() -> drivetrain.resetPose(Pose2d.kZero)));
 
         // Operator Mode Setting
-        operatorController.getLeftBumper().onTrue(Commands.runOnce(() -> stateManager.setMode(CoralAlgaeMode.LeftCoral), stateManager));
-        operatorController.getRightBumper().onTrue(Commands.runOnce(() -> stateManager.setMode(CoralAlgaeMode.RightCoral), stateManager));
-        operatorController.getRightTrigger().onTrue(Commands.runOnce(() -> stateManager.setMode(CoralAlgaeMode.Algae), stateManager));
+        operatorController
+                .getLeftBumper()
+                .onTrue(
+                        Commands.runOnce(
+                                () -> stateManager.setMode(CoralAlgaeMode.LeftCoral),
+                                stateManager));
+        operatorController
+                .getRightBumper()
+                .onTrue(
+                        Commands.runOnce(
+                                () -> stateManager.setMode(CoralAlgaeMode.RightCoral),
+                                stateManager));
+        operatorController
+                .getRightTrigger()
+                .onTrue(
+                        Commands.runOnce(
+                                () -> stateManager.setMode(CoralAlgaeMode.Algae), stateManager));
 
         Trigger LEFT_JOYSTICK_BUMP =
                 new Trigger(
@@ -407,7 +412,8 @@ public class RobotContainer {
 
         operatorController.getY().onTrue(stateManager.setGoal(Position.L4));
 
-        //operatorController.getY().onTrue(Commands.runOnce(() -> System.out.println("Y PRESSED")));
+        // operatorController.getY().onTrue(Commands.runOnce(() -> System.out.println("Y
+        // PRESSED")));
         operatorController.getX().onTrue(stateManager.setGoal(Position.L3));
 
         operatorController.getB().onTrue(stateManager.setGoal(Position.L2));
@@ -451,14 +457,14 @@ public class RobotContainer {
                                                                 gripperSubsystem.HAS_PIECE))));
         (EJECT_TRIGGER).whileTrue(gripperSubsystem.ejectReverse(12));
 
-        rightDriveController.getBottomThumb().whileTrue(alignToReef(stateManager.getAligningOffset()));
+        rightDriveController
+                .getBottomThumb()
+                .whileTrue(alignToReef(stateManager.getAligningOffset()));
 
         // Technical Bindings
 
         leftDriveController.getLeftBottomMiddle().onTrue(climberSubsystem.zeroClimberCommand());
-        rightDriveController
-                .getLeftBottomMiddle()
-                .onTrue(stateManager.setGoal(Position.Start));
+        rightDriveController.getLeftBottomMiddle().onTrue(stateManager.setGoal(Position.Start));
         leftDriveController.getLeftTopMiddle().whileTrue(climberSubsystem.climberTuneable());
 
         rightDriveController
@@ -473,12 +479,9 @@ public class RobotContainer {
 
         leftDriveController.getLeftBottomRight().onTrue(intakeSubsystem.zeroflipper());
 
-        //leftDriveController.getLeftTopLeft().whileTrue(gripperSubsystem.gripperTuneable());
-        
-            
+        // leftDriveController.getLeftTopLeft().whileTrue(gripperSubsystem.gripperTuneable());
 
         SmartDashboard.putData(stateManager);
-        
 
         // leftDriveController.getRightBottomLeft().onTrue(elevatorSubsystem.zeroElevatorCommand());
     }
@@ -495,9 +498,9 @@ public class RobotContainer {
         return value * Math.abs(value);
     }
 
-//     public Command getAutonomousCommand() {
-//         return auto.getAuto();
-//     }
+    //     public Command getAutonomousCommand() {
+    //         return auto.getAuto();
+    //     }
 
     public Command alignToReef(int tag, double offset, Rotation2d rotOffset) {
         Pose2d alignmentPose =
@@ -525,20 +528,19 @@ public class RobotContainer {
     // Automatically chooses closest tag
     public Command alignToReef(double offset) {
         return Commands.defer(
-                        () -> {
-                            Pose2d alignmentPose =
-                                    VisionConstants.aprilTagLayout.getTagPose(3).get().toPose2d(); 
-                                
-                            return new AlignToReef(
-                                    drivetrain,
-                                    leftJoystickVelocityX,
-                                    leftJoystickVelocityY,
-                                    0,
-                                    alignmentPose,
-                                    Rotation2d.kPi);
-                        },
-                        Set.of(drivetrain));
-                
+                () -> {
+                    Pose2d alignmentPose =
+                            VisionConstants.aprilTagLayout.getTagPose(3).get().toPose2d();
+
+                    return new AlignToReef(
+                            drivetrain,
+                            leftJoystickVelocityX,
+                            leftJoystickVelocityY,
+                            0,
+                            alignmentPose,
+                            Rotation2d.kPi);
+                },
+                Set.of(drivetrain));
     }
 
     public Command alignAndDriveToReef(int tag, double offset) {
@@ -553,5 +555,4 @@ public class RobotContainer {
                                         new Rotation2d()));
         return new AlignAndDriveToReef(drivetrain, 0, alignmentPose, Rotation2d.kPi);
     }
-
 }

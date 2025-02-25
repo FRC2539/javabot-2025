@@ -80,10 +80,9 @@ public class ModeManager extends SubsystemBase {
     }
 
     public Command setGoal(frc.robot.subsystems.ModeManager.ModeManager.State.Position position) {
-        
-        System.out.println("asdsadasa");
+
         return Commands.parallel(
                 Commands.runOnce(() -> elevator.setPosition(position.elevatorHeight()), elevator),
-                Commands.runOnce(() -> arm.setPosition(position.armHeight()), arm, this));
+                Commands.runOnce(() -> arm.setPosition(position.armHeight()), arm));
     }
 }

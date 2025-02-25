@@ -4,12 +4,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.RobotContainer;
-
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
-
-import com.pathplanner.lib.config.RobotConfig;
 
 public class GripperSubsystem extends SubsystemBase {
 
@@ -62,7 +58,8 @@ public class GripperSubsystem extends SubsystemBase {
         return Commands.runOnce(
                 () -> {
                     gripperIO.setVoltage(voltage);
-                }, this);
+                },
+                this);
     }
 
     public boolean hasPiece() {
