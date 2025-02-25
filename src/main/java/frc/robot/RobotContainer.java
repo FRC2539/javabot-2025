@@ -14,7 +14,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.InternalButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.controller.LogitechController;
@@ -74,7 +73,7 @@ public class RobotContainer {
 
     public Vision vision;
     public LightsSubsystem lights;
-    
+
     public ModeManager modeManager;
     public GripperSubsystem gripperSubsystem;
 
@@ -83,8 +82,6 @@ public class RobotContainer {
     private DoubleSupplier rightJoystickVelocityTheta;
 
     private Supplier<ChassisSpeeds> driverVelocitySupplier;
-
-    
 
     public RobotContainer() {
         if (Robot.isReal()) {
@@ -109,7 +106,6 @@ public class RobotContainer {
                             new ClimberHeadIONeo550()); // new ClimberIOTalonFX(), new
             // ClimberHeadIONeo550());
             lights = new LightsSubsystem();
-            
 
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
         } else {
@@ -136,7 +132,6 @@ public class RobotContainer {
             climberSubsystem =
                     new ClimberSubsystem(new ClimberIOTalonFX(), new ClimberHeadIONeo550());
             lights = new LightsSubsystem();
-
         }
 
         modeManager = new ModeManager(elevatorSubsystem, armSubsystem);
@@ -334,9 +329,6 @@ public class RobotContainer {
                 .getBottomThumb()
                 .and(() -> modeManager.getCurrentScoringMode() == ScoringMode.Algae)
                 .whileTrue(alignToReef(AligningConstants.centerOffset));
-
-
-
 
         leftDriveController.getLeftBottomMiddle().onTrue(climberSubsystem.zeroClimberCommand());
         rightDriveController.getLeftBottomMiddle().onTrue(modeManager.goTo(Position.Start));
