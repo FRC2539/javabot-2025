@@ -69,7 +69,7 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    //public Auto auto; // #146: Pass in RobotContainer
+    // public Auto auto; // #146: Pass in RobotContainer
     public IntakeSubsystem intakeSubsystem;
     public ElevatorSubsystem elevatorSubsystem;
     public ClimberSubsystem climberSubsystem;
@@ -143,7 +143,7 @@ public class RobotContainer {
         }
 
         modeManager = new ModeManager(elevatorSubsystem, armSubsystem);
-        //auto = new Auto(drivetrain, this);
+        // auto = new Auto(drivetrain, this);
 
         configureBindings();
         // Establish the "Trajectory Field" Field2d into the dashboard
@@ -274,7 +274,7 @@ public class RobotContainer {
                                                 operatorController.getRightXAxis().get(),
                                                 operatorController.getRightYAxis().get())
                                         > 0.3);
-                        
+
         RIGHT_JOYSTICK_BUMP.toggleOnTrue(
                 lights.runEnd(
                         (() -> LightsSubsystem.LEDSegment.MainStrip.setRainbowAnimation(1)),
@@ -293,7 +293,6 @@ public class RobotContainer {
         operatorController.getDPadLeft().onTrue(modeManager.goTo(Position.Algae3));
         operatorController.getDPadRight().onTrue(modeManager.goTo(Position.Algae2));
 
-
         operatorController.getY().onTrue(modeManager.goTo(Position.L4));
         operatorController.getX().onTrue(modeManager.goTo(Position.L3));
         operatorController.getB().onTrue(modeManager.goTo(Position.L2));
@@ -306,21 +305,32 @@ public class RobotContainer {
         leftDriveController.getRightThumb().whileTrue(climberSubsystem.moveClimberUpVoltage());
         leftDriveController.getBottomThumb().whileTrue(climberSubsystem.intakeCage());
 
-
-        operatorController.getLeftBumper().onTrue(Commands.runOnce(() -> modeManager.setScoringMode(ScoringMode.LeftCoral), modeManager));
-        operatorController.getRightBumper().onTrue(Commands.runOnce(() -> modeManager.setScoringMode(ScoringMode.RightCoral), modeManager));
-        operatorController.getRightTrigger().onTrue(Commands.runOnce(() -> modeManager.setScoringMode(ScoringMode.Algae), modeManager));
-
+        operatorController
+                .getLeftBumper()
+                .onTrue(
+                        Commands.runOnce(
+                                () -> modeManager.setScoringMode(ScoringMode.LeftCoral),
+                                modeManager));
+        operatorController
+                .getRightBumper()
+                .onTrue(
+                        Commands.runOnce(
+                                () -> modeManager.setScoringMode(ScoringMode.RightCoral),
+                                modeManager));
+        operatorController
+                .getRightTrigger()
+                .onTrue(
+                        Commands.runOnce(
+                                () -> modeManager.setScoringMode(ScoringMode.Algae), modeManager));
 
         lights.setAlgaeModeSupplier(gripperSubsystem.HAS_PIECE);
 
-
-        rightDriveController.getBottomThumb().whileTrue(alignToReef(modeManager.getAligningOffset()));
-  
-        leftDriveController.getLeftBottomMiddle().onTrue(climberSubsystem.zeroClimberCommand());
         rightDriveController
-                .getLeftBottomMiddle()
-                .onTrue(modeManager.goTo(Position.Start));
+                .getBottomThumb()
+                .whileTrue(alignToReef(modeManager.getAligningOffset()));
+
+        leftDriveController.getLeftBottomMiddle().onTrue(climberSubsystem.zeroClimberCommand());
+        rightDriveController.getLeftBottomMiddle().onTrue(modeManager.goTo(Position.Start));
         leftDriveController.getLeftTopMiddle().whileTrue(climberSubsystem.climberTuneable());
 
         rightDriveController
@@ -348,7 +358,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        //return auto.getAuto();
+        // return auto.getAuto();
         return Commands.none();
     }
 
@@ -374,9 +384,6 @@ public class RobotContainer {
     public Command alignToReef(int tag, double offset) {
         return alignToReef(tag, offset, Rotation2d.kZero);
     }
-
-
-
 
     // Automatically chooses closest tag
     public Command alignToReef(double offset) {

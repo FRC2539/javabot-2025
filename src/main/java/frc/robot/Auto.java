@@ -54,7 +54,8 @@
 //         this.robotContainer = robotContainer;
 //         setUpPathPlanner(drivetrain);
 //         configureBindings();
-//         autoChooser = new LoggedDashboardChooser<>("Auto Routine", AutoBuilder.buildAutoChooser());
+//         autoChooser = new LoggedDashboardChooser<>("Auto Routine",
+// AutoBuilder.buildAutoChooser());
 //         SmartDashboard.putData("Auto Path", m_trajectoryField);
 //     }
 
@@ -75,7 +76,8 @@
 //             } else {
 //                 Logger.recordOutput(
 //                         "Auto/AutoDescription",
-//                         "404: Description not found. Validate that there is description in AutoConstants.");
+//                         "404: Description not found. Validate that there is description in
+// AutoConstants.");
 //             }
 
 //             Command command = previousAuto;
@@ -98,10 +100,13 @@
 
 //                     // A list of all paths contained in this auto
 //                     List<Pose2d> poses =
-//                             new ArrayList<>(); // This will be a list of all points during the auto
+//                             new ArrayList<>(); // This will be a list of all points during the
+// auto
 
-//                     for (var path : trajectories) { // For each path assigned, split into segments
-//                         for (var point : path.getStates()) { // For each segment, split into points
+//                     for (var path : trajectories) { // For each path assigned, split into
+// segments
+//                         for (var point : path.getStates()) { // For each segment, split into
+// points
 //                             poses.add(point.pose);
 //                         }
 //                     }
@@ -121,7 +126,8 @@
 //                     Pose2d startingPose = trajectories[0].getInitialPose();
 //                     Pose2d endingPose = trajectories[trajectories.length - 1].getEndState().pose;
 
-//                     m_trajectoryField.getObject("start_and_end").setPoses(startingPose, endingPose);
+//                     m_trajectoryField.getObject("start_and_end").setPoses(startingPose,
+// endingPose);
 
 //                     System.out.println("Pathplanner auto successfully shared.");
 
@@ -153,7 +159,8 @@
 //                 drivetrain::resetPose,
 //                 drivetrain::getChassisSpeeds,
 //                 (speeds, feedforwards) ->
-//                         drivetrain.setControl(drivetrain.driveRobotRelative(speeds, feedforwards)),
+//                         drivetrain.setControl(drivetrain.driveRobotRelative(speeds,
+// feedforwards)),
 //                 new PPHolonomicDriveController( // PPHolonomicController is the built in path
 //                         // following controller for holonomic drive trains
 //                         new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
@@ -296,7 +303,8 @@
 //                         .gripperSubsystem
 //                         .intakeSpinCoral()
 //                         .withDeadline(
-//                                 Commands.waitUntil(() -> robotContainer.gripperSubsystem.hasPiece())
+//                                 Commands.waitUntil(() ->
+// robotContainer.gripperSubsystem.hasPiece())
 //                                         .andThen(Commands.waitSeconds(0.75))
 //                                         .withTimeout(5)); // TODO: TIMEOUT
 //         NamedCommands.registerCommand("intake", intakeCommand.asProxy());
@@ -306,7 +314,8 @@
 //                 Commands.race(
 //                         armCommand.asProxy(),
 //                         Commands.sequence(
-//                                 Commands.waitUntil(() -> armInPlace()), scoreCommand.asProxy())));
+//                                 Commands.waitUntil(() -> armInPlace()),
+// scoreCommand.asProxy())));
 
 //         // spotless:off
 //         Command placeCommand =
@@ -359,7 +368,8 @@
 
 //     @AutoLogOutput(key = "Auto/Arm In Prep")
 //     private boolean armInPrep() {
-//         return SuperstructureState.AUTO.checksOut(targetHeight.prep, robotContainer.stateManager);
+//         return SuperstructureState.AUTO.checksOut(targetHeight.prep,
+// robotContainer.stateManager);
 //     }
 
 //     @AutoLogOutput(key = "Auto/Robot In Place")
