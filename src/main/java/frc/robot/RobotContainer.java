@@ -405,8 +405,7 @@ public class RobotContainer {
 
         operatorController.getY().onTrue(stateManager.setGoal(Position.L4));
 
-        operatorController.getY().onTrue(stateManager.setG
-        oal(Position.L4));
+        operatorController.getY().onTrue(stateManager.setGoal(Position.L4));
 
         //operatorController.getY().onTrue(Commands.runOnce(() -> System.out.println("Y PRESSED")));
         operatorController.getX().onTrue(stateManager.setGoal(Position.L3));
