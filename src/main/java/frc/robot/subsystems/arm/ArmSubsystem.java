@@ -43,9 +43,32 @@ public class ArmSubsystem extends SubsystemBase {
         setDefaultCommand(setVoltage(0));
     }
 
+    public boolean isAtSetpoint() {
+        return controller.atSetpoint();
+    }
+
     public void periodic() {
         armPivotIO.updateInputs(armPivotInputs);
         Logger.processInputs("RealOutputs/Arm", armPivotInputs);
+
+        double voltage = controller.calculate(armPivotInputs.throughboreEncoderPosition, reference);
+        TrapezoidProfile.State state = controller.getSetpoint();
+        voltage += state.velocity * 1.0 / 0.5;
+        voltage += Math.sin(state.position) * 0.2;
+        if (voltage > 0) {
+            voltage += 0.2;
+        } else {
+            voltage -= 0.2;
+        }
+        if (controller.atGoal()) {
+            voltage = 0;
+        } else {
+            voltage = Math.min(12.0, Math.max(-12.0, voltage)); // Clamp voltage
+        }
+        armPivotIO.setVoltage(voltage);
+        Logger.recordOutput("Arm/setpoint", state.position);
+        Logger.recordOutput("Arm/setpoint velocity", state.velocity);
+        Logger.recordOutput("Arm/reference", reference);
     }
 
     public Command runQStaticArmSysId(SysIdRoutine.Direction direction) {
@@ -72,10 +95,6 @@ public class ArmSubsystem extends SubsystemBase {
         return run(() -> armPivotIO.setVoltage(armTuneables.get()));
     }
 
-    public Command tunablePose() {
-        return runOnce(() -> reference = armTuneables.get()).andThen(followReference());
-    }
-
     public Command setPosition(double position) {
         if (position > ArmConstants.upperLimit) {
             position = ArmConstants.upperLimit;
@@ -86,40 +105,13 @@ public class ArmSubsystem extends SubsystemBase {
         double nextPosition = position;
 
         return runOnce(
-                        () -> {
-                            reference = nextPosition;
-                        })
-                .andThen(followReference());
+                () -> {
+                    reference = nextPosition;
+                });
     }
 
     public double getPosition() {
         return armPivotInputs.throughboreEncoderPosition;
-    }
-
-    private Command followReference() {
-        return run(
-                () -> {
-                    double voltage =
-                            controller.calculate(
-                                    armPivotInputs.throughboreEncoderPosition, reference);
-                    TrapezoidProfile.State state = controller.getSetpoint();
-                    voltage += state.velocity * 1.0 / 0.5;
-                    voltage += Math.sin(state.position) * 0.2;
-                    if (voltage > 0) {
-                        voltage += 0.2;
-                    } else {
-                        voltage -= 0.2;
-                    }
-                    if (controller.atGoal()) {
-                        voltage = 0;
-                    } else {
-                        voltage = Math.min(12.0, Math.max(-12.0, voltage)); // Clamp voltage
-                    }
-                    armPivotIO.setVoltage(voltage);
-                    Logger.recordOutput("Arm/setpoint", state.position);
-                    Logger.recordOutput("Arm/setpoint velocity", state.velocity);
-                    Logger.recordOutput("Arm/reference", reference);
-                });
     }
 
     public double getInternalEncoderPosition() {

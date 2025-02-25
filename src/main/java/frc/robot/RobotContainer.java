@@ -38,7 +38,7 @@ import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
-import frc.robot.subsystems.gripper.GripperIOFalcon;
+import frc.robot.subsystems.gripper.GripperIONeo550;
 import frc.robot.subsystems.gripper.GripperIOSim;
 import frc.robot.subsystems.gripper.GripperSubsystem;
 import frc.robot.subsystems.intake.FlipperIOSim;
@@ -96,7 +96,7 @@ public class RobotContainer {
                                     () -> drivetrain.getRobotPose().getRotation()),
                             new DummyPhotonCamera());
             gripperSubsystem =
-                    new GripperSubsystem(new GripperIOFalcon()); // new GripperIOFalcon());
+                    new GripperSubsystem(new GripperIONeo550()); // new GripperIOFalcon());
             elevatorSubsystem =
                     new ElevatorSubsystem(new ElevatorIOTalonFX()); // new ElevatorIOTalonFX());
             armSubsystem = new ArmSubsystem(new ArmPivotIOTalonFX());
@@ -280,7 +280,10 @@ public class RobotContainer {
 
         (operatorController.getDPadUp()).onTrue(modeManager.goTo(Position.Handoff));
 
-        (operatorController.getDPadUp()).whileTrue(gripperSubsystem.intakeSpinCoral());
+        (operatorController.getDPadUp())
+                .whileTrue(
+                        gripperSubsystem.intake(
+                                12)); // TODO: No this should not be structured like this
 
         operatorController.getDPadLeft().onTrue(modeManager.goTo(Position.Algae3));
         operatorController.getDPadRight().onTrue(modeManager.goTo(Position.Algae2));
@@ -339,8 +342,6 @@ public class RobotContainer {
                 .onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric()));
 
         leftDriveController.getLeftBottomRight().onTrue(intakeSubsystem.zeroflipper());
-
-        leftDriveController.getLeftTopLeft().whileTrue(gripperSubsystem.gripperTuneable());
     }
 
     private double deadband(double value, double deadband) {
