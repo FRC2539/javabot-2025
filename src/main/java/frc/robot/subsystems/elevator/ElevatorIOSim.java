@@ -14,9 +14,9 @@ public class ElevatorIOSim implements ElevatorIO {
         if (positionControl) {
             voltage = sussyAhh.calculate(position, positionSetpoint);
         }
-        position += voltage * 0.02;
+        // position += voltage * 0.02;
 
-        inputs.position = position;
+        inputs.position = positionSetpoint;
         inputs.voltage = voltage;
     }
 

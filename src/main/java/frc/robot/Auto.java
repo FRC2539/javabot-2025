@@ -240,19 +240,22 @@ public class Auto {
 
         NamedCommands.registerCommand("goto", robotContainer.modeManager.goTo(targetPosition));
 
-        Command scoreCommand =
-                robotContainer.gripperSubsystem.ejectSpinCoral().withTimeout(placeTimeout);
-        NamedCommands.registerCommand("score", scoreCommand.asProxy());
+        // Command scoreCommand =
+        //         robotContainer.gripperSubsystem.ejectSpinCoral().withTimeout(placeTimeout);
+        // NamedCommands.registerCommand("score", scoreCommand.asProxy());
 
-        Command intakeCommand =
-                robotContainer
-                        .gripperSubsystem
-                        .intakeSpinCoral()
-                        .withDeadline(
-                                Commands.waitUntil(() -> robotContainer.gripperSubsystem.hasPiece())
-                                        .andThen(Commands.waitSeconds(0.75))
-                                        .withTimeout(5)); // TODO: TIMEOUT
-        NamedCommands.registerCommand("intake", intakeCommand.asProxy());
+        // Command intakeCommand =
+        //         robotContainer
+        //                 .gripperSubsystem
+        //                 .intakeSpinCoral()
+        //                 .withDeadline(
+        //                         Commands.waitUntil(() ->
+        // robotContainer.gripperSubsystem.hasPiece())
+        //                                 .andThen(Commands.waitSeconds(0.75))
+        //                                 .withTimeout(5)); // TODO: TIMEOUT
+        // NamedCommands.registerCommand("intake", intakeCommand.asProxy());
+
+        // TODO UNCOMMENT THE CODE ABOVE
 
         // spotless:on
 

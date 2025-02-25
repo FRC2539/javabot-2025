@@ -58,6 +58,7 @@ public class ModeManager extends SubsystemBase {
         this.targetPosition = position;
         return Commands.sequence(
                 arm.setPosition(targetPosition.armHeight),
+                Commands.waitUntil(() -> arm.isAtSetpoint()),
                 elevator.setPosition(targetPosition.elevatorHeight));
     }
 
@@ -69,7 +70,12 @@ public class ModeManager extends SubsystemBase {
         return this.currentScoringMode;
     }
 
+    @AutoLogOutput
     public boolean isAtPosition() {
+        System.out.println(
+                arm.isAtSetpoint()
+                        + "  "
+                        + Math.abs(elevator.getPosition() - targetPosition.elevatorHeight));
         return arm.isAtSetpoint()
                 && (Math.abs(elevator.getPosition() - targetPosition.elevatorHeight)
                         < 0.5); // TODO: TUNE
