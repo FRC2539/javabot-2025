@@ -33,8 +33,9 @@ import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.constants.VisionConstants;
-import frc.robot.subsystems.ModeManager.SuperstructureStateManager;
-import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState.Position;
+import frc.robot.subsystems.ModeManager.ModeManager;
+import frc.robot.subsystems.ModeManager.ModeManager.CoralAlgaeMode;
+import frc.robot.subsystems.ModeManager.ModeManager.State.Position;
 import frc.robot.subsystems.arm.ArmPivotIOSim;
 import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
 import frc.robot.subsystems.arm.ArmSubsystem;
@@ -72,7 +73,7 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    public Auto auto; // #146: Pass in RobotContainer
+    //public Auto auto; // #146: Pass in RobotContainer
     public IntakeSubsystem intakeSubsystem;
     public ElevatorSubsystem elevatorSubsystem;
     public ClimberSubsystem climberSubsystem;
@@ -81,7 +82,7 @@ public class RobotContainer {
     public Vision vision;
     public LightsSubsystem lights;
 
-    public SuperstructureStateManager stateManager;
+    public ModeManager stateManager;
     public GripperSubsystem gripperSubsystem;
 
     private DoubleSupplier leftJoystickVelocityX;
@@ -152,10 +153,10 @@ public class RobotContainer {
             lights = new LightsSubsystem();
         }
 
-        stateManager = new SuperstructureStateManager(elevatorSubsystem, armSubsystem);
+        // auto = new Auto(drivetrain, this);
 
-        auto = new Auto(drivetrain, this);
-
+        stateManager = new ModeManager(elevatorSubsystem, armSubsystem);
+        stateManager.setDefaultCommand(Commands.runOnce(() -> {}, stateManager));
         configureBindings();
         // Establish the "Trajectory Field" Field2d into the dashboard
     }
@@ -199,22 +200,15 @@ public class RobotContainer {
         DROP_TRIGGER = leftDriveController.getTrigger();
 
         final Trigger EJECT_TRIGGER = rightDriveController.getTrigger();
-        final Trigger ALIGN_TRIGGER = rightDriveController.getBottomThumb();
-        final Trigger NORMAL_ALIGN =
-                (stateManager.STATION_GRIPPER.or(stateManager.PROCESSOR)).negate();
+        //final Trigger ALIGN_TRIGGER = rightDriveController.getBottomThumb();
+        // final Trigger NORMAL_ALIGN =
+        //         (stateManager.STATION_GRIPPER.or(stateManager.PROCESSOR)).negate();
 
-        USING_AUTO_ALIGN = new Trigger(ALIGN_TRIGGER);
+        //USING_AUTO_ALIGN = new Trigger(ALIGN_TRIGGER);
 
-        AUTO_ALIGNED =
-                new Trigger(
-                        () -> {
-                            return Auto.robotInPlace(
-                                    drivetrain.getRobotPose(),
-                                    stateManager.getLastScoringPose(),
-                                    stateManager.getLastScoringOffset());
-                        });
+        
 
-        AUTO_DRIVER_TRIGGER = (USING_AUTO_ALIGN.negate().or(AUTO_ALIGNED)).and(DROP_TRIGGER);
+        //AUTO_DRIVER_TRIGGER = (USING_AUTO_ALIGN.negate().or(AUTO_ALIGNED)).and(DROP_TRIGGER);
 
         // drive.withVelocityX(-leftDriveController.getYAxis().get() *
         // GlobalConstants.MAX_TRANSLATIONAL_SPEED) // Drive forward with negative Y
@@ -366,9 +360,9 @@ public class RobotContainer {
         // .onTrue(drivetrain.runOnce(() -> drivetrain.resetPose(Pose2d.kZero)));
 
         // Operator Mode Setting
-        operatorController.getLeftBumper().onTrue(stateManager.setLeftCoralMode());
-        operatorController.getRightBumper().onTrue(stateManager.setRightCoralMode());
-        operatorController.getRightTrigger().onTrue(stateManager.setAlgaeMode());
+        operatorController.getLeftBumper().onTrue(Commands.runOnce(() -> stateManager.setMode(CoralAlgaeMode.LeftCoral), stateManager));
+        operatorController.getRightBumper().onTrue(Commands.runOnce(() -> stateManager.setMode(CoralAlgaeMode.RightCoral), stateManager));
+        operatorController.getRightTrigger().onTrue(Commands.runOnce(() -> stateManager.setMode(CoralAlgaeMode.Algae), stateManager));
 
         Trigger LEFT_JOYSTICK_BUMP =
                 new Trigger(
@@ -399,52 +393,33 @@ public class RobotContainer {
                         (() -> LightsSubsystem.LEDSegment.MainStrip.setRainbowAnimation(1)),
                         () -> {})); // L3 Rainbow
 
-        // Coral Mode Bindings
-        final Trigger CORAL = stateManager.LEFT_CORAL.or(stateManager.RIGHT_CORAL);
-        final Trigger ALGAE = stateManager.ALGAE;
-        final Trigger ARMWRIST = stateManager.ARMWRIST;
-        ARMWRIST.and(operatorController.getY()).whileTrue(armSubsystem.armpivotUp());
-        ARMWRIST.and(operatorController.getA()).whileTrue(armSubsystem.armpivotDown());
-
         // CORAL.and(operatorController.getY())
         //         .onTrue(stateManager.moveToPosition(Position.L4Prep))
         //         .onFalse(stateManager.moveToPosition(Position.L4));
         // CORAL.and(operatorController.getX())
         //         .onTrue(stateManager.moveToPosition(Position.L3Prep))
         //         .onFalse(stateManager.moveToPosition(Position.L3));
-        // CORAL.and(operatorController.getB())
-        //         .onTrue(stateManager.moveToPosition(Position.L2Prep))
-        //         .onFalse(stateManager.moveToPosition(Position.L2));
-        // CORAL.and(operatorController.getA()).onTrue(stateManager.moveToPosition(Position.L1));
+        // CORAL
 
-        operatorController.getLeftTrigger().onTrue(stateManager.moveToPosition(Position.Climb));
+        operatorController.getLeftTrigger().onTrue(stateManager.setGoal(Position.Climb));
 
-        bindPlaceSeq(CORAL.and(operatorController.getY()), Position.L4Prep, Position.L4, 0.1);
+        operatorController.getY().onTrue(stateManager.setGoal(Position.L4));
 
-        bindPlaceSeq(CORAL.and(operatorController.getX()), Position.L3Prep, Position.L3, 0.1);
+        operatorController.getY().onTrue(stateManager.setG
+        oal(Position.L4));
 
-        bindPlaceSeq(CORAL.and(operatorController.getB()), Position.L2Prep, Position.L2, 0.1);
+        //operatorController.getY().onTrue(Commands.runOnce(() -> System.out.println("Y PRESSED")));
+        operatorController.getX().onTrue(stateManager.setGoal(Position.L3));
 
-        operatorController.getA().onTrue(stateManager.moveToPosition(Position.L1));
+        operatorController.getB().onTrue(stateManager.setGoal(Position.L2));
 
-        CORAL.and(operatorController.getStart())
-                .onTrue(stateManager.moveToPosition(Position.Source));
+        operatorController.getA().onTrue(stateManager.setGoal(Position.L1));
 
-        CORAL.and(operatorController.getDPadDown())
-                .onTrue(stateManager.moveToPosition(Position.Home));
-        CORAL.and(operatorController.getDPadUp()).whileTrue(gripperSubsystem.injectForward(12));
+        operatorController.getDPadDown().onTrue(stateManager.setGoal(Position.Home));
+        operatorController.getDPadUp().onTrue(stateManager.setGoal(Position.Handoff));
 
-        // ALGAE.and(operatorController.getY()).onTrue(stateManager.moveToPosition(Position.NetAlgae));
-        ALGAE.and(operatorController.getX()).onTrue(stateManager.moveToPosition(Position.L3Algae));
-        ALGAE.and(operatorController.getB()).onTrue(stateManager.moveToPosition(Position.L2Algae));
-        ALGAE.and(operatorController.getA())
-                .onTrue(stateManager.moveToPosition(Position.Processor));
-        // ALGAE.and(operatorController.getDPadUp())
-        //         .onTrue(stateManager.moveToPosition(Position.Handoff));
-        ALGAE.and(operatorController.getDPadLeft())
-                .onTrue(stateManager.moveToPosition(Position.Quick34));
-        ALGAE.and(operatorController.getDPadRight())
-                .onTrue(stateManager.moveToPosition(Position.Quick23));
+        operatorController.getDPadLeft().onTrue(stateManager.setGoal(Position.Quick3));
+        operatorController.getDPadRight().onTrue(stateManager.setGoal(Position.Quick2));
 
         // operatorController.getBack().onTrue(wristSubsystem.flipWristPosition());
 
@@ -466,87 +441,25 @@ public class RobotContainer {
 
         lights.setAlgaeModeSupplier(gripperSubsystem.HAS_PIECE);
 
-        CORAL.and(rightDriveController.getLeftThumb())
+        (rightDriveController.getLeftThumb())
                 .whileTrue(
                         gripperSubsystem
-                                .injectForward(12)
+                                .ejectReverse(12)
                                 .withDeadline(
                                         Commands.waitSeconds(0.2)
                                                 .andThen(
                                                         Commands.waitUntil(
                                                                 gripperSubsystem.HAS_PIECE))));
-        CORAL.and(EJECT_TRIGGER).whileTrue(gripperSubsystem.ejectReverse(12));
+        (EJECT_TRIGGER).whileTrue(gripperSubsystem.ejectReverse(12));
 
-        ALGAE.and(rightDriveController.getLeftThumb()).onTrue(gripperSubsystem.injectForward(12));
-        ALGAE.and(EJECT_TRIGGER)
-                .and(stateManager.PROCESSOR)
-                .whileTrue(gripperSubsystem.ejectReverse(6)); // slower i think
-        ALGAE.and(EJECT_TRIGGER)
-                .and(stateManager.PROCESSOR.negate())
-                .whileTrue(gripperSubsystem.ejectReverse(6)); // slower i think
-
-        ALIGN_TRIGGER.onTrue(
-                Commands.runOnce(
-                        () ->
-                                stateManager.setLastScoringPose(
-                                        drivetrain.findNearestAprilTagPose())));
-
-        stateManager
-                .LEFT_CORAL
-                .and(ALIGN_TRIGGER)
-                .whileTrue(alignToReef(AligningConstants.leftOffset));
-
-        stateManager
-                .ALGAE
-                .and(ALIGN_TRIGGER)
-                .whileTrue(alignToReef(AligningConstants.centerOffset));
-
-        stateManager
-                .RIGHT_CORAL
-                .and(ALIGN_TRIGGER)
-                .whileTrue(alignToReef(AligningConstants.rightOffset));
-
-        // stateManager
-        //         .ALGAE
-        //         .and(ALIGN_TRIGGER.and(stateManager.PROCESSOR))
-        //         .whileTrue(alignToProcessor());
-
-        // stateManager
-        //         .LEFT_CORAL
-        //         .and(ALIGN_TRIGGER.and(stateManager.STATION_GRIPPER))
-        //         .whileTrue(alignToStation(0.6, Rotation2d.kZero));
-
-        // stateManager
-        //         .ALGAE
-        //         .and(ALIGN_TRIGGER.and(stateManager.STATION_GRIPPER))
-        //         .whileTrue(alignToStation(0.0, Rotation2d.kZero));
-
-        // stateManager
-        //         .RIGHT_CORAL
-        //         .and(ALIGN_TRIGGER.and(stateManager.STATION_GRIPPER))
-        //         .whileTrue(alignToStation(-0.6, Rotation2d.kZero));
-
-        // stateManager
-        //         .LEFT_CORAL
-        //         .and(ALIGN_TRIGGER.and(stateManager.STATION_HANDOFF))
-        //         .whileTrue(alignToStation(0.6, Rotation2d.k180deg));
-
-        // stateManager
-        //         .ALGAE
-        //         .and(ALIGN_TRIGGER.and(stateManager.STATION_HANDOFF))
-        //         .whileTrue(alignToStation(0.0, Rotation2d.k180deg));
-
-        // stateManager
-        //         .RIGHT_CORAL
-        //         .and(ALIGN_TRIGGER.and(stateManager.STATION_HANDOFF))
-        //         .whileTrue(alignToStation(-0.6, Rotation2d.k180deg));
+        rightDriveController.getBottomThumb().whileTrue(alignToReef(stateManager.getAligningOffset()));
 
         // Technical Bindings
 
         leftDriveController.getLeftBottomMiddle().onTrue(climberSubsystem.zeroClimberCommand());
         rightDriveController
                 .getLeftBottomMiddle()
-                .onTrue(stateManager.moveToPosition(Position.Start));
+                .onTrue(stateManager.setGoal(Position.Start));
         leftDriveController.getLeftTopMiddle().whileTrue(climberSubsystem.climberTuneable());
 
         rightDriveController
@@ -561,60 +474,14 @@ public class RobotContainer {
 
         leftDriveController.getLeftBottomRight().onTrue(intakeSubsystem.zeroflipper());
 
-        leftDriveController.getLeftTopLeft().whileTrue(gripperSubsystem.gripperTuneable());
-        {
-            var tunableCommand =
-                    Commands.runOnce(
-                                    () -> {
-                                        Elastic.sendNotification(
-                                                new Elastic.Notification(
-                                                        Elastic.Notification.NotificationLevel.INFO,
-                                                        "Scheduled Supestructure Tunable",
-                                                        "YAYYAYYA."));
-                                    })
-                            .andThen(stateManager.moveToTunablePosition());
+        //leftDriveController.getLeftTopLeft().whileTrue(gripperSubsystem.gripperTuneable());
+        
+            
 
-            tunableCommand.setName("Tunable Superstructure");
-
-            leftDriveController
-                    .getRightTopLeft()
-                    .onTrue(
-                            Commands.runOnce(
-                                    () -> {
-                                        tunableCommand.cancel();
-                                        tunableCommand.schedule();
-                                    }));
-
-            SmartDashboard.putData(tunableCommand);
-
-            SmartDashboard.putData(stateManager);
-        }
+        SmartDashboard.putData(stateManager);
+        
 
         // leftDriveController.getRightBottomLeft().onTrue(elevatorSubsystem.zeroElevatorCommand());
-    }
-
-    private void bindPlaceSeq(Trigger button, Position prep, Position end, double timeout) {
-        (button)
-                .onTrue(
-                        (stateManager
-                                        .moveToPosition(prep)
-                                        .until(DROP_TRIGGER)
-                                        .andThen(
-                                                stateManager
-                                                        .moveToPosition(end)
-                                                        //                         .alongWith(
-                                                        //
-                                                        // Commands.waitSeconds(timeout)
-                                                        //
-                                                        // .andThen(
-                                                        //
-                                                        //       gripperSubsystem
-                                                        //
-                                                        //               .ejectSpinCoral()))
-                                                        .until(DROP_TRIGGER.negate())))
-                                .repeatedly()
-                                .beforeStarting(() -> normalRelease.setPressed(false))
-                                .finallyDo(() -> normalRelease.setPressed(true)));
     }
 
     private double deadband(double value, double deadband) {
@@ -629,9 +496,9 @@ public class RobotContainer {
         return value * Math.abs(value);
     }
 
-    public Command getAutonomousCommand() {
-        return auto.getAuto();
-    }
+//     public Command getAutonomousCommand() {
+//         return auto.getAuto();
+//     }
 
     public Command alignToReef(int tag, double offset, Rotation2d rotOffset) {
         Pose2d alignmentPose =
@@ -661,16 +528,8 @@ public class RobotContainer {
         return Commands.defer(
                         () -> {
                             Pose2d alignmentPose =
-                                    stateManager
-                                            .getLastScoringPose()
-                                            .plus(
-                                                    new Transform2d(
-                                                            new Translation2d(
-                                                                    Units.feetToMeters(3) / 2,
-                                                                    offset),
-                                                            new Rotation2d()));
-                            //         return new AlignAndDriveToReef(drivetrain, 0, alignmentPose,
-                            // Rotation2d.kPi);
+                                    VisionConstants.aprilTagLayout.getTagPose(3).get().toPose2d(); 
+                                
                             return new AlignToReef(
                                     drivetrain,
                                     leftJoystickVelocityX,
@@ -679,8 +538,8 @@ public class RobotContainer {
                                     alignmentPose,
                                     Rotation2d.kPi);
                         },
-                        Set.of(drivetrain))
-                .beforeStarting(() -> stateManager.setLastScoringOffset(offset));
+                        Set.of(drivetrain));
+                
     }
 
     public Command alignAndDriveToReef(int tag, double offset) {
@@ -696,70 +555,4 @@ public class RobotContainer {
         return new AlignAndDriveToReef(drivetrain, 0, alignmentPose, Rotation2d.kPi);
     }
 
-    public Command alignToPiece() {
-        Supplier<Pose2d> piecePositionSupplier =
-                () -> {
-                    var lastObservation = vision.getLastTargetObersevation(2);
-                    Pose2d robotPose = drivetrain.getRobotPose();
-                    Translation2d lastPieceTranslation =
-                            PinholeModel3D.getTranslationToTarget(
-                                    new Translation3d(
-                                            1,
-                                            lastObservation.tx().unaryMinus().getTan(),
-                                            lastObservation.ty().getTan()),
-                                    VisionConstants.robotToCamera2,
-                                    0);
-                    Pose2d poseAtTime = robotPose;
-
-                    Pose2d newPiecePose =
-                            poseAtTime.plus(
-                                    new Transform2d(lastPieceTranslation, new Rotation2d()));
-
-                    return newPiecePose;
-                };
-        return new AlignToPiece(
-                drivetrain,
-                driverVelocitySupplier,
-                .15,
-                piecePositionSupplier,
-                Rotation2d.kCCW_90deg);
-    }
-
-    public Command alignToProcessor() {
-        // getAlignmentcolor 3 = r
-        // set a trigger based on the thumbpad
-        //
-        return Commands.either(
-                alignToReef(3, 0),
-                alignToReef(16, 0),
-                () -> {
-                    return DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
-                });
-    }
-
-    public Command alignToStation(double offset, Rotation2d rotOffset) {
-        // getAlignmentcolor 3 = r
-        // set a trigger based on the thumbpad
-        //
-        return Commands.defer(
-                () -> {
-                    int closestTag = 0;
-                    Pose2d currentPose = drivetrain.getRobotPose();
-                    if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
-                        if (currentPose.getY() > 4.026) {
-                            closestTag = 2;
-                        } else {
-                            closestTag = 1;
-                        }
-                    } else {
-                        if (currentPose.getY() > 4.026) {
-                            closestTag = 13;
-                        } else {
-                            closestTag = 12;
-                        }
-                    }
-                    return alignToReef(closestTag, offset, rotOffset);
-                },
-                Set.of(drivetrain));
-    }
 }

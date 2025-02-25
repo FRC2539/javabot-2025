@@ -1,68 +1,56 @@
 package frc.robot.subsystems.gripper;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.RobotContainer;
+
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
+import com.pathplanner.lib.config.RobotConfig;
+
 public class GripperSubsystem extends SubsystemBase {
 
-    private GripperIO piviotIO;
+    private GripperIO gripperIO;
 
-    private GripperIOInputsAutoLogged armrollerInputs = new GripperIOInputsAutoLogged();
+    private GripperIOInputsAutoLogged gripperInputs = new GripperIOInputsAutoLogged();
 
     public final Trigger HAS_PIECE = new Trigger(this::hasPiece);
 
-    // NetworkTableInstance nInstance = NetworkTableInstance.getDefault();
-    // NetworkTable table = nInstance.getTable("SmartDashboard");
-    // NetworkTableValue grippervoltage = table.getValue("grippervoltage");
-
-    LoggedNetworkNumber grippervoltage = new LoggedNetworkNumber("Gripper Voltage", 0);
+    LoggedNetworkNumber leftGripperVoltage =
+            new LoggedNetworkNumber("Left Gripper Motor Voltage", 0);
+    LoggedNetworkNumber rightGripperVoltage =
+            new LoggedNetworkNumber("Right Gripper Motor Voltage ", 0); // TODO: NAME?
 
     public GripperSubsystem(GripperIO armrollerIO) {
-        this.piviotIO = armrollerIO;
+        this.gripperIO = armrollerIO;
         setDefaultCommand(setVoltage(0));
     }
 
     public void periodic() {
-        piviotIO.updateInputs(armrollerInputs);
-        Logger.processInputs("RealOutputs/Gripper", armrollerInputs);
+        gripperIO.updateInputs(gripperInputs);
+        Logger.processInputs("RealOutputs/Gripper", gripperInputs);
     }
 
-    public Command gripperTuneable() {
+    public Command gripperLeftTuneable() {
         return run(
                 () -> {
-                    double voltage = grippervoltage.get();
-                    piviotIO.setVoltage(voltage);
+                    double voltage = leftGripperVoltage.get();
+                    gripperIO.setVoltage(voltage);
                 });
     }
 
-    // public Command intakeSpinCoral() {
-    //     return setVoltage(12);
-    // }
+    public Command gripperRightTuneable() {
+        return run(
+                () -> {
+                    double voltage = rightGripperVoltage.get();
+                    gripperIO.setVoltage(voltage);
+                });
+    }
 
-    // public Command holdCoral() {
-    //     return setVoltage(0.25);
-    // }
-
-    // public Command ejectSpinCoral() {
-    //     return setVoltage(-1);
-    // }
-
-    // public Command intakeSpinAlgae() {
-    //     return setVoltage(12);
-    // }
-
-    // public Command ejectSpinAlgae() {
-    //     return setVoltage(-12);
-    // }
-
-    // public Command slowEjectSpinAlgae() {
-    //     return setVoltage(-3);
-    // }
-
-    public Command injectForward(double voltage) {
+    public Command intake(double voltage) {
         return setVoltage(voltage);
     }
 
@@ -71,20 +59,13 @@ public class GripperSubsystem extends SubsystemBase {
     }
 
     public Command setVoltage(double voltage) {
-        return run(
+        return Commands.runOnce(
                 () -> {
-                    piviotIO.setVoltage(voltage);
-                });
+                    gripperIO.setVoltage(voltage);
+                }, this);
     }
 
     public boolean hasPiece() {
-        // return armrollerInputs.sensor;
         return false;
-    }
-
-    private boolean hasAlgae = false;
-
-    public void setHasAlgae(boolean hasAlgae) {
-        hasAlgae = true;
     }
 }

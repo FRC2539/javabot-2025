@@ -11,21 +11,13 @@ public interface GripperIO {
         public double voltageLeft = 0;
         public double temperatureLeft = 0;
         public double currentLeft = 0;
-        public boolean sensorLeft = false;
-        public double throughboreEncoderPositionLeft = 0;
-        public boolean shutdownLeft;
-        public boolean throughboreConnectedLeft = false;
-        public double positionLeft;
 
         public double speedRight = 0;
         public double voltageRight = 0;
         public double temperatureRight = 0;
         public double currentRight = 0;
-        public boolean sensorRight = false;
-        public double throughboreEncoderPositionRight = 0;
-        public boolean shutdownRight;
-        public boolean throughboreConnectedRight = false;
-        public double positionRight;
+
+        public boolean hasPiece = false;
     }
 
     public void setVoltage(double voltage);
