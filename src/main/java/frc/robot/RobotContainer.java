@@ -77,7 +77,7 @@ public class RobotContainer {
 
     public Vision vision;
     public LightsSubsystem lights;
-    public ChuteSubsystem chuteSubsystem;
+    
     public ModeManager modeManager;
     public GripperSubsystem gripperSubsystem;
 
@@ -87,7 +87,7 @@ public class RobotContainer {
 
     private Supplier<ChassisSpeeds> driverVelocitySupplier;
 
-    private InternalButton normalRelease = new InternalButton();
+    
 
     public RobotContainer() {
         if (Robot.isReal()) {
@@ -112,7 +112,7 @@ public class RobotContainer {
                             new ClimberHeadIONeo550()); // new ClimberIOTalonFX(), new
             // ClimberHeadIONeo550());
             lights = new LightsSubsystem();
-            chuteSubsystem = new ChuteSubsystem(new ChuteIONeo550()); // new ChuteIONeo550());
+            
 
             intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
         } else {
@@ -139,7 +139,7 @@ public class RobotContainer {
             climberSubsystem =
                     new ClimberSubsystem(new ClimberIOTalonFX(), new ClimberHeadIONeo550());
             lights = new LightsSubsystem();
-            chuteSubsystem = new ChuteSubsystem(new ChuteIOSim());
+
         }
 
         modeManager = new ModeManager(elevatorSubsystem, armSubsystem);
@@ -327,7 +327,19 @@ public class RobotContainer {
 
         rightDriveController
                 .getBottomThumb()
-                .whileTrue(alignToReef(modeManager.getAligningOffset()));
+                .and(() -> modeManager.getCurrentScoringMode() == ScoringMode.LeftCoral)
+                .whileTrue(alignToReef(AligningConstants.leftOffset));
+        rightDriveController
+                .getBottomThumb()
+                .and(() -> modeManager.getCurrentScoringMode() == ScoringMode.RightCoral)
+                .whileTrue(alignToReef(AligningConstants.rightOffset));
+        rightDriveController
+                .getBottomThumb()
+                .and(() -> modeManager.getCurrentScoringMode() == ScoringMode.Algae)
+                .whileTrue(alignToReef(AligningConstants.centerOffset));
+
+
+
 
         leftDriveController.getLeftBottomMiddle().onTrue(climberSubsystem.zeroClimberCommand());
         rightDriveController.getLeftBottomMiddle().onTrue(modeManager.goTo(Position.Start));
@@ -336,9 +348,6 @@ public class RobotContainer {
         rightDriveController
                 .getLeftTopLeft()
                 .onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric()));
-
-        leftDriveController.getLeftBottomLeft().whileTrue(chuteSubsystem.moveChuteUp());
-        leftDriveController.getLeftTopRight().whileTrue(chuteSubsystem.moveChuteDown());
 
         leftDriveController.getLeftBottomRight().onTrue(intakeSubsystem.zeroflipper());
 

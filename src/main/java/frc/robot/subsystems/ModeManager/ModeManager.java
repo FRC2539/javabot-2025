@@ -3,6 +3,7 @@ package frc.robot.subsystems.ModeManager;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import frc.robot.constants.AligningConstants;
 import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
@@ -11,7 +12,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 public class ModeManager extends SubsystemBase {
     private ElevatorSubsystem elevator;
     private ArmSubsystem arm;
-    @AutoLogOutput private ScoringMode currentScoringMode = ScoringMode.LeftCoral;
+    @AutoLogOutput private ScoringMode currentScoringMode = ScoringMode.Algae;
 
     public ModeManager(ElevatorSubsystem elevator, ArmSubsystem arm) {
         this.elevator = elevator;
@@ -60,7 +61,11 @@ public class ModeManager extends SubsystemBase {
     }
 
     public void setScoringMode(ScoringMode mode) {
-        currentScoringMode = mode;
+        this.currentScoringMode = mode;
+    }
+
+    public ScoringMode getCurrentScoringMode() {
+        return this.currentScoringMode;
     }
 
     public double getAligningOffset() {
