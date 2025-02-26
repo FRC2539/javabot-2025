@@ -23,6 +23,7 @@ import frc.robot.commands.AlignToReef;
 import frc.robot.commands.WheelRadiusCharacterization;
 import frc.robot.constants.AligningConstants;
 import frc.robot.constants.GlobalConstants;
+import frc.robot.constants.GripperConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.constants.VisionConstants;
@@ -41,9 +42,6 @@ import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.gripper.GripperIONeo550;
 import frc.robot.subsystems.gripper.GripperIOSim;
 import frc.robot.subsystems.gripper.GripperSubsystem;
-import frc.robot.subsystems.intake.FlipperIOSim;
-import frc.robot.subsystems.intake.IntakeRollerIOSim;
-import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.lights.LightsSubsystem;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.DummyPhotonCamera;
@@ -66,7 +64,7 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     // public Auto auto; // #146: Pass in RobotContainer
-    public IntakeSubsystem intakeSubsystem;
+    // public IntakeSubsystem intakeSubsystem;
     public ElevatorSubsystem elevatorSubsystem;
     public ClimberSubsystem climberSubsystem;
     public ArmSubsystem armSubsystem;
@@ -107,7 +105,8 @@ public class RobotContainer {
             // ClimberHeadIONeo550());
             lights = new LightsSubsystem();
 
-            intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
+            //     intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new
+            // FlipperIOSim());
         } else {
             vision =
                     new Vision(
@@ -128,7 +127,8 @@ public class RobotContainer {
             gripperSubsystem = new GripperSubsystem(new GripperIOSim());
             elevatorSubsystem = new ElevatorSubsystem(new ElevatorIOSim());
             armSubsystem = new ArmSubsystem(new ArmPivotIOSim());
-            intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new FlipperIOSim());
+            //     intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new
+            // FlipperIOSim());
             climberSubsystem =
                     new ClimberSubsystem(new ClimberIOTalonFX(), new ClimberHeadIONeo550());
             lights = new LightsSubsystem();
@@ -274,16 +274,15 @@ public class RobotContainer {
 
         operatorController.getLeftTrigger().onTrue(modeManager.goTo(Position.Climb));
 
-        operatorController.getA().onTrue(modeManager.goTo(Position.L1));
-
         (operatorController.getDPadDown()).onTrue(modeManager.goTo(Position.Home));
 
-        (operatorController.getDPadUp()).onTrue(modeManager.goTo(Position.Handoff));
-
+        (operatorController.getDPadUp())
+                .onTrue(
+                                modeManager.goTo(Position.Handoff));
         (operatorController.getDPadUp())
                 .whileTrue(
-                        gripperSubsystem.intake(
-                                12)); // TODO: No this should not be structured like this
+                        gripperSubsystem.intakeUntilPiece());
+
 
         operatorController.getDPadLeft().onTrue(modeManager.goTo(Position.Algae3));
         operatorController.getDPadRight().onTrue(modeManager.goTo(Position.Algae2));
@@ -337,11 +336,10 @@ public class RobotContainer {
         rightDriveController.getLeftBottomMiddle().onTrue(modeManager.goTo(Position.Start));
         leftDriveController.getLeftTopMiddle().whileTrue(climberSubsystem.climberTuneable());
 
+        rightDriveController.getTrigger().whileTrue(gripperSubsystem.ejectReverse(GripperConstants.placeVoltage));
         rightDriveController
                 .getLeftTopLeft()
                 .onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric()));
-
-        leftDriveController.getLeftBottomRight().onTrue(intakeSubsystem.zeroflipper());
     }
 
     private double deadband(double value, double deadband) {

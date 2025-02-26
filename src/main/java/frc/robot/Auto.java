@@ -226,12 +226,9 @@ public class Auto {
     }
 
     // #146: Add a function that will register all triggers
-    private double placeTimeout = 0.5;
 
     public void configureBindings() {
-        NamedCommands.registerCommand(
-                "wait", Commands.waitUntil(() -> armInPlace() && robotInPlace()));
-
+    
         NamedCommands.registerCommand(
                 "wait position",
                 Commands.waitUntil(() -> robotContainer.modeManager.isAtPosition()));
@@ -240,22 +237,16 @@ public class Auto {
 
         NamedCommands.registerCommand("goto", robotContainer.modeManager.goTo(targetPosition));
 
-        // Command scoreCommand =
-        //         robotContainer.gripperSubsystem.ejectSpinCoral().withTimeout(placeTimeout);
-        // NamedCommands.registerCommand("score", scoreCommand.asProxy());
+        Command scoreCommand =
+                robotContainer.gripperSubsystem.placePiece();
+        NamedCommands.registerCommand("place", scoreCommand.asProxy());
 
-        // Command intakeCommand =
-        //         robotContainer
-        //                 .gripperSubsystem
-        //                 .intakeSpinCoral()
-        //                 .withDeadline(
-        //                         Commands.waitUntil(() ->
-        // robotContainer.gripperSubsystem.hasPiece())
-        //                                 .andThen(Commands.waitSeconds(0.75))
-        //                                 .withTimeout(5)); // TODO: TIMEOUT
-        // NamedCommands.registerCommand("intake", intakeCommand.asProxy());
+        Command intakeCommand =
+                robotContainer
+                        .gripperSubsystem
+                        .intakeUntilPiece();
 
-        // TODO UNCOMMENT THE CODE ABOVE
+        NamedCommands.registerCommand("intake", intakeCommand.asProxy());
 
         // spotless:on
 

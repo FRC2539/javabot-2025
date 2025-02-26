@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.constants.GripperConstants;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -48,6 +49,19 @@ public class GripperSubsystem extends SubsystemBase {
 
     public Command intake(double voltage) {
         return setVoltage(voltage);
+    }
+
+    public Command intakeUntilPiece() {
+        return setVoltage(GripperConstants.handoffVoltage)
+                .andThen(Commands.waitUntil(HAS_PIECE))
+                .andThen(setVoltage(0)); // TODO: I dont think i need to set the voltage to zero again but i am anyways
+    }
+
+    public Command placePiece() {
+        return setVoltage(GripperConstants.placeVoltage)
+                .andThen(Commands.waitUntil(HAS_PIECE))
+                .andThen(Commands.waitSeconds(0.01))
+                .andThen(setVoltage(0));
     }
 
     public Command ejectReverse(double voltage) {
