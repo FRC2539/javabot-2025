@@ -34,6 +34,7 @@ import frc.robot.subsystems.arm.ArmPivotIOSim;
 import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
 import frc.robot.subsystems.arm.ArmSubsystem;
 import frc.robot.subsystems.climber.ClimberHeadIONeo550;
+import frc.robot.subsystems.climber.ClimberHeadIOSim;
 import frc.robot.subsystems.climber.ClimberIOTalonFX;
 import frc.robot.subsystems.climber.ClimberSubsystem;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
@@ -129,8 +130,7 @@ public class RobotContainer {
             armSubsystem = new ArmSubsystem(new ArmPivotIOSim());
             //     intakeSubsystem = new IntakeSubsystem(new IntakeRollerIOSim(), new
             // FlipperIOSim());
-            climberSubsystem =
-                    new ClimberSubsystem(new ClimberIOTalonFX(), new ClimberHeadIONeo550());
+            climberSubsystem = new ClimberSubsystem(new ClimberIOTalonFX(), new ClimberHeadIOSim());
             lights = new LightsSubsystem();
         }
 
@@ -274,14 +274,16 @@ public class RobotContainer {
 
         operatorController.getLeftTrigger().onTrue(modeManager.goTo(Position.Climb));
 
-        (operatorController.getDPadDown()).onTrue(modeManager.goTo(Position.Home));
+        operatorController.getDPadDown().onTrue(modeManager.goTo(Position.Home));
 
-        (operatorController.getDPadUp()).onTrue(modeManager.goTo(Position.Handoff));
-        (operatorController.getDPadLeft()).whileTrue(Commands.runOnce(() -> {
-                gripperSubsystem.setVoltage(12);
-        }, gripperSubsystem));
+        operatorController
+                .getDPadUp()
+                .onTrue(
+                        modeManager
+                                .goTo(Position.Handoff)
+                                .alongWith(gripperSubsystem.intakeUntilPiece()));
+        operatorController.getDPadLeft().onTrue(modeManager.goTo(Position.Algae3));
 
-        //operatorController.getDPadLeft().onTrue(modeManager.goTo(Position.Algae3));
         operatorController.getDPadRight().onTrue(modeManager.goTo(Position.Algae2));
 
         operatorController.getY().onTrue(modeManager.goTo(Position.L4));
@@ -294,7 +296,6 @@ public class RobotContainer {
         // Climb Bindings
         leftDriveController.getLeftThumb().whileTrue(climberSubsystem.moveClimberDownVoltage());
         leftDriveController.getRightThumb().whileTrue(climberSubsystem.moveClimberUpVoltage());
-        leftDriveController.getBottomThumb().whileTrue(climberSubsystem.intakeCage());
 
         operatorController
                 .getLeftBumper()

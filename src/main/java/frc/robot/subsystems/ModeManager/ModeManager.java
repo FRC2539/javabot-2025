@@ -11,7 +11,8 @@ import org.littletonrobotics.junction.AutoLogOutput;
 public class ModeManager extends SubsystemBase {
     private ElevatorSubsystem elevator;
     private ArmSubsystem arm;
-    @AutoLogOutput private Position targetPosition;
+    @AutoLogOutput private Position currentPosition;
+    @AutoLogOutput private MoveOrder currentMoveOrder = MoveOrder.MoveArmFirst;
     @AutoLogOutput private ScoringMode currentScoringMode = ScoringMode.Algae;
 
     public ModeManager(ElevatorSubsystem elevator, ArmSubsystem arm) {
@@ -27,9 +28,6 @@ public class ModeManager extends SubsystemBase {
         L3(160, 2.2),
         L4(248.6, 0.09),
         Algae2(130, 1.1),
-
-
-
 
         Algae3(130, 1.1),
         Handoff(155.6, -2.6),
@@ -60,17 +58,43 @@ public class ModeManager extends SubsystemBase {
         RightCoral
     }
 
-    public Command goTo(Position position) {
-        this.targetPosition = position;
-        // return Commands.sequence(
-        //         Commands.runOnce(() -> {this.targetPosition = position;}, this),
-        //         arm.setPosition(targetPosition.armHeight),
-        //         Commands.waitUntil(() -> arm.isAtSetpoint()),
-        //         elevator.setPosition(targetPosition.elevatorHeight));
-        return Commands.sequence(Commands.runOnce(() -> {this.targetPosition = position;}, this), 
-        elevator.setPosition(targetPosition.elevatorHeight))
-        .andThen(Commands.waitSeconds(5))
-        .andThen(arm.setPosition(targetPosition.armHeight));
+    public static enum MoveOrder {
+        MoveArmFirst,
+        MoveElevatorFirst,
+        MoveParallel,
+    }
+
+    public Command goTo(Position endPosition) {
+        if (currentPosition.elevatorHeight < Position.Home.elevatorHeight) {
+            // If we're below home we need to move elevator first so we don't slam the wrist into
+            // the climber / bottom polycarb
+            currentMoveOrder = MoveOrder.MoveElevatorFirst;
+        } else if (currentPosition == Position.Handoff) {
+            // If we're at handoff we need to move the arm first so we dont clip the chin strap
+            currentMoveOrder = MoveOrder.MoveArmFirst;
+        } else {
+            // Besides that, everything else is safe, such as L4 -> L3 & L2 -> Home
+            currentMoveOrder = MoveOrder.MoveParallel;
+        }
+
+        switch (currentMoveOrder) {
+            case MoveElevatorFirst:
+                return Commands.sequence(
+                        elevator.setPosition(endPosition.elevatorHeight),
+                        Commands.waitUntil(() -> isElevatorAtPosition()),
+                        arm.setPosition(endPosition.armHeight));
+            case MoveArmFirst:
+                return Commands.sequence(
+                        arm.setPosition(endPosition.armHeight),
+                        Commands.waitUntil(() -> arm.isAtSetpoint()),
+                        elevator.setPosition(endPosition.elevatorHeight));
+            case MoveParallel:
+                return Commands.parallel(
+                        arm.setPosition(endPosition.armHeight),
+                        elevator.setPosition(endPosition.elevatorHeight));
+            default:
+                return Commands.none();
+        }
     }
 
     public void setScoringMode(ScoringMode mode) {
@@ -83,13 +107,14 @@ public class ModeManager extends SubsystemBase {
 
     @AutoLogOutput
     public boolean isAtPosition() {
-        System.out.println(
-                arm.isAtSetpoint()
-                        + "  "
-                        + arm.getPosition());
+        System.out.println(arm.isAtSetpoint() + "  " + arm.getPosition());
         return arm.isAtSetpoint()
-                && (Math.abs(elevator.getPosition() - targetPosition.elevatorHeight)
+                && (Math.abs(elevator.getPosition() - currentPosition.elevatorHeight)
                         < 0.5); // TODO: TUNE
+    }
+
+    public boolean isElevatorAtPosition() {
+        return (Math.abs(elevator.getPosition() - currentPosition.elevatorHeight) < 0.5);
     }
 
     public double getAligningOffset() {

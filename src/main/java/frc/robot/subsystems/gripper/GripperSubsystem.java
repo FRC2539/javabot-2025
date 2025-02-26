@@ -23,7 +23,7 @@ public class GripperSubsystem extends SubsystemBase {
 
     public GripperSubsystem(GripperIO armrollerIO) {
         this.gripperIO = armrollerIO;
-        //setDefaultCommand(setVoltage(0));
+        setDefaultCommand(setVoltage(0));
     }
 
     public void periodic() {
@@ -34,7 +34,6 @@ public class GripperSubsystem extends SubsystemBase {
     public Command gripperLeftTuneable() {
         return run(
                 () -> {
-
                     double voltage = leftGripperVoltage.get();
                     gripperIO.setVoltage(voltage);
                 });
@@ -53,16 +52,14 @@ public class GripperSubsystem extends SubsystemBase {
     }
 
     public Command intakeUntilPiece() {
-        return setVoltage(GripperConstants.handoffVoltage);
-                
-        // but i am anyways
+        return setVoltage(GripperConstants.handoffVoltage)
+                .andThen(Commands.waitUntil(() -> hasPiece()));
     }
 
     public Command placePiece() {
         return setVoltage(GripperConstants.placeVoltage)
                 .andThen(Commands.waitUntil(HAS_PIECE))
-                .andThen(Commands.waitSeconds(0.01))
-                .andThen(setVoltage(0));
+                .andThen(Commands.waitSeconds(0.01));
     }
 
     public Command ejectReverse(double voltage) {
@@ -78,6 +75,6 @@ public class GripperSubsystem extends SubsystemBase {
     }
 
     public boolean hasPiece() {
-        return false;
+        return gripperInputs.hasPiece;
     }
 }
