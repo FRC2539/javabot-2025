@@ -17,6 +17,8 @@ public class ModeManager extends SubsystemBase {
     public ModeManager(ElevatorSubsystem elevator, ArmSubsystem arm) {
         this.elevator = elevator;
         this.arm = arm;
+
+        goTo(Position.Start);
     }
 
     public static enum Position {
@@ -27,11 +29,11 @@ public class ModeManager extends SubsystemBase {
         Algae2(130, 1.1),
 
 
-        
+
         Algae3(130, 1.1),
         Handoff(130, 1.1),
         Home(130, 1.1),
-        Start(130, 1.1),
+        Start(0, 1.1),
         Climb(130, 1.1);
 
         private double elevatorHeight;

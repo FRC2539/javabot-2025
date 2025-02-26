@@ -55,11 +55,11 @@ public class ArmSubsystem extends SubsystemBase {
         TrapezoidProfile.State state = controller.getSetpoint();
         voltage += state.velocity * 1.0 / 0.5;
         voltage += Math.sin(state.position) * 0.2;
-        if (voltage > 0) {
-            voltage += 0.2;
-        } else {
-            voltage -= 0.2;
-        }
+        // if (voltage > 0) {
+        //     voltage += 0.2;
+        // } else {
+        //     voltage -= 0.2;
+        // }
         if (controller.atGoal()) {
             voltage = 0;
         } else {
