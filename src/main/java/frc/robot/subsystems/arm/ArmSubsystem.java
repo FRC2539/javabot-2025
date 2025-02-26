@@ -23,7 +23,7 @@ public class ArmSubsystem extends SubsystemBase {
                     ArmConstants.ARM_KD,
                     new TrapezoidProfile.Constraints(3, 4.5)); // try 6 and 6
 
-    private double reference = 0;
+    private double reference = -1.92;
 
     private SysIdRoutine armSysIdRoutine =
             new SysIdRoutine(
@@ -40,7 +40,7 @@ public class ArmSubsystem extends SubsystemBase {
     public ArmSubsystem(ArmPivotIO armPivotIO) {
         this.armPivotIO = armPivotIO;
         controller.setTolerance(ArmConstants.ARM_TOLERANCE);
-        //setDefaultCommand(setVoltage(0));
+        // setDefaultCommand(setVoltage(0));
     }
 
     public boolean isAtSetpoint() {

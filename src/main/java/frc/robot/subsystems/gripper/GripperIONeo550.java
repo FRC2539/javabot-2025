@@ -16,17 +16,15 @@ public class GripperIONeo550 implements GripperIO {
     private SparkMax rightSparkMax =
             new SparkMax(GripperConstants.rightMotorId, SparkLowLevel.MotorType.kBrushless);
 
-    private double lastVoltageLeft = 0;
+    private double lastVoltageLeft = -4;
 
-    private double lastVoltageRight = 0;
+    private double lastVoltageRight = 4;
 
     private DigitalInput sensor = new DigitalInput(GripperConstants.pieceSensorChannel);
 
     public GripperIONeo550() {
         SparkBaseConfig config =
                 new SparkMaxConfig()
-                        .smartCurrentLimit((int) WristConstants.WristCurrent)
-                        .secondaryCurrentLimit(WristConstants.WristCurrent)
                         .idleMode(IdleMode.kBrake);
 
         leftSparkMax.configure(config, null, PersistMode.kPersistParameters);
@@ -37,7 +35,7 @@ public class GripperIONeo550 implements GripperIO {
         inputs.voltageLeft = leftSparkMax.getBusVoltage() * leftSparkMax.getAppliedOutput();
         inputs.currentLeft = leftSparkMax.getOutputCurrent();
         inputs.temperatureLeft = leftSparkMax.getMotorTemperature();
-
+        System.out.println(lastVoltageLeft);
         leftSparkMax.setVoltage(lastVoltageLeft);
 
         inputs.voltageRight = rightSparkMax.getBusVoltage() * rightSparkMax.getAppliedOutput();

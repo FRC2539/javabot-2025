@@ -25,16 +25,17 @@ public class ModeManager extends SubsystemBase {
         L1(130, 1.1),
         L2(90, 2.2),
         L3(160, 2.2),
-        L4(297, 1.7),
+        L4(248.6, 0.09),
         Algae2(130, 1.1),
 
 
 
+
         Algae3(130, 1.1),
-        Handoff(130, 1.1),
-        Home(130, 1.1),
-        Start(0, 1.1),
-        Climb(130, 1.1);
+        Handoff(155.6, -2.6),
+        Home(144, -1.86),
+        Start(0, -1.86),
+        Climb(160, -1.86);
 
         private double elevatorHeight;
         private double armHeight;
@@ -61,11 +62,15 @@ public class ModeManager extends SubsystemBase {
 
     public Command goTo(Position position) {
         this.targetPosition = position;
-        return Commands.sequence(
-                Commands.runOnce(() -> {this.targetPosition = position;}, this),
-                arm.setPosition(targetPosition.armHeight),
-                Commands.waitUntil(() -> arm.isAtSetpoint()),
-                elevator.setPosition(targetPosition.elevatorHeight));
+        // return Commands.sequence(
+        //         Commands.runOnce(() -> {this.targetPosition = position;}, this),
+        //         arm.setPosition(targetPosition.armHeight),
+        //         Commands.waitUntil(() -> arm.isAtSetpoint()),
+        //         elevator.setPosition(targetPosition.elevatorHeight));
+        return Commands.sequence(Commands.runOnce(() -> {this.targetPosition = position;}, this), 
+        elevator.setPosition(targetPosition.elevatorHeight))
+        .andThen(Commands.waitSeconds(5))
+        .andThen(arm.setPosition(targetPosition.armHeight));
     }
 
     public void setScoringMode(ScoringMode mode) {

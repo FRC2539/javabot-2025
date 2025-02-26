@@ -23,7 +23,7 @@ public class GripperSubsystem extends SubsystemBase {
 
     public GripperSubsystem(GripperIO armrollerIO) {
         this.gripperIO = armrollerIO;
-        setDefaultCommand(setVoltage(0));
+        //setDefaultCommand(setVoltage(0));
     }
 
     public void periodic() {
@@ -34,6 +34,7 @@ public class GripperSubsystem extends SubsystemBase {
     public Command gripperLeftTuneable() {
         return run(
                 () -> {
+
                     double voltage = leftGripperVoltage.get();
                     gripperIO.setVoltage(voltage);
                 });
@@ -52,9 +53,9 @@ public class GripperSubsystem extends SubsystemBase {
     }
 
     public Command intakeUntilPiece() {
-        return setVoltage(GripperConstants.handoffVoltage)
-                .andThen(Commands.waitUntil(HAS_PIECE))
-                .andThen(setVoltage(0)); // TODO: I dont think i need to set the voltage to zero again but i am anyways
+        return setVoltage(GripperConstants.handoffVoltage);
+                
+        // but i am anyways
     }
 
     public Command placePiece() {

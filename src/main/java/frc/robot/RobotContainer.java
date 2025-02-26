@@ -23,8 +23,8 @@ import frc.robot.commands.AlignToReef;
 import frc.robot.commands.WheelRadiusCharacterization;
 import frc.robot.constants.AligningConstants;
 import frc.robot.constants.GlobalConstants;
-import frc.robot.constants.GripperConstants;
 import frc.robot.constants.GlobalConstants.ControllerConstants;
+import frc.robot.constants.GripperConstants;
 import frc.robot.constants.TunerConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.ModeManager.ModeManager;
@@ -276,15 +276,12 @@ public class RobotContainer {
 
         (operatorController.getDPadDown()).onTrue(modeManager.goTo(Position.Home));
 
-        (operatorController.getDPadUp())
-                .onTrue(
-                                modeManager.goTo(Position.Handoff));
-        (operatorController.getDPadUp())
-                .whileTrue(
-                        gripperSubsystem.intakeUntilPiece());
+        (operatorController.getDPadUp()).onTrue(modeManager.goTo(Position.Handoff));
+        (operatorController.getDPadLeft()).whileTrue(Commands.runOnce(() -> {
+                gripperSubsystem.setVoltage(12);
+        }, gripperSubsystem));
 
-
-        operatorController.getDPadLeft().onTrue(modeManager.goTo(Position.Algae3));
+        //operatorController.getDPadLeft().onTrue(modeManager.goTo(Position.Algae3));
         operatorController.getDPadRight().onTrue(modeManager.goTo(Position.Algae2));
 
         operatorController.getY().onTrue(modeManager.goTo(Position.L4));
@@ -336,7 +333,9 @@ public class RobotContainer {
         rightDriveController.getLeftBottomMiddle().onTrue(modeManager.goTo(Position.Start));
         leftDriveController.getLeftTopMiddle().whileTrue(climberSubsystem.climberTuneable());
 
-        rightDriveController.getTrigger().whileTrue(gripperSubsystem.ejectReverse(GripperConstants.placeVoltage));
+        rightDriveController
+                .getTrigger()
+                .whileTrue(gripperSubsystem.ejectReverse(GripperConstants.placeVoltage));
         rightDriveController
                 .getLeftTopLeft()
                 .onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric()));

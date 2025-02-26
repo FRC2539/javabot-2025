@@ -228,7 +228,7 @@ public class Auto {
     // #146: Add a function that will register all triggers
 
     public void configureBindings() {
-    
+
         NamedCommands.registerCommand(
                 "wait position",
                 Commands.waitUntil(() -> robotContainer.modeManager.isAtPosition()));
@@ -237,14 +237,10 @@ public class Auto {
 
         NamedCommands.registerCommand("goto", robotContainer.modeManager.goTo(targetPosition));
 
-        Command scoreCommand =
-                robotContainer.gripperSubsystem.placePiece();
+        Command scoreCommand = robotContainer.gripperSubsystem.placePiece();
         NamedCommands.registerCommand("place", scoreCommand.asProxy());
 
-        Command intakeCommand =
-                robotContainer
-                        .gripperSubsystem
-                        .intakeUntilPiece();
+        Command intakeCommand = robotContainer.gripperSubsystem.intakeUntilPiece();
 
         NamedCommands.registerCommand("intake", intakeCommand.asProxy());
 
