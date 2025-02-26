@@ -11,7 +11,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 public class ModeManager extends SubsystemBase {
     private ElevatorSubsystem elevator;
     private ArmSubsystem arm;
-    private Position targetPosition;
+    @AutoLogOutput private Position targetPosition;
     @AutoLogOutput private ScoringMode currentScoringMode = ScoringMode.Algae;
 
     public ModeManager(ElevatorSubsystem elevator, ArmSubsystem arm) {
@@ -25,6 +25,9 @@ public class ModeManager extends SubsystemBase {
         L3(160, 2.2),
         L4(297, 1.7),
         Algae2(130, 1.1),
+
+
+        
         Algae3(130, 1.1),
         Handoff(130, 1.1),
         Home(130, 1.1),
@@ -57,6 +60,7 @@ public class ModeManager extends SubsystemBase {
     public Command goTo(Position position) {
         this.targetPosition = position;
         return Commands.sequence(
+                Commands.runOnce(() -> {this.targetPosition = position;}, this),
                 arm.setPosition(targetPosition.armHeight),
                 Commands.waitUntil(() -> arm.isAtSetpoint()),
                 elevator.setPosition(targetPosition.elevatorHeight));
@@ -75,7 +79,7 @@ public class ModeManager extends SubsystemBase {
         System.out.println(
                 arm.isAtSetpoint()
                         + "  "
-                        + Math.abs(elevator.getPosition() - targetPosition.elevatorHeight));
+                        + arm.getPosition());
         return arm.isAtSetpoint()
                 && (Math.abs(elevator.getPosition() - targetPosition.elevatorHeight)
                         < 0.5); // TODO: TUNE

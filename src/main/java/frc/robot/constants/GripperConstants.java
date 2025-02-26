@@ -13,5 +13,6 @@ public class GripperConstants {
 
     public static final double handoffVoltage = 8;
     public static final double placeVoltage = 12;
+    
     public static final int pieceSensorChannel = 0;
 }

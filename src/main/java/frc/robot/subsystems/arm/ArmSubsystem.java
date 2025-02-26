@@ -40,7 +40,7 @@ public class ArmSubsystem extends SubsystemBase {
     public ArmSubsystem(ArmPivotIO armPivotIO) {
         this.armPivotIO = armPivotIO;
         controller.setTolerance(ArmConstants.ARM_TOLERANCE);
-        setDefaultCommand(setVoltage(0));
+        //setDefaultCommand(setVoltage(0));
     }
 
     public boolean isAtSetpoint() {
