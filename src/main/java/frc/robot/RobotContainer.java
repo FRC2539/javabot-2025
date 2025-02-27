@@ -50,9 +50,13 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSimML;
+import frc.robot.subsystems.vision.VisionIO.TargetObservation;
+
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+
+import org.littletonrobotics.junction.Logger;
 
 public class RobotContainer {
     private final ThrustmasterJoystick leftDriveController =
@@ -409,5 +413,27 @@ public class RobotContainer {
                                         new Translation2d(AligningConstants.reefDistance, offset),
                                         new Rotation2d()));
         return new AlignAndDriveToReef(drivetrain, 0, alignmentPose, Rotation2d.kPi);
+    }
+
+    // Log camera-reef measurments pre-comp
+    public void logCameraOffset()
+    {
+        int tag = 0; // TODO: make tunable
+        
+
+        Pose2d pose = VisionConstants.aprilTagLayout
+                .getTagPose(tag)
+                .get()
+                .toPose2d()
+                .plus(
+                        new Transform2d(
+                                new Translation2d(AligningConstants.reefDistance, 0),
+                                new Rotation2d())); 
+        // Outputs
+        double offsetX = pose.getX();
+        double offsetY = pose.getY();
+
+        Logger.recordOutput("CameraOffsets/Offset X", offsetX);
+        Logger.recordOutput("CameraOffsets/Offset Y", offsetY);
     }
 }

@@ -4,12 +4,20 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Auto.DriveLocation;
+import frc.robot.constants.AligningConstants;
+import frc.robot.constants.VisionConstants;
+import frc.robot.subsystems.ModeManager.ModeManager.Position;
 import frc.robot.util.Elastic;
 import frc.robot.util.Elastic.Notification;
 import java.nio.charset.Charset;
@@ -72,6 +80,7 @@ public class Robot extends LoggedRobot {
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
         // m_robotContainer.auto.logAutoInformation();
+        m_robotContainer.logCameraOffset();
     }
 
     @Override
