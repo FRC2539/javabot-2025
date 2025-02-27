@@ -82,7 +82,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         //         () -> {
         //             piviotIO.setPosition(position);
         //         }, );
-        return Commands.runOnce(
+        return Commands.run(
                 () -> {
                     piviotIO.setPosition(position);
                 },

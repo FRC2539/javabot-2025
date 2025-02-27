@@ -102,7 +102,7 @@ public class RobotContainer {
             climberSubsystem =
                     new ClimberSubsystem(
                             new ClimberIOTalonFX(),
-                            new ClimberHeadIONeo550()); // new ClimberIOTalonFX(), new
+                            new ClimberHeadIOSim()); // new ClimberIOTalonFX(), new
             // ClimberHeadIONeo550());
             lights = new LightsSubsystem();
 
@@ -280,11 +280,14 @@ public class RobotContainer {
                 .getDPadUp()
                 .onTrue(
                         modeManager
-                                .goTo(Position.Handoff)
-                                .alongWith(gripperSubsystem.intakeUntilPiece()));
-        operatorController.getDPadLeft().onTrue(modeManager.goTo(Position.Algae3));
+                        
+                                .goTo(Position.Handoff));
+                                
+        operatorController.getDPadLeft().onTrue(gripperSubsystem.intakeUntilPiece());
+
 
         operatorController.getDPadRight().onTrue(modeManager.goTo(Position.Algae2));
+
 
         operatorController.getY().onTrue(modeManager.goTo(Position.L4));
         operatorController.getX().onTrue(modeManager.goTo(Position.L3));

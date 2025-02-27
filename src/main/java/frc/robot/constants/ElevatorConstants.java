@@ -10,7 +10,7 @@ public class ElevatorConstants {
             new Slot0Configs()
                     .withKA(0)
                     .withKD(0)
-                    .withKG(0)
+                    .withKG(0.01)
                     .withKI(0)
                     .withKP(2)
                     .withKS(0)
