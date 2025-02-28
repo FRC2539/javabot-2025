@@ -11,6 +11,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "goto Home"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "pushEnd-H"
@@ -19,13 +25,37 @@
         {
           "type": "named",
           "data": {
-            "name": "height L1"
+            "name": "goto L4"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "score"
+            "name": "goto L4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "location H"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "align"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "wait pose"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "place"
           }
         }
       ]

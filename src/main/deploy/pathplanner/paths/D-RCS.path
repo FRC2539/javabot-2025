@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.8290909090909087,
-        "y": 2.489375
+        "x": 3.8988920454545455,
+        "y": 2.60903409090909
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.4003125000000005,
-        "y": 2.050625000000001
+        "x": 3.4701136363636373,
+        "y": 2.170284090909091
       },
       "isLocked": false,
       "linkedName": "D"
     },
     {
       "anchor": {
-        "x": 1.1148565573770493,
-        "y": 0.7523565573770474
+        "x": 1.3062784090909094,
+        "y": 0.6246875000000012
       },
       "prevControl": {
-        "x": 1.802896330104322,
-        "y": 1.2210213301043198
+        "x": 1.9943181818181823,
+        "y": 1.0933522727272735
       },
       "nextControl": null,
       "isLocked": false,
@@ -34,7 +34,7 @@
   "eventMarkers": [
     {
       "name": "height Handoff",
-      "waypointRelativePos": 0.19730077120822576,
+      "waypointRelativePos": 0.33295838020247503,
       "endWaypointRelativePos": null,
       "command": {
         "type": "parallel",
@@ -43,13 +43,7 @@
             {
               "type": "named",
               "data": {
-                "name": "height Handoff"
-              }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "preparm"
+                "name": "goto Handoff"
               }
             }
           ]
@@ -58,8 +52,8 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 5.2,
-    "maxAcceleration": 8.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -67,7 +61,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 48.5
+    "rotation": 55.0
   },
   "reversed": false,
   "folder": "Reef-RCS",

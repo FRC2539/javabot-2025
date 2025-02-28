@@ -59,8 +59,7 @@ public class GripperSubsystem extends SubsystemBase {
 
     public Command placePiece() {
         return setVoltage(GripperConstants.placeVoltage)
-                .andThen(Commands.waitUntil(HAS_PIECE))
-                .andThen(Commands.waitSeconds(0.01));
+                .until(HAS_PIECE.negate()).andThen(Commands.waitSeconds(0.3)).withTimeout(4);
     }
 
     public Command ejectReverse(double voltage) {
@@ -73,6 +72,13 @@ public class GripperSubsystem extends SubsystemBase {
                     gripperIO.setVoltage(voltage);
                 },
                 this);
+    }
+
+    public Command setVoltage(double leftVoltage, double rightVoltage) {
+        return Commands.run(() -> {
+            gripperIO.setVoltageLeft(leftVoltage);
+            gripperIO.setVoltageRight(rightVoltage);
+        }, this);
     }
 
     public boolean hasPiece() {

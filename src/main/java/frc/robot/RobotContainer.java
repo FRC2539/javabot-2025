@@ -64,7 +64,7 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    // public Auto auto; // #146: Pass in RobotContainer
+    public Auto auto; // #146: Pass in RobotContainer
     // public IntakeSubsystem intakeSubsystem;
     public ElevatorSubsystem elevatorSubsystem;
     public ClimberSubsystem climberSubsystem;
@@ -135,7 +135,7 @@ public class RobotContainer {
         }
 
         modeManager = new ModeManager(elevatorSubsystem, armSubsystem);
-        // auto = new Auto(drivetrain, this);
+        auto = new Auto(drivetrain, this);
 
         configureBindings();
         // Establish the "Trajectory Field" Field2d into the dashboard
@@ -276,17 +276,22 @@ public class RobotContainer {
 
         operatorController.getDPadDown().onTrue(modeManager.goTo(Position.Home));
 
-        operatorController
-                .getDPadUp()
-                .onTrue(
-                        modeManager
-                        
-                                .goTo(Position.Handoff));
-                                
-        operatorController.getDPadLeft().onTrue(gripperSubsystem.intakeUntilPiece());
+        // operatorController
+        //         .getDPadUp()
+        //         .onTrue(
+        //                 modeManager.goTo(Position.Handoff).alongWith(gripperSubsystem.intakeUntilPiece()));
 
 
-        operatorController.getDPadRight().onTrue(modeManager.goTo(Position.Algae2));
+        // operatorController.getDPadUp().whileTrue(getAutonomousCommand())
+
+        Trigger DPadUp = operatorController.getDPadUp();
+
+        DPadUp.onTrue(modeManager.goTo(Position.Handoff));
+
+        DPadUp.whileTrue(gripperSubsystem.intakeUntilPiece());
+
+
+        //operatorController.getDPadRight().onTrue(modeManager.goTo(Position.Algae2));
 
 
         operatorController.getY().onTrue(modeManager.goTo(Position.L4));
@@ -339,7 +344,24 @@ public class RobotContainer {
 
         rightDriveController
                 .getTrigger()
+                .and(() -> modeManager.targetPosition != Position.L1)
+                .whileTrue(gripperSubsystem.intake(GripperConstants.placeVoltage));
+
+        rightDriveController
+                .getLeftThumb()
+                .and(() -> modeManager.targetPosition != Position.L1)
                 .whileTrue(gripperSubsystem.ejectReverse(GripperConstants.placeVoltage));
+
+        operatorController
+                .getDPadLeft()
+                .whileTrue(gripperSubsystem.intake(1.5));
+
+        operatorController
+                .getDPadRight()
+                .whileTrue(gripperSubsystem.intake(-1.5));
+
+
+        rightDriveController.getTrigger().and(() -> modeManager.targetPosition == Position.L1).whileTrue(gripperSubsystem.setVoltage(1, 4));
         rightDriveController
                 .getLeftTopLeft()
                 .onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric()));
@@ -358,8 +380,8 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        // return auto.getAuto();
-        return Commands.none();
+        return auto.getAuto();
+        // Commands.none();
     }
 
     public Command alignToReef(int tag, double offset, Rotation2d rotOffset) {

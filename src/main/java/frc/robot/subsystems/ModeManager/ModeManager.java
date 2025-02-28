@@ -29,17 +29,17 @@ public class ModeManager extends SubsystemBase {
     }
 
     public static enum Position {
-        L1(70, 1.1),
-        L2(95, 2.2),
-        L3(180, 2.2),
-        L4(297, 0.09),
+        L1(150, -1.65),
+        L2(110, 0.135),
+        L3(180, 0.135),
+        L4(300, 0.135),
         Algae2(130, 1.1),
 
         Algae3(130, 1.1),
-        Handoff(154, -2.58),
+        Handoff(153.5, -2.58),
         Home(170, -1.8),
         Start(0, -2.022),
-        Climb(160, -1.86);
+        Climb(30, -2.022);
 
         private double elevatorHeight;
         private double armHeight;
@@ -66,7 +66,7 @@ public class ModeManager extends SubsystemBase {
 
     public Command goTo(Position endPosition) {
         
-            return Commands.either(
+            return Commands.runOnce(() -> targetPosition = endPosition, this).andThen(Commands.either(
                 Commands.sequence(
                     elevator.setPosition(endPosition.elevatorHeight),
                     //Commands.waitUntil(() -> Math.abs(elevator.getPosition() - targetPosition.elevatorHeight) < 2).withTimeout(2),
@@ -80,7 +80,22 @@ public class ModeManager extends SubsystemBase {
                     
                 
                 () -> endPosition != Position.Handoff || endPosition == Position.Handoff
-            );
+            ));
+
+            // return Commands.either(
+            //     Commands.sequence(
+            //         elevator.setPosition(endPosition.elevatorHeight),
+            //         //Commands.waitUntil(() -> Math.abs(elevator.getPosition() - targetPosition.elevatorHeight) < 2).withTimeout(2),
+            //         arm.setPosition(endPosition.armHeight).until(() -> arm.isAtSetpoint())
+            //     ),
+            //     Commands.sequence(
+            //         arm.setPosition(endPosition.armHeight).until(() -> arm.isAtSetpoint()),
+            //         elevator.setPosition(endPosition.elevatorHeight)),
+            //         //Commands.waitUntil(() -> (Math.abs(elevator.getPosition() - endPosition.elevatorHeight) < 2))),
+                    
+                
+            //     () -> endPosition != Position.Handoff || endPosition == Position.Handoff
+            // );
 
     }
 
@@ -93,14 +108,10 @@ public class ModeManager extends SubsystemBase {
     }
 
     @AutoLogOutput
-    public boolean isAtPosition() {
-        System.out.println("at set:" + arm.isAtSetpoint() + "  " + arm.getPosition());
-        System.out.println("elev set:" +(Math.abs(elevator.getPosition() - targetPosition.elevatorHeight)
-        < 0.5));
-        return arm.isAtSetpoint()
-                && (Math.abs(elevator.getPosition() - targetPosition.elevatorHeight)
-                        < 0.5); // TODO: TUNE
+    public boolean isArmAtPosition() {
+        return arm.isAtSetpoint();
     }
+    
 
     @AutoLogOutput
     public boolean isElevatorAtPosition() {
@@ -119,5 +130,10 @@ public class ModeManager extends SubsystemBase {
         }
 
         return 0;
+    }
+
+    @Override
+    public void periodic() {
+        
     }
 }

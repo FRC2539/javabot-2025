@@ -13,8 +13,8 @@ public class AlignAndDriveToReef extends Command {
     private CommandSwerveDrivetrain drivetrain;
 
     private PIDController thetaController = new PIDController(6, 0, 0);
-    private PIDController yController = new PIDController(8, 0, 0);
-    private PIDController xController = new PIDController(5, 0, 0);
+    private PIDController yController = new PIDController(6, 0, 0);
+    private PIDController xController = new PIDController(8, 0, 0);
     private Pose2d targetPose;
     private double offset;
     private Rotation2d rotationOffset;

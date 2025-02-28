@@ -33,6 +33,6 @@ public class ArmConstants {
 
     public static final double ARM_TOLERANCE = 0.03;
 
-    public static final double upperLimit = 0.84;
+    public static final double upperLimit = 0.135;
     public static final double lowerLimit = -2.7;
 }
