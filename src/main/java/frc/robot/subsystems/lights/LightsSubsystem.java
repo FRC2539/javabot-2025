@@ -239,6 +239,6 @@ public class LightsSubsystem extends SubsystemBase {
     }
 
     public static void enableLEDs() {
-        setBrightness(1);
+        setBrightness(.5);
     }
 }

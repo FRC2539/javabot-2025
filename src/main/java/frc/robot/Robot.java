@@ -5,11 +5,16 @@
 package frc.robot;
 
 import edu.wpi.first.net.WebServer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj.RobotController;
+import frc.robot.constants.GlobalConstants;
+import frc.robot.subsystems.lights.LightsSubsystem;
+import frc.robot.subsystems.lights.LightsSubsystem.LEDSegment;
 import frc.robot.util.Elastic;
 import frc.robot.util.Elastic.Notification;
 import java.nio.charset.Charset;
@@ -78,7 +83,25 @@ public class Robot extends LoggedRobot {
     public void disabledInit() {}
 
     @Override
-    public void disabledPeriodic() {}
+    public void disabledPeriodic() {
+        // Indicate if the battery is at voltage
+        if (RobotController.getBatteryVoltage() > 12.3)
+            LEDSegment.BatteryIndicator.setColor(LightsSubsystem.green.dim(0.25));
+        else LEDSegment.BatteryIndicator.setFadeAnimation(LightsSubsystem.green.dim(0.25), 1);
+
+        // Verify that all absolute encoders are connected
+        if (m_robotContainer.armSubsystem.isEncoderConnected())
+            LEDSegment.PivotEncoderIndicator.setColor(LightsSubsystem.yellow.dim(0.25));
+        else LEDSegment.PivotEncoderIndicator.fullClear();
+
+        // Indicate once the driver station is connected
+        if (DriverStation.isDSAttached()) LEDSegment.DriverstationIndicator.setColor(LightsSubsystem.orange.dim(0.25));
+        else LEDSegment.DriverstationIndicator.fullClear();
+
+        // Passive Main LED Mode
+        LEDSegment.MainStrip.setFadeAnimation(LightsSubsystem.orange, 0.5);
+
+    }
 
     @Override
     public void disabledExit() {}
