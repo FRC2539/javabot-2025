@@ -6,9 +6,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import edu.wpi.first.wpilibj.AnalogInput;
-import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.constants.GripperConstants;
 
 public class GripperIONeo550 implements GripperIO {
@@ -43,8 +41,8 @@ public class GripperIONeo550 implements GripperIO {
         leftSparkMax.setVoltage(lastVoltageLeft);
         rightSparkMax.setVoltage(lastVoltageRight);
 
-        //System.out.println(sensor.getValue());
-        inputs.hasPiece = sensor.getValue() < 50; 
+        // System.out.println(sensor.getValue());
+        inputs.hasPiece = sensor.getValue() < 50;
     }
 
     public void setVoltage(double voltage) {

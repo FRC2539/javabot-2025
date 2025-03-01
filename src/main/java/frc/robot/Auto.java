@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -262,11 +261,15 @@ public class Auto {
         for (Position position : Position.values()) {
             NamedCommands.registerCommand(
                     "goto ".concat(position.name()),
-                    robotContainer.modeManager.goTo(position).until(() -> robotContainer.modeManager.isArmAtPosition() && robotContainer.modeManager.isElevatorAtPosition()));
+                    robotContainer
+                            .modeManager
+                            .goTo(position)
+                            .until(
+                                    () ->
+                                            robotContainer.modeManager.isArmAtPosition()
+                                                    && robotContainer.modeManager
+                                                            .isElevatorAtPosition()));
         }
-
-
-        
 
         // for (Position position : Position.values()) {
         //     NamedCommands.registerCommand(
@@ -279,16 +282,18 @@ public class Auto {
         // }
         // #endregion
 
-        Command alignCommand = Commands.defer(() -> robotContainer.alignAndDriveToReef(targetLocation.getTagByTeam(), targetLocation.offset).until(() -> robotInPlace()), Set.of(robotContainer.drivetrain));
+        Command alignCommand =
+                Commands.defer(
+                        () ->
+                                robotContainer
+                                        .alignAndDriveToReef(
+                                                targetLocation.getTagByTeam(),
+                                                targetLocation.offset)
+                                        .until(() -> robotInPlace()),
+                        Set.of(robotContainer.drivetrain));
 
         NamedCommands.registerCommand("align", alignCommand.withTimeout(5));
-
     }
-
-   
-
-
-
 
     @AutoLogOutput(key = "Auto/Arm In Place")
     private boolean armInPlace() {
@@ -313,7 +318,7 @@ public class Auto {
         Pose2d relativePos = alignmentPose.relativeTo(currentPose);
         Logger.recordOutput("Auto/Physical Relative Pose", relativePos);
         return (Math.abs(relativePos.getX()) < Units.inchesToMeters(0.43))
-                && (Math.abs(relativePos.getY()) < Units.inchesToMeters(0.43))
+                && (Math.abs(relativePos.getY()) < Units.inchesToMeters(0.215))
                 && ((Math.abs(relativePos.getRotation().getRadians()) % Math.PI)
                         < Units.degreesToRadians(2));
     }

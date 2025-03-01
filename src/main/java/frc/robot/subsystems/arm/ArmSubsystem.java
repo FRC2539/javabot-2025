@@ -3,14 +3,11 @@ package frc.robot.subsystems.arm;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.constants.ArmConstants;
-
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
@@ -21,11 +18,8 @@ public class ArmSubsystem extends SubsystemBase {
     public LoggedNetworkNumber armTuneables = new LoggedNetworkNumber("arm tuneable", 0);
 
     private PIDController controller =
-            new PIDController(
-                    ArmConstants.ARM_KP,
-                    ArmConstants.ARM_KI,
-                    ArmConstants.ARM_KD);
-                    //new TrapezoidProfile.Constraints(3, 4.5)); // try 6 and 6
+            new PIDController(ArmConstants.ARM_KP, ArmConstants.ARM_KI, ArmConstants.ARM_KD);
+    // new TrapezoidProfile.Constraints(3, 4.5)); // try 6 and 6
 
     private double reference = -2.022;
 
@@ -56,7 +50,8 @@ public class ArmSubsystem extends SubsystemBase {
         armPivotIO.updateInputs(armPivotInputs);
         Logger.processInputs("RealOutputs/Arm", armPivotInputs);
 
-        // double voltage = controller.calculate(armPivotInputs.throughboreEncoderPosition, reference);
+        // double voltage = controller.calculate(armPivotInputs.throughboreEncoderPosition,
+        // reference);
         // TrapezoidProfile.State state = controller.getSetpoint();
         // voltage += state.velocity * 1.0 / 0.5;
         // voltage += Math.sin(state.position) * 0.2;
@@ -110,30 +105,35 @@ public class ArmSubsystem extends SubsystemBase {
         double nextPosition = position;
 
         return runOnce(
-                () -> {
-                    reference = nextPosition;
-                }).andThen(followReference());
+                        () -> {
+                            reference = nextPosition;
+                        })
+                .andThen(followReference());
     }
 
     private Command followReference() {
-        return Commands.run(() -> {
-            double voltage = controller.calculate(armPivotInputs.throughboreEncoderPosition, reference);
-            //TrapezoidProfile.State state = controller.getSetpoint();
-            // voltage += state.velocity * 1.0 / 0.5;
-            // voltage += Math.sin(state.position) * 0.2;
-            // if (voltage > 0) {
-            //     voltage += 0.2;
-            // } else {
-            //     voltage -= 0.2;
-            // }
-            if (controller.atSetpoint()) {
-                voltage = 0;
-            } else {
-                voltage = Math.min(12.0, Math.max(-12.0, voltage)); // Clamp voltage
-            }
-            armPivotIO.setVoltage(voltage);
-            Logger.recordOutput("Arm/setpoint", controller.getSetpoint());
-        }, this);
+        return Commands.run(
+                () -> {
+                    double voltage =
+                            controller.calculate(
+                                    armPivotInputs.throughboreEncoderPosition, reference);
+                    // TrapezoidProfile.State state = controller.getSetpoint();
+                    // voltage += state.velocity * 1.0 / 0.5;
+                    // voltage += Math.sin(state.position) * 0.2;
+                    // if (voltage > 0) {
+                    //     voltage += 0.2;
+                    // } else {
+                    //     voltage -= 0.2;
+                    // }
+                    if (controller.atSetpoint()) {
+                        voltage = 0;
+                    } else {
+                        voltage = Math.min(12.0, Math.max(-12.0, voltage)); // Clamp voltage
+                    }
+                    armPivotIO.setVoltage(voltage);
+                    Logger.recordOutput("Arm/setpoint", controller.getSetpoint());
+                },
+                this);
     }
 
     public double getPosition() {

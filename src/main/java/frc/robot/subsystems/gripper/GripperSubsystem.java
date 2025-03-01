@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.constants.GripperConstants;
-
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -53,13 +52,14 @@ public class GripperSubsystem extends SubsystemBase {
     }
 
     public Command intakeUntilPiece() {
-        return setVoltage(GripperConstants.handoffVoltage)
-                .until(() -> gripperInputs.hasPiece);
+        return setVoltage(GripperConstants.handoffVoltage).until(() -> gripperInputs.hasPiece);
     }
 
     public Command placePiece() {
         return setVoltage(GripperConstants.placeVoltage)
-                .until(HAS_PIECE.negate()).andThen(Commands.waitSeconds(0.3)).withTimeout(4);
+                .until(HAS_PIECE.negate())
+                .andThen(Commands.waitSeconds(0.3))
+                .withTimeout(4);
     }
 
     public Command ejectReverse(double voltage) {
@@ -75,10 +75,12 @@ public class GripperSubsystem extends SubsystemBase {
     }
 
     public Command setVoltage(double leftVoltage, double rightVoltage) {
-        return Commands.run(() -> {
-            gripperIO.setVoltageLeft(leftVoltage);
-            gripperIO.setVoltageRight(rightVoltage);
-        }, this);
+        return Commands.run(
+                () -> {
+                    gripperIO.setVoltageLeft(leftVoltage);
+                    gripperIO.setVoltageRight(rightVoltage);
+                },
+                this);
     }
 
     public boolean hasPiece() {

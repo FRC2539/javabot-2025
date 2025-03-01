@@ -33,7 +33,6 @@ import frc.robot.subsystems.ModeManager.ModeManager.ScoringMode;
 import frc.robot.subsystems.arm.ArmPivotIOSim;
 import frc.robot.subsystems.arm.ArmPivotIOTalonFX;
 import frc.robot.subsystems.arm.ArmSubsystem;
-import frc.robot.subsystems.climber.ClimberHeadIONeo550;
 import frc.robot.subsystems.climber.ClimberHeadIOSim;
 import frc.robot.subsystems.climber.ClimberIOTalonFX;
 import frc.robot.subsystems.climber.ClimberSubsystem;
@@ -243,8 +242,6 @@ public class RobotContainer {
 
         SmartDashboard.putData(armSubsystem);
 
-        
-
         Trigger LEFT_JOYSTICK_BUMP =
                 new Trigger(
                         () ->
@@ -274,15 +271,19 @@ public class RobotContainer {
                         (() -> LightsSubsystem.LEDSegment.MainStrip.setRainbowAnimation(1)),
                         () -> {})); // L3 Rainbow
 
-        operatorController.getLeftTrigger().onTrue(modeManager.goTo(Position.Climb));
+        operatorController.getStart().onTrue(modeManager.goTo(Position.Climb));
 
         operatorController.getDPadDown().onTrue(modeManager.goTo(Position.Home));
+
+        operatorController.getStart().onTrue(modeManager.goTo(Position.Climb));
+        operatorController.getLeftTrigger().onTrue(modeManager.goTo(Position.Algae3));
+        operatorController.getRightTrigger().onTrue(modeManager.goTo(Position.Algae2));
 
         // operatorController
         //         .getDPadUp()
         //         .onTrue(
-        //                 modeManager.goTo(Position.Handoff).alongWith(gripperSubsystem.intakeUntilPiece()));
-
+        //
+        // modeManager.goTo(Position.Handoff).alongWith(gripperSubsystem.intakeUntilPiece()));
 
         // operatorController.getDPadUp().whileTrue(getAutonomousCommand())
 
@@ -292,9 +293,7 @@ public class RobotContainer {
 
         DPadUp.whileTrue(gripperSubsystem.intakeUntilPiece());
 
-
-        //operatorController.getDPadRight().onTrue(modeManager.goTo(Position.Algae2));
-
+        // operatorController.getDPadRight().onTrue(modeManager.goTo(Position.Algae2));
 
         operatorController.getY().onTrue(modeManager.goTo(Position.L4));
         operatorController.getX().onTrue(modeManager.goTo(Position.L3));
@@ -319,11 +318,12 @@ public class RobotContainer {
                         Commands.runOnce(
                                 () -> modeManager.setScoringMode(ScoringMode.RightCoral),
                                 modeManager));
-        operatorController
-                .getRightTrigger()
-                .onTrue(
-                        Commands.runOnce(
-                                () -> modeManager.setScoringMode(ScoringMode.Algae), modeManager));
+        // operatorController
+        //         .getRightTrigger()
+        //         .onTrue(
+        //                 Commands.runOnce(
+        //                         () -> modeManager.setScoringMode(ScoringMode.Algae),
+        // modeManager));
 
         lights.setAlgaeModeSupplier(gripperSubsystem.HAS_PIECE);
 
@@ -354,16 +354,14 @@ public class RobotContainer {
                 .and(() -> modeManager.targetPosition != Position.L1)
                 .whileTrue(gripperSubsystem.ejectReverse(GripperConstants.placeVoltage));
 
-        operatorController
-                .getDPadLeft()
-                .whileTrue(gripperSubsystem.intake(1.5));
+        operatorController.getDPadLeft().whileTrue(gripperSubsystem.intake(1.5));
 
-        operatorController
-                .getDPadRight()
-                .whileTrue(gripperSubsystem.intake(-1.5));
+        operatorController.getDPadRight().whileTrue(gripperSubsystem.intake(-1.5));
 
-
-        rightDriveController.getTrigger().and(() -> modeManager.targetPosition == Position.L1).whileTrue(gripperSubsystem.setVoltage(1, 4));
+        rightDriveController
+                .getTrigger()
+                .and(() -> modeManager.targetPosition == Position.L1)
+                .whileTrue(gripperSubsystem.setVoltage(1, 4));
         rightDriveController
                 .getLeftTopLeft()
                 .onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric()));
