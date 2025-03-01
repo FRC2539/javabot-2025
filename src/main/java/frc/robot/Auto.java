@@ -241,6 +241,10 @@ public class Auto {
         Command scoreCommand = robotContainer.gripperSubsystem.placePiece();
         NamedCommands.registerCommand("place", scoreCommand.asProxy());
 
+        Command scoreReverse = robotContainer.gripperSubsystem.placePieceReverse();
+
+        NamedCommands.registerCommand("place reverse", scoreReverse.withTimeout(3));
+
         Command intakeCommand = robotContainer.gripperSubsystem.intakeUntilPiece();
 
         NamedCommands.registerCommand("intake", intakeCommand.asProxy());
@@ -292,7 +296,7 @@ public class Auto {
                                         .until(() -> robotInPlace()),
                         Set.of(robotContainer.drivetrain));
 
-        NamedCommands.registerCommand("align", alignCommand.withTimeout(5));
+        NamedCommands.registerCommand("align", alignCommand.withTimeout(3));
     }
 
     @AutoLogOutput(key = "Auto/Arm In Place")

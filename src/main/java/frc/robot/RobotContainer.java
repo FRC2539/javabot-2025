@@ -288,10 +288,13 @@ public class RobotContainer {
         // operatorController.getDPadUp().whileTrue(getAutonomousCommand())
 
         Trigger DPadUp = operatorController.getDPadUp();
+        Trigger Handoffing = new Trigger(gripperSubsystem::intaking);
 
         DPadUp.onTrue(modeManager.goTo(Position.Handoff));
 
-        DPadUp.whileTrue(gripperSubsystem.intakeUntilPiece());
+        DPadUp.onTrue(gripperSubsystem.intakeUntilPiece());
+        Handoffing.whileTrue(Commands.run(()->LightsSubsystem.LEDSegment.MainStrip.setStrobeAnimation(
+                LightsSubsystem.blue, 1), lights));
 
         // operatorController.getDPadRight().onTrue(modeManager.goTo(Position.Algae2));
 
@@ -340,7 +343,7 @@ public class RobotContainer {
                 .and(() -> modeManager.getCurrentScoringMode() == ScoringMode.Algae)
                 .whileTrue(alignToReef(AligningConstants.centerOffset));
 
-        leftDriveController.getLeftBottomMiddle().onTrue(climberSubsystem.zeroClimberCommand());
+        //leftDriveController.getLeftBottomMiddle().onTrue(climberSubsystem.zeroClimberCommand());
         rightDriveController.getLeftBottomMiddle().onTrue(modeManager.goTo(Position.Start));
         leftDriveController.getLeftTopMiddle().whileTrue(climberSubsystem.climberTuneable());
 
@@ -355,6 +358,9 @@ public class RobotContainer {
                 .whileTrue(gripperSubsystem.ejectReverse(GripperConstants.placeVoltage));
 
         operatorController.getDPadLeft().whileTrue(gripperSubsystem.intake(1.5));
+
+        leftDriveController.getLeftBottomMiddle().whileTrue(elevatorSubsystem.setVoltage(1.5));
+        leftDriveController.getLeftBottomRight().whileTrue(elevatorSubsystem.setVoltage(-1.5));
 
         operatorController.getDPadRight().whileTrue(gripperSubsystem.intake(-1.5));
 

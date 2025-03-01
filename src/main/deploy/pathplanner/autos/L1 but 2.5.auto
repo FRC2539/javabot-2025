@@ -27,7 +27,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "goto L4"
+                        "name": "goto L1"
                       }
                     }
                   ]
@@ -39,13 +39,7 @@
         {
           "type": "named",
           "data": {
-            "name": "goto L4"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "wait arm"
+            "name": "goto L1"
           }
         },
         {
@@ -63,45 +57,19 @@
         {
           "type": "named",
           "data": {
-            "name": "place"
+            "name": "place reverse"
           }
         },
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "E-RCS"
-                }
-              },
-              {
-                "type": "sequential",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.4
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "goto Home"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "goto Handoff"
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
+            "pathName": "E-RCS"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "goto Handoff"
           }
         },
         {
@@ -120,12 +88,6 @@
           "type": "named",
           "data": {
             "name": "goto L4"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "wait arm"
           }
         },
         {

@@ -85,17 +85,17 @@ public class Robot extends LoggedRobot {
     public void disabledPeriodic() {
         // Indicate if the battery is at voltage
         if (RobotController.getBatteryVoltage() > 12.3)
-            LEDSegment.BatteryIndicator.setColor(LightsSubsystem.green.dim(0.25));
+            LEDSegment.BatteryIndicator.setColor(LightsSubsystem.green.dim(1));
         else LEDSegment.BatteryIndicator.setFadeAnimation(LightsSubsystem.green.dim(0.25), 1);
 
         // Verify that all absolute encoders are connected
         if (m_robotContainer.armSubsystem.isEncoderConnected())
-            LEDSegment.PivotEncoderIndicator.setColor(LightsSubsystem.yellow.dim(0.25));
+            LEDSegment.PivotEncoderIndicator.setColor(LightsSubsystem.white.dim(1));
         else LEDSegment.PivotEncoderIndicator.fullClear();
 
         // Indicate once the driver station is connected
         if (DriverStation.isDSAttached())
-            LEDSegment.DriverstationIndicator.setColor(LightsSubsystem.orange.dim(0.25));
+            LEDSegment.DriverstationIndicator.setColor(LightsSubsystem.orange.dim(1));
         else LEDSegment.DriverstationIndicator.fullClear();
 
         // Passive Main LED Mode
