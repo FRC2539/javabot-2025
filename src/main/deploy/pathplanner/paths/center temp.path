@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.055596590909091,
-        "y": 5.421022727272727
+        "x": 7.179545454545455,
+        "y": 3.9053409090909086
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.9359375000000005,
-        "y": 6.188835227272726
+        "x": 6.2527679380135,
+        "y": 3.9000375536334153
       },
       "isLocked": false,
-      "linkedName": "J"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 1.2464488636363638,
-        "y": 7.136136363636362
+        "x": 5.992926136363637,
+        "y": 3.9053409090909086
       },
       "prevControl": {
-        "x": 1.8447443181818184,
-        "y": 7.166051136363635
+        "x": 6.430856111536688,
+        "y": 3.89153242670386
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "LCS"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -33,13 +33,13 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "height Handoff",
-      "waypointRelativePos": 0.2,
+      "name": "location G",
+      "waypointRelativePos": 0,
       "endWaypointRelativePos": null,
       "command": {
-        "type": "parallel",
+        "type": "named",
         "data": {
-          "commands": []
+          "name": "location G"
         }
       }
     }
@@ -54,13 +54,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -55.0
+    "rotation": 180.0
   },
   "reversed": false,
-  "folder": "Reef-LCS",
+  "folder": "LStart-Reef",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -119.99999999999999
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

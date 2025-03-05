@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.545596590909091,
-        "y": 6.836988636363635
+        "x": 1.2464488636363638,
+        "y": 7.136136363636362
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.3033072612205023,
-        "y": 6.3605093487385345
+        "x": 2.0041595339477754,
+        "y": 6.6596570760112614
       },
       "isLocked": false,
       "linkedName": "LCS"
     },
     {
       "anchor": {
-        "x": 3.789204545454545,
-        "y": 5.6703125
+        "x": 3.9188352272727274,
+        "y": 5.430994318181818
       },
       "prevControl": {
-        "x": 3.0411148746385517,
-        "y": 6.160049264888443
+        "x": 3.170745556456734,
+        "y": 5.920731083070261
       },
       "nextControl": null,
       "isLocked": false,
@@ -37,26 +37,13 @@
       "waypointRelativePos": 0.0,
       "endWaypointRelativePos": null,
       "command": {
-        "type": "sequential",
+        "type": "parallel",
         "data": {
           "commands": [
             {
-              "type": "race",
+              "type": "named",
               "data": {
-                "commands": [
-                  {
-                    "type": "named",
-                    "data": {
-                      "name": "intake"
-                    }
-                  },
-                  {
-                    "type": "named",
-                    "data": {
-                      "name": "arm"
-                    }
-                  }
-                ]
+                "name": "intake"
               }
             },
             {
@@ -71,8 +58,8 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 5.2,
-    "maxAcceleration": 8.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,

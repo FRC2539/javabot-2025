@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.139659090909091,
-        "y": 0.5149999999999989
+        "x": 7.119715909090909,
+        "y": 2.4794034090909087
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.7007353642089456,
-        "y": 0.24454137518329144
+        "x": 7.680792182390763,
+        "y": 2.2089447842742014
       },
       "isLocked": false,
       "linkedName": "RStart"
     },
     {
       "anchor": {
-        "x": 3.8290909090909087,
-        "y": 2.489375
+        "x": 3.8988920454545455,
+        "y": 2.60903409090909
       },
       "prevControl": {
-        "x": 3.898892045454545,
-        "y": 1.5420738636363636
+        "x": 3.9686931818181814,
+        "y": 1.6617329545454536
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 5.2,
-    "maxAcceleration": 8.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,

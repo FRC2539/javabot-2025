@@ -7,12 +7,22 @@ public interface GripperIO {
 
     @AutoLog
     public class GripperIOInputs {
-        public double speed = 0;
-        public double voltage = 0;
-        public double temperature = 0;
-        public double current = 0;
-        public boolean sensor = false;
+        public double speedLeft = 0;
+        public double voltageLeft = 0;
+        public double temperatureLeft = 0;
+        public double currentLeft = 0;
+
+        public double speedRight = 0;
+        public double voltageRight = 0;
+        public double temperatureRight = 0;
+        public double currentRight = 0;
+
+        public boolean hasPiece = false;
     }
 
     public void setVoltage(double voltage);
+
+    public void setVoltageLeft(double voltage);
+
+    public void setVoltageRight(double voltage);
 }

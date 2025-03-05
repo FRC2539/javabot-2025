@@ -4,79 +4,97 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.constants.GripperConstants;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class GripperSubsystem extends SubsystemBase {
 
-    private GripperIO piviotIO;
+    private GripperIO gripperIO;
 
-    private GripperIOInputsAutoLogged armrollerInputs = new GripperIOInputsAutoLogged();
+    private GripperIOInputsAutoLogged gripperInputs = new GripperIOInputsAutoLogged();
 
     public final Trigger HAS_PIECE = new Trigger(this::hasPiece);
 
-    // NetworkTableInstance nInstance = NetworkTableInstance.getDefault();
-    // NetworkTable table = nInstance.getTable("SmartDashboard");
-    // NetworkTableValue grippervoltage = table.getValue("grippervoltage");
-
-    LoggedNetworkNumber grippervoltage = new LoggedNetworkNumber("Gripper Voltage", 0);
+    LoggedNetworkNumber leftGripperVoltage =
+            new LoggedNetworkNumber("Left Gripper Motor Voltage", 0);
+    LoggedNetworkNumber rightGripperVoltage =
+            new LoggedNetworkNumber("Right Gripper Motor Voltage ", 0); // TODO: NAME?
 
     public GripperSubsystem(GripperIO armrollerIO) {
-        this.piviotIO = armrollerIO;
-        setDefaultCommand(Commands.either(holdCoral(), setVoltage(0), HAS_PIECE));
+        this.gripperIO = armrollerIO;
+        setDefaultCommand(setVoltage(0));
     }
 
     public void periodic() {
-        piviotIO.updateInputs(armrollerInputs);
-        Logger.processInputs("RealOutputs/Gripper", armrollerInputs);
+        gripperIO.updateInputs(gripperInputs);
+        Logger.processInputs("RealOutputs/Gripper", gripperInputs);
     }
 
-    public Command gripperTuneable() {
+    public Command gripperLeftTuneable() {
         return run(
                 () -> {
-                    double voltage = grippervoltage.get();
-                    piviotIO.setVoltage(voltage);
+                    double voltage = leftGripperVoltage.get();
+                    gripperIO.setVoltage(voltage);
                 });
     }
 
-    public Command intakeSpinCoral() {
-        return setVoltage(12);
+    public Command gripperRightTuneable() {
+        return run(
+                () -> {
+                    double voltage = rightGripperVoltage.get();
+                    gripperIO.setVoltage(voltage);
+                });
     }
 
-    public Command holdCoral() {
-        return setVoltage(0.25);
+    public Command intake(double voltage) {
+        return setVoltage(voltage);
     }
 
-    public Command ejectSpinCoral() {
-        return setVoltage(-1);
+    public Command intakeUntilPiece() {
+        return setVoltage(GripperConstants.handoffVoltage).until(() -> gripperInputs.hasPiece);
     }
 
-    public Command intakeSpinAlgae() {
-        return setVoltage(12);
+    public Command placePiece() {
+        return setVoltage(GripperConstants.placeVoltage)
+                .until(HAS_PIECE.negate())
+                .andThen(Commands.waitSeconds(0.3))
+                .withTimeout(4);
     }
 
-    public Command ejectSpinAlgae() {
-        return setVoltage(-12);
+    public Command placePieceReverse() {
+        return setVoltage(1, 4)
+                .until(HAS_PIECE.negate())
+                .andThen(Commands.waitSeconds(0.3))
+                .withTimeout(4);
     }
 
-    public Command slowEjectSpinAlgae() {
-        return setVoltage(-3);
+    public Command ejectReverse(double voltage) {
+        return setVoltage(-voltage);
     }
 
     public Command setVoltage(double voltage) {
-        return run(
+        return Commands.run(
                 () -> {
-                    piviotIO.setVoltage(voltage);
-                });
+                    gripperIO.setVoltage(voltage);
+                },
+                this);
+    }
+
+    public Command setVoltage(double leftVoltage, double rightVoltage) {
+        return Commands.run(
+                () -> {
+                    gripperIO.setVoltageLeft(leftVoltage);
+                    gripperIO.setVoltageRight(rightVoltage);
+                },
+                this);
     }
 
     public boolean hasPiece() {
-        return armrollerInputs.sensor;
+        return gripperInputs.hasPiece;
     }
 
-    private boolean hasAlgae = false;
-
-    public void setHasAlgae(boolean hasAlgae) {
-        hasAlgae = true;
+    public boolean intaking() {
+        return gripperInputs.voltageLeft > 3;
     }
 }

@@ -25,8 +25,7 @@ import frc.robot.constants.AligningConstants;
 import frc.robot.constants.AutoConstants;
 import frc.robot.constants.GlobalConstants;
 import frc.robot.constants.VisionConstants;
-import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState;
-import frc.robot.subsystems.ModeManager.SuperstructureStateManager.SuperstructureState.Position;
+import frc.robot.subsystems.ModeManager.ModeManager.Position;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +44,7 @@ public class Auto {
     // #146
     private RobotContainer robotContainer;
     private DriveLocation targetLocation = DriveLocation.GH;
-    private ArmHeight targetHeight = ArmHeight.Home;
+    private Position targetPosition = Position.Start;
 
     // *NEW
     private final Field2d m_trajectoryField = new Field2d();
@@ -227,103 +226,28 @@ public class Auto {
         }
     }
 
-    public enum ArmHeight {
-        Home(Position.Home, Position.Home),
-        L1(Position.L1, Position.L1),
-        L2(Position.L2, Position.L2Prep),
-        L3(Position.L3, Position.L3Prep),
-        L4(Position.L4, Position.L4Prep),
-        Source(Position.Source, Position.Source),
-        Handoff(Position.Handoff, Position.HandoffPrep);
-
-        public Position position;
-        public double armMotorSpeed;
-        public Position prep;
-
-        private ArmHeight(Position position, Position prep) {
-            this.position = position;
-            this.prep = prep;
-        }
-    }
-
     // #146: Add a function that will register all triggers
-    private double placeTimeout = 0.5;
 
     public void configureBindings() {
-        NamedCommands.registerCommand(
-                "wait", Commands.waitUntil(() -> armInPlace() && robotInPlace()));
 
-        NamedCommands.registerCommand("wait arm", Commands.waitUntil(() -> armInPlace()));
-
-        NamedCommands.registerCommand("wait prep", Commands.waitUntil(() -> armInPrep()));
+        // NamedCommands.registerCommand(
+        //         "wait position",
+        //         Commands.waitUntil(() -> robotContainer.modeManager.isAtPosition()));
 
         NamedCommands.registerCommand("wait pose", Commands.waitUntil(() -> robotInPlace()));
 
-        Command alignCommand =
-                Commands.defer(
-                        () ->
-                                robotContainer.alignAndDriveToReef(
-                                        targetLocation.getTagByTeam(), targetLocation.offset),
-                        Set.of(robotContainer.drivetrain));
-        NamedCommands.registerCommand("align", alignCommand);
+        // NamedCommands.registerCommand("goto", robotContainer.modeManager.goTo(targetPosition));
 
-        Command armCommand =
-                Commands.defer(
-                        () -> robotContainer.stateManager.moveToPosition(targetHeight.position),
-                        Set.of(
-                                robotContainer.armSubsystem,
-                                robotContainer.elevatorSubsystem,
-                                robotContainer.wristSubsystem,
-                                robotContainer.stateManager));
-        NamedCommands.registerCommand("arm", armCommand.asProxy());
+        Command scoreCommand = robotContainer.gripperSubsystem.placePiece();
+        NamedCommands.registerCommand("place", scoreCommand.asProxy());
 
-        Command prepArmCommand =
-                Commands.defer(
-                        () -> robotContainer.stateManager.moveToPosition(targetHeight.prep),
-                        Set.of(
-                                robotContainer.armSubsystem,
-                                robotContainer.elevatorSubsystem,
-                                robotContainer.wristSubsystem,
-                                robotContainer.stateManager));
-        NamedCommands.registerCommand("preparm", prepArmCommand.asProxy());
+        Command scoreReverse = robotContainer.gripperSubsystem.placePieceReverse();
 
-        Command scoreCommand =
-                robotContainer.gripperSubsystem.ejectSpinCoral().withTimeout(placeTimeout);
-        NamedCommands.registerCommand("score", scoreCommand.asProxy());
+        NamedCommands.registerCommand("place reverse", scoreReverse.withTimeout(3));
 
-        Command intakeCommand =
-                robotContainer
-                        .gripperSubsystem
-                        .intakeSpinCoral()
-                        .withDeadline(
-                                Commands.waitUntil(() -> robotContainer.gripperSubsystem.hasPiece())
-                                        .andThen(Commands.waitSeconds(0.75))
-                                        .withTimeout(5)); // TODO: TIMEOUT
+        Command intakeCommand = robotContainer.gripperSubsystem.intakeUntilPiece();
+
         NamedCommands.registerCommand("intake", intakeCommand.asProxy());
-
-        NamedCommands.registerCommand(
-                "placenoalign",
-                Commands.race(
-                        armCommand.asProxy(),
-                        Commands.sequence(
-                                Commands.waitUntil(() -> armInPlace()), scoreCommand.asProxy())));
-
-        // spotless:off
-        Command placeCommand =
-                prepArmCommand.asProxy()
-                .until(() -> robotInPlace()) // Wait until arm and align are in position
-                .andThen(
-                    Commands.waitSeconds(1).andThen((
-                        Commands.waitSeconds(0.5).andThen(Commands.waitUntil(() -> armInPlace()))
-                        .andThen(scoreCommand.asProxy())
-                    )
-                    .deadlineFor(armCommand.asProxy()))
-                )
-                .deadlineFor(alignCommand);
-
-
-        NamedCommands.registerCommand("place", placeCommand);
-
 
         // spotless:on
 
@@ -338,28 +262,46 @@ public class Auto {
                             }));
         }
 
-        for (ArmHeight height : ArmHeight.values()) {
+        for (Position position : Position.values()) {
             NamedCommands.registerCommand(
-                    "height ".concat(height.name()),
-                    Commands.runOnce(
-                            () -> {
-                                targetHeight = height;
-                                Logger.recordOutput("Auto/Chosen Height", height);
-                            }));
+                    "goto ".concat(position.name()),
+                    Commands.runOnce(robotContainer.modeManager.goTo(position)::schedule)
+                            .andThen(Commands.idle())
+                            .until(
+                                    () ->
+                                            robotContainer.modeManager.isArmAtPosition()
+                                                    && robotContainer.modeManager
+                                                            .isElevatorAtPosition())
+                            .withTimeout(5));
         }
+
+        // for (Position position : Position.values()) {
+        //     NamedCommands.registerCommand(
+        //             "position ".concat(position.name()),
+        //             Commands.runOnce(
+        //                     () -> {
+        //                         targetPosition = position;
+        //                         Logger.recordOutput("Auto/Chosen Position", position.name());
+        //                     }));
+        // }
         // #endregion
 
+        Command alignCommand =
+                Commands.defer(
+                        () ->
+                                robotContainer
+                                        .alignAndDriveToReef(
+                                                targetLocation.getTagByTeam(),
+                                                targetLocation.offset)
+                                        .until(() -> robotInPlace()),
+                        Set.of(robotContainer.drivetrain));
+
+        NamedCommands.registerCommand("align", alignCommand.withTimeout(3));
     }
 
     @AutoLogOutput(key = "Auto/Arm In Place")
     private boolean armInPlace() {
-        return SuperstructureState.AUTO.checksOut(
-                targetHeight.position, robotContainer.stateManager);
-    }
-
-    @AutoLogOutput(key = "Auto/Arm In Prep")
-    private boolean armInPrep() {
-        return SuperstructureState.AUTO.checksOut(targetHeight.prep, robotContainer.stateManager);
+        return robotContainer.armSubsystem.isAtSetpoint();
     }
 
     @AutoLogOutput(key = "Auto/Robot In Place")
@@ -379,9 +321,9 @@ public class Auto {
         Pose2d currentPose = robotContainer.drivetrain.getRobotPose();
         Pose2d relativePos = alignmentPose.relativeTo(currentPose);
         Logger.recordOutput("Auto/Physical Relative Pose", relativePos);
-        return (Math.abs(relativePos.getX()) < Units.inchesToMeters(0.7))
-                && (Math.abs(relativePos.getY()) < Units.inchesToMeters(0.7))
+        return (Math.abs(relativePos.getX()) < Units.inchesToMeters(0.43))
+                && (Math.abs(relativePos.getY()) < Units.inchesToMeters(0.215))
                 && ((Math.abs(relativePos.getRotation().getRadians()) % Math.PI)
-                        < Units.degreesToRadians(2));
+                        < Units.degreesToRadians(2)); // 2
     }
 }

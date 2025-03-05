@@ -55,7 +55,7 @@ public class ClimberSubsystem extends SubsystemBase {
     }
 
     public Command moveClimberUpVoltage() {
-        return setClimberVoltage(12);
+        return setClimberVoltage(8);
     }
 
     public Command climberTuneable() {
@@ -67,7 +67,7 @@ public class ClimberSubsystem extends SubsystemBase {
     }
 
     public Command moveClimberDownVoltage() {
-        return setClimberVoltage(-12);
+        return setClimberVoltage(-8);
     }
 
     public Command setClimberVoltage(double voltage) {

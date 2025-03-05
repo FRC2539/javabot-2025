@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.789204545454545,
-        "y": 5.6703125
+        "x": 3.9188352272727274,
+        "y": 5.430994318181818
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.127313841897648,
-        "y": 5.514901492390936
+        "x": 4.2569445237158305,
+        "y": 5.275583310572754
       },
       "isLocked": false,
       "linkedName": "K"
     },
     {
       "anchor": {
-        "x": 1.545596590909091,
-        "y": 6.836988636363635
+        "x": 1.2464488636363638,
+        "y": 7.136136363636362
       },
       "prevControl": {
-        "x": 1.3324851977442531,
-        "y": 6.967692630577056
+        "x": 1.033337470471526,
+        "y": 7.266840357849783
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,12 +45,6 @@
               "data": {
                 "name": "height Handoff"
               }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "armprep"
-              }
             }
           ]
         }
@@ -58,8 +52,8 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 5.2,
-    "maxAcceleration": 8.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,

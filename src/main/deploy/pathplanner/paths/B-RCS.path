@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 1.1148565573770493,
-        "y": 0.7523565573770474
+        "x": 1.3062784090909094,
+        "y": 0.6246875000000012
       },
       "prevControl": {
-        "x": 1.1196332646514404,
-        "y": 1.002310919346617
+        "x": 1.3110551163653006,
+        "y": 0.8746418619695709
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 5.2,
-    "maxAcceleration": 8.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 48.5
+    "rotation": 55.0
   },
   "reversed": false,
   "folder": "Reef-RCS",

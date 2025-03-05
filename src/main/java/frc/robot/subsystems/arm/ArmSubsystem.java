@@ -2,12 +2,13 @@ package frc.robot.subsystems.arm;
 
 import static edu.wpi.first.units.Units.Volts;
 
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.constants.ArmConstants;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -16,14 +17,11 @@ public class ArmSubsystem extends SubsystemBase {
     public ArmPivotIOInputsAutoLogged armPivotInputs = new ArmPivotIOInputsAutoLogged();
     public LoggedNetworkNumber armTuneables = new LoggedNetworkNumber("arm tuneable", 0);
 
-    private ProfiledPIDController controller =
-            new ProfiledPIDController(
-                    ArmConstants.ARM_KP,
-                    ArmConstants.ARM_KI,
-                    ArmConstants.ARM_KD,
-                    new TrapezoidProfile.Constraints(3, 4.5)); // try 6 and 6
+    private PIDController controller =
+            new PIDController(ArmConstants.ARM_KP, ArmConstants.ARM_KI, ArmConstants.ARM_KD);
+    // new TrapezoidProfile.Constraints(3, 4.5)); // try 6 and 6
 
-    private double reference = 0;
+    private double reference = -2.022;
 
     private SysIdRoutine armSysIdRoutine =
             new SysIdRoutine(
@@ -43,9 +41,34 @@ public class ArmSubsystem extends SubsystemBase {
         setDefaultCommand(setVoltage(0));
     }
 
+    @AutoLogOutput
+    public boolean isAtSetpoint() {
+        return controller.atSetpoint();
+    }
+
     public void periodic() {
         armPivotIO.updateInputs(armPivotInputs);
         Logger.processInputs("RealOutputs/Arm", armPivotInputs);
+
+        // double voltage = controller.calculate(armPivotInputs.throughboreEncoderPosition,
+        // reference);
+        // TrapezoidProfile.State state = controller.getSetpoint();
+        // voltage += state.velocity * 1.0 / 0.5;
+        // voltage += Math.sin(state.position) * 0.2;
+        // // if (voltage > 0) {
+        // //     voltage += 0.2;
+        // // } else {
+        // //     voltage -= 0.2;
+        // // }
+        // if (controller.atGoal()) {
+        //     voltage = 0;
+        // } else {
+        //     voltage = Math.min(12.0, Math.max(-12.0, voltage)); // Clamp voltage
+        // }
+        // armPivotIO.setVoltage(voltage);
+        // Logger.recordOutput("Arm/setpoint", state.position);
+        // Logger.recordOutput("Arm/setpoint velocity", state.velocity);
+        // Logger.recordOutput("Arm/reference", reference);
     }
 
     public Command runQStaticArmSysId(SysIdRoutine.Direction direction) {
@@ -72,10 +95,6 @@ public class ArmSubsystem extends SubsystemBase {
         return run(() -> armPivotIO.setVoltage(armTuneables.get()));
     }
 
-    public Command tunablePose() {
-        return runOnce(() -> reference = armTuneables.get()).andThen(followReference());
-    }
-
     public Command setPosition(double position) {
         if (position > ArmConstants.upperLimit) {
             position = ArmConstants.upperLimit;
@@ -92,34 +111,33 @@ public class ArmSubsystem extends SubsystemBase {
                 .andThen(followReference());
     }
 
-    public double getPosition() {
-        return armPivotInputs.throughboreEncoderPosition;
-    }
-
     private Command followReference() {
-        return run(
+        return Commands.run(
                 () -> {
                     double voltage =
                             controller.calculate(
                                     armPivotInputs.throughboreEncoderPosition, reference);
-                    TrapezoidProfile.State state = controller.getSetpoint();
-                    voltage += state.velocity * 1.0 / 0.5;
-                    voltage += Math.sin(state.position) * 0.2;
-                    if (voltage > 0) {
-                        voltage += 0.2;
-                    } else {
-                        voltage -= 0.2;
-                    }
-                    if (controller.atGoal()) {
+                    // TrapezoidProfile.State state = controller.getSetpoint();
+                    // voltage += state.velocity * 1.0 / 0.5;
+                    // voltage += Math.sin(state.position) * 0.2;
+                    // if (voltage > 0) {
+                    //     voltage += 0.2;
+                    // } else {
+                    //     voltage -= 0.2;
+                    // }
+                    if (controller.atSetpoint()) {
                         voltage = 0;
                     } else {
                         voltage = Math.min(12.0, Math.max(-12.0, voltage)); // Clamp voltage
                     }
                     armPivotIO.setVoltage(voltage);
-                    Logger.recordOutput("Arm/setpoint", state.position);
-                    Logger.recordOutput("Arm/setpoint velocity", state.velocity);
-                    Logger.recordOutput("Arm/reference", reference);
-                });
+                    Logger.recordOutput("Arm/setpoint", controller.getSetpoint());
+                },
+                this);
+    }
+
+    public double getPosition() {
+        return armPivotInputs.throughboreEncoderPosition;
     }
 
     public double getInternalEncoderPosition() {

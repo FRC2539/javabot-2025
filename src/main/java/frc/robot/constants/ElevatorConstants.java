@@ -10,7 +10,7 @@ public class ElevatorConstants {
             new Slot0Configs()
                     .withKA(0)
                     .withKD(0)
-                    .withKG(0)
+                    .withKG(0.01)
                     .withKI(0)
                     .withKP(2)
                     .withKS(0)
@@ -32,5 +32,5 @@ public class ElevatorConstants {
     public static final CurrentLimitsConfigs currentLimit = new CurrentLimitsConfigs();
 
     public static final double lowerLimit = 0;
-    public static final double upperLimit = 297;
+    public static final double upperLimit = 303;
 }

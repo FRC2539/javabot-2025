@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "pushStart-pushEnd"
+            "pathName": "center temp"
           }
         },
         {
@@ -17,27 +17,9 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "pushEnd-H"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "goto L4"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "goto L4"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "location H"
           }
         },
         {
@@ -49,7 +31,7 @@
         {
           "type": "named",
           "data": {
-            "name": "place"
+            "name": "score"
           }
         }
       ]
