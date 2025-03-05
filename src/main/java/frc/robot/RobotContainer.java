@@ -293,8 +293,12 @@ public class RobotContainer {
         DPadUp.onTrue(modeManager.goTo(Position.Handoff));
 
         DPadUp.onTrue(gripperSubsystem.intakeUntilPiece());
-        Handoffing.whileTrue(Commands.run(()->LightsSubsystem.LEDSegment.MainStrip.setStrobeAnimation(
-                LightsSubsystem.blue, 1), lights));
+        Handoffing.whileTrue(
+                Commands.run(
+                        () ->
+                                LightsSubsystem.LEDSegment.MainStrip.setStrobeAnimation(
+                                        LightsSubsystem.blue, 1),
+                        lights));
 
         // operatorController.getDPadRight().onTrue(modeManager.goTo(Position.Algae2));
 
@@ -311,14 +315,10 @@ public class RobotContainer {
 
         operatorController
                 .getLeftBumper()
-                .onTrue(
-                        Commands.runOnce(
-                                () -> modeManager.setScoringMode(ScoringMode.LeftCoral)));
+                .onTrue(Commands.runOnce(() -> modeManager.setScoringMode(ScoringMode.LeftCoral)));
         operatorController
                 .getRightBumper()
-                .onTrue(
-                        Commands.runOnce(
-                                () -> modeManager.setScoringMode(ScoringMode.RightCoral)));
+                .onTrue(Commands.runOnce(() -> modeManager.setScoringMode(ScoringMode.RightCoral)));
         // operatorController
         //         .getRightTrigger()
         //         .onTrue(
@@ -341,7 +341,7 @@ public class RobotContainer {
                 .and(() -> modeManager.getCurrentScoringMode() == ScoringMode.Algae)
                 .whileTrue(alignToReef(AligningConstants.centerOffset));
 
-        //leftDriveController.getLeftBottomMiddle().onTrue(climberSubsystem.zeroClimberCommand());
+        // leftDriveController.getLeftBottomMiddle().onTrue(climberSubsystem.zeroClimberCommand());
         rightDriveController.getLeftBottomMiddle().onTrue(modeManager.goTo(Position.Start));
         leftDriveController.getLeftTopMiddle().whileTrue(climberSubsystem.climberTuneable());
 

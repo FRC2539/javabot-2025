@@ -265,14 +265,14 @@ public class Auto {
         for (Position position : Position.values()) {
             NamedCommands.registerCommand(
                     "goto ".concat(position.name()),
-                    Commands.runOnce(robotContainer
-                            .modeManager
-                            .goTo(position)::schedule).andThen(Commands.idle())
+                    Commands.runOnce(robotContainer.modeManager.goTo(position)::schedule)
+                            .andThen(Commands.idle())
                             .until(
                                     () ->
                                             robotContainer.modeManager.isArmAtPosition()
                                                     && robotContainer.modeManager
-                                                            .isElevatorAtPosition()).withTimeout(5));
+                                                            .isElevatorAtPosition())
+                            .withTimeout(5));
         }
 
         // for (Position position : Position.values()) {
@@ -324,6 +324,6 @@ public class Auto {
         return (Math.abs(relativePos.getX()) < Units.inchesToMeters(0.43))
                 && (Math.abs(relativePos.getY()) < Units.inchesToMeters(0.215))
                 && ((Math.abs(relativePos.getRotation().getRadians()) % Math.PI)
-                        < Units.degreesToRadians(2)); //2
+                        < Units.degreesToRadians(2)); // 2
     }
 }

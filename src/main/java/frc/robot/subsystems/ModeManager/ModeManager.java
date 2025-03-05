@@ -62,64 +62,55 @@ public class ModeManager extends SubsystemBase {
 
     public Command goTo(Position endPosition) {
 
-        return 
-                Commands.runOnce(() -> targetPosition = endPosition, this)
-                                .andThen(
-                                        Commands.either(
-                                                Commands.either(
-                                                        Commands.sequence(
-                                                                arm.setPosition(
-                                                                        endPosition.armHeight),
-                                                                Commands.waitUntil(
-                                                                        () -> arm.isAtSetpoint()),
-                                                                elevator.setPosition(
-                                                                        endPosition.elevatorHeight),
-                                                                Commands.waitUntil(
-                                                                        () ->
-                                                                                (Math.abs(
-                                                                                                elevator
-                                                                                                                .getPosition()
-                                                                                                        - endPosition
-                                                                                                                .elevatorHeight)
-                                                                                        < 2))),
-                                                        Commands.sequence(
-                                                                elevator.setPosition(
-                                                                        endPosition.elevatorHeight),
-                                                                Commands.waitUntil(
-                                                                        () ->
-                                                                                (Math.abs(
-                                                                                                elevator
-                                                                                                                .getPosition()
-                                                                                                        - endPosition
-                                                                                                                .elevatorHeight)
-                                                                                        < 2)),
-                                                                arm.setPosition(
-                                                                        endPosition.armHeight),
-                                                                Commands.waitUntil(
-                                                                        () -> arm.isAtSetpoint())),
-                                                        () -> lastPosition == Position.Handoff),
-                                                Commands.sequence(
-                                                        elevator.setPosition(
-                                                                endPosition.elevatorHeight),
-                                                        // Commands.waitUntil(() ->
-                                                        // Math.abs(elevator.getPosition()
-                                                        // - targetPosition.elevatorHeight) <
-                                                        // 2).withTimeout(2),
-                                                        arm.setPosition(endPosition.armHeight),
-                                                        Commands.waitUntil(
-                                                                () -> arm.isAtSetpoint()),
-                                                        Commands.waitUntil(
-                                                                () ->
-                                                                        (Math.abs(
-                                                                                        elevator
-                                                                                                        .getPosition()
-                                                                                                - endPosition
-                                                                                                        .elevatorHeight)
-                                                                                < 2))),
+        return Commands.runOnce(() -> targetPosition = endPosition, this)
+                .andThen(
+                        Commands.either(
+                                Commands.either(
+                                        Commands.sequence(
+                                                arm.setPosition(endPosition.armHeight),
+                                                Commands.waitUntil(() -> arm.isAtSetpoint()),
+                                                elevator.setPosition(endPosition.elevatorHeight),
+                                                Commands.waitUntil(
+                                                        () ->
+                                                                (Math.abs(
+                                                                                elevator
+                                                                                                .getPosition()
+                                                                                        - endPosition
+                                                                                                .elevatorHeight)
+                                                                        < 2))),
+                                        Commands.sequence(
+                                                elevator.setPosition(endPosition.elevatorHeight),
+                                                Commands.waitUntil(
+                                                        () ->
+                                                                (Math.abs(
+                                                                                elevator
+                                                                                                .getPosition()
+                                                                                        - endPosition
+                                                                                                .elevatorHeight)
+                                                                        < 2)),
+                                                arm.setPosition(endPosition.armHeight),
+                                                Commands.waitUntil(() -> arm.isAtSetpoint())),
+                                        () -> lastPosition == Position.Handoff),
+                                Commands.sequence(
+                                        elevator.setPosition(endPosition.elevatorHeight),
+                                        // Commands.waitUntil(() ->
+                                        // Math.abs(elevator.getPosition()
+                                        // - targetPosition.elevatorHeight) <
+                                        // 2).withTimeout(2),
+                                        arm.setPosition(endPosition.armHeight),
+                                        Commands.waitUntil(() -> arm.isAtSetpoint()),
+                                        Commands.waitUntil(
                                                 () ->
-                                                        lastPosition == Position.Handoff
-                                                                || endPosition == Position.Handoff))
-                                .andThen(Commands.runOnce(() -> lastPosition = endPosition, this)).andThen(Commands.idle(this));
+                                                        (Math.abs(
+                                                                        elevator.getPosition()
+                                                                                - endPosition
+                                                                                        .elevatorHeight)
+                                                                < 2))),
+                                () ->
+                                        lastPosition == Position.Handoff
+                                                || endPosition == Position.Handoff))
+                .andThen(Commands.runOnce(() -> lastPosition = endPosition, this))
+                .andThen(Commands.idle(this));
 
         // return Commands.either(
         //     Commands.sequence(
