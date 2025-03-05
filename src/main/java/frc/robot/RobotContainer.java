@@ -313,14 +313,12 @@ public class RobotContainer {
                 .getLeftBumper()
                 .onTrue(
                         Commands.runOnce(
-                                () -> modeManager.setScoringMode(ScoringMode.LeftCoral),
-                                modeManager));
+                                () -> modeManager.setScoringMode(ScoringMode.LeftCoral)));
         operatorController
                 .getRightBumper()
                 .onTrue(
                         Commands.runOnce(
-                                () -> modeManager.setScoringMode(ScoringMode.RightCoral),
-                                modeManager));
+                                () -> modeManager.setScoringMode(ScoringMode.RightCoral)));
         // operatorController
         //         .getRightTrigger()
         //         .onTrue(

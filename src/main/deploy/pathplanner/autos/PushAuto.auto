@@ -49,12 +49,6 @@
         {
           "type": "named",
           "data": {
-            "name": "wait pose"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
             "name": "place"
           }
         }

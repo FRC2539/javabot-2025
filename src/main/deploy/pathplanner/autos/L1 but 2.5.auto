@@ -51,12 +51,6 @@
         {
           "type": "named",
           "data": {
-            "name": "wait pose"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
             "name": "place reverse"
           }
         },
@@ -94,12 +88,6 @@
           "type": "named",
           "data": {
             "name": "align"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "wait pose"
           }
         },
         {

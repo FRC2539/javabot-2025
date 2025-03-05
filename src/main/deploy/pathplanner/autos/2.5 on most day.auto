@@ -45,19 +45,7 @@
         {
           "type": "named",
           "data": {
-            "name": "wait arm"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
             "name": "align"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "wait pose"
           }
         },
         {
@@ -89,12 +77,6 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "goto Home"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
                         "name": "goto Handoff"
                       }
                     }
@@ -107,7 +89,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.5
+            "waitTime": 0.7
           }
         },
         {
@@ -125,19 +107,7 @@
         {
           "type": "named",
           "data": {
-            "name": "wait arm"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
             "name": "align"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "wait pose"
           }
         },
         {
