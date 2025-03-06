@@ -19,7 +19,9 @@ public class GripperIONeo550 implements GripperIO {
 
     private double lastVoltageRight = 0;
 
-    private AnalogInput sensor = new AnalogInput(GripperConstants.pieceSensorChannel);
+    private AnalogInput initialPieceSensor = new AnalogInput(GripperConstants.initialSensorChannel);
+
+    private AnalogInput hasPieceSensor = new AnalogInput(GripperConstants.secondSensorChannel);
 
     public GripperIONeo550() {
         SparkBaseConfig leftConfig = new SparkMaxConfig().idleMode(IdleMode.kBrake).inverted(true);
@@ -42,7 +44,9 @@ public class GripperIONeo550 implements GripperIO {
         rightSparkMax.setVoltage(lastVoltageRight);
 
         // System.out.println(sensor.getValue());
-        inputs.hasPiece = sensor.getValue() < 50;
+        inputs.firstSensor = initialPieceSensor.getValue() < 50;
+
+        inputs.secondSensor = hasPieceSensor.getValue() < 50;
     }
 
     public void setVoltage(double voltage) {
