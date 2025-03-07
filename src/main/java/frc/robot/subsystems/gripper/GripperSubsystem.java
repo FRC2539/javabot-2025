@@ -16,7 +16,6 @@ public class GripperSubsystem extends SubsystemBase {
 
     public final Trigger HAS_PIECE = new Trigger(this::hasPiece);
     public final Trigger PIECE_SEATED = new Trigger(this::isPieceSeated);
-    
 
     LoggedNetworkNumber leftGripperVoltage =
             new LoggedNetworkNumber("Left Gripper Motor Voltage", 0);
@@ -55,9 +54,10 @@ public class GripperSubsystem extends SubsystemBase {
 
     public Command intakeUntilPiece() {
         return setVoltage(GripperConstants.handoffVoltage)
-        .until(() -> gripperInputs.firstSensor)
-        .andThen(setVoltage(GripperConstants.slowHandoffVoltage)
-        .until(() -> gripperInputs.secondSensor));
+                .until(() -> gripperInputs.firstSensor)
+                .andThen(
+                        setVoltage(GripperConstants.slowHandoffVoltage)
+                                .until(() -> gripperInputs.secondSensor));
     }
 
     public Command placePiece() {

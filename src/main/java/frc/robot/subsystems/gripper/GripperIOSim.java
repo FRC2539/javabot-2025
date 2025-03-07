@@ -9,10 +9,8 @@ public class GripperIOSim implements GripperIO {
     private LoggedNetworkBoolean gripperGPSensorInitial =
             new LoggedNetworkBoolean("Gripper Initial Sensor Sim", true);
 
-     private LoggedNetworkBoolean gripperGPSensorSecond =
-        new LoggedNetworkBoolean("Gripper Second Sensor Sim", true);
-
-    
+    private LoggedNetworkBoolean gripperGPSensorSecond =
+            new LoggedNetworkBoolean("Gripper Second Sensor Sim", true);
 
     public void updateInputs(GripperIOInputs inputs) {
         inputs.voltageLeft = leftVoltage;

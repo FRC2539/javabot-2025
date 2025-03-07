@@ -321,7 +321,7 @@ public class RobotContainer {
                 .onTrue(Commands.runOnce(() -> modeManager.setScoringMode(ScoringMode.RightCoral)));
         // operatorController
         //         .getRightTrigger()
-        //         .onTrue(
+        //         .onTrue([]\
         //                 Commands.runOnce(
         //                         () -> modeManager.setScoringMode(ScoringMode.Algae),
         // modeManager));
@@ -357,8 +357,8 @@ public class RobotContainer {
 
         operatorController.getDPadLeft().whileTrue(gripperSubsystem.intake(1.5));
 
-        leftDriveController.getLeftBottomMiddle().whileTrue(elevatorSubsystem.setVoltage(1.5));
-        leftDriveController.getLeftBottomRight().whileTrue(elevatorSubsystem.setVoltage(-1.5));
+        leftDriveController.getLeftBottomMiddle().whileTrue(elevatorSubsystem.setVoltage(3));
+        leftDriveController.getLeftBottomRight().whileTrue(elevatorSubsystem.setVoltage(-3));
 
         operatorController.getDPadRight().whileTrue(gripperSubsystem.intake(-1.5));
 
