@@ -11,8 +11,8 @@ public class AligningConstants {
     public static final double Ki = 0.0;
     public static final double Kd = 0.0;
 
-    public static final double leftOffset = -0.1079; // COMP -0.146
-    public static final double rightOffset = 0.157; // COMP 0.155
+    public static final double leftOffset = -0.152; // Hat -0.146
+    public static final double rightOffset = 0.165; // Hat 0.155
     public static final double centerOffset = 0;
     public static final double reefDistance = Units.feetToMeters(3) / 2;
 

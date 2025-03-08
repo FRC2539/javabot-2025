@@ -27,9 +27,9 @@ public class ArmConstants {
     //                     .withMotionMagicJerk(4);
 
     public static final CurrentLimitsConfigs currentLimitConfigs = new CurrentLimitsConfigs();
-    public static final double ARM_KP = 5; // 3.5
-    public static final double ARM_KD = 0;
-    public static final double ARM_KI = 0.25;
+    public static final double ARM_KP = 6; // 3.5 5
+    public static final double ARM_KD = 0.0001; //0
+    public static final double ARM_KI = 0.01; //.25
 
     public static final double ARM_TOLERANCE = 0.03;
 
