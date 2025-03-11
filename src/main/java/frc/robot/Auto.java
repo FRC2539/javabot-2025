@@ -296,7 +296,7 @@ public class Auto {
                                         .until(() -> robotInPlace()),
                         Set.of(robotContainer.drivetrain));
 
-        NamedCommands.registerCommand("align", alignCommand.withTimeout(3));
+        NamedCommands.registerCommand("align", alignCommand);
     }
 
     @AutoLogOutput(key = "Auto/Arm In Place")
@@ -321,8 +321,8 @@ public class Auto {
         Pose2d currentPose = robotContainer.drivetrain.getRobotPose();
         Pose2d relativePos = alignmentPose.relativeTo(currentPose);
         Logger.recordOutput("Auto/Physical Relative Pose", relativePos);
-        return (Math.abs(relativePos.getX()) < Units.inchesToMeters(0.43))
-                && (Math.abs(relativePos.getY()) < Units.inchesToMeters(0.215))
+        return (Math.abs(relativePos.getX()) < Units.inchesToMeters(1)) // 0.43
+                && (Math.abs(relativePos.getY()) < Units.inchesToMeters(.65)) // 0.215
                 && ((Math.abs(relativePos.getRotation().getRadians()) % Math.PI)
                         < Units.degreesToRadians(2)); // 2
     }

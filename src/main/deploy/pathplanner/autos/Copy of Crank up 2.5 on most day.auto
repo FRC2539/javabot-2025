@@ -36,28 +36,54 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "sequential",
           "data": {
             "commands": [
               {
-                "type": "path",
+                "type": "parallel",
                 "data": {
-                  "pathName": "E-RCS"
+                  "commands": [
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "E-RCS"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "goto Handoff"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "intake"
+                      }
+                    }
+                  ]
                 }
               },
               {
-                "type": "named",
+                "type": "race",
                 "data": {
-                  "name": "goto Handoff"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "intake"
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.35
+                      }
+                    }
+                  ]
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.3
           }
         },
         {
@@ -92,28 +118,54 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "sequential",
           "data": {
             "commands": [
               {
-                "type": "path",
+                "type": "parallel",
                 "data": {
-                  "pathName": "D-RCS"
+                  "commands": [
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "D-RCS"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "goto Handoff"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "intake"
+                      }
+                    }
+                  ]
                 }
               },
               {
-                "type": "named",
+                "type": "race",
                 "data": {
-                  "name": "goto Handoff"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "intake"
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.35
+                      }
+                    }
+                  ]
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.3
           }
         },
         {
@@ -145,12 +197,6 @@
           "type": "named",
           "data": {
             "name": "place"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "C-RCS"
           }
         }
       ]
