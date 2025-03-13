@@ -94,7 +94,6 @@ public class ModeManager extends SubsystemBase {
                                         () -> lastPosition == Position.Handoff),
                                 Commands.sequence(
                                         elevator.setPosition(endPosition.elevatorHeight),
-                                        Commands.waitSeconds(0.08),
                                         // Commands.waitUntil(() ->
                                         // Math.abs(elevator.getPosition()
                                         // - targetPosition.elevatorHeight) <
