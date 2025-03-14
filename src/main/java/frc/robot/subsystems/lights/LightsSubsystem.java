@@ -16,6 +16,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.function.BooleanSupplier;
 
 public class LightsSubsystem extends SubsystemBase {
@@ -53,6 +55,38 @@ public class LightsSubsystem extends SubsystemBase {
     public static final Color blue = new Color(8, 32, 255);
     public static final Color red = new Color(255, 0, 0);
 
+    CustomAnimation testAnimation =
+            new CustomAnimation(
+                    candle,
+                    0,
+                    30,
+                    new AnimDelta(
+                            new AnimColorSegment[] {
+                                new AnimColorSegment(orange, 8, 25),
+                                new AnimColorSegment(blue, 25 + 8, 25),
+                                new AnimColorSegment(red, 50 + 8, 25)
+                            }),
+                    new Hashtable<Integer, AnimDelta>() {
+                        {
+                            put(
+                                    10,
+                                    new AnimDelta(
+                                            new AnimColorSegment[] {
+                                                new AnimColorSegment(blue, 8, 25),
+                                                new AnimColorSegment(red, 25 + 8, 25),
+                                                new AnimColorSegment(orange, 50 + 8, 25)
+                                            }));
+                            put(
+                                    20,
+                                    new AnimDelta(
+                                            new AnimColorSegment[] {
+                                                new AnimColorSegment(red, 8, 25),
+                                                new AnimColorSegment(orange, 25 + 8, 25),
+                                                new AnimColorSegment(blue, 50 + 8, 25)
+                                            }));
+                        }
+                    });
+
     public LightsSubsystem() {
         if (candle != null) {
             CANdleConfiguration candleConfiguration = new CANdleConfiguration();
@@ -89,8 +123,8 @@ public class LightsSubsystem extends SubsystemBase {
                             LEDSegment.MainStrip.setColor(orange);
                         }
                     } else {
-
-                        LEDSegment.MainStrip.setFadeAnimation(orange, 0.2);
+                        LEDSegment.MainStrip.setCustomAnimation(testAnimation, 1);
+                        // LEDSegment.MainStrip.setFadeAnimation(orange, 0.2);
                     }
                 })
                 .ignoringDisable(true);
@@ -201,6 +235,11 @@ public class LightsSubsystem extends SubsystemBase {
         public void setRainbowAnimation(double speed) {
             setAnimation(new RainbowAnimation(1, speed, segmentSize, false, startIndex));
         }
+
+        public void setCustomAnimation(CustomAnimation anim, double speed) {
+            candle.clearAnimation(animationSlot);
+            anim.update();
+        }
     }
 
     public static class Color {
@@ -241,4 +280,88 @@ public class LightsSubsystem extends SubsystemBase {
     public static void enableLEDs() {
         setBrightness(.5);
     }
+
+    // #region Custom Animations
+
+    class AnimColorSegment {
+        public final Color color;
+        public final int start;
+        public final int length;
+
+        AnimColorSegment(Color color, int start, int length) {
+            this.color = color;
+            this.start = start;
+            this.length = length;
+        }
+    }
+
+    class AnimDelta {
+        public final AnimColorSegment[] deltas;
+
+        AnimDelta(AnimColorSegment[] deltas) {
+            this.deltas = deltas;
+        }
+
+        public void apply(CANdle candle) {
+            for (AnimColorSegment cur : deltas) {
+                Color color = cur.color;
+                candle.setLEDs(color.red, color.green, color.blue, 0, cur.start, cur.length);
+            }
+        }
+    }
+
+    class CustomAnimation {
+        final CANdle candle;
+        final int pixelOffset;
+        final int frameCount;
+        public int frameCurrent = 0;
+        public double fps = 5;
+        final AnimDelta frameDeltaInitial;
+        final Dictionary<Integer, AnimDelta> frameDeltas;
+
+        CustomAnimation(
+                CANdle candle,
+                int pixelOffset,
+                int frameCount,
+                AnimDelta frameDeltaInitial,
+                Dictionary<Integer, AnimDelta> frameDeltas) {
+            this.candle = candle;
+            this.pixelOffset = pixelOffset;
+            this.frameCount = frameCount;
+            this.frameDeltaInitial = frameDeltaInitial;
+            this.frameDeltas = frameDeltas;
+        }
+
+        CustomAnimation(
+                CANdle candle,
+                int pixelOffset,
+                int frameCount,
+                AnimDelta frameDeltaInitial,
+                Dictionary<Integer, AnimDelta> frameDeltas,
+                double fps) {
+            this.candle = candle;
+            this.pixelOffset = pixelOffset;
+            this.frameCount = frameCount;
+            this.frameDeltaInitial = frameDeltaInitial;
+            this.frameDeltas = frameDeltas;
+            this.fps = fps;
+        }
+
+        public void init() {
+            frameCurrent = 0;
+            frameDeltaInitial.apply(candle);
+        }
+
+        public void update() {
+            frameCurrent++;
+            if (frameCurrent >= frameCount) {
+                init();
+                return;
+            }
+            AnimDelta delta = frameDeltas.get(frameCurrent);
+            if (delta != null) delta.apply(candle);
+        }
+    }
+
+    // #endregion
 }
