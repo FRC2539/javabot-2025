@@ -357,8 +357,8 @@ public class RobotContainer {
 
         operatorController.getDPadLeft().whileTrue(gripperSubsystem.intake(1.5));
 
-        leftDriveController.getLeftBottomMiddle().whileTrue(elevatorSubsystem.setVoltage(3));
-        leftDriveController.getLeftBottomRight().whileTrue(elevatorSubsystem.setVoltage(-3));
+        leftDriveController.getLeftBottomMiddle().whileTrue(elevatorSubsystem.setVoltage(1.5));
+        leftDriveController.getLeftBottomRight().whileTrue(elevatorSubsystem.setVoltage(-1.5));
 
         operatorController.getDPadRight().whileTrue(gripperSubsystem.intake(-1.5));
 

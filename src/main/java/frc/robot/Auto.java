@@ -245,7 +245,11 @@ public class Auto {
 
         NamedCommands.registerCommand("place reverse", scoreReverse.withTimeout(3));
 
-        Command intakeCommand = robotContainer.gripperSubsystem.intakeUntilPiece();
+        Command intakeCommand =
+                robotContainer
+                        .gripperSubsystem
+                        .intakeUntilPiece()
+                        .onlyIf(() -> !robotContainer.gripperSubsystem.hasPiece());
 
         NamedCommands.registerCommand("intake", intakeCommand.asProxy());
 
@@ -302,6 +306,11 @@ public class Auto {
     @AutoLogOutput(key = "Auto/Arm In Place")
     private boolean armInPlace() {
         return robotContainer.armSubsystem.isAtSetpoint();
+    }
+
+    @AutoLogOutput(key = "Auto/Elevator In Place")
+    private boolean elevatorInplace() {
+        return robotContainer.modeManager.isElevatorAtPosition();
     }
 
     @AutoLogOutput(key = "Auto/Robot In Place")
