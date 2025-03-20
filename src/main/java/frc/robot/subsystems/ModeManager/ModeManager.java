@@ -24,18 +24,19 @@ public class ModeManager extends SubsystemBase {
     }
 
     public static enum Position {
-        L1(150, -1.65),
-        L2(110, 0.135),
-        L3(180, 0.135),
-        L4(300, 0.135),
-        Algae2(110, 1.1), // 110
+        L1(88, -1.65),
+        L2(80, 0.09),
 
-        Algae3(190, 1.1), // 190
+        L3(127, 0.09),
+        L4(200, 0.16), // 0.14
+        Algae2(83, 0.09), // 110
 
-        Handoff(153, -2.58),
-        Home(170, -1.8),
-        Start(10, -2.022),
-        Climb(30, -2.022);
+        Algae3(133, 0.09), // 190
+
+        Handoff(92.15, -2.64), // -3// pre hat 94.463
+        Home(90, -1.8),
+        Start(1, -2.022),
+        Climb(5, -2.022);
 
         private double elevatorHeight;
         private double armHeight;
@@ -111,24 +112,25 @@ public class ModeManager extends SubsystemBase {
                                                 || endPosition == Position.Handoff))
                 .andThen(Commands.runOnce(() -> lastPosition = endPosition, this))
                 .andThen(Commands.idle(this));
-
-        // return Commands.either(
-        //     Commands.sequence(
-        //         elevator.setPosition(endPosition.elevatorHeight),
-        //         //Commands.waitUntil(() -> Math.abs(elevator.getPosition() -
-        // targetPosition.elevatorHeight) < 2).withTimeout(2),
-        //         arm.setPosition(endPosition.armHeight).until(() -> arm.isAtSetpoint())
-        //     ),
-        //     Commands.sequence(
-        //         arm.setPosition(endPosition.armHeight).until(() -> arm.isAtSetpoint()),
-        //         elevator.setPosition(endPosition.elevatorHeight)),
-        //         //Commands.waitUntil(() -> (Math.abs(elevator.getPosition() -
-        // endPosition.elevatorHeight) < 2))),
-
-        //     () -> endPosition != Position.Handoff || endPosition == Position.Handoff
-        // );
-
     }
+
+    // return Commands.either(
+    //     Commands.sequence(
+    //         elevator.setPosition(endPosition.elevatorHeight),
+    //         //Commands.waitUntil(() -> Math.abs(elevator.getPosition() -
+    // targetPosition.elevatorHeight) < 2).withTimeout(2),
+    //         arm.setPosition(endPosition.armHeight).until(() -> arm.isAtSetpoint())
+    //     ),
+    //     Commands.sequence(
+    //         arm.setPosition(endPosition.armHeight).until(() -> arm.isAtSetpoint()),
+    //         elevator.setPosition(endPosition.elevatorHeight)),
+    //         //Commands.waitUntil(() -> (Math.abs(elevator.getPosition() -
+    // endPosition.elevatorHeight) < 2))),
+
+    //     () -> endPosition != Position.Handoff || endPosition == Position.Handoff
+    // );
+
+    // }
 
     public void setScoringMode(ScoringMode mode) {
         this.currentScoringMode = mode;

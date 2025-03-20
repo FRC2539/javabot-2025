@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 1.2464488636363638,
-        "y": 7.136136363636362
+        "x": 1.536,
+        "y": 7.47
       },
       "prevControl": {
-        "x": 1.8447443181818184,
-        "y": 7.166051136363635
+        "x": 2.1342954545454544,
+        "y": 7.499914772727273
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,22 +31,10 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "height Handoff",
-      "waypointRelativePos": 0.2,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "parallel",
-        "data": {
-          "commands": []
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 3.25,
+    "maxAcceleration": 5.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -54,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -55.0
+    "rotation": -52.35237935989226
   },
   "reversed": false,
   "folder": "Reef-LCS",

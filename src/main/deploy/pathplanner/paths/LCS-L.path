@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.2464488636363638,
-        "y": 7.136136363636362
+        "x": 1.536,
+        "y": 7.47
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.030657100064534,
-        "y": 6.554572180260008
+        "x": 2.3202082364281704,
+        "y": 6.8884358166236455
       },
       "isLocked": false,
       "linkedName": "LCS"
     },
     {
       "anchor": {
-        "x": 3.4701136363636365,
-        "y": 5.421022727272727
+        "x": 3.629659090909091,
+        "y": 5.261477272727273
       },
       "prevControl": {
-        "x": 2.9925063176600646,
-        "y": 5.76603633822357
+        "x": 3.1520517722055192,
+        "y": 5.6064908836781155
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,46 +33,20 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "intake & prep",
-      "waypointRelativePos": 0.0809898762654653,
+      "name": "location L",
+      "waypointRelativePos": 0,
       "endWaypointRelativePos": null,
       "command": {
-        "type": "sequential",
+        "type": "named",
         "data": {
-          "commands": [
-            {
-              "type": "parallel",
-              "data": {
-                "commands": [
-                  {
-                    "type": "named",
-                    "data": {
-                      "name": "intake"
-                    }
-                  },
-                  {
-                    "type": "named",
-                    "data": {
-                      "name": "arm"
-                    }
-                  }
-                ]
-              }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "location L"
-              }
-            }
-          ]
+          "name": "location L"
         }
       }
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 3.25,
+    "maxAcceleration": 5.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -86,7 +60,7 @@
   "folder": "LCS-Reef",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -55.0
+    "rotation": -52.35237935989226
   },
   "useDefaultConstraints": true
 }

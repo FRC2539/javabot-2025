@@ -15,6 +15,7 @@ public class GripperSubsystem extends SubsystemBase {
     private GripperIOInputsAutoLogged gripperInputs = new GripperIOInputsAutoLogged();
 
     public final Trigger HAS_PIECE = new Trigger(this::hasPiece);
+    public final Trigger PIECE_SEATED = new Trigger(this::isPieceSeated);
 
     LoggedNetworkNumber leftGripperVoltage =
             new LoggedNetworkNumber("Left Gripper Motor Voltage", 0);
@@ -52,14 +53,18 @@ public class GripperSubsystem extends SubsystemBase {
     }
 
     public Command intakeUntilPiece() {
-        return setVoltage(GripperConstants.handoffVoltage).until(() -> gripperInputs.hasPiece);
+        return setVoltage(GripperConstants.handoffVoltage)
+                .until(() -> gripperInputs.firstSensor)
+                .andThen(
+                        setVoltage(GripperConstants.slowHandoffVoltage)
+                                .until(() -> gripperInputs.secondSensor));
     }
 
     public Command placePiece() {
         return setVoltage(GripperConstants.placeVoltage)
                 .until(HAS_PIECE.negate())
-                .andThen(Commands.waitSeconds(0.3))
-                .withTimeout(4);
+                .andThen(Commands.waitSeconds(0.45))
+                .withTimeout(2);
     }
 
     public Command placePieceReverse() {
@@ -90,8 +95,12 @@ public class GripperSubsystem extends SubsystemBase {
                 this);
     }
 
+    public boolean isPieceSeated() {
+        return gripperInputs.firstSensor;
+    }
+
     public boolean hasPiece() {
-        return gripperInputs.hasPiece;
+        return gripperInputs.secondSensor;
     }
 
     public boolean intaking() {

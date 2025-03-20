@@ -48,7 +48,9 @@ public class AlignToReef extends Command {
         // tagId
         // Rotation to face the tag
         slewerTimer.restart();
-        Logger.recordOutput("/AutoAlign/Pose", targetPose);
+        Pose2d tCurrentPose = drivetrain.getState().Pose;
+        Logger.recordOutput("/AutoAlign/CurrentPose", tCurrentPose);
+        Logger.recordOutput("/AutoAlign/TargetPose", targetPose);
         Logger.recordOutput("/AutoAlign/Offset", offset);
 
         thetaController.setSetpoint(rotationOffset.getRadians());

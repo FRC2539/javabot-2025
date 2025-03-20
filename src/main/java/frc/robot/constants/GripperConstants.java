@@ -11,10 +11,13 @@ public class GripperConstants {
 
     public static final String canbus = "rio";
 
-    public static final double handoffVoltage = 4.8;
-    public static final double placeVoltage = -4.3;
+    public static final double handoffVoltage = 3; // 4.8
+    public static final double slowHandoffVoltage = 1.8; // 2.2
+    public static final double placeVoltage = -6;
     public static final double downvoltage = -1;
     public static final double upvoltage = 1;
 
-    public static final int pieceSensorChannel = 0;
+    public static final int initialSensorChannel = 0;
+
+    public static final int secondSensorChannel = 0;
 }

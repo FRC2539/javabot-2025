@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.2464488636363638,
-        "y": 7.136136363636362
+        "x": 1.536,
+        "y": 7.47
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.0041595339477754,
-        "y": 6.6596570760112614
+        "x": 2.2937106703114116,
+        "y": 6.993520712374899
       },
       "isLocked": false,
       "linkedName": "LCS"
@@ -33,33 +33,20 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "intake & prep",
-      "waypointRelativePos": 0.0,
+      "name": "location K",
+      "waypointRelativePos": 0,
       "endWaypointRelativePos": null,
       "command": {
-        "type": "parallel",
+        "type": "named",
         "data": {
-          "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "intake"
-              }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "location K"
-              }
-            }
-          ]
+          "name": "location K"
         }
       }
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 3.25,
+    "maxAcceleration": 5.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -73,7 +60,7 @@
   "folder": "LCS-Reef",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -55.0
+    "rotation": -52.35237935989226
   },
   "useDefaultConstraints": true
 }

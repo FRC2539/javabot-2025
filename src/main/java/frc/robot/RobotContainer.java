@@ -321,7 +321,7 @@ public class RobotContainer {
                 .onTrue(Commands.runOnce(() -> modeManager.setScoringMode(ScoringMode.RightCoral)));
         // operatorController
         //         .getRightTrigger()
-        //         .onTrue(
+        //         .onTrue([]\
         //                 Commands.runOnce(
         //                         () -> modeManager.setScoringMode(ScoringMode.Algae),
         // modeManager));
@@ -336,10 +336,10 @@ public class RobotContainer {
                 .getBottomThumb()
                 .and(() -> modeManager.getCurrentScoringMode() == ScoringMode.RightCoral)
                 .whileTrue(alignToReef(AligningConstants.rightOffset));
-        rightDriveController
-                .getBottomThumb()
-                .and(() -> modeManager.getCurrentScoringMode() == ScoringMode.Algae)
-                .whileTrue(alignToReef(AligningConstants.centerOffset));
+        // rightDriveController
+        //         .getBottomThumb()
+        //         .and(() -> modeManager.getCurrentScoringMode() == ScoringMode.Algae)
+        //         .whileTrue(alignToReef(AligningConstants.centerOffset));
 
         // leftDriveController.getLeftBottomMiddle().onTrue(climberSubsystem.zeroClimberCommand());
         rightDriveController.getLeftBottomMiddle().onTrue(modeManager.goTo(Position.Start));
