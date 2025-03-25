@@ -115,7 +115,7 @@ public class LightsSubsystem extends SubsystemBase {
         ExtraBIndicator(5, 1, -1),
         PivotEncoderIndicator(6, 1, -1),
         AllianceIndicator(7, 1, -1),
-        MainStrip(8, 300, 2);
+        MainStrip(8, 500, 2);
 
         public final int startIndex;
         public final int segmentSize;

@@ -12,7 +12,7 @@ public class ModeManager extends SubsystemBase {
     private ElevatorSubsystem elevator;
     private ArmSubsystem arm;
     @AutoLogOutput public Position targetPosition = Position.Home;
-    @AutoLogOutput public ScoringMode currentScoringMode = ScoringMode.Algae;
+    @AutoLogOutput public ScoringMode currentScoringMode = ScoringMode.zero;
     @AutoLogOutput public Position lastPosition = Position.Home;
 
     public ModeManager(ElevatorSubsystem elevator, ArmSubsystem arm) {
@@ -24,19 +24,19 @@ public class ModeManager extends SubsystemBase {
     }
 
     public static enum Position {
-        L1(88, -1.65),
-        L2(80, 0.09),
+        L1(92, 0.190), //-1.65 arm value
+        L2(76, 2.213), //0.09 arm value
 
-        L3(127, 0.09),
-        L4(200, 0.16), // 0.14
-        Algae2(83, 0.09), // 110
+        L3(127, 2.213), //0.09 arm value
+        L4(200, 2.213), // 0.14 // 0.16 arm value
+        Algae2(83, 2.213), // 110 //0.09 arm value
 
-        Algae3(133, 0.09), // 190
+        Algae3(133, 2.213), // 190 // 0.09 arm value
 
-        Handoff(92.15, -2.64), // -3// pre hat 94.463
-        Home(90, -1.8),
-        Start(1, -2.022),
-        Climb(5, -2.022);
+        Handoff(92.15, -0.472), // -3// pre hat 94.463 //-2.64 arm value
+        Home(90, 0.07), // -1.8 arm value
+        Start(1, 0.07), // -2.022 arm value
+        Climb(5, 0.07); // -2.022 arm value
 
         private double elevatorHeight;
         private double armHeight;
@@ -56,6 +56,7 @@ public class ModeManager extends SubsystemBase {
     }
 
     public static enum ScoringMode {
+        zero,
         Algae,
         LeftCoral,
         RightCoral

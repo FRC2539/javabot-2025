@@ -13,7 +13,7 @@ public class AligningConstants {
 
     public static final double leftOffset = -0.15; // Hat -0.146 //home -0.152
     public static final double rightOffset = 0.188; // Hat 0.155 // home 0.165
-    public static final double centerOffset = 0;
+    public static final double centerOffset = -0.222;
     public static final double reefDistance = Units.feetToMeters(3) / 2;
 
     public static final double aligningAngleTolerance = Units.degreesToRadians(2);
