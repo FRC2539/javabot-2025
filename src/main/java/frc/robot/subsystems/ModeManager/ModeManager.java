@@ -33,8 +33,8 @@ public class ModeManager extends SubsystemBase {
 
         Algae3(133, 2.213), // 190 // 0.09 arm value
 
-        Handoff(92.15, -0.472), // -3// pre hat 94.463 //-2.64 arm value
-        Home(90, 0.07), // -1.8 arm value
+        Handoff(92.15, -0.472), // -0.472 // -3// pre hat 94.463 //-2.64 arm value
+        Home(90, 0.07), //0.07 // -1.8 arm value
         Start(1, 0.07), // -2.022 arm value
         Climb(5, 0.07); // -2.022 arm value
 
@@ -62,6 +62,9 @@ public class ModeManager extends SubsystemBase {
         RightCoral
     }
 
+    public Command moveArm(Position position) {
+        return Commands.either(arm.setPositionL1(position.armHeight), arm.setPosition(position.armHeight), () -> {return position == Position.L1 || position == Position.Home;});
+    }
     public Command goTo(Position endPosition) {
 
         return Commands.runOnce(() -> targetPosition = endPosition, this)
@@ -69,7 +72,7 @@ public class ModeManager extends SubsystemBase {
                         Commands.either(
                                 Commands.either(
                                         Commands.sequence(
-                                                arm.setPosition(endPosition.armHeight),
+                                                moveArm(endPosition),
                                                 Commands.waitUntil(() -> arm.isAtSetpoint()),
                                                 elevator.setPosition(endPosition.elevatorHeight),
                                                 Commands.waitUntil(
@@ -90,7 +93,7 @@ public class ModeManager extends SubsystemBase {
                                                                                         - endPosition
                                                                                                 .elevatorHeight)
                                                                         < 2)),
-                                                arm.setPosition(endPosition.armHeight),
+                                                moveArm(endPosition),
                                                 Commands.waitUntil(() -> arm.isAtSetpoint())),
                                         () -> lastPosition == Position.Handoff),
                                 Commands.sequence(
@@ -99,7 +102,7 @@ public class ModeManager extends SubsystemBase {
                                         // Math.abs(elevator.getPosition()
                                         // - targetPosition.elevatorHeight) <
                                         // 2).withTimeout(2),
-                                        arm.setPosition(endPosition.armHeight),
+                                        moveArm(endPosition),
                                         Commands.waitUntil(() -> arm.isAtSetpoint()),
                                         Commands.waitUntil(
                                                 () ->
