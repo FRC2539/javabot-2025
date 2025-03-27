@@ -1,10 +1,12 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
@@ -13,7 +15,7 @@ public class AlignAndDriveToReef extends Command {
     private CommandSwerveDrivetrain drivetrain;
 
     private PIDController thetaController = new PIDController(6, 0, 0);
-    private PIDController yController = new PIDController(6, 0, 0);
+    private ProfiledPIDController yController = new ProfiledPIDController(8, 0, 0, new TrapezoidProfile.Constraints(5.5, 8));
     private PIDController xController = new PIDController(8, 0, 0);
     private Pose2d targetPose;
     private double offset;
@@ -38,7 +40,7 @@ public class AlignAndDriveToReef extends Command {
         // Rotation to face the tag
 
         thetaController.setSetpoint(rotationOffset.getRadians());
-        yController.setSetpoint(offset);
+        yController.setGoal(offset);
         thetaController.enableContinuousInput(0, 2 * Math.PI);
         thetaController.setTolerance(Units.degreesToRadians(1));
         yController.setTolerance(Units.inchesToMeters(0.4));

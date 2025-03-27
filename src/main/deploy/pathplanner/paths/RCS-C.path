@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 3.609715909090909,
-        "y": 2.70875
+        "x": 3.6196875,
+        "y": 2.8184375
       },
       "prevControl": {
-        "x": 3.3235039134550393,
-        "y": 2.4580170678639885
+        "x": 3.3334755043641304,
+        "y": 2.5677045678639883
       },
       "nextControl": null,
       "isLocked": false,
@@ -47,34 +47,9 @@
               }
             },
             {
-              "type": "race",
-              "data": {
-                "commands": [
-                  {
-                    "type": "named",
-                    "data": {
-                      "name": "intake"
-                    }
-                  },
-                  {
-                    "type": "named",
-                    "data": {
-                      "name": "arm"
-                    }
-                  }
-                ]
-              }
-            },
-            {
               "type": "named",
               "data": {
-                "name": "height L3"
-              }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "preparm"
+                "name": "intake"
               }
             }
           ]

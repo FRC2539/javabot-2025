@@ -19,6 +19,9 @@ public class ArmSubsystem extends SubsystemBase {
 
     private PIDController controller =
             new PIDController(ArmConstants.ARM_KP, ArmConstants.ARM_KI, ArmConstants.ARM_KD);
+
+            // kill me now please send help
+    private PIDController L1Controller = new PIDController(3, 0, 0);
     // new TrapezoidProfile.Constraints(3, 4.5)); // try 6 and 6
 
     private double reference = -2.022;
@@ -111,6 +114,25 @@ public class ArmSubsystem extends SubsystemBase {
                 .andThen(followReference());
     }
 
+    public Command setPositionL1(double position) {
+        if (position > ArmConstants.upperLimit) {
+            position = ArmConstants.upperLimit;
+        }
+        if (position < ArmConstants.lowerLimit) {
+            position = ArmConstants.lowerLimit;
+        }
+        double nextPosition = position;
+
+        return runOnce(
+                        () -> {
+                            reference = nextPosition;
+                        })
+                .andThen(followReferenceL1());
+    }
+
+    
+
+    
     private Command followReference() {
         return Commands.run(
                 () -> {
@@ -132,6 +154,31 @@ public class ArmSubsystem extends SubsystemBase {
                     }
                     armPivotIO.setVoltage(voltage);
                     Logger.recordOutput("Arm/setpoint", controller.getSetpoint());
+                },
+                this);
+    }
+
+    private Command followReferenceL1() {
+        return Commands.run(
+                () -> {
+                    double voltage =
+                            L1Controller.calculate(
+                                    armPivotInputs.throughboreEncoderPosition, reference);
+                    // TrapezoidProfile.State state = controller.getSetpoint();
+                    // voltage += state.velocity * 1.0 / 0.5;
+                    // voltage += Math.sin(state.position) * 0.2;
+                    // if (voltage > 0) {
+                    //     voltage += 0.2;
+                    // } else {
+                    //     voltage -= 0.2;
+                    // }
+                    if (L1Controller.atSetpoint()) {
+                        voltage = 0;
+                    } else {
+                        voltage = Math.min(12.0, Math.max(-12.0, voltage)); // Clamp voltage
+                    }
+                    armPivotIO.setVoltage(voltage);
+                    Logger.recordOutput("Arm/setpoint", L1Controller.getSetpoint());
                 },
                 this);
     }
