@@ -331,7 +331,7 @@ public class Auto {
         Pose2d relativePos = alignmentPose.relativeTo(currentPose);
         Logger.recordOutput("Auto/Physical Relative Pose", relativePos);
         return (Math.abs(relativePos.getX()) < Units.inchesToMeters(1)) // 0.43
-                && (Math.abs(relativePos.getY()) < Units.inchesToMeters(.65)) // 0.215
+                && (Math.abs(relativePos.getY()) < Units.inchesToMeters(.4)) // .65 0.215
                 && ((Math.abs(relativePos.getRotation().getRadians()) % Math.PI)
                         < Units.degreesToRadians(2)); // 2
     }
