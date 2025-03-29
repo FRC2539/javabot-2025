@@ -57,6 +57,7 @@ public class LightsSubsystem extends SubsystemBase {
     public static final Color blue = new Color(8, 32, 255);
     public static final Color red = new Color(255, 0, 0);
 
+<<<<<<< HEAD
     // region importAnimation
     CustomAnimation importAnimation =
     new CustomAnimation(candle,8,14, new AnimDelta( new AnimColorSegment[] { new AnimColorSegment(new Color(255,20,0),8,1),
@@ -385,6 +386,12 @@ public class LightsSubsystem extends SubsystemBase {
             new CustomAnimation(
                     candle,
                     8,
+=======
+    CustomAnimation testAnimation =
+            new CustomAnimation(
+                    candle,
+                    0,
+>>>>>>> e2dcb8f (Added Logistics, Pending Testing)
                     30,
                     new AnimDelta(
                             new AnimColorSegment[] {
@@ -411,8 +418,12 @@ public class LightsSubsystem extends SubsystemBase {
                                                 new AnimColorSegment(blue, 50 + 8, 25)
                                             }));
                         }
+<<<<<<< HEAD
                     },
                     "testAnimation");
+=======
+                    });
+>>>>>>> e2dcb8f (Added Logistics, Pending Testing)
 
     public LightsSubsystem() {
         if (candle != null) {
@@ -451,7 +462,11 @@ public class LightsSubsystem extends SubsystemBase {
                             // LEDSegment.MainStrip.setColor(orange);
                         }
                     } else {
+<<<<<<< HEAD
                         LEDSegment.MainStrip.setCustomAnimation(importAnimation, 1);
+=======
+                        LEDSegment.MainStrip.setCustomAnimation(testAnimation, 1);
+>>>>>>> e2dcb8f (Added Logistics, Pending Testing)
                         // LEDSegment.MainStrip.setFadeAnimation(orange, 0.2);
                     }
                 })
@@ -646,21 +661,31 @@ public class LightsSubsystem extends SubsystemBase {
         public double fps = 5;
         final AnimDelta frameDeltaInitial;
         final Dictionary<Integer, AnimDelta> frameDeltas;
+<<<<<<< HEAD
         final String id;
+=======
+>>>>>>> e2dcb8f (Added Logistics, Pending Testing)
 
         CustomAnimation(
                 CANdle candle,
                 int pixelOffset,
                 int frameCount,
                 AnimDelta frameDeltaInitial,
+<<<<<<< HEAD
                 Dictionary<Integer, AnimDelta> frameDeltas,
                 String id) {
+=======
+                Dictionary<Integer, AnimDelta> frameDeltas) {
+>>>>>>> e2dcb8f (Added Logistics, Pending Testing)
             this.candle = candle;
             this.pixelOffset = pixelOffset;
             this.frameCount = frameCount;
             this.frameDeltaInitial = frameDeltaInitial;
             this.frameDeltas = frameDeltas;
+<<<<<<< HEAD
             this.id = id;
+=======
+>>>>>>> e2dcb8f (Added Logistics, Pending Testing)
         }
 
         CustomAnimation(
@@ -669,15 +694,22 @@ public class LightsSubsystem extends SubsystemBase {
                 int frameCount,
                 AnimDelta frameDeltaInitial,
                 Dictionary<Integer, AnimDelta> frameDeltas,
+<<<<<<< HEAD
                 double fps,
                 String id) {
+=======
+                double fps) {
+>>>>>>> e2dcb8f (Added Logistics, Pending Testing)
             this.candle = candle;
             this.pixelOffset = pixelOffset;
             this.frameCount = frameCount;
             this.frameDeltaInitial = frameDeltaInitial;
             this.frameDeltas = frameDeltas;
             this.fps = fps;
+<<<<<<< HEAD
             this.id = id;
+=======
+>>>>>>> e2dcb8f (Added Logistics, Pending Testing)
         }
 
         public void init() {
@@ -686,6 +718,7 @@ public class LightsSubsystem extends SubsystemBase {
         }
 
         public void update() {
+<<<<<<< HEAD
             if (currentAnimation != id) {
                 init();
                 currentAnimation = id;
@@ -697,6 +730,15 @@ public class LightsSubsystem extends SubsystemBase {
             if (frameCurrent >= frameCount) {
                 frameCurrent = 0;
             }
+=======
+            frameCurrent++;
+            if (frameCurrent >= frameCount) {
+                init();
+                return;
+            }
+            AnimDelta delta = frameDeltas.get(frameCurrent);
+            if (delta != null) delta.apply(candle);
+>>>>>>> e2dcb8f (Added Logistics, Pending Testing)
         }
     }
 
