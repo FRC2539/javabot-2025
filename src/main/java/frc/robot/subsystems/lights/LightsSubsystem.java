@@ -57,9 +57,6 @@ public class LightsSubsystem extends SubsystemBase {
     public static final Color blue = new Color(8, 32, 255);
     public static final Color red = new Color(255, 0, 0);
 
-   
-
-
     // region importAnimation
     CustomAnimation importAnimation =
     new CustomAnimation(candle,8,14, new AnimDelta( new AnimColorSegment[] { new AnimColorSegment(new Color(255,20,0),8,1),
@@ -383,7 +380,6 @@ public class LightsSubsystem extends SubsystemBase {
         }));}},
         "importAnimation");
     // endregion
-
 
     CustomAnimation testAnimation =
             new CustomAnimation(
