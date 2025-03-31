@@ -3,16 +3,32 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.3361931818181818,
-        "y": 7.126164772727273
+        "x": 7.119715909090909,
+        "y": 0.5149999999999989
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.535483392073295,
-        "y": 6.824057055979433
+        "x": 5.225113636357447,
+        "y": 0.9138636363592267
       },
       "isLocked": false,
-      "linkedName": "LCS"
+      "linkedName": "RWall"
+    },
+    {
+      "anchor": {
+        "x": 1.974375,
+        "y": 1.6417897727272726
+      },
+      "prevControl": {
+        "x": 2.8154838420568615,
+        "y": 0.44226475828574885
+      },
+      "nextControl": {
+        "x": 1.4749072929797504,
+        "y": 2.354092364876265
+      },
+      "isLocked": false,
+      "linkedName": null
     },
     {
       "anchor": {
@@ -20,8 +36,8 @@
         "y": 3.8754261363636364
       },
       "prevControl": {
-        "x": 2.8020170454545457,
-        "y": 4.503636363636364
+        "x": 1.5555681818119929,
+        "y": 3.7158806818137733
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,10 +61,10 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "LCS-Reef",
+  "folder": "RStart-Reef",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -52.35237935989226
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

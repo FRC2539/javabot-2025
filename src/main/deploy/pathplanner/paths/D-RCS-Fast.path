@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.3361931818181818,
-        "y": 7.126164772727273
+        "x": 3.8889204545454543,
+        "y": 2.699
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.535483392073295,
-        "y": 6.824057055979433
+        "x": 3.196673688649086,
+        "y": 2.105294104560996
       },
       "isLocked": false,
-      "linkedName": "LCS"
+      "linkedName": "D"
     },
     {
       "anchor": {
-        "x": 2.9815056818181818,
-        "y": 3.8754261363636364
+        "x": 1.6951704545454547,
+        "y": 0.734375
       },
       "prevControl": {
-        "x": 2.8020170454545457,
-        "y": 4.503636363636364
+        "x": 2.6476101618637244,
+        "y": 1.5331610357674337
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "B"
+      "linkedName": "RCSFast"
     }
   ],
   "rotationTargets": [],
@@ -34,7 +34,7 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 5.5,
-    "maxAcceleration": 5.1,
+    "maxAcceleration": 9.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 55.0
   },
   "reversed": false,
-  "folder": "LCS-Reef",
+  "folder": "fastpaths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -52.35237935989226
+    "rotation": 59.99999999999999
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }
