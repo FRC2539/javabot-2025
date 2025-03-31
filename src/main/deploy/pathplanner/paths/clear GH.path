@@ -3,37 +3,49 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.3361931818181818,
-        "y": 7.126164772727273
+        "x": 5.982954545454545,
+        "y": 3.9053409090909086
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.535483392073295,
-        "y": 6.824057055979433
+        "x": 7.3789772727272736,
+        "y": 4.6532102272727265
       },
       "isLocked": false,
-      "linkedName": "LCS"
+      "linkedName": "G"
     },
     {
       "anchor": {
-        "x": 2.9815056818181818,
-        "y": 3.8754261363636364
+        "x": 5.982954545454545,
+        "y": 3.9053409090909086
       },
       "prevControl": {
-        "x": 2.8020170454545457,
-        "y": 4.503636363636364
+        "x": 8.675284090909091,
+        "y": 3.4965056818181814
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "B"
+      "linkedName": "G"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "location GH"
+        }
+      }
+    }
+  ],
   "globalConstraints": {
-    "maxVelocity": 5.5,
+    "maxVelocity": 3.0,
     "maxAcceleration": 5.1,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -42,13 +54,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "reversed": false,
-  "folder": "LCS-Reef",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -52.35237935989226
+    "rotation": 180.0
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

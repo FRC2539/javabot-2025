@@ -241,6 +241,8 @@ public class Auto {
         Command scoreCommand = robotContainer.gripperSubsystem.placePiece();
         NamedCommands.registerCommand("place", scoreCommand.asProxy());
 
+        Command algaeClear = robotContainer.gripperSubsystem.ejectReverse(12);
+        NamedCommands.registerCommand("algae clear", algaeClear);
         Command scoreReverse = robotContainer.gripperSubsystem.placePieceReverse();
 
         NamedCommands.registerCommand("place reverse", scoreReverse.withTimeout(3));

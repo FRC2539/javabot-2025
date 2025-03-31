@@ -21,7 +21,9 @@ public class AlignToReef extends Command {
     private DoubleSupplier yVelocity;
 
     private PIDController thetaController = new PIDController(4, 0, 0);
-    private ProfiledPIDController yController = new ProfiledPIDController(8, 0, 0, new TrapezoidProfile.Constraints(5.5, 8));
+    //private ProfiledPIDController yController = new ProfiledPIDController(8, 0, 0, new TrapezoidProfile.Constraints(5.5, 8));
+    private PIDController yController = new PIDController(8, 0, 0);
+
     private Pose2d targetPose;
     private double offset;
     private Rotation2d rotationOffset;
@@ -56,7 +58,7 @@ public class AlignToReef extends Command {
         Logger.recordOutput("/AutoAlign/Offset", offset);
 
         thetaController.setSetpoint(rotationOffset.getRadians());
-        yController.setGoal(offset);
+        yController.setSetpoint(offset);
         thetaController.enableContinuousInput(0, 2 * Math.PI);
         thetaController.setTolerance(Units.degreesToRadians(0.5));
         yController.setTolerance(Units.inchesToMeters(0.2));

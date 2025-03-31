@@ -5,17 +5,11 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
+          "type": "sequential",
           "data": {
             "commands": [
               {
-                "type": "path",
-                "data": {
-                  "pathName": "RStart-E"
-                }
-              },
-              {
-                "type": "sequential",
+                "type": "race",
                 "data": {
                   "commands": [
                     {
@@ -25,21 +19,27 @@
                       }
                     },
                     {
-                      "type": "named",
+                      "type": "wait",
                       "data": {
-                        "name": "goto L4"
+                        "waitTime": 0.2
                       }
                     }
                   ]
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "goto L4"
                 }
               }
             ]
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "goto L4"
+            "pathName": "center temp"
           }
         },
         {
@@ -51,19 +51,13 @@
         {
           "type": "named",
           "data": {
-            "name": "place"
+            "name": "score"
           }
         },
         {
           "type": "parallel",
           "data": {
             "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "E-RCS"
-                }
-              },
               {
                 "type": "sequential",
                 "data": {
@@ -71,59 +65,48 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 0.4
+                        "waitTime": 0.3
                       }
                     },
                     {
                       "type": "named",
                       "data": {
-                        "name": "goto Handoff"
+                        "name": "goto Algae2"
                       }
                     }
                   ]
                 }
-              }
-            ]
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.7
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "RCS-D"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "goto L4"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "align"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "place"
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
+              },
               {
-                "type": "path",
+                "type": "parallel",
                 "data": {
-                  "pathName": "D-RCS"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "clear algae"
+                      }
+                    },
+                    {
+                      "type": "sequential",
+                      "data": {
+                        "commands": [
+                          {
+                            "type": "path",
+                            "data": {
+                              "pathName": "clear GH"
+                            }
+                          },
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "align"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
                 }
               }
             ]

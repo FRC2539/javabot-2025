@@ -6,13 +6,16 @@
     "AutoTest",
     "LCS-Reef",
     "LStart-Reef",
-    "misc",
+    "fastpaths",
     "RCS-Reef",
     "RStart-Reef",
     "Reef-LCS",
-    "Reef-RCS"
+    "Reef-RCS",
+    "misc"
   ],
-  "autoFolders": [],
+  "autoFolders": [
+    "New Folder"
+  ],
   "defaultMaxVel": 5.5,
   "defaultMaxAccel": 5.1,
   "defaultMaxAngVel": 540.0,

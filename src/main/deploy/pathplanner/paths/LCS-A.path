@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.2065624999999998,
-        "y": 7.245823863636363
+        "x": 1.3361931818181818,
+        "y": 7.126164772727273
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.3326419847399016,
-        "y": 6.936821939513377
+        "x": 1.4622726665580836,
+        "y": 6.817162848604287
       },
       "isLocked": false,
       "linkedName": "LCS"
     },
     {
       "anchor": {
-        "x": 3.200880681818182,
-        "y": 4.194517045454545
+        "x": 2.9914772727272725,
+        "y": 4.204488636363636
       },
       "prevControl": {
-        "x": 2.233636363636364,
-        "y": 4.104772727272727
+        "x": 2.0242329545454543,
+        "y": 4.114744318181818
       },
       "nextControl": null,
       "isLocked": false,
@@ -37,48 +37,9 @@
       "waypointRelativePos": 0,
       "endWaypointRelativePos": null,
       "command": {
-        "type": "sequential",
+        "type": "named",
         "data": {
-          "commands": [
-            {
-              "type": "parallel",
-              "data": {
-                "commands": [
-                  {
-                    "type": "named",
-                    "data": {
-                      "name": "intake"
-                    }
-                  },
-                  {
-                    "type": "named",
-                    "data": {
-                      "name": "arm"
-                    }
-                  }
-                ]
-              }
-            },
-            {
-              "type": "parallel",
-              "data": {
-                "commands": [
-                  {
-                    "type": "named",
-                    "data": {
-                      "name": "height L4"
-                    }
-                  },
-                  {
-                    "type": "named",
-                    "data": {
-                      "name": "armprep"
-                    }
-                  }
-                ]
-              }
-            }
-          ]
+          "name": "location A"
         }
       }
     }
