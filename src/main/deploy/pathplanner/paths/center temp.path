@@ -36,12 +36,7 @@
       "name": "location G",
       "waypointRelativePos": 0,
       "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "location G"
-        }
-      }
+      "command": null
     }
   ],
   "globalConstraints": {

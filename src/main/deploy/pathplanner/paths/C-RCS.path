@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 1.5655397727272726,
-        "y": 0.6944886363636351
+        "x": 1.4259375,
+        "y": 0.6246875000000012
       },
       "prevControl": {
-        "x": 2.3433238636434233,
-        "y": 1.4124431818165704
+        "x": 2.2037215909161505,
+        "y": 1.3426420454529364
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,32 +31,7 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "height Handoff",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "parallel",
-        "data": {
-          "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "height Handoff"
-              }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "preparm"
-              }
-            }
-          ]
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 5.5,
     "maxAcceleration": 5.1,

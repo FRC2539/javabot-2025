@@ -295,11 +295,11 @@ public class Auto {
         Command alignCommand =
                 Commands.defer(
                         () ->
-                                robotContainer
+                                (robotContainer
                                         .alignAndDriveToReef(
                                                 targetLocation.getTagByTeam(),
                                                 targetLocation.offset)
-                                        .until(() -> robotInPlace()),
+                                        .until(() -> robotInPlace())).withTimeout(5),
                         Set.of(robotContainer.drivetrain));
 
         NamedCommands.registerCommand("align", alignCommand);
