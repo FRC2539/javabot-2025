@@ -350,7 +350,7 @@ public class RobotContainer {
 
         rightDriveController
                 .getTrigger()
-                .and(() -> modeManager.targetPosition != Position.L1)
+                .and(() -> modeManager.targetPosition != Position.L1 && modeManager.targetPosition != Position.Algae2 && modeManager.targetPosition != Position.Algae3)
                 .whileTrue(gripperSubsystem.intake(GripperConstants.placeVoltage));
 
         rightDriveController
@@ -369,6 +369,16 @@ public class RobotContainer {
                 .getTrigger()
                 .and(() -> modeManager.targetPosition == Position.L1)
                 .whileTrue(gripperSubsystem.setVoltage(1, 4));
+//voltage for algae clear
+        rightDriveController
+                .getTrigger()
+                .and(() -> modeManager.targetPosition == Position.Algae2)
+                .whileTrue(gripperSubsystem.setVoltage(-6, -6));
+
+        rightDriveController
+                .getTrigger()
+                .and(() -> modeManager.targetPosition == Position.Algae3)
+                .whileTrue(gripperSubsystem.setVoltage(-6, -6));
         rightDriveController
                 .getLeftTopLeft()
                 .onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric()));

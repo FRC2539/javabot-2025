@@ -149,9 +149,22 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "goto L4"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "goto ToryL2"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "goto L4"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -257,9 +270,22 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "goto L4"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "goto ToryL2"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "goto L4"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -352,43 +378,6 @@
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "LCS-A"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "goto L4"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.1
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "align"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "place"
           }
         }
       ]
