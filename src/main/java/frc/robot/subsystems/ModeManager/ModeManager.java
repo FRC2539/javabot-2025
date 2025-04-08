@@ -24,19 +24,19 @@ public class ModeManager extends SubsystemBase {
     }
 
     public static enum Position {
-        L1(82, 0.45), //-1.65 arm value
-        L2(76, 2.27), //0.09 arm value //2.213
-        ToryL2(113, 2.27),
-        L3(125, 2.27), //0.09 arm value
-        L4(200, 2.29), // 0.14 // 0.16 arm value //2.213
-        Algae2(83, 2.27), // 110 //0.09 arm value
+        L1(82, 0.38), // -1.65 arm value
+        L2(76, 2.323), // 0.09 arm value //2.213
+        ToryL2(113, 2.323),
+        L3(125, 2.323), // 0.09 arm value
+        L4(200, 2.45), // 0.14 // 0.16 arm value //2.213
+        Algae2(83, 2.323), // 110 //0.09 arm value
 
-        Algae3(133, 2.27), // 190 // 0.09 arm value
+        Algae3(133, 2.323), // 190 // 0.09 arm value
 
-        Handoff(91.15, -0.57), // -0.472 // -3// pre hat 94.463 //-2.64 arm value
-        Home(90, 0.05), //0.07 // -1.8 arm value
-        Start(1, 0.05), // -2.022 arm value
-        Climb(5, 0.05); // -2.022 arm value
+        Handoff(89, -0.55), // -0.472 // -3// pre hat 94.463 //-2.64 arm value
+        Home(90, 0.222), // 0.07 // -1.8 arm value
+        Start(1, 0.222), // -2.022 arm value
+        Climb(5, 0.222); // -2.022 arm value
 
         private double elevatorHeight;
         private double armHeight;
@@ -63,8 +63,14 @@ public class ModeManager extends SubsystemBase {
     }
 
     public Command moveArm(Position position) {
-        return Commands.either(arm.setPositionL1(position.armHeight), arm.setPosition(position.armHeight), () -> {return position == Position.L1 || position == Position.Home;});
+        return Commands.either(
+                arm.setPositionL1(position.armHeight),
+                arm.setPosition(position.armHeight),
+                () -> {
+                    return position == Position.L1 || position == Position.Home;
+                });
     }
+
     public Command goTo(Position endPosition) {
 
         return Commands.runOnce(() -> targetPosition = endPosition, this)

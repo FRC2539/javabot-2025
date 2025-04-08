@@ -296,10 +296,11 @@ public class Auto {
                 Commands.defer(
                         () ->
                                 (robotContainer
-                                        .alignAndDriveToReef(
-                                                targetLocation.getTagByTeam(),
-                                                targetLocation.offset)
-                                        .until(() -> robotInPlace())).withTimeout(5),
+                                                .alignAndDriveToReef(
+                                                        targetLocation.getTagByTeam(),
+                                                        targetLocation.offset)
+                                                .until(() -> robotInPlace()))
+                                        .withTimeout(5),
                         Set.of(robotContainer.drivetrain));
 
         NamedCommands.registerCommand("align", alignCommand);

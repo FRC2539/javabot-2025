@@ -340,9 +340,9 @@ public class RobotContainer {
                 .and(() -> modeManager.getCurrentScoringMode() == ScoringMode.RightCoral)
                 .whileTrue(alignToReef(AligningConstants.rightOffset));
         rightDriveController
-                 .getBottomThumb()
-                 .and(() -> modeManager.getCurrentScoringMode() == ScoringMode.Algae)
-                 .whileTrue(alignToReef(AligningConstants.centerOffset));
+                .getBottomThumb()
+                .and(() -> modeManager.getCurrentScoringMode() == ScoringMode.Algae)
+                .whileTrue(alignToReef(AligningConstants.centerOffset));
 
         // leftDriveController.getLeftBottomMiddle().onTrue(climberSubsystem.zeroClimberCommand());
         rightDriveController.getLeftBottomMiddle().onTrue(modeManager.goTo(Position.Start));
@@ -350,7 +350,11 @@ public class RobotContainer {
 
         rightDriveController
                 .getTrigger()
-                .and(() -> modeManager.targetPosition != Position.L1 && modeManager.targetPosition != Position.Algae2 && modeManager.targetPosition != Position.Algae3)
+                .and(
+                        () ->
+                                modeManager.targetPosition != Position.L1
+                                        && modeManager.targetPosition != Position.Algae2
+                                        && modeManager.targetPosition != Position.Algae3)
                 .whileTrue(gripperSubsystem.intake(GripperConstants.placeVoltage));
 
         rightDriveController
@@ -369,7 +373,7 @@ public class RobotContainer {
                 .getTrigger()
                 .and(() -> modeManager.targetPosition == Position.L1)
                 .whileTrue(gripperSubsystem.setVoltage(1, 4));
-//voltage for algae clear
+        // voltage for algae clear
         rightDriveController
                 .getTrigger()
                 .and(() -> modeManager.targetPosition == Position.Algae2)
