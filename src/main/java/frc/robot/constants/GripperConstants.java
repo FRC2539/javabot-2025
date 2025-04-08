@@ -13,7 +13,7 @@ public class GripperConstants {
 
     public static final double handoffVoltage = 2.8; // 4.8
     public static final double slowHandoffVoltage = 1.7; // 2.2
-    public static final double placeVoltage = -12; //-6
+    public static final double placeVoltage = -12; // -6
     public static final double downvoltage = -1;
     public static final double upvoltage = 1;
 

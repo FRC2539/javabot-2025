@@ -64,7 +64,7 @@ public class GripperSubsystem extends SubsystemBase {
         return setVoltage(GripperConstants.placeVoltage)
                 .until((HAS_PIECE.negate()).and(PIECE_SEATED.negate()))
                 .andThen(Commands.waitSeconds(0.3));
-                //.withTimeout(2);
+        // .withTimeout(2);
     }
 
     public Command placePieceReverse() {
