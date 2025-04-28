@@ -42,7 +42,7 @@ public class AlignAndDriveToReef extends Command {
         thetaController.setSetpoint(rotationOffset.getRadians());
         yController.setGoal(offset);
         thetaController.enableContinuousInput(0, 2 * Math.PI);
-        thetaController.setTolerance(Units.degreesToRadians(1));
+        thetaController.setTolerance(Units.degreesToRadians(3));
         yController.setTolerance(Units.inchesToMeters(0.4));
         xController.setTolerance(Units.inchesToMeters(0.4));
     }

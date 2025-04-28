@@ -250,6 +250,16 @@ public class RobotContainer {
                                                 operatorController.getLeftYAxis().get())
                                         > 0.3);
 
+        leftDriveController
+                .getLeftBottomLeft()
+                .onTrue(
+                        Commands.runOnce(
+                                () -> {
+                                    gripperSubsystem.TWOSENSORSMODE =
+                                            !gripperSubsystem.TWOSENSORSMODE;
+                                },
+                                gripperSubsystem));
+
         LEFT_JOYSTICK_BUMP.toggleOnTrue(
                 lights.runEnd(
                                 (() ->

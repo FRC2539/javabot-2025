@@ -3,29 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.678,
-        "y": 7.483
+        "x": 1.4822635135135136,
+        "y": 0.6849662162162156
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.8040794847399018,
-        "y": 7.173998075877014
+        "x": 2.4295646498771495,
+        "y": 1.0638866707616728
       },
       "isLocked": false,
-      "linkedName": "LCS"
+      "linkedName": "RCStink"
     },
     {
       "anchor": {
-        "x": 2.8,
-        "y": 4.204488636363636
+        "x": 6.002897727272727,
+        "y": 1.552045454545455
       },
       "prevControl": {
-        "x": 1.8327556818181816,
-        "y": 4.114744318181818
+        "x": 4.840252794039097,
+        "y": 0.21592026866336944
+      },
+      "nextControl": {
+        "x": 6.912159483742705,
+        "y": 2.5969797235143917
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.002897727272727,
+        "y": 4.174573863636363
+      },
+      "prevControl": {
+        "x": 7.648479729729729,
+        "y": 4.479560810810811
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "A"
+      "linkedName": "H"
     }
   ],
   "rotationTargets": [],
@@ -33,13 +49,13 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "",
+      "name": "location H",
       "waypointRelativePos": 0,
       "endWaypointRelativePos": null,
       "command": {
         "type": "named",
         "data": {
-          "name": "location A"
+          "name": "location H"
         }
       }
     }
@@ -54,13 +70,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "reversed": false,
-  "folder": "LCS-Reef",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -52.35237935989226
+    "rotation": 55.0
   },
   "useDefaultConstraints": true
 }
