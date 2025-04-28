@@ -3,47 +3,35 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.678,
-        "y": 7.483
+        "x": 0.6521959459503173,
+        "y": 1.3766891891946875
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.8040794847399018,
-        "y": 7.173998075877014
+        "x": 0.9190033783783784,
+        "y": 1.83125
       },
       "isLocked": false,
-      "linkedName": "LCS"
+      "linkedName": "daisyRCS"
     },
     {
       "anchor": {
-        "x": 2.8,
-        "y": 4.204488636363636
+        "x": 2.9815056818181818,
+        "y": 3.8754261363636364
       },
       "prevControl": {
-        "x": 1.8327556818181816,
-        "y": 4.114744318181818
+        "x": 1.9815056818181818,
+        "y": 3.8754261363636364
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "A"
+      "linkedName": "B"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "location A"
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 5.5,
     "maxAcceleration": 5.1,
@@ -57,10 +45,10 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "LCS-Reef",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -52.35237935989226
+    "rotation": 55.0
   },
   "useDefaultConstraints": true
 }

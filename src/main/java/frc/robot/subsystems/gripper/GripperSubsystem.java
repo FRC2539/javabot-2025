@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.constants.GripperConstants;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -17,6 +18,7 @@ public class GripperSubsystem extends SubsystemBase {
     public final Trigger HAS_PIECE = new Trigger(this::hasPiece);
     public final Trigger PIECE_SEATED = new Trigger(this::isPieceSeated);
 
+    public boolean TWOSENSORSMODE = true;
     LoggedNetworkNumber leftGripperVoltage =
             new LoggedNetworkNumber("Left Gripper Motor Voltage", 0);
     LoggedNetworkNumber rightGripperVoltage =
@@ -25,6 +27,11 @@ public class GripperSubsystem extends SubsystemBase {
     public GripperSubsystem(GripperIO armrollerIO) {
         this.gripperIO = armrollerIO;
         setDefaultCommand(setVoltage(0));
+    }
+
+    @AutoLogOutput
+    public boolean isUsingTwoSensorMode() {
+        return TWOSENSORSMODE;
     }
 
     public void periodic() {
@@ -52,12 +59,24 @@ public class GripperSubsystem extends SubsystemBase {
         return setVoltage(voltage);
     }
 
-    public Command intakeUntilPiece() {
+    public Command intakeUntilPieceOld() {
         return setVoltage(GripperConstants.handoffVoltage)
                 .until(() -> gripperInputs.firstSensor)
                 .andThen(
                         setVoltage(GripperConstants.slowHandoffVoltage)
                                 .until(() -> gripperInputs.secondSensor));
+    }
+
+    public Command intakeUntilPieceOneSensorMode() {
+        return setVoltage(1.2).until(() -> gripperInputs.secondSensor);
+        // .andThen(
+        //         setVoltage(GripperConstants.slowHandoffVoltage)
+        //                 .until(() -> gripperInputs.secondSensor));
+    }
+
+    public Command intakeUntilPiece() {
+        return Commands.either(
+                intakeUntilPieceOld(), intakeUntilPieceOneSensorMode(), () -> this.TWOSENSORSMODE);
     }
 
     public Command placePiece() {

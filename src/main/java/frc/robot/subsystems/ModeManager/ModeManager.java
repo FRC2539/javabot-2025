@@ -24,7 +24,7 @@ public class ModeManager extends SubsystemBase {
     }
 
     public static enum Position {
-        L1(82, 0.38), // -1.65 arm value
+        L1(82, 0.55), // -1.65 arm value
         L2(76, 2.323), // 0.09 arm value //2.213
         ToryL2(113, 2.323),
         L3(125, 2.323), // 0.09 arm value
