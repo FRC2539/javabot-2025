@@ -12,6 +12,7 @@ import com.ctre.phoenix.led.LarsonAnimation.BounceMode;
 import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.SingleFadeAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
+import com.ctre.phoenix.led.FireAnimation;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -90,7 +91,7 @@ public class LightsSubsystem extends SubsystemBase {
                         }
                     } else {
 
-                        LEDSegment.MainStrip.setFadeAnimation(orange, 0.2);
+                        LEDSegment.MainStrip.setFireAnimation(0.2);
                     }
                 })
                 .ignoringDisable(true);
@@ -200,6 +201,10 @@ public class LightsSubsystem extends SubsystemBase {
 
         public void setRainbowAnimation(double speed) {
             setAnimation(new RainbowAnimation(1, speed, segmentSize, false, startIndex));
+        }
+
+        public void setFireAnimation(double speed) {
+            setAnimation(new FireAnimation(1, speed, segmentSize, 0.5, 0.5));
         }
     }
 
