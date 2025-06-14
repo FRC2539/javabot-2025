@@ -43,6 +43,7 @@ import frc.robot.subsystems.gripper.GripperIONeo550;
 import frc.robot.subsystems.gripper.GripperIOSim;
 import frc.robot.subsystems.gripper.GripperSubsystem;
 import frc.robot.subsystems.lights.LightsSubsystem;
+import frc.robot.subsystems.lights.LightsSubsystem.LightsControlModule;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.DummyPhotonCamera;
 import frc.robot.subsystems.vision.Vision;
@@ -339,8 +340,6 @@ public class RobotContainer {
         //                         () -> modeManager.setScoringMode(ScoringMode.Algae),
         // modeManager));
 
-        lights.setAlgaeModeSupplier(gripperSubsystem.HAS_PIECE);
-
         rightDriveController
                 .getBottomThumb()
                 .and(() -> modeManager.getCurrentScoringMode() == ScoringMode.LeftCoral)
@@ -396,6 +395,11 @@ public class RobotContainer {
         rightDriveController
                 .getLeftTopLeft()
                 .onTrue(Commands.runOnce(() -> drivetrain.seedFieldCentric()));
+
+        // Lights
+        LightsControlModule.Supplier_hasPiece(gripperSubsystem.HAS_PIECE);
+        LightsControlModule.Supplier_isAligning(rightDriveController.getBottomThumb());
+        LightsControlModule.Supplier_alignMode(() -> modeManager.getCurrentScoringMode().ordinal());
     }
 
     private double deadband(double value, double deadband) {

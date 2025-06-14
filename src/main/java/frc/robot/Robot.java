@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.lights.LightsSubsystem;
 import frc.robot.subsystems.lights.LightsSubsystem.LEDSegment;
+import frc.robot.subsystems.lights.LightsSubsystem.LightsControlModule;
 import frc.robot.util.Elastic;
 import frc.robot.util.Elastic.Notification;
 import java.nio.charset.Charset;
@@ -98,8 +99,9 @@ public class Robot extends LoggedRobot {
             LEDSegment.DriverstationIndicator.setColor(LightsSubsystem.orange.dim(1));
         else LEDSegment.DriverstationIndicator.fullClear();
 
-        // Passive Main LED Mode
-        LEDSegment.MainStrip.setFadeAnimation(LightsSubsystem.orange, 0.5);
+        // // Passive Main LED Mode
+        // LEDSegment.MainStrip.setFadeAnimation(LightsSubsystem.orange, 0.5);
+        // LightsControlModule.fire();
     }
 
     @Override
@@ -125,7 +127,7 @@ public class Robot extends LoggedRobot {
         if (m_autonomousCommand != null) {
             m_autonomousCommand.cancel();
         }
-
+        LightsControlModule.enabled = true;
         Elastic.selectTab("Teleoperated");
 
         Elastic.sendNotification(
@@ -139,7 +141,9 @@ public class Robot extends LoggedRobot {
     public void teleopPeriodic() {}
 
     @Override
-    public void teleopExit() {}
+    public void teleopExit() {
+        LightsControlModule.enabled = false;
+    }
 
     @Override
     public void testInit() {
