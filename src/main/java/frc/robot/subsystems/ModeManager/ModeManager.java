@@ -24,16 +24,16 @@ public class ModeManager extends SubsystemBase {
     }
 
     public static enum Position {
-        L1(82, 0.55), // -1.65 arm value
-        L2(76, 2.323), // 0.09 arm value //2.213
-        ToryL2(113, 2.323),
-        L3(125, 2.323), // 0.09 arm value
-        L4(200, 2.45), // 0.14 // 0.16 arm value //2.213
-        Algae2(83, 2.323), // 110 //0.09 arm value
+        L1(82, 0.57), // -1.65 arm value
+        L2(76, 2.52), // 0.09 arm value //2.213
+        ToryL2(113, 2.52),
+        L3(121, 2.52), // 0.09 arm value
+        L4(200, 2.52), // 0.14 // 0.16 arm value //2.213
+        Algae2(83, 2.52), // 110 //0.09 arm value
 
-        Algae3(133, 2.323), // 190 // 0.09 arm value
+        Algae3(133, 2.52), // 190 // 0.09 arm value
 
-        Handoff(89, -0.55), // -0.472 // -3// pre hat 94.463 //-2.64 arm value
+        Handoff(90.5, -0.3), // -0.472 // -3// pre hat 94.463 //-2.64 arm value
         Home(90, 0.222), // 0.07 // -1.8 arm value
         Start(1, 0.222), // -2.022 arm value
         Climb(5, 0.222); // -2.022 arm value

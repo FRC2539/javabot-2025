@@ -146,16 +146,16 @@ public class RobotContainer {
         leftJoystickVelocityX =
                 () -> {
                     return GlobalConstants.MAX_TRANSLATIONAL_SPEED.in(MetersPerSecond)
-                            * -sps(deadband(leftDriveController.getYAxis().get(), 0.1));
+                            * -sps(deadband(leftDriveController.getYAxis().get(), 0.05));
                 };
         leftJoystickVelocityY =
                 () -> {
-                    return -sps(deadband(leftDriveController.getXAxis().get(), 0.1))
+                    return -sps(deadband(leftDriveController.getXAxis().get(), 0.05))
                             * GlobalConstants.MAX_TRANSLATIONAL_SPEED.in(MetersPerSecond);
                 };
         rightJoystickVelocityTheta =
                 () -> {
-                    return -sps(deadband(rightDriveController.getXAxis().get(), 0.1))
+                    return -sps(deadband(rightDriveController.getXAxis().get(), 0.05))
                             * GlobalConstants.MAX_ROTATIONAL_SPEED.in(RadiansPerSecond);
                 };
 

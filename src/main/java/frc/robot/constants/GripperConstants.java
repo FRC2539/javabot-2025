@@ -12,7 +12,7 @@ public class GripperConstants {
     public static final String canbus = "rio";
 
     public static final double handoffVoltage = 2.8; // 4.8
-    public static final double slowHandoffVoltage = 2.2; // ONE POINT SEVENT
+    public static final double slowHandoffVoltage = 2; // ONE POINT SEVENT
     public static final double placeVoltage = -12; // -6
     public static final double downvoltage = -1;
     public static final double upvoltage = 1;
