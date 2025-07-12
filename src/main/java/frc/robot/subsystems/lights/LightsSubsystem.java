@@ -54,6 +54,7 @@ public class LightsSubsystem extends SubsystemBase {
     public static final Color green = new Color(56, 209, 0);
     public static final Color blue = new Color(8, 32, 255);
     public static final Color red = new Color(255, 0, 0);
+    public static final Color gray = new Color(75, 75, 75);
 
     public LightsSubsystem() {
         if (candle != null) {
@@ -143,15 +144,15 @@ public class LightsSubsystem extends SubsystemBase {
             if (isAligning.getAsBoolean()) {
                 int alignModeInt = alignMode.getAsInt();
                 if (alignModeInt == ModeManager.ScoringMode.LeftCoral.ordinal()) {
-                    alignLeft(10);
+                    alignLeft(10); // TODO: get distance to tag
                     return;
                 }
                 if (alignModeInt == ModeManager.ScoringMode.RightCoral.ordinal()) {
-                    alignRight(10);
+                    alignRight(10); // TODO: get distance to tag
                     return;
                 }
                 if (alignModeInt == ModeManager.ScoringMode.Algae.ordinal()) {
-                    alignCenter(10);
+                    alignCenter(10); // TODO: get distance to tag
                     return;
                 }
                 fade();
@@ -210,8 +211,7 @@ public class LightsSubsystem extends SubsystemBase {
         }
 
         public static void alignLeft(double distance) {
-            if (lightMode == mode.alignLeft) return;
-            lightMode = mode.alignLeft;
+            if (lightMode != mode.alignLeft) LEDSegment.MainStripRight.progressCount = 0;
 
             if (distance < alignToleranceMin) {
                 LEDSegment.MainStrip.setColor(green);
@@ -220,17 +220,20 @@ public class LightsSubsystem extends SubsystemBase {
             } else if (distance < alignToleranceMax) {
                 LEDSegment.MainStrip.clearAnimation();
                 LEDSegment.MainStripLeft.setStrobeAnimation(blue, 0.25);
-                LEDSegment.MainStripRight.setColor(red); // Replace with a progress bar overlay
+                if (lightMode != mode.alignLeft) LEDSegment.MainStripRight.setColor(red);
+                updateProgressBar(LEDSegment.MainStripRight, distance);
             } else {
                 LEDSegment.MainStrip.clearAnimation();
                 LEDSegment.MainStripLeft.setStrobeAnimation(yellow, 0.15);
-                LEDSegment.MainStripRight.setColor(red);
+                if (lightMode != mode.alignLeft) LEDSegment.MainStripRight.setColor(red);
+                updateProgressBar(LEDSegment.MainStripRight, distance);
             }
+
+            lightMode = mode.alignLeft;
         }
 
         public static void alignRight(double distance) {
-            if (lightMode == mode.alignRight) return;
-            lightMode = mode.alignRight;
+            if (lightMode != mode.alignRight) LEDSegment.MainStripLeft.progressCount = 0;
 
             if (distance < alignToleranceMin) {
                 LEDSegment.MainStrip.setColor(green);
@@ -238,18 +241,24 @@ public class LightsSubsystem extends SubsystemBase {
                 LEDSegment.MainStripRight.clearAnimation();
             } else if (distance < alignToleranceMax) {
                 LEDSegment.MainStrip.clearAnimation();
-                LEDSegment.MainStripLeft.setColor(red); // Replace with a progress bar overlay
-                LEDSegment.MainStripRight.setStrobeAnimation(blue, 0.25);
+                if (lightMode != mode.alignRight) LEDSegment.MainStripLeft.setColor(red);
+                LEDSegment.MainStripRight.setStrobeAnimation(blue, 0.3);
+                updateProgressBar(LEDSegment.MainStripLeft, distance);
             } else {
                 LEDSegment.MainStrip.clearAnimation();
-                LEDSegment.MainStripLeft.setColor(red);
+                if (lightMode != mode.alignRight) LEDSegment.MainStripLeft.setColor(red);
                 LEDSegment.MainStripRight.setStrobeAnimation(yellow, 0.15);
+                updateProgressBar(LEDSegment.MainStripLeft, distance);
             }
+
+            lightMode = mode.alignRight;
         }
 
         public static void alignCenter(double distance) {
             if (lightMode == mode.alignCenter) return;
-            lightMode = mode.alignCenter;
+
+            // The idea here: blink according to the directon we want to drive
+            // Functionality is not correctly implemented at this time
 
             if (distance < alignToleranceMin) {
                 LEDSegment.MainStrip.setColor(green);
@@ -264,6 +273,61 @@ public class LightsSubsystem extends SubsystemBase {
                 LEDSegment.MainStripLeft.setColor(purple);
                 LEDSegment.MainStripRight.setStrobeAnimation(yellow, 0.15);
             }
+            lightMode = mode.alignCenter;
+        }
+
+        static void updateProgressBar(LEDSegment segment, double distance) {
+            int delta = findProgressDelta(segment, distance);
+            if (delta == 0) return;
+            if (!segment.reverseMode) {
+                int currentLocation =
+                        segment.startIndex
+                                + segment.progressCount; // Current Location = the light after the
+                // last active light
+                if (delta > 0) {
+                    // Turn on forwards
+                    Color color = segment.progressOnColor;
+                    candle.setLEDs(color.red, color.green, color.blue, 0, currentLocation, delta);
+                } else {
+                    // Turn off backwards
+                    Color color = segment.progressOffColor;
+                    candle.setLEDs(
+                            color.red, color.green, color.blue, 0, currentLocation - 1, -delta);
+                }
+            } else {
+                int currentLocation =
+                        segment.startIndex
+                                + segment.segmentSize
+                                - 1
+                                - segment.progressCount; // Current Location = the light after the
+                // last active light
+                if (delta > 0) {
+                    // Turn on backwards
+                    Color color = segment.progressOnColor;
+                    candle.setLEDs(
+                            color.red,
+                            color.green,
+                            color.blue,
+                            0,
+                            currentLocation - delta + 1,
+                            delta);
+                } else {
+                    // Turn off forwards
+                    Color color = segment.progressOffColor;
+                    candle.setLEDs(
+                            color.red, color.green, color.blue, 0, currentLocation + 1, -delta);
+                }
+            }
+        }
+
+        static int findProgressDelta(LEDSegment segment, double value) {
+            value =
+                    Math.max(alignToleranceMin, Math.min(alignToleranceMax, value))
+                            - alignToleranceMin; // Clamp within the distance range
+            int delta =
+                    (int) Math.ceil(value / segment.progressValueDistance)
+                            - segment.progressCount; // How many lights need to change
+            return delta;
         }
     }
 
@@ -275,13 +339,18 @@ public class LightsSubsystem extends SubsystemBase {
         PivotEncoderIndicator(6, 1, -1, false),
         AllianceIndicator(7, 1, -1, false),
         MainStrip(8, 108, 2, false),
-        MainStripLeft(8, 53, 3, false),
-        MainStripRight(61, 73, 4, true);
+        MainStripLeft(8, 53, 3, false, red, yellow),
+        MainStripRight(61, 73, 4, true, red, yellow);
 
         public final int startIndex;
         public final int segmentSize;
         public final int animationSlot;
         public final boolean reverseMode;
+
+        public int progressCount = 0;
+        public final double progressValueDistance;
+        public final Color progressOffColor;
+        public final Color progressOnColor;
 
         private LEDSegment(
                 int startIndex, int segmentSize, int animationSlot, boolean reverseMode) {
@@ -289,6 +358,25 @@ public class LightsSubsystem extends SubsystemBase {
             this.segmentSize = segmentSize;
             this.animationSlot = animationSlot;
             this.reverseMode = reverseMode;
+            this.progressValueDistance = 1 / segmentSize;
+            this.progressOffColor = null;
+            this.progressOnColor = null;
+        }
+
+        private LEDSegment(
+                int startIndex,
+                int segmentSize,
+                int animationSlot,
+                boolean reverseMode,
+                Color progressOffColor,
+                Color progressOnColor) {
+            this.startIndex = startIndex;
+            this.segmentSize = segmentSize;
+            this.animationSlot = animationSlot;
+            this.reverseMode = reverseMode;
+            this.progressValueDistance = 1 / segmentSize;
+            this.progressOffColor = progressOffColor;
+            this.progressOnColor = progressOnColor;
         }
 
         public void setColor(Color color) {
