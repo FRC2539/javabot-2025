@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.ModeManager.ModeManager;
 import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
 
 public class LightsSubsystem extends SubsystemBase {
@@ -26,8 +27,6 @@ public class LightsSubsystem extends SubsystemBase {
 
         public static final int SENSOR_PORT = 0;
     }
-
-    private BooleanSupplier algaeMode = () -> false;
 
     private static final CANdle candle;
 
@@ -55,6 +54,7 @@ public class LightsSubsystem extends SubsystemBase {
     public static final Color blue = new Color(8, 32, 255);
     public static final Color red = new Color(255, 0, 0);
     public static final Color gray = new Color(75, 75, 75);
+    public static final Color brown = new Color(170, 130, 50);
 
     public LightsSubsystem() {
         if (candle != null) {
@@ -98,13 +98,24 @@ public class LightsSubsystem extends SubsystemBase {
 
     // Condensed storage for animations, called when setting animations
     public static class LightsControlModule {
+        public enum RobotStatus {
+            Disabled,
+            Enabled,
+            Autonomous,
+            Test
+        }
         enum mode {
             disabled,
             paused,
             manual,
             strobe,
             fade,
+            disabledLoaded,
             fire,
+            autoFire,
+            rainbow,
+            intake,
+            brownOut,
             alignLeft,
             alignRight,
             alignCenter
@@ -117,10 +128,19 @@ public class LightsSubsystem extends SubsystemBase {
 
         // #region
 
-        public static boolean enabled = false;
+        static RobotStatus robotStatus = RobotStatus.Disabled;
+        public static void setRobotStatus(RobotStatus newStatus)
+        {
+            robotStatus = newStatus;
+        }
         static BooleanSupplier hasPiece = () -> false;
         static BooleanSupplier isAligning = () -> false;
         static IntSupplier alignMode = () -> 0;
+        static DoubleSupplier batteryVoltage = () -> 0;
+        static DoubleSupplier opControllerLeftX = () -> 0;
+        static DoubleSupplier opControllerLeftY = () -> 0;
+        static DoubleSupplier opControllerRightX = () -> 0;
+        static DoubleSupplier opControllerRightY = () -> 0;
 
         public static void Supplier_hasPiece(BooleanSupplier sup) {
             hasPiece = sup;
@@ -134,35 +154,165 @@ public class LightsSubsystem extends SubsystemBase {
             alignMode = sup;
         }
 
+        public static void Supplier_batteryVoltage(DoubleSupplier sup) {
+            batteryVoltage = sup;
+        }
+
+        public static void Supplier_opControllerLeftX(DoubleSupplier sup) {
+            opControllerLeftX = sup;
+        }
+
+        public static void Supplier_opControllerLeftY(DoubleSupplier sup) {
+            opControllerLeftY = sup;
+        }
+
+        public static void Supplier_opControllerRightX(DoubleSupplier sup) {
+            opControllerRightX = sup;
+        }
+
+        public static void Supplier_opControllerRightY(DoubleSupplier sup) {
+            opControllerRightY = sup;
+        }
+
+        static DoubleSupplier opControllerLeftMagnitude =
+                () -> Math.hypot(opControllerLeftX.getAsDouble(), opControllerLeftY.getAsDouble());
+        static DoubleSupplier opControllerRightMagnitude =
+                () ->
+                        Math.hypot(
+                                opControllerRightX.getAsDouble(), opControllerRightY.getAsDouble());
+
         // #endregion
 
+        enum cardinalDirection {
+            North,
+            East,
+            South,
+            West
+        }
+
+        static cardinalDirection getJoystickCardinal(double x, double y) {
+            if (y >= -x) {
+                if (y >= x) return cardinalDirection.North;
+                return cardinalDirection.East;
+            } else {
+                if (y >= x) return cardinalDirection.West;
+                return cardinalDirection.South;
+            }
+        }
+
         public static void update() {
-            if (!enabled) {
+            // #region Emote Wheel
+            if (opControllerLeftMagnitude.getAsDouble() > 0.2) {
+                cardinalDirection dir =
+                        getJoystickCardinal(
+                                opControllerLeftX.getAsDouble(), opControllerLeftY.getAsDouble());
+                switch (dir) {
+                    case North:
+                        rainbow();
+                        break;
+                    case East:
+                        break;
+                    case South:
+                        intake();
+                        break;
+                    case West:
+                        break;
+                }
+                return;
+            }
+            /* Disabled due to no action
+            if (opControllerLeftMagnitude.getAsDouble() > 0.2) {
+                cardinalDirection dir =
+                        getJoystickCardinal(
+                                opControllerLeftX.getAsDouble(), opControllerLeftY.getAsDouble());
+                
+                switch (dir) {
+                    case North:
+                        break;
+                    case East:
+                        break;
+                    case South:
+                        break;
+                    case West:
+                        break;
+                }
+                return;
+            }
+            */
+            // #endregion
+            // #region Disabled Logic
+            if (robotStatus == RobotStatus.Disabled) {
+                if (batteryVoltage.getAsDouble() <= 11) {
+                    brownOut();
+                    return;
+                }
+                // Has Piece
+                if (hasPiece.getAsBoolean()) {
+                    disabledLoaded();
+                    return;
+                }
                 fade();
                 return;
             }
-            if (isAligning.getAsBoolean()) {
-                int alignModeInt = alignMode.getAsInt();
-                if (alignModeInt == ModeManager.ScoringMode.LeftCoral.ordinal()) {
-                    alignLeft(10); // TODO: get distance to tag
+            // #endregion
+            // #region Enabled Logic
+            if (robotStatus == RobotStatus.Enabled) {
+                // Align Mode
+                if (isAligning.getAsBoolean()) {
+                    int alignModeInt = alignMode.getAsInt();
+                    if (alignModeInt == ModeManager.ScoringMode.LeftCoral.ordinal()) {
+                        alignLeft(10); // TODO: get distance to tag
+                        return;
+                    }
+                    if (alignModeInt == ModeManager.ScoringMode.RightCoral.ordinal()) {
+                        alignRight(10); // TODO: get distance to tag
+                        return;
+                    }
+                    if (alignModeInt == ModeManager.ScoringMode.Algae.ordinal()) {
+                        alignCenter(10); // TODO: get distance to tag
+                        return;
+                    }
+                    // Idle
+                    fade();
                     return;
                 }
-                if (alignModeInt == ModeManager.ScoringMode.RightCoral.ordinal()) {
-                    alignRight(10); // TODO: get distance to tag
+                // HasPiece
+                if (hasPiece.getAsBoolean()) {
+                    strobe();
                     return;
                 }
-                if (alignModeInt == ModeManager.ScoringMode.Algae.ordinal()) {
-                    alignCenter(10); // TODO: get distance to tag
+
+                // Brown Out
+                if (batteryVoltage.getAsDouble() <= 11) {
+                    brownOut();
                     return;
                 }
-                fade();
+
+                // Idle
+                fire();
                 return;
             }
-            if (hasPiece.getAsBoolean()) {
-                strobe();
+            // #endregion
+            // #region Autonomous Logic
+            if (robotStatus == RobotStatus.Autonomous)
+            {
+                // Brown Out
+                if (batteryVoltage.getAsDouble() <= 11) {
+                    brownOut();
+                    return;
+                }
+
+                // Has Piece
+                if (hasPiece.getAsBoolean()) {
+                    autoFire();
+                    return;
+                }
+
+                // Idle
+                fire();
                 return;
             }
-            fire();
+            //#endregion 
         }
 
         public static void clearAnimation() {
@@ -200,6 +350,14 @@ public class LightsSubsystem extends SubsystemBase {
             LEDSegment.MainStripLeft.clearAnimation();
             LEDSegment.MainStripRight.clearAnimation();
         }
+        public static void disabledLoaded() {
+            if (lightMode == mode.disabledLoaded) return;
+            lightMode = mode.disabledLoaded;
+
+            LEDSegment.MainStrip.setFadeAnimation(orange, 0.5);
+            LEDSegment.MainStripLeft.setBandAnimation(green, 5, 0.05);
+            LEDSegment.MainStripRight.setBandAnimation(green, 5, 0.05);
+        }
 
         public static void fire() {
             if (lightMode == mode.fire) return;
@@ -208,6 +366,41 @@ public class LightsSubsystem extends SubsystemBase {
             LEDSegment.MainStrip.clearAnimation();
             LEDSegment.MainStripLeft.setFireAnimation(0.2);
             LEDSegment.MainStripRight.setFireAnimation(0.2);
+        }
+        public static void autoFire() { // This code maintains the fire playing during auto
+            if (lightMode == mode.autoFire) return;
+            lightMode = mode.autoFire;
+
+            LEDSegment.MainStrip.setColor(blue);
+            LEDSegment.MainStripLeft.setFireAnimation(0.2);
+            LEDSegment.MainStripRight.setFireAnimation(0.2);
+        }
+
+        public static void rainbow() {
+            if (lightMode == mode.rainbow) return;
+            lightMode = mode.rainbow;
+
+            LEDSegment.MainStrip.setRainbowAnimation(0.2);
+            LEDSegment.MainStripLeft.clearAnimation();
+            LEDSegment.MainStripRight.clearAnimation();
+        }
+
+        public static void intake() {
+            if (lightMode == mode.intake) return;
+            lightMode = mode.intake;
+
+            LEDSegment.MainStrip.setStrobeAnimation(yellow, 0.25);
+            LEDSegment.MainStripLeft.clearAnimation();
+            LEDSegment.MainStripRight.clearAnimation();
+        }
+
+        public static void brownOut() {
+            if (lightMode == mode.brownOut) return;
+            lightMode = mode.brownOut;
+
+            LEDSegment.MainStrip.setFadeAnimation(red, 0.5);
+            LEDSegment.MainStripLeft.clearAnimation();
+            LEDSegment.MainStripRight.clearAnimation();
         }
 
         public static void alignLeft(double distance) {
@@ -433,7 +626,7 @@ public class LightsSubsystem extends SubsystemBase {
                             color.red, color.green, color.blue, 0, speed, segmentSize, startIndex));
         }
 
-        public void setBandAnimation(Color color, double speed) {
+        public void setBandAnimation(Color color, int size, double speed, BounceMode bounceMode) {
             setAnimation(
                     new LarsonAnimation(
                             color.red,
@@ -442,11 +635,15 @@ public class LightsSubsystem extends SubsystemBase {
                             0,
                             speed,
                             segmentSize,
-                            (!reverseMode)
-                                    ? BounceMode.Front
-                                    : BounceMode.Back, // transmute reverseMode to BounceMode value
-                            3,
-                            startIndex));
+                            bounceMode,
+                            size,
+                            (!reverseMode) // transmute reverseMode to starting index
+                                    ? startIndex
+                                    : startIndex + segmentSize - size));
+        }
+
+        public void setBandAnimation(Color color, int size, double speed) {
+            setBandAnimation(color, size, speed, BounceMode.Front);
         }
 
         public void setStrobeAnimation(Color color, double speed) {
