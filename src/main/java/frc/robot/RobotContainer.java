@@ -244,44 +244,6 @@ public class RobotContainer {
 
         SmartDashboard.putData(armSubsystem);
 
-        Trigger LEFT_JOYSTICK_BUMP =
-                new Trigger(
-                        () ->
-                                Math.hypot(
-                                                operatorController.getLeftXAxis().get(),
-                                                operatorController.getLeftYAxis().get())
-                                        > 0.3);
-
-        leftDriveController
-                .getLeftBottomLeft()
-                .onTrue(
-                        Commands.runOnce(
-                                () -> {
-                                    gripperSubsystem.TWOSENSORSMODE =
-                                            !gripperSubsystem.TWOSENSORSMODE;
-                                },
-                                gripperSubsystem));
-
-        LEFT_JOYSTICK_BUMP.toggleOnTrue(
-                lights.runEnd(
-                                (() ->
-                                        LightsSubsystem.LEDSegment.MainStrip.setStrobeAnimation(
-                                                LightsSubsystem.purple, 1)),
-                                () -> {})
-                        .withTimeout(5)); // L2 tation Lights
-
-        Trigger RIGHT_JOYSTICK_BUMP =
-                new Trigger(
-                        () ->
-                                Math.hypot(
-                                                operatorController.getRightXAxis().get(),
-                                                operatorController.getRightYAxis().get())
-                                        > 0.3);
-
-        RIGHT_JOYSTICK_BUMP.toggleOnTrue(
-                lights.runEnd(
-                        (() -> LightsSubsystem.LEDSegment.MainStrip.setRainbowAnimation(1)),
-                        () -> {})); // L3 Rainbow
 
         operatorController.getStart().onTrue(modeManager.goTo(Position.Climb));
 
