@@ -104,6 +104,7 @@ public class LightsSubsystem extends SubsystemBase {
             Autonomous,
             Test
         }
+
         enum mode {
             disabled,
             paused,
@@ -118,7 +119,10 @@ public class LightsSubsystem extends SubsystemBase {
             brownOut,
             alignLeft,
             alignRight,
-            alignCenter
+            alignCenter,
+            timeRemainingA,
+            timeRemainingB,
+            timeRemainingC
         }
 
         static mode lightMode = mode.disabled;
@@ -128,11 +132,18 @@ public class LightsSubsystem extends SubsystemBase {
 
         // #region
 
+        static Long RobotStatusChangeTime;
         static RobotStatus robotStatus = RobotStatus.Disabled;
-        public static void setRobotStatus(RobotStatus newStatus)
-        {
+
+        public static void setRobotStatus(RobotStatus newStatus) {
             robotStatus = newStatus;
+            RobotStatusChangeTime = System.currentTimeMillis();
         }
+
+        public static Long timeInRobotStatus() {
+            return System.currentTimeMillis() - RobotStatusChangeTime;
+        }
+
         static BooleanSupplier hasPiece = () -> false;
         static BooleanSupplier isAligning = () -> false;
         static IntSupplier alignMode = () -> 0;
@@ -225,7 +236,7 @@ public class LightsSubsystem extends SubsystemBase {
                 cardinalDirection dir =
                         getJoystickCardinal(
                                 opControllerLeftX.getAsDouble(), opControllerLeftY.getAsDouble());
-                
+
                 switch (dir) {
                     case North:
                         break;
@@ -289,13 +300,33 @@ public class LightsSubsystem extends SubsystemBase {
                 }
 
                 // Idle
-                fire();
-                return;
+                // TODO: Add a case that tests for whether we want the timer or not
+                int seconds =
+                        (int)
+                                Math.floor(
+                                        timeInRobotStatus()
+                                                / 1000); // Teleop length = 2:15, which is 135
+                // seconds
+                if (seconds < 120) {
+                    fire();
+                    return;
+                } else if (seconds < 125) {
+                    timeRemainingA();
+                    return;
+                } else if (seconds < 130) {
+                    timeRemainingB();
+                    return;
+                } else if (seconds < 135) {
+                    timeRemainingC();
+                    return;
+                } else {
+                    fire();
+                    return;
+                }
             }
             // #endregion
             // #region Autonomous Logic
-            if (robotStatus == RobotStatus.Autonomous)
-            {
+            if (robotStatus == RobotStatus.Autonomous) {
                 // Brown Out
                 if (batteryVoltage.getAsDouble() <= 11) {
                     brownOut();
@@ -312,7 +343,7 @@ public class LightsSubsystem extends SubsystemBase {
                 fire();
                 return;
             }
-            //#endregion 
+            // #endregion
         }
 
         public static void clearAnimation() {
@@ -350,6 +381,7 @@ public class LightsSubsystem extends SubsystemBase {
             LEDSegment.MainStripLeft.clearAnimation();
             LEDSegment.MainStripRight.clearAnimation();
         }
+
         public static void disabledLoaded() {
             if (lightMode == mode.disabledLoaded) return;
             lightMode = mode.disabledLoaded;
@@ -367,6 +399,7 @@ public class LightsSubsystem extends SubsystemBase {
             LEDSegment.MainStripLeft.setFireAnimation(0.2);
             LEDSegment.MainStripRight.setFireAnimation(0.2);
         }
+
         public static void autoFire() { // This code maintains the fire playing during auto
             if (lightMode == mode.autoFire) return;
             lightMode = mode.autoFire;
@@ -448,10 +481,11 @@ public class LightsSubsystem extends SubsystemBase {
         }
 
         public static void alignCenter(double distance) {
-            if (lightMode == mode.alignCenter) return;
+            if (lightMode != mode.alignCenter) LEDSegment.MainStrip.progressCount = 0;
 
             // The idea here: blink according to the directon we want to drive
             // Functionality is not correctly implemented at this time
+            // This might be harder, because we have to calculate a normal for the targetPosition
 
             if (distance < alignToleranceMin) {
                 LEDSegment.MainStrip.setColor(green);
@@ -466,7 +500,32 @@ public class LightsSubsystem extends SubsystemBase {
                 LEDSegment.MainStripLeft.setColor(purple);
                 LEDSegment.MainStripRight.setStrobeAnimation(yellow, 0.15);
             }
+
             lightMode = mode.alignCenter;
+        }
+
+        public static void timeRemainingA() {
+            if (lightMode == mode.timeRemainingA) return;
+
+            LEDSegment.MainStrip.setBandAnimation(green, 10, 0.2);
+            LEDSegment.MainStripLeft.clearAnimation();
+            LEDSegment.MainStripRight.clearAnimation();
+        }
+
+        public static void timeRemainingB() {
+            if (lightMode == mode.timeRemainingB) return;
+
+            LEDSegment.MainStrip.setBandAnimation(yellow, 10, 0.5);
+            LEDSegment.MainStripLeft.clearAnimation();
+            LEDSegment.MainStripRight.clearAnimation();
+        }
+
+        public static void timeRemainingC() {
+            if (lightMode == mode.timeRemainingC) return;
+
+            LEDSegment.MainStrip.setBandAnimation(red, 10, 1);
+            LEDSegment.MainStripLeft.clearAnimation();
+            LEDSegment.MainStripRight.clearAnimation();
         }
 
         static void updateProgressBar(LEDSegment segment, double distance) {

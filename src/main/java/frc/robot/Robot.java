@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.lights.LightsSubsystem;
 import frc.robot.subsystems.lights.LightsSubsystem.LEDSegment;
-import frc.robot.subsystems.lights.LightsSubsystem.LightsConstants;
 import frc.robot.subsystems.lights.LightsSubsystem.LightsControlModule;
 import frc.robot.subsystems.lights.LightsSubsystem.LightsControlModule.RobotStatus;
 import frc.robot.util.Elastic;
