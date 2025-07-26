@@ -118,8 +118,14 @@ public class LightsSubsystem extends SubsystemBase {
             intake,
             brownOut,
             alignLeft,
+            alignLeftNear,
+            alignLeftFar,
             alignRight,
+            alignRightNear,
+            alignRightFar,
             alignCenter,
+            alignCenterNear,
+            alignCenterFar,
             timeRemainingA,
             timeRemainingB,
             timeRemainingC
@@ -440,44 +446,60 @@ public class LightsSubsystem extends SubsystemBase {
             if (lightMode != mode.alignLeft) LEDSegment.MainStripRight.progressCount = 0;
 
             if (distance < alignToleranceMin) {
-                LEDSegment.MainStrip.setColor(green);
-                LEDSegment.MainStripLeft.clearAnimation();
-                LEDSegment.MainStripRight.clearAnimation();
+                if (lightMode != mode.alignLeft)
+                {
+                    LEDSegment.MainStrip.setColor(green);
+                    LEDSegment.MainStripLeft.clearAnimation();
+                    LEDSegment.MainStripRight.clearAnimation();
+                    lightMode = mode.alignLeft;
+                }
             } else if (distance < alignToleranceMax) {
-                LEDSegment.MainStrip.clearAnimation();
-                LEDSegment.MainStripLeft.setStrobeAnimation(blue, 0.25);
-                if (lightMode != mode.alignLeft) LEDSegment.MainStripRight.setColor(red);
+                if (lightMode != mode.alignLeftNear)
+                {
+                    LEDSegment.MainStrip.clearAnimation();
+                    LEDSegment.MainStripLeft.setStrobeAnimation(blue, 0.25);
+                    LEDSegment.MainStripRight.setColor(red);
+                    lightMode = mode.alignLeftNear;
+                }
                 updateProgressBar(LEDSegment.MainStripRight, distance);
             } else {
-                LEDSegment.MainStrip.clearAnimation();
-                LEDSegment.MainStripLeft.setStrobeAnimation(yellow, 0.15);
-                if (lightMode != mode.alignLeft) LEDSegment.MainStripRight.setColor(red);
-                updateProgressBar(LEDSegment.MainStripRight, distance);
+                if (lightMode != mode.alignLeftFar)
+                {
+                    LEDSegment.MainStrip.clearAnimation();
+                    LEDSegment.MainStripLeft.setStrobeAnimation(yellow, 0.15);
+                    LEDSegment.MainStripRight.setColor(red);
+                    lightMode = mode.alignLeftFar;
+                }
             }
-
-            lightMode = mode.alignLeft;
         }
 
         public static void alignRight(double distance) {
-            if (lightMode != mode.alignRight) LEDSegment.MainStripLeft.progressCount = 0;
-
             if (distance < alignToleranceMin) {
-                LEDSegment.MainStrip.setColor(green);
-                LEDSegment.MainStripLeft.clearAnimation();
-                LEDSegment.MainStripRight.clearAnimation();
+                if (lightMode != mode.alignRight)
+                {
+                    LEDSegment.MainStrip.setColor(green);
+                    LEDSegment.MainStripLeft.clearAnimation();
+                    LEDSegment.MainStripRight.clearAnimation();
+                    lightMode = mode.alignRight;
+                }
             } else if (distance < alignToleranceMax) {
-                LEDSegment.MainStrip.clearAnimation();
-                if (lightMode != mode.alignRight) LEDSegment.MainStripLeft.setColor(red);
-                LEDSegment.MainStripRight.setStrobeAnimation(blue, 0.3);
+                if (lightMode != mode.alignRightNear) {
+                    LEDSegment.MainStripLeft.progressCount = 0;
+                    LEDSegment.MainStrip.clearAnimation();
+                    LEDSegment.MainStripLeft.setColor(red);
+                    LEDSegment.MainStripRight.setStrobeAnimation(blue, 0.3);
+                    lightMode = mode.alignRightNear;
+                }
                 updateProgressBar(LEDSegment.MainStripLeft, distance);
             } else {
-                LEDSegment.MainStrip.clearAnimation();
-                if (lightMode != mode.alignRight) LEDSegment.MainStripLeft.setColor(red);
-                LEDSegment.MainStripRight.setStrobeAnimation(yellow, 0.15);
-                updateProgressBar(LEDSegment.MainStripLeft, distance);
+                if (lightMode != mode.alignRightFar) 
+                {
+                    LEDSegment.MainStrip.clearAnimation();
+                    LEDSegment.MainStripLeft.setColor(red);
+                    LEDSegment.MainStripRight.setStrobeAnimation(yellow, 0.15);
+                    lightMode = mode.alignRightFar;
+                }
             }
-
-            lightMode = mode.alignRight;
         }
 
         public static void alignCenter(double distance) {
@@ -488,44 +510,54 @@ public class LightsSubsystem extends SubsystemBase {
             // This might be harder, because we have to calculate a normal for the targetPosition
 
             if (distance < alignToleranceMin) {
-                LEDSegment.MainStrip.setColor(green);
-                LEDSegment.MainStripLeft.clearAnimation();
-                LEDSegment.MainStripRight.clearAnimation();
+                if (lightMode != mode.alignCenter) {
+                    LEDSegment.MainStrip.setColor(green);
+                    LEDSegment.MainStripLeft.clearAnimation();
+                    LEDSegment.MainStripRight.clearAnimation();
+                    lightMode = mode.alignCenter;
+                }
             } else if (distance < alignToleranceMax) {
-                LEDSegment.MainStrip.clearAnimation();
-                LEDSegment.MainStripLeft.setColor(purple); // Replace with a progress bar overlay
-                LEDSegment.MainStripRight.setStrobeAnimation(blue, 0.25);
+                if (lightMode != mode.alignCenterNear) {
+                    LEDSegment.MainStripLeft.progressCount = 0;
+                    LEDSegment.MainStrip.clearAnimation();
+                    LEDSegment.MainStripLeft.setColor(yellow);
+                    LEDSegment.MainStripRight.setColor(yellow);
+                    lightMode = mode.alignCenterNear;
+                }
+                updateProgressBar(LEDSegment.MainStripLeft, distance);
+                updateProgressBar(LEDSegment.MainStripRight, distance);
             } else {
-                LEDSegment.MainStrip.clearAnimation();
-                LEDSegment.MainStripLeft.setColor(purple);
-                LEDSegment.MainStripRight.setStrobeAnimation(yellow, 0.15);
+                if (lightMode != mode.alignCenterFar) {
+                    LEDSegment.MainStrip.clearAnimation();
+                    LEDSegment.MainStripLeft.setColor(red);
+                    LEDSegment.MainStripRight.setColor(red);
+                    lightMode = mode.alignCenterFar;
+                }
             }
-
-            lightMode = mode.alignCenter;
         }
 
         public static void timeRemainingA() {
             if (lightMode == mode.timeRemainingA) return;
 
-            LEDSegment.MainStrip.setBandAnimation(green, 10, 0.2);
-            LEDSegment.MainStripLeft.clearAnimation();
-            LEDSegment.MainStripRight.clearAnimation();
+            LEDSegment.MainStrip.setFireAnimation(0.2);
+            LEDSegment.MainStripLeft.setBandAnimation(green, 10, 0.2);
+            LEDSegment.MainStripRight.setBandAnimation(green, 10, 0.2);
         }
 
         public static void timeRemainingB() {
             if (lightMode == mode.timeRemainingB) return;
 
-            LEDSegment.MainStrip.setBandAnimation(yellow, 10, 0.5);
-            LEDSegment.MainStripLeft.clearAnimation();
-            LEDSegment.MainStripRight.clearAnimation();
+            LEDSegment.MainStrip.setFireAnimation(0.2);
+            LEDSegment.MainStripLeft.setBandAnimation(yellow, 10, 0.5);
+            LEDSegment.MainStripRight.setBandAnimation(yellow, 10, 0.5);
         }
 
         public static void timeRemainingC() {
             if (lightMode == mode.timeRemainingC) return;
 
-            LEDSegment.MainStrip.setBandAnimation(red, 10, 1);
-            LEDSegment.MainStripLeft.clearAnimation();
-            LEDSegment.MainStripRight.clearAnimation();
+            LEDSegment.MainStrip.setFireAnimation(0.2);
+            LEDSegment.MainStripLeft.setBandAnimation(red, 10, 1);
+            LEDSegment.MainStripRight.setBandAnimation(red, 10, 1);
         }
 
         static void updateProgressBar(LEDSegment segment, double distance) {
