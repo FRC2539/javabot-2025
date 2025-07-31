@@ -244,7 +244,6 @@ public class RobotContainer {
 
         SmartDashboard.putData(armSubsystem);
 
-
         operatorController.getStart().onTrue(modeManager.goTo(Position.Climb));
 
         operatorController.getDPadDown().onTrue(modeManager.goTo(Position.Home));

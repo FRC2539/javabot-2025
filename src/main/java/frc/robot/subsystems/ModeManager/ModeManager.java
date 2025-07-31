@@ -55,8 +55,7 @@ public class ModeManager extends SubsystemBase {
         }
     }
 
-    public static enum 
-    ScoringMode {
+    public static enum ScoringMode {
         zero,
         Algae,
         LeftCoral,

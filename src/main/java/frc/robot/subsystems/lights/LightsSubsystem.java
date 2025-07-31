@@ -14,12 +14,14 @@ import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.SingleFadeAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.ModeManager.ModeManager;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
 public class LightsSubsystem extends SubsystemBase {
     public static final class LightsConstants {
@@ -31,6 +33,8 @@ public class LightsSubsystem extends SubsystemBase {
     private static final CANdle candle;
 
     private static final boolean isReal = true;
+    static LoggedNetworkBoolean timerEnabled =
+            new LoggedNetworkBoolean("Lights Timer Warnings", true);
 
     static {
         if (RobotBase.isReal() && isReal) {
@@ -38,6 +42,7 @@ public class LightsSubsystem extends SubsystemBase {
         } else {
             candle = null;
         }
+        LightsControlModule.RobotStatusTimer = new Timer();
     }
 
     // Team colors
@@ -111,6 +116,7 @@ public class LightsSubsystem extends SubsystemBase {
             manual,
             strobe,
             fade,
+            flow,
             disabledLoaded,
             fire,
             autoFire,
@@ -138,16 +144,14 @@ public class LightsSubsystem extends SubsystemBase {
 
         // #region
 
-        static Long RobotStatusChangeTime;
+        static Timer RobotStatusTimer;
         static RobotStatus robotStatus = RobotStatus.Disabled;
 
         public static void setRobotStatus(RobotStatus newStatus) {
             robotStatus = newStatus;
-            RobotStatusChangeTime = System.currentTimeMillis();
-        }
-
-        public static Long timeInRobotStatus() {
-            return System.currentTimeMillis() - RobotStatusChangeTime;
+            RobotStatusTimer.reset();
+            RobotStatusTimer.start();
+            System.out.println("Start timer");
         }
 
         static BooleanSupplier hasPiece = () -> false;
@@ -228,6 +232,7 @@ public class LightsSubsystem extends SubsystemBase {
                         rainbow();
                         break;
                     case East:
+                        autoFire();
                         break;
                     case South:
                         intake();
@@ -263,12 +268,17 @@ public class LightsSubsystem extends SubsystemBase {
                     brownOut();
                     return;
                 }
+                double seconds = RobotStatusTimer.get();
+                if (seconds < 300) {
+                    rainbow();
+                    return;
+                }
                 // Has Piece
                 if (hasPiece.getAsBoolean()) {
                     disabledLoaded();
                     return;
                 }
-                fade();
+                flow();
                 return;
             }
             // #endregion
@@ -306,14 +316,9 @@ public class LightsSubsystem extends SubsystemBase {
                 }
 
                 // Idle
-                // TODO: Add a case that tests for whether we want the timer or not
-                int seconds =
-                        (int)
-                                Math.floor(
-                                        timeInRobotStatus()
-                                                / 1000); // Teleop length = 2:15, which is 135
+                double seconds = RobotStatusTimer.get(); // Teleop length = 2:15, which is 135
                 // seconds
-                if (seconds < 120) {
+                if (!LightsSubsystem.timerEnabled.get() || seconds < 120) {
                     fire();
                     return;
                 } else if (seconds < 125) {
@@ -326,7 +331,7 @@ public class LightsSubsystem extends SubsystemBase {
                     timeRemainingC();
                     return;
                 } else {
-                    fire();
+                    rainbow();
                     return;
                 }
             }
@@ -346,8 +351,23 @@ public class LightsSubsystem extends SubsystemBase {
                 }
 
                 // Idle
-                fire();
-                return;
+                double seconds = RobotStatusTimer.get(); // Teleop length = 30 seconds
+                if (!LightsSubsystem.timerEnabled.get() || seconds < 15) {
+                    fire();
+                    return;
+                } else if (seconds < 20) {
+                    timeRemainingA();
+                    return;
+                } else if (seconds < 25) {
+                    timeRemainingB();
+                    return;
+                } else if (seconds < 30) {
+                    timeRemainingC();
+                    return;
+                } else {
+                    fire();
+                    return;
+                }
             }
             // #endregion
         }
@@ -388,13 +408,22 @@ public class LightsSubsystem extends SubsystemBase {
             LEDSegment.MainStripRight.clearAnimation();
         }
 
+        public static void flow() {
+            if (lightMode == mode.flow) return;
+            lightMode = mode.flow;
+
+            LEDSegment.MainStrip.setFlowAnimation(orange, 0.2);
+            LEDSegment.MainStripLeft.clearAnimation();
+            LEDSegment.MainStripRight.clearAnimation();
+        }
+
         public static void disabledLoaded() {
             if (lightMode == mode.disabledLoaded) return;
             lightMode = mode.disabledLoaded;
 
-            LEDSegment.MainStrip.setFadeAnimation(orange, 0.5);
-            LEDSegment.MainStripLeft.setBandAnimation(green, 5, 0.05);
-            LEDSegment.MainStripRight.setBandAnimation(green, 5, 0.05);
+            LEDSegment.MainStrip.setFadeAnimation(green, 0.5);
+            LEDSegment.MainStripLeft.clearAnimation();
+            LEDSegment.MainStripRight.clearAnimation();
         }
 
         public static void fire() {
@@ -410,16 +439,16 @@ public class LightsSubsystem extends SubsystemBase {
             if (lightMode == mode.autoFire) return;
             lightMode = mode.autoFire;
 
-            LEDSegment.MainStrip.setColor(blue);
-            LEDSegment.MainStripLeft.setFireAnimation(0.2);
-            LEDSegment.MainStripRight.setFireAnimation(0.2);
+            LEDSegment.MainStrip.clearAnimation();
+            LEDSegment.MainStripLeft.setFireOverdriveAnimation(0.4);
+            LEDSegment.MainStripLeft.setFireOverdriveAnimation(0.4);
         }
 
         public static void rainbow() {
             if (lightMode == mode.rainbow) return;
             lightMode = mode.rainbow;
 
-            LEDSegment.MainStrip.setRainbowAnimation(0.2);
+            LEDSegment.MainStrip.setRainbowAnimation(0.8);
             LEDSegment.MainStripLeft.clearAnimation();
             LEDSegment.MainStripRight.clearAnimation();
         }
@@ -534,25 +563,25 @@ public class LightsSubsystem extends SubsystemBase {
         public static void timeRemainingA() {
             if (lightMode == mode.timeRemainingA) return;
 
-            LEDSegment.MainStrip.setFireAnimation(0.2);
-            LEDSegment.MainStripLeft.setBandAnimation(green, 10, 0.2);
-            LEDSegment.MainStripRight.setBandAnimation(green, 10, 0.2);
+            LEDSegment.MainStrip.clearAnimation();
+            LEDSegment.MainStripLeft.setBandAnimation(green, 20, 0.5);
+            LEDSegment.MainStripRight.setBandAnimation(green, 20, 0.5);
         }
 
         public static void timeRemainingB() {
             if (lightMode == mode.timeRemainingB) return;
 
-            LEDSegment.MainStrip.setFireAnimation(0.2);
-            LEDSegment.MainStripLeft.setBandAnimation(yellow, 10, 0.5);
-            LEDSegment.MainStripRight.setBandAnimation(yellow, 10, 0.5);
+            LEDSegment.MainStrip.clearAnimation();
+            LEDSegment.MainStripLeft.setBandAnimation(yellow, 20, 0.7);
+            LEDSegment.MainStripRight.setBandAnimation(yellow, 20, 0.7);
         }
 
         public static void timeRemainingC() {
             if (lightMode == mode.timeRemainingC) return;
 
-            LEDSegment.MainStrip.setFireAnimation(0.2);
-            LEDSegment.MainStripLeft.setBandAnimation(red, 10, 1);
-            LEDSegment.MainStripRight.setBandAnimation(red, 10, 1);
+            LEDSegment.MainStrip.clearAnimation();
+            LEDSegment.MainStripLeft.setBandAnimation(red, 20, 1);
+            LEDSegment.MainStripRight.setBandAnimation(red, 20, 1);
         }
 
         static void updateProgressBar(LEDSegment segment, double distance) {
@@ -617,7 +646,7 @@ public class LightsSubsystem extends SubsystemBase {
         ExtraBIndicator(5, 1, -1, false),
         PivotEncoderIndicator(6, 1, -1, false),
         AllianceIndicator(7, 1, -1, false),
-        MainStrip(8, 108, 2, false),
+        MainStrip(8, 127, 2, false),
         MainStripLeft(8, 53, 3, false, red, yellow),
         MainStripRight(61, 73, 4, true, red, yellow);
 
@@ -723,9 +752,7 @@ public class LightsSubsystem extends SubsystemBase {
                             segmentSize,
                             bounceMode,
                             size,
-                            (!reverseMode) // transmute reverseMode to starting index
-                                    ? startIndex
-                                    : startIndex + segmentSize - size));
+                            startIndex));
         }
 
         public void setBandAnimation(Color color, int size, double speed) {
@@ -745,6 +772,11 @@ public class LightsSubsystem extends SubsystemBase {
         public void setFireAnimation(double speed) {
             setAnimation(
                     new FireAnimation(1, speed, segmentSize, 0.5, 0.3, reverseMode, startIndex));
+        }
+
+        public void setFireOverdriveAnimation(double speed) {
+            setAnimation(
+                    new FireAnimation(1, speed, segmentSize, 0.75, 0.6, reverseMode, startIndex));
         }
     }
 
